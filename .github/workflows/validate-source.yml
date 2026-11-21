@@ -201,6 +201,8 @@ jobs:
               "firebase_messaging": "  firebase_messaging: ^15.1.6",
               "package_info_plus": "  package_info_plus: ^8.1.2",
               "crypto": "  crypto: ^3.0.6",
+              "flutter_map": "  flutter_map: ^7.0.2",
+              "latlong2": "  latlong2: ^0.9.1",
           }
           lines = s.splitlines()
           dep = next((i for i, line in enumerate(lines) if line.strip() == "dependencies:"), None)
