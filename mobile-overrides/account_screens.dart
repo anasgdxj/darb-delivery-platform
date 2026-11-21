@@ -453,7 +453,7 @@ class _AccountPageState extends State<AccountPage> {
                       child: Text(
                         _roleLabel,
                         style: TextStyle(
-                          color: DarbColors.forest,
+                          color: DarbColors.brandForeground,
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
                         ),

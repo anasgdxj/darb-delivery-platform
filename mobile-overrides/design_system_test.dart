@@ -8,6 +8,8 @@ void main() {
       final theme = DarbTheme.light;
       expect(theme.useMaterial3, isTrue);
       expect(theme.colorScheme.primary, DarbColors.forest);
+    expect(DarbColors.primary, DarbColors.forest);
+    expect(DarbColors.onPrimary, const Color(0xFFFFFFFF));
       expect(theme.scaffoldBackgroundColor, DarbColors.canvas);
     });
 
@@ -16,6 +18,8 @@ void main() {
       expect(theme.useMaterial3, isTrue);
       expect(theme.brightness, Brightness.dark);
       expect(theme.colorScheme.primary, const Color(0xFFB9E4D2));
+    expect(DarbColors.primary, DarbColors.mint);
+    expect(DarbColors.onPrimary, DarbColors.forest);
       expect(theme.scaffoldBackgroundColor, const Color(0xFF0B1512));
     });
 

@@ -142,7 +142,7 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: DarbColors.forest,
+        backgroundColor: DarbColors.primary,
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -161,7 +161,7 @@ class _AppShellState extends State<AppShell> {
                 ),
                 borderRadius: BorderRadius.circular(13),
               ),
-              child: Text(dt('د'), style: TextStyle(color: DarbColors.forest, fontWeight: FontWeight.w900, fontSize: 23)),
+              child: Text(dt('د'), style: TextStyle(color: DarbColors.brandForeground, fontWeight: FontWeight.w900, fontSize: 23)),
             ),
             SizedBox(width: 11),
             Column(

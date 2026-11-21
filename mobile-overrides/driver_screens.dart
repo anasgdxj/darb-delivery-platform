@@ -120,7 +120,7 @@ class DriverOrders extends StatelessWidget {const DriverOrders({super.key});@ove
 class _DataList extends StatefulWidget {final String path,title,empty;const _DataList({super.key,required this.path,required this.title,required this.empty});@override State<_DataList> createState()=>_DataListState();}
 class _DataListState extends State<_DataList>{bool loading=true;String? error;String? _workingOrderId;List rows=[];@override void initState(){super.initState();_load();}Future<void> _load()async{setState(()=>loading=true);try{rows=await Api.instance.get(widget.path) as List;error=null;}catch(e){error=e.toString();}finally{if(mounted)setState(()=>loading=false);}}@override Widget build(BuildContext context)=>RefreshIndicator(
   onRefresh:_load,
-  color:DarbColors.forest,
+  color: DarbColors.brandForeground,
   child:ListView(
     physics:const AlwaysScrollableScrollPhysics(),
     padding:const EdgeInsets.fromLTRB(18,18,18,28),
@@ -231,7 +231,7 @@ Widget _orderCard(dynamic row){
             Container(
               width:44,height:44,
               decoration:BoxDecoration(color:DarbColors.mint.withValues(alpha:.38),borderRadius:BorderRadius.circular(14)),
-              child:Icon(peer?Icons.local_shipping_rounded:Icons.shopping_bag_outlined,color:DarbColors.forest),
+              child:Icon(peer?Icons.local_shipping_rounded:Icons.shopping_bag_outlined,color: DarbColors.brandForeground),
             ),
             const SizedBox(width:11),
             Expanded(child:Column(
@@ -254,7 +254,7 @@ Widget _orderCard(dynamic row){
             decoration:BoxDecoration(color:DarbColors.canvas,borderRadius:BorderRadius.circular(13)),
             child:Row(children:[
               Expanded(child:Text(peer&&row['deliveryFee']==0?dt('بانتظار عروض السائقين'):dt('قيمة الطلب'),style:TextStyle(color:DarbColors.muted,fontSize:11))),
-              Text('${row['total']??''} ${row['currency']??''}',style:TextStyle(color:DarbColors.forest,fontSize:14,fontWeight:FontWeight.w900)),
+              Text('${row['total']??''} ${row['currency']??''}',style:TextStyle(color: DarbColors.brandForeground,fontSize:14,fontWeight:FontWeight.w900)),
             ]),
           ),
           if(peer&&row['distanceKm']!=null)Padding(
@@ -267,7 +267,7 @@ Widget _orderCard(dynamic row){
           ),
           if(peer&&pickup!=null)ListTile(
             dense:true,contentPadding:EdgeInsets.zero,
-            leading:Icon(Icons.trip_origin_rounded,color:DarbColors.forest),
+            leading:Icon(Icons.trip_origin_rounded,color: DarbColors.brandForeground),
             title:Text(dt('الاستلام'),style:TextStyle(fontSize:11,color:DarbColors.muted)),
             subtitle:Text(pickup,style:const TextStyle(fontWeight:FontWeight.w700)),
           ),

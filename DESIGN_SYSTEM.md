@@ -77,9 +77,9 @@ The dark theme must use a separate semantic palette; do not invert the light pal
 | accent | #C8F169 | Rare high-priority accent |
 | scrim | #B3000000 | Modal backdrops |
 
-Dark palette values are implemented through adaptive `DarbColors` semantic tokens. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Contrast and component states must be verified in implementation before this theme is considered complete.
+Dark palette values are implemented through adaptive `DarbColors` semantic tokens, including `primary` / `onPrimary` for interactive controls and `surfaceElevated` for raised containers. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Contrast and component states must be verified in implementation before this theme is considered complete.
 
-Do not introduce near-duplicate brand colors in individual screens. Add genuinely new semantic colors centrally and document their use. All screen colors must resolve through the active theme; screen-specific hard-coded palette values are not permitted except for intentional brand artwork and media.
+Do not introduce near-duplicate brand colors in individual screens. Add genuinely new semantic colors centrally and document their use. All screen colors must resolve through the active theme; screen-specific hard-coded palette values are not permitted except for intentional brand artwork and media. Use `DarbColors.primary` with `DarbColors.onPrimary` for primary controls; use `DarbColors.brandForeground` for text and icons placed on ordinary surfaces. Keep `forest` and `forestSoft` only for intentional fixed brand artwork and photo overlays.
 
 ## Spacing
 

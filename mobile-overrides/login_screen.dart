@@ -257,7 +257,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _brandPanel(AppLocalizations l) => Container(
     decoration: BoxDecoration(
-      color: DarbColors.forest,
+      color: DarbColors.brandForeground,
       borderRadius: BorderRadius.circular(DarbRadius.hero),
       boxShadow: DarbElevation.floating,
     ),
@@ -302,7 +302,7 @@ class _LoginScreenState extends State<LoginScreen>
                   child: Text(
                     'د',
                     style: TextStyle(
-                      color: DarbColors.forest,
+                      color: DarbColors.brandForeground,
                       fontSize: 37,
                       height: 1,
                       fontWeight: FontWeight.w900,
@@ -526,7 +526,8 @@ class _LoginScreenState extends State<LoginScreen>
                 ? null
                 : (sent ? verify : requestCode),
             style: FilledButton.styleFrom(
-              backgroundColor: DarbColors.forest,
+              backgroundColor: DarbColors.primary,
+              foregroundColor: DarbColors.onPrimary,
               disabledBackgroundColor: DarbColors.borderStrong,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(DarbRadius.md),
@@ -599,7 +600,7 @@ class _LoginScreenState extends State<LoginScreen>
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: DarbColors.forest,
+                        color: DarbColors.brandForeground,
                       ),
                     )
                   : Row(
@@ -760,7 +761,7 @@ class _LoginScreenState extends State<LoginScreen>
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(DarbRadius.md),
-      borderSide: BorderSide(color: DarbColors.forest, width: 1.5),
+      borderSide: BorderSide(color: DarbColors.primary, width: 1.5),
     ),
   );
 

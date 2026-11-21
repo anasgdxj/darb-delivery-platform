@@ -417,7 +417,7 @@ class _CustomerHomeState extends State<CustomerHome> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: DarbColors.brandForeground, width: 1.4),
+                borderSide: BorderSide(color: DarbColors.primary, width: 1.4),
               ),
             ),
           ),
@@ -537,7 +537,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
     final warnings = (_draft?['warnings'] as List?) ?? const [];
     return Scaffold(
       appBar: AppBar(title: Text(dt('مساعد دَرْب الذكي')),
-        backgroundColor: DarbColors.forest, foregroundColor: Colors.white),
+        backgroundColor: DarbColors.primary, foregroundColor: Colors.white),
       body: ListView(
         padding: const EdgeInsets.all(18),
         children: [
@@ -595,7 +595,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                   Text(dt('العناصر المستخرجة'), style: const TextStyle(fontWeight: FontWeight.w800)),
                   for (final item in items)
                     if (item is Map) ListTile(contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.inventory_2_outlined, color: DarbColors.forest),
+                      leading: Icon(Icons.inventory_2_outlined, color: DarbColors.brandForeground),
                       title: Text(item['rawName']?.toString() ?? dt('عنصر')),
                       subtitle: Text('الكمية: ${item['quantity'] ?? 1} ${item['unit'] ?? ''}'),
                       trailing: item['productId'] == null

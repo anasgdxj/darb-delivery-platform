@@ -118,7 +118,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
               width: 48,
               height: 48,
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: DarbColors.forest, borderRadius: BorderRadius.circular(15)),
+              decoration: BoxDecoration(color: DarbColors.brandForeground, borderRadius: BorderRadius.circular(15)),
               child: Text(tag, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
             ),
             const SizedBox(width: 14),
