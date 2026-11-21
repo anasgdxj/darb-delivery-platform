@@ -143,7 +143,7 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: DarbColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: DarbColors.onPrimary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 18,
@@ -168,8 +168,8 @@ class _AppShellState extends State<AppShell> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(dt('دَرْب'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, height: 1.1)),
-                Text(titles[tab], style: TextStyle(color: Colors.white.withValues(alpha: .72), fontSize: 11, fontWeight: FontWeight.w600)),
+                Text(dt('دَرْب'), style: TextStyle(color: DarbColors.onPrimary, fontWeight: FontWeight.w900, fontSize: 18, height: 1.1)),
+                Text(titles[tab], style: TextStyle(color: DarbColors.onPrimary.withValues(alpha: .72), fontSize: 11, fontWeight: FontWeight.w600)),
               ],
             ),
           ],

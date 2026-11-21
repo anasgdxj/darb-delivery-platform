@@ -537,7 +537,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
     final warnings = (_draft?['warnings'] as List?) ?? const [];
     return Scaffold(
       appBar: AppBar(title: Text(dt('مساعد دَرْب الذكي')),
-        backgroundColor: DarbColors.primary, foregroundColor: Colors.white),
+        backgroundColor: DarbColors.primary, foregroundColor: DarbColors.onPrimary),
       body: ListView(
         padding: const EdgeInsets.all(18),
         children: [

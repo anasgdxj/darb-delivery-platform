@@ -257,7 +257,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _brandPanel(AppLocalizations l) => Container(
     decoration: BoxDecoration(
-      color: DarbColors.brandForeground,
+      color: DarbColors.forest,
       borderRadius: BorderRadius.circular(DarbRadius.hero),
       boxShadow: DarbElevation.floating,
     ),
@@ -302,7 +302,7 @@ class _LoginScreenState extends State<LoginScreen>
                   child: Text(
                     'د',
                     style: TextStyle(
-                      color: DarbColors.brandForeground,
+                      color: DarbColors.forest,
                       fontSize: 37,
                       height: 1,
                       fontWeight: FontWeight.w900,
