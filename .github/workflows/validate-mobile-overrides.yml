@@ -140,6 +140,33 @@ jobs:
       - name: Analyze all mobile Dart sources
         working-directory: extracted/darb-project/mobile
         run: flutter analyze lib --no-pub --no-fatal-infos --no-fatal-warnings
+      - name: Configure resilient Gradle dependency repositories
+        working-directory: extracted/darb-project/mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.gradle"
+          cat > "$HOME/.gradle/init.gradle" <<'GRADLE'
+          settingsEvaluated { settings ->
+              settings.pluginManagement.repositories {
+                  maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+                  maven { url = uri("https://repo1.maven.org/maven2/") }
+                  gradlePluginPortal()
+                  google()
+                  mavenCentral()
+              }
+          }
+          allprojects {
+              buildscript.repositories {
+                  maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+                  maven { url "https://repo1.maven.org/maven2/" }
+              }
+              repositories {
+                  maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+                  maven { url "https://repo1.maven.org/maven2/" }
+              }
+          }
+          GRADLE
       - name: Build Android debug APK
         working-directory: extracted/darb-project/mobile
         run: flutter build apk --debug --no-pub --build-number 32
