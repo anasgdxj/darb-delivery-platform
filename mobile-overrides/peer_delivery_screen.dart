@@ -23,6 +23,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   bool locating = false;
   bool savingAddress = false;
   Position? pickupPosition;
+  LatLng? pickupPoint;
 
   List<String> get _stepTitles => [dt('المواقع'), dt('تفاصيل الغرض'), dt('مراجعة الطلب')];
 
@@ -81,6 +82,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
     setState(() { locating = true; error = null; });
     try {
       pickupPosition = await _currentPosition();
+      pickupPoint = LatLng(pickupPosition!.latitude, pickupPosition!.longitude);
     } catch (e) {
       error = e.toString();
     } finally {
@@ -91,7 +93,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   Future<void> _addAddress() async {
     final label = TextEditingController();
     final details = TextEditingController();
-    Position? position;
+    LatLng? position;
     String? dialogError;
     bool locatingAddress = false;
 
@@ -118,24 +120,41 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                   ),
                 ),
                 SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: locatingAddress ? null : () async {
-                    setDialogState(() { locatingAddress = true; dialogError = null; });
-                    try {
-                      position = await _currentPosition();
-                    } catch (e) {
-                      dialogError = e.toString();
-                    } finally {
-                      setDialogState(() => locatingAddress = false);
-                    }
-                  },
-                  icon: Icon(position == null ? Icons.my_location : Icons.check_circle),
-                  label: Text(
-                    locatingAddress
-                        ? dt('جارٍ تحديد الموقع...')
-                        : position == null ? dt('تحديد موقع العنوان') : dt('تم تحديد الموقع'),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: locatingAddress ? null : () async {
+                      setDialogState(() { locatingAddress = true; dialogError = null; });
+                      try {
+                        final current = await _currentPosition();
+                        position = LatLng(current.latitude, current.longitude);
+                      } catch (e) {
+                        dialogError = e.toString();
+                      } finally {
+                        setDialogState(() => locatingAddress = false);
+                      }
+                    },
+                    icon: locatingAddress
+                        ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                        : Icon(Icons.my_location),
+                    label: Text(locatingAddress ? dt('جارٍ تحديد الموقع...') : dt('استخدام موقعي')),
                   ),
                 ),
+                DarbMapPicker(
+                  key: ValueKey('address-${position?.latitude}-${position?.longitude}'),
+                  selectedPoint: position,
+                  height: 230,
+                  onPointSelected: (point) => setDialogState(() {
+                    position = point;
+                    dialogError = null;
+                  }),
+                ),
+                if (position != null)
+                  Text(
+                    dt('الإحداثيات: ${position!.latitude.toStringAsFixed(5)}, ${position!.longitude.toStringAsFixed(5)}'),
+                    textDirection: TextDirection.ltr,
+                    style: TextStyle(color: DarbColors.muted, fontSize: 11),
+                  ),
                 if (position != null)
                   Text(dt('تم حفظ الإحداثيات لهذا العنوان'),
                     style: TextStyle(color: DarbColors.forest, fontSize: 12),
@@ -215,7 +234,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         setState(() => error = dt('اكتب وصفاً واضحاً لمكان الاستلام'));
         return false;
       }
-      if (pickupPosition == null) {
+      if (pickupPoint == null) {
         setState(() => error = dt('حدد موقع الاستلام أولاً'));
         return false;
       }
@@ -254,7 +273,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   Future<void> _submit() async {
     if (!_validateCurrentStep()) return;
     final destination = _selectedAddress;
-    if (destination == null || pickupPosition == null) return;
+    if (destination == null || pickupPoint == null) return;
 
     final noteParts = <String>[
       dt('نوع الغرض: ${itemType.text.trim()}'),
@@ -269,8 +288,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         'cityId': widget.cityId,
         'addressId': addressId,
         'pickupAddress': pickup.text.trim(),
-        'pickupLatitude': pickupPosition!.latitude,
-        'pickupLongitude': pickupPosition!.longitude,
+        'pickupLatitude': pickupPoint!.latitude,
+        'pickupLongitude': pickupPoint!.longitude,
         'notes': noteParts.join('\n'),
       });
       if (!mounted) return;
@@ -360,22 +379,42 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
           ),
         ),
         SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: locating ? null : _locatePickup,
-          icon: locating
-              ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : Icon(pickupPosition == null ? Icons.my_location : Icons.check_circle),
-          label: Text(
-            locating ? dt('جارٍ تحديد الموقع...') : pickupPosition == null ? dt('استخدام موقعي الحالي') : dt('تم تحديد موقع الاستلام'),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(dt('اختر نقطة الاستلام على الخريطة'), style: TextStyle(fontWeight: FontWeight.w800)),
+            ),
+            TextButton.icon(
+              onPressed: locating ? null : _locatePickup,
+              icon: locating
+                  ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : Icon(Icons.my_location),
+              label: Text(dt('موقعي')),
+            ),
+          ],
         ),
-        if (pickupPosition != null)
+        DarbMapPicker(
+          key: ValueKey('pickup-${pickupPoint?.latitude}-${pickupPoint?.longitude}'),
+          selectedPoint: pickupPoint,
+          onPointSelected: (point) => setState(() {
+            pickupPoint = point;
+            pickupPosition = null;
+            error = null;
+          }),
+        ),
+        if (pickupPoint != null)
           Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(top: 7),
             child: Text(
-              dt('تم تحديد الموقع بدقة: ${pickupPosition!.latitude.toStringAsFixed(4)}, ${pickupPosition!.longitude.toStringAsFixed(4)}'),
+              dt('إحداثيات الاستلام: ${pickupPoint!.latitude.toStringAsFixed(5)}, ${pickupPoint!.longitude.toStringAsFixed(5)}'),
+              textDirection: TextDirection.ltr,
               style: TextStyle(color: DarbColors.muted, fontSize: 11),
             ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(top: 7),
+            child: Text(dt('المس الخريطة لتحديد مكان الاستلام بدقة.'), style: TextStyle(color: DarbColors.muted, fontSize: 12)),
           ),
         SizedBox(height: 24),
         Row(
@@ -633,6 +672,100 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+
+/// OpenStreetMap-based point selector. It selects coordinates only; it does not
+/// claim to provide routing, navigation, or reverse geocoding.
+class DarbMapPicker extends StatelessWidget {
+  final LatLng? selectedPoint;
+  final ValueChanged<LatLng> onPointSelected;
+  final double height;
+
+  const DarbMapPicker({
+    super.key,
+    required this.selectedPoint,
+    required this.onPointSelected,
+    this.height = 250,
+  });
+
+  static const LatLng _syriaCenter = LatLng(35.0, 38.5);
+
+  @override
+  Widget build(BuildContext context) {
+    final center = selectedPoint ?? _syriaCenter;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: SizedBox(
+        height: height,
+        child: Stack(
+          children: [
+            FlutterMap(
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: selectedPoint == null ? 6.0 : 15.0,
+                minZoom: 4,
+                maxZoom: 19,
+                onTap: (tapPosition, point) => onPointSelected(point),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.darb.darb',
+                  maxZoom: 19,
+                ),
+                if (selectedPoint != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: selectedPoint!,
+                        width: 48,
+                        height: 56,
+                        child: Icon(
+                          Icons.location_pin,
+                          size: 48,
+                          color: DarbColors.danger,
+                          shadows: const [Shadow(color: Colors.white, blurRadius: 5)],
+                        ),
+                      ),
+                    ],
+                  ),
+                RichAttributionWidget(
+                  attributions: [
+                    TextSourceAttribution(
+                      'OpenStreetMap contributors',
+                      onTap: () => launchUrl(
+                        Uri.parse('https://www.openstreetmap.org/copyright'),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                    ),
+                  ],
+                  alignment: AttributionAlignment.bottomRight,
+                ),
+              ],
+            ),
+            Positioned(
+              top: 10,
+              left: 10,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: DarbColors.surface.withValues(alpha: .94),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  child: Text(
+                    dt('المس الخريطة لتحديد النقطة'),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: DarbColors.ink),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
