@@ -75,6 +75,10 @@ The dark theme must use a separate semantic palette; do not invert the light pal
 | primary | #B9E4D2 | Main interactive emphasis on dark surfaces |
 | onPrimary | #102B26 | Text/icons on primary |
 | accent | #C8F169 | Rare high-priority accent |
+| danger | #E47777 | Error and destructive states on dark surfaces |
+| success | #75C99A | Confirmed/success states on dark surfaces |
+| warning | #E5B968 | Pending/attention states on dark surfaces |
+| info | #83B8E0 | Informational states on dark surfaces |
 | scrim | #B8000000 | Modal backdrops |
 
 Dark palette values are implemented through adaptive `DarbColors` semantic tokens. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Contrast and component states must be verified in implementation before this theme is considered complete.
