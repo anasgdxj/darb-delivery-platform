@@ -44,7 +44,7 @@ DARB should feel like a live logistics network: confident, clear, fast, and prem
 | lime | #C8F169 | High-emphasis accent on dark brand surfaces |
 | danger | #B94747 | Destructive actions and errors |
 | success | #287A50 | Confirmed/success states |
-| warning | #B7791F | Pending/attention states |
+| warning | #8A5A12 | Pending/attention states; WCAG AA contrast on light surfaces |
 | info | #356D9A | Informational states |
 
 ### Light semantic surfaces
@@ -54,7 +54,7 @@ DARB should feel like a live logistics network: confident, clear, fast, and prem
 | canvas | #F5F6F2 | Main application background |
 | surface | #FFFFFF | Cards, sheets, and fields |
 | ink | #17231F | Main text |
-| muted | #77837D | Secondary text and hints |
+| muted | #626F69 | Secondary text and hints; WCAG AA contrast on canvas and white surfaces |
 | line | #E4E9E3 | Dividers and subtle borders |
 | borderStrong | #CBD5CE | Stronger boundaries |
 | scrim | #990B1713 | Modal backdrops |
@@ -75,7 +75,11 @@ The dark theme must use a separate semantic palette; do not invert the light pal
 | primary | #B9E4D2 | Main interactive emphasis on dark surfaces |
 | onPrimary | #102B26 | Text/icons on primary |
 | accent | #C8F169 | Rare high-priority accent |
-| scrim | #B3000000 | Modal backdrops |
+| danger | #E47777 | Error and destructive states on dark surfaces |
+| success | #75C99A | Confirmed/success states on dark surfaces |
+| warning | #E5B968 | Pending/attention states on dark surfaces |
+| info | #83B8E0 | Informational states on dark surfaces |
+| scrim | #B8000000 | Modal backdrops |
 
 Dark palette values are implemented through adaptive `DarbColors` semantic tokens. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Contrast and component states must be verified in implementation before this theme is considered complete.
 

@@ -201,8 +201,10 @@ jobs:
           flutter analyze lib --no-pub --no-fatal-infos --no-fatal-warnings
           mkdir -p "$HOME/.gradle"
           cat > "$HOME/.gradle/init.gradle" <<'GRADLE'
-          settingsEvaluated { settings ->
+          beforeSettings { settings ->
               settings.pluginManagement.repositories {
+                  maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+                  maven { url = uri("https://repo1.maven.org/maven2/") }
                   gradlePluginPortal()
                   google()
                   mavenCentral()
