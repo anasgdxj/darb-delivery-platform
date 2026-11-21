@@ -19,11 +19,11 @@ abstract final class DarbColors {
   static Color get onForest => const Color(0xFFFFFFFF);
   static Color get brandForeground => _dark ? mint : forest;
   static Color get ink => _dark ? const Color(0xFFF1F5F1) : const Color(0xFF17231F);
-  static Color get muted => _dark ? const Color(0xFFA4B2AA) : const Color(0xFF77837D);
+  static Color get muted => _dark ? const Color(0xFFA4B2AA) : const Color(0xFF626F69);
   static Color get line => _dark ? const Color(0xFF2A3B33) : const Color(0xFFE4E9E3);
   static Color get danger => _dark ? const Color(0xFFE47777) : const Color(0xFFB94747);
   static Color get success => _dark ? const Color(0xFF75C99A) : const Color(0xFF287A50);
-  static Color get warning => _dark ? const Color(0xFFE5B968) : const Color(0xFFB7791F);
+  static Color get warning => _dark ? const Color(0xFFE5B968) : const Color(0xFF8A5A12);
   static Color get info => _dark ? const Color(0xFF83B8E0) : const Color(0xFF356D9A);
   static Color get borderStrong => _dark ? const Color(0xFF40564A) : const Color(0xFFCBD5CE);
   static Color get scrim => _dark ? const Color(0xB8000000) : const Color(0x990B1713);
@@ -382,7 +382,7 @@ abstract final class DarbTheme {
         titleLarge: TextStyle(color: Color(0xFF17231F), fontSize: 19, fontWeight: FontWeight.w800),
         titleMedium: TextStyle(color: Color(0xFF17231F), fontSize: 15, fontWeight: FontWeight.w700),
         bodyLarge: TextStyle(color: Color(0xFF17231F), fontSize: 15, height: 1.5),
-        bodyMedium: TextStyle(color: Color(0xFF77837D), fontSize: 13, height: 1.45),
+        bodyMedium: TextStyle(color: Color(0xFF626F69), fontSize: 13, height: 1.45),
         labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
@@ -453,8 +453,8 @@ abstract final class DarbTheme {
         filled: true,
         fillColor: Color(0xFFFFFFFF),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 17),
-        hintStyle: TextStyle(color: Color(0xFF77837D), fontSize: 14),
-        labelStyle: TextStyle(color: Color(0xFF77837D)),
+        hintStyle: TextStyle(color: Color(0xFF626F69), fontSize: 14),
+        labelStyle: TextStyle(color: Color(0xFF626F69)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: Color(0xFFE4E9E3)),
