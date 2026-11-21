@@ -203,12 +203,22 @@ jobs:
           cat > "$HOME/.gradle/init.gradle" <<'GRADLE'
           settingsEvaluated { settings ->
               settings.pluginManagement.repositories {
+                  maven { url = uri("https://maven-central.storage-download.googleapis.com/maven2/") }
+                  maven { url = uri("https://repo1.maven.org/maven2/") }
                   gradlePluginPortal()
                   google()
                   mavenCentral()
               }
           }
           allprojects {
+              buildscript.repositories {
+                  maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+                  maven { url "https://repo1.maven.org/maven2/" }
+              }
+              repositories {
+                  maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+                  maven { url "https://repo1.maven.org/maven2/" }
+              }
               tasks.configureEach { task ->
                   if (task.name == "lintVitalAnalyzeRelease" || task.name == "lintVitalRelease") {
                       task.enabled = false
