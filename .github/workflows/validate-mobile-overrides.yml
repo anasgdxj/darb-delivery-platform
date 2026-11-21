@@ -102,7 +102,7 @@ jobs:
           lines=[line for line in lines if not line.strip().startswith("intl:")]
           dep=next((i for i,line in enumerate(lines) if line.strip()=="dependencies:"),None)
           if dep is None: raise SystemExit("pubspec.yaml dependencies section missing")
-          for name, version in [("intl","^0.20.3"),("google_sign_in","^6.2.1"),("geolocator","^13.0.2"),("url_launcher","^6.3.1"),("firebase_core","^3.8.1"),("firebase_messaging","^15.1.6"),("package_info_plus","^8.1.2"),("crypto","^3.0.6"),("path_provider","^2.1.5")]:
+          for name, version in [("intl","^0.20.3"),("google_sign_in","^6.2.1"),("geolocator","^13.0.2"),("url_launcher","^6.3.1"),("firebase_core","^3.8.1"),("firebase_messaging","^15.1.6"),("package_info_plus","^8.1.2"),("crypto","^3.0.6"),("path_provider","^2.1.5"),("flutter_map","^7.0.2"),("latlong2","^0.9.1")]:
               if not any(line.strip().startswith(name + ":") for line in lines):
                   dep += 1
                   lines.insert(dep, f"  {name}: {version}")
