@@ -316,6 +316,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
             key: ValueKey('pickup-map-$_pickupMapRevision'),
             selectedLatitude: _pickupLat,
             selectedLongitude: _pickupLng,
+            cityName: widget.cityName,
             onPointSelected: (latitude, longitude) {
               setState(() {
                 _pickupLat = latitude;
