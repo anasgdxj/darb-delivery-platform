@@ -250,6 +250,35 @@ class _DarbPressScaleState extends State<DarbPressScale> {
   }
 }
 
+/// Drop-in Card replacement that adds real backdrop blur while Glass mode is active.
+class DarbGlassCard extends Card {
+  const DarbGlassCard({
+    super.key,
+    super.color,
+    super.shadowColor,
+    super.surfaceTintColor,
+    super.elevation,
+    super.shape,
+    super.borderOnForeground,
+    super.margin,
+    super.clipBehavior,
+    super.semanticContainer,
+    super.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!DarbAppearance.glass.value) return super.build(context);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(DarbRadius.lg),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: super.build(context),
+      ),
+    );
+  }
+}
+
 /// Shared atmospheric canvas used behind every route when Glass mode is enabled.
 class DarbGlassBackdrop extends StatelessWidget {
   const DarbGlassBackdrop({super.key, required this.child});
@@ -571,7 +600,7 @@ abstract final class DarbTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: const Color(0xFF13221D),
+        color: DarbColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -658,7 +687,7 @@ abstract final class DarbTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: Color(0xFFFFFFFF),
+        color: DarbColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
