@@ -194,7 +194,7 @@ class _DriverLocationLifecycleObserver extends WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      DriverLocationReporter.start();
+      unawaited(DriverLocationReporter.refresh());
     }
   }
 }
