@@ -581,7 +581,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
             const SizedBox(height: 22),
             Text(dt('مسودة طلبك'), style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900)),
             const SizedBox(height: 10),
-            Card(child: Padding(padding: const EdgeInsets.all(16),
+            DarbGlassCard(child: Padding(padding: const EdgeInsets.all(16),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(_intentLabel(_draft?['intent']?.toString()),
                   style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
