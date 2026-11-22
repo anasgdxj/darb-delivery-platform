@@ -32,6 +32,11 @@ jobs:
           cp -r mobile-overrides/lib/. extracted/darb-project/mobile/lib/
           cp mobile-overrides/test/widget_test.dart extracted/darb-project/mobile/test/widget_test.dart
           bash mobile-overrides/prepare_city_assets.sh extracted/darb-project/mobile
+          mkdir -p extracted/darb-project/backend
+          cp darb-workspace/darb-project/backend/package.json extracted/darb-project/backend/package.json
+          cp darb-workspace/darb-project/backend/package-lock.json extracted/darb-project/backend/package-lock.json
+          cp darb-workspace/darb-project/backend/nest-cli.json extracted/darb-project/backend/nest-cli.json
+          cp darb-workspace/darb-project/backend/tsconfig.json extracted/darb-project/backend/tsconfig.json
           cp -R backend/src/. extracted/darb-project/backend/src/
           cp backend-overrides/schema.prisma extracted/darb-project/backend/prisma/schema.prisma
           mkdir -p extracted/darb-project/backend/prisma/migrations
@@ -115,11 +120,14 @@ jobs:
           deps = {
               "google_sign_in": "  google_sign_in: ^6.2.1",
               "geolocator": "  geolocator: ^13.0.2",
+              "flutter_map": "  flutter_map: ^7.0.2",
+              "latlong2": "  latlong2: ^0.9.1",
               "url_launcher": "  url_launcher: ^6.3.1",
               "firebase_core": "  firebase_core: ^3.8.1",
               "firebase_messaging": "  firebase_messaging: ^15.1.6",
               "package_info_plus": "  package_info_plus: ^8.1.2",
               "crypto": "  crypto: ^3.0.6",
+              "path_provider": "  path_provider: ^2.1.5",
           }
           lines = s.splitlines()
           dep = next((i for i, line in enumerate(lines) if line.strip() == "dependencies:"), None)
@@ -144,7 +152,7 @@ jobs:
           flutter pub get
             if ! flutter analyze --no-pub --no-fatal-infos --no-fatal-warnings; then
               echo "::group::Dart syntax context: app_shell.dart lines 25-33"
-              nl -ba lib/screens/app_shell.dart | sed -n '25,33p' | fold -w 160
+              nl -ba lib/features/shell/app_shell.dart | sed -n '25,33p' | fold -w 160
               echo "::endgroup::"
               exit 1
             fi
