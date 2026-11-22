@@ -37,6 +37,12 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  Future<void> _openSettings() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const DarbSettingsPage()),
+    );
+  }
+
   Future<void> _openLanguageSettings() async {
     final updated = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
@@ -830,6 +836,13 @@ class _AccountPageState extends State<AccountPage> {
           ),
           child: Column(
             children: [
+              _settingsTile(
+                icon: Icons.settings_rounded,
+                title: dt('إعدادات دَرْب'),
+                subtitle: dt('المظهر والتحديث واللغة'),
+                onTap: _openSettings,
+              ),
+              Divider(height: 1, indent: 72, endIndent: 16),
               _settingsTile(
                 icon: Icons.language_rounded,
                 title: dt('لغة التطبيق'),

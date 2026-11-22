@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/api.dart';
 import '../design_system.dart';
@@ -17,6 +18,7 @@ part 'vendor_screens.dart';
 part 'driver_screens.dart';
 part 'account_screens.dart';
 part 'account_pages.dart';
+part 'settings_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -140,7 +142,9 @@ class _AppShellState extends State<AppShell> {
                 ? [Icons.receipt_long_outlined, Icons.inventory_2_outlined, Icons.person_outline_rounded]
                 : [Icons.radar_rounded, Icons.route_outlined, Icons.person_outline_rounded];
 
-    return Scaffold(
+    return ValueListenableBuilder<bool>(
+      valueListenable: DarbAppearance.glass,
+      builder: (context, glassMode, _) => Scaffold(
       appBar: AppBar(
         backgroundColor: DarbColors.forest,
         foregroundColor: Colors.white,
@@ -175,6 +179,14 @@ class _AppShellState extends State<AppShell> {
           ],
         ),
         actions: [
+          if (tab == titles.length - 1)
+            IconButton(
+              tooltip: dt('إعدادات دَرْب'),
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(builder: (_) => const DarbSettingsPage()),
+              ),
+              icon: const Icon(Icons.settings_rounded, color: Colors.white),
+            ),
           IconButton(
             tooltip: Theme.of(context).brightness == Brightness.dark
                 ? dt('التبديل إلى الوضع النهاري')
@@ -263,6 +275,7 @@ class _AppShellState extends State<AppShell> {
           for (var i = 0; i < titles.length; i++)
             NavigationDestination(icon: Icon(icons[i]), selectedIcon: Icon(icons[i]), label: titles[i]),
         ],
+      ),
       ),
     );
   }

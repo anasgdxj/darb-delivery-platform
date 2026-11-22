@@ -42,6 +42,16 @@ void main() {
       expect(DarbTheme.mode.value, ThemeMode.system);
     });
 
+    test('defaults to the approved glass appearance and exposes a standard mode', () {
+      expect(DarbAppearance.glass.value, isTrue);
+      DarbTheme.updateBrightness(Brightness.light);
+      final glassSurface = DarbColors.surface;
+      DarbAppearance.glass.value = false;
+      expect(DarbColors.surface, isNot(glassSurface));
+      DarbAppearance.glass.value = true;
+      expect(DarbColors.surface, glassSurface);
+    });
+
 
     test('semantic palette adapts when active brightness changes', () {
       DarbTheme.updateBrightness(Brightness.light);
