@@ -3,7 +3,8 @@ import { AddressesService } from './addresses.service';
 
 describe('AddressesService', () => {
   const prisma: any = {
-    address: { findFirst: jest.fn(), delete: jest.fn(), update: jest.fn(), findUnique: jest.fn() },
+    address: { findMany: jest.fn(), findFirst: jest.fn(), delete: jest.fn(), update: jest.fn(), findUnique: jest.fn() },
+    $queryRaw: jest.fn(),
     $transaction: jest.fn(),
   };
   let service: AddressesService;
@@ -11,6 +12,26 @@ describe('AddressesService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new AddressesService(prisma);
+  });
+
+  it('returns saved coordinates with each address for map editing', async () => {
+    prisma.address.findMany.mockResolvedValue([
+      { id: 'addr-1', label: 'المنزل', details: 'حي الشهباء' },
+    ]);
+    prisma.$queryRaw.mockResolvedValue([
+      { id: 'addr-1', hasLocation: true, latitude: 36.2021, longitude: 37.1343 },
+    ]);
+
+    await expect(service.list('u-1')).resolves.toEqual([
+      {
+        id: 'addr-1',
+        label: 'المنزل',
+        details: 'حي الشهباء',
+        hasLocation: true,
+        latitude: 36.2021,
+        longitude: 37.1343,
+      },
+    ]);
   });
 
   it('rejects partial coordinates on update', async () => {
