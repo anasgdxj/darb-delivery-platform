@@ -1,8 +1,10 @@
 # DARB Design System
 
 Version: 2.0  
-Scope: Flutter mobile app (customer, driver, vendor, administration)  
-Source of truth: `mobile-overrides/lib/core/theme/darb_design_system.dart`
+Scope: Flutter mobile app, public website, and administration dashboard  
+Source of truth (mobile): `mobile-overrides/lib/core/theme/darb_design_system.dart`  
+Public website tokens: `index.html`  
+Administration dashboard tokens: `admin-web/index.html`
 
 This document defines the shared visual and interaction language for DARB. It does not authorize changing product behavior or backend contracts.
 
