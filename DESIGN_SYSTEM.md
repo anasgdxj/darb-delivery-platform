@@ -1,8 +1,10 @@
 # DARB Design System
 
 Version: 2.0  
-Scope: Flutter mobile app (customer, driver, vendor, administration)  
-Source of truth: `mobile-overrides/design_system.dart`
+Scope: Flutter mobile app, public website, and administration dashboard  
+Source of truth (mobile): `mobile-overrides/lib/core/theme/darb_design_system.dart`  
+Public website tokens: `index.html`  
+Administration dashboard tokens: `admin-web/index.html`
 
 This document defines the shared visual and interaction language for DARB. It does not authorize changing product behavior or backend contracts.
 
@@ -41,10 +43,9 @@ DARB should feel like a live logistics network: confident, clear, fast, and prem
 | forest | #102B26 | Primary brand and high-emphasis actions |
 | forestSoft | #1C443B | Secondary brand surfaces |
 | mint | #B9E4D2 | Selected and supportive states |
-| lime | #C8F169 | High-emphasis accent on dark brand surfaces |
 | danger | #B94747 | Destructive actions and errors |
 | success | #287A50 | Confirmed/success states |
-| warning | #B7791F | Pending/attention states |
+| warning | #8A5A12 | Pending/attention states |
 | info | #356D9A | Informational states |
 
 ### Light semantic surfaces
@@ -54,7 +55,7 @@ DARB should feel like a live logistics network: confident, clear, fast, and prem
 | canvas | #F5F6F2 | Main application background |
 | surface | #FFFFFF | Cards, sheets, and fields |
 | ink | #17231F | Main text |
-| muted | #77837D | Secondary text and hints |
+| muted | #626F69 | Secondary text and hints |
 | line | #E4E9E3 | Dividers and subtle borders |
 | borderStrong | #CBD5CE | Stronger boundaries |
 | scrim | #990B1713 | Modal backdrops |
@@ -72,12 +73,16 @@ The dark theme must use a separate semantic palette; do not invert the light pal
 | muted | #A4B2AA | Secondary text and hints |
 | line | #2A3B33 | Dividers and subtle borders |
 | borderStrong | #40564A | Stronger boundaries |
+| danger | #E56868 | Errors and destructive actions |
+| success | #4FB982 | Confirmed/success states |
+| warning | #E2A84B | Pending/attention states |
+| info | #63A6DC | Informational states |
 | primary | #B9E4D2 | Main interactive emphasis on dark surfaces |
 | onPrimary | #102B26 | Text/icons on primary |
-| accent | #C8F169 | Rare high-priority accent |
+| accent | #B9E4D2 | Rare high-priority accent |
 | scrim | #B3000000 | Modal backdrops |
 
-Dark palette values are implemented through adaptive `DarbColors` semantic tokens. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Contrast and component states must be verified in implementation before this theme is considered complete.
+Dark palette values are implemented through adaptive `DarbColors` semantic tokens. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Normal text must meet WCAG AA contrast (4.5:1); large text and meaningful non-text controls must meet at least 3:1. The repository contrast contract checks the core semantic pairs.
 
 Do not introduce near-duplicate brand colors in individual screens. Add genuinely new semantic colors centrally and document their use. All screen colors must resolve through the active theme; screen-specific hard-coded palette values are not permitted except for intentional brand artwork and media.
 
@@ -113,7 +118,7 @@ Use the shared theme text styles. Maintain readable Arabic typography and consis
 
 ## Motion
 
-Use the shared primitives and tokens in `mobile-overrides/design_system.dart`:
+Use the shared primitives and tokens in `mobile-overrides/lib/core/theme/darb_design_system.dart`:
 - press feedback: 120 ms
 - fast: 160 ms
 - standard: 260 ms
@@ -181,4 +186,21 @@ Pending vendor/driver approvals, delivery-zone and fee configuration, operationa
 
 ## Current implementation notes
 
-The token implementation lives in `mobile-overrides/design_system.dart`. Keep this document aligned with the code. A theme is incomplete until all customer, driver, vendor, and administration screens use semantic colors and all key components are legible in both modes.
+The token implementation lives in `mobile-overrides/lib/core/theme/darb_design_system.dart`. Keep this document aligned with the code. A theme is incomplete until all customer, driver, vendor, and administration screens use semantic colors and all key components are legible in both modes.
+
+
+### Public website semantic tokens
+
+| Token | Light | Dark |
+|---|---|---|
+| Canvas | `#F6F6F3` | `#0A1916` |
+| Surface | `#FFFFFF` | `#112621` |
+| Ink | `#1A2E29` | `#F1F5F1` |
+| Muted | `#626F69` | `#9DB2AC` |
+| Primary | `#167A5A` | `#28A47C` |
+| Primary hover | `#116248` | `#269B73` |
+| On primary | `#FFFFFF` | `#0A1916` |
+| Mint accent | `#B9E4D2` | `#B9E4D2` |
+| Danger | `#B94747` | `#E56868` |
+
+Primary buttons must use the semantic `on-primary` token instead of hard-coded white text. This keeps dark-mode buttons readable while primary links retain their lighter green foreground.

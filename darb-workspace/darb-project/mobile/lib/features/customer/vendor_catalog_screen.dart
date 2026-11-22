@@ -423,8 +423,8 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                       ),
                       FilledButton(
                         style: FilledButton.styleFrom(
-                          backgroundColor: DarbColors.lime,
-                          foregroundColor: DarbColors.forest,
+                          backgroundColor: DarbColors.primaryOf(context),
+                          foregroundColor: DarbColors.onPrimaryOf(context),
                           minimumSize: const Size(0, 42),
                         ),
                         onPressed: _openCheckout,

@@ -15,6 +15,7 @@
   --forest: #12302A;
   --primary: #167A5A;
   --primary-hover: #116248;
+  --on-primary: #FFFFFF;
   --mint: #B9E4D2;
   --mint-tint: #E7F5EE;
   --canvas: #F6F6F3;
@@ -22,11 +23,11 @@
   --surface-glass: rgba(255, 255, 255, 0.74);
   --surface-soft: #EDF2EE;
   --ink: #1A2E29;
-  --muted: #687A75;
+  --muted: #626F69;
   --border: #DCE4DF;
   --glass-border: rgba(255, 255, 255, 0.85);
   --shadow: 0 20px 50px rgba(18, 48, 42, 0.08);
-  --danger: #D64545;
+  --danger: #B94747;
   --blur: 22px;
 }
 
@@ -38,7 +39,8 @@ html.dark {
   --ink: #F1F5F3;
   --muted: #9DB2AC;
   --primary: #28A47C;
-  --primary-hover: #218B69;
+  --primary-hover: #269B73;
+  --on-primary: #0A1916;
   --mint-tint: #14352C;
   --border: #23473E;
   --glass-border: rgba(185, 228, 210, 0.16);
@@ -172,7 +174,7 @@ html[data-style="standard"] header {
 }
 .btn:hover { transform: translateY(-1px); }
 .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.btn-primary { background: var(--primary); color: #FFFFFF; }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
 .btn-primary:hover { background: var(--primary-hover); }
 .btn-outline { background: transparent; border-color: var(--border); color: var(--ink); }
 .btn-outline:hover { background: var(--surface-soft); }
