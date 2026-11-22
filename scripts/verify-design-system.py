@@ -65,6 +65,15 @@ CONTRAST_PAIRS = {
     "public site dark primary hover label": ("#0A1916", "#269B73", 4.5),
     "public site light primary button label": ("#FFFFFF", "#167A5A", 4.5),
     "public site mint button label": ("#12302A", "#B9E4D2", 4.5),
+    "admin light muted": ("#626F69", "#F5F6F2", 4.5),
+    "admin light warning": ("#8A5A12", "#F5F6F2", 4.5),
+    "admin light info": ("#356D9A", "#F5F6F2", 4.5),
+    "admin dark muted": ("#A4B2AA", "#13221D", 4.5),
+    "admin dark danger": ("#E56868", "#13221D", 4.5),
+    "admin dark success": ("#4FB982", "#13221D", 4.5),
+    "admin dark warning": ("#E2A84B", "#13221D", 4.5),
+    "admin dark info": ("#63A6DC", "#13221D", 4.5),
+    "admin dark primary button label": ("#102B26", "#B9E4D2", 4.5),
 }
 
 
@@ -143,6 +152,32 @@ def main() -> int:
 
     if "color: var(--on-primary)" not in site_text:
         failures.append("Public website primary buttons do not use the adaptive on-primary token")
+
+    admin_light = re.search(r":root\\s*\\{([^}]+)\\}", admin_text, re.DOTALL)
+    admin_dark = re.search(r"html\\.dark\\s*\\{([^}]+)\\}", admin_text, re.DOTALL)
+    if not admin_light or not admin_dark:
+        failures.append("Admin web light/dark semantic token blocks are missing")
+    else:
+        for token, color in {
+            "--muted": "#626F69",
+            "--danger": "#B94747",
+            "--success": "#287A50",
+            "--warn": "#8A5A12",
+            "--info": "#356D9A",
+        }.items():
+            if not re.search(rf"{re.escape(token)}\\s*:\\s*{re.escape(color)}\\s*;", admin_light.group(1)):
+                failures.append(f"Admin light token {token} does not match {color}")
+        for token, color in {
+            "--muted": "#A4B2AA",
+            "--danger": "#E56868",
+            "--success": "#4FB982",
+            "--warn": "#E2A84B",
+            "--info": "#63A6DC",
+            "--primary": "#B9E4D2",
+            "--on-primary": "#102B26",
+        }.items():
+            if not re.search(rf"{re.escape(token)}\\s*:\\s*{re.escape(color)}\\s*;", admin_dark.group(1)):
+                failures.append(f"Admin dark token {token} does not match {color}")
 
     for name, (foreground, background, minimum) in CONTRAST_PAIRS.items():
         ratio = contrast(foreground, background)
