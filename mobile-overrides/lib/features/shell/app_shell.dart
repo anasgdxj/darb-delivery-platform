@@ -58,7 +58,13 @@ class _AppShellState extends State<AppShell> {
           content: Text(message),
           action: SnackBarAction(
             label: dt('عرض'),
-            onPressed: () => unawaited(_openNotifications()),
+            onPressed: () {
+              if (data.isNotEmpty) {
+                unawaited(_handleNotificationOpen(data));
+              } else {
+                unawaited(_openNotifications());
+              }
+            },
           ),
         ),
       );
@@ -156,10 +162,25 @@ class _AppShellState extends State<AppShell> {
   }
 
   Future<void> _handleNotificationOpen(Map<String, dynamic> data) async {
+    if (!mounted) return;
+
+    if (_user == null) {
+      try {
+        final currentUser = await Api.instance.get('/auth/me');
+        if (currentUser is Map<String, dynamic> && mounted) {
+          setState(() => _user = currentUser);
+        }
+      } catch (_) {
+        await _openNotifications();
+        return;
+      }
+    }
+
     final orderId = (data['orderId'] ?? data['order_id'] ?? '').toString().trim();
+    final type = (data['type'] ?? '').toString().toUpperCase();
     final role = _user?['role']?.toString().toUpperCase() ?? 'CUSTOMER';
 
-    if (orderId.isNotEmpty && role == 'CUSTOMER') {
+    if (role == 'CUSTOMER' && orderId.isNotEmpty) {
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -171,8 +192,15 @@ class _AppShellState extends State<AppShell> {
     }
 
     if (role == 'DRIVER' && mounted) {
-      setState(() => _tabIndex = 1);
-      return;
+      final destination = switch (type) {
+        'PEER_DELIVERY_AVAILABLE' => 0,
+        'DELIVERY_OFFER_SELECTED' || 'ORDER_ASSIGNED' || 'ORDER_STATUS' => 1,
+        _ => -1,
+      };
+      if (destination >= 0) {
+        setState(() => _tabIndex = destination);
+        return;
+      }
     }
 
     await _openNotifications();
