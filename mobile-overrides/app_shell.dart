@@ -142,7 +142,9 @@ class _AppShellState extends State<AppShell> {
                 ? [Icons.receipt_long_outlined, Icons.inventory_2_outlined, Icons.person_outline_rounded]
                 : [Icons.radar_rounded, Icons.route_outlined, Icons.person_outline_rounded];
 
-    return Scaffold(
+    return ValueListenableBuilder<bool>(
+      valueListenable: DarbAppearance.glass,
+      builder: (context, glassMode, _) => Scaffold(
       appBar: AppBar(
         backgroundColor: DarbColors.forest,
         foregroundColor: Colors.white,
@@ -265,6 +267,7 @@ class _AppShellState extends State<AppShell> {
           for (var i = 0; i < titles.length; i++)
             NavigationDestination(icon: Icon(icons[i]), selectedIcon: Icon(icons[i]), label: titles[i]),
         ],
+      ),
       ),
     );
   }
