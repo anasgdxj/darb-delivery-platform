@@ -53,6 +53,43 @@ void main() {
     });
 
 
+
+    testWidgets('glass surfaces use a real backdrop filter', (tester) async {
+      DarbAppearance.glass.value = true;
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: [
+                ColoredBox(color: Color(0xFFB9E4D2)),
+                Center(
+                  child: DarbGlassSurface(
+                    child: Text('Frosted surface'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byType(BackdropFilter), findsOneWidget);
+      expect(find.text('Frosted surface'), findsOneWidget);
+    });
+
+    testWidgets('standard surfaces do not apply backdrop blur', (tester) async {
+      DarbAppearance.glass.value = false;
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DarbGlassSurface(child: Text('Standard surface')),
+          ),
+        ),
+      );
+      expect(find.byType(BackdropFilter), findsNothing);
+      expect(find.text('Standard surface'), findsOneWidget);
+      DarbAppearance.glass.value = true;
+    });
+
     test('semantic palette adapts when active brightness changes', () {
       DarbTheme.updateBrightness(Brightness.light);
       final lightCanvas = DarbColors.canvas;
