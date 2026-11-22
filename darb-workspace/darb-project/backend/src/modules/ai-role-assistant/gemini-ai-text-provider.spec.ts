@@ -12,7 +12,7 @@ describe('GeminiAiTextProvider', () => {
     provider = new GeminiAiTextProvider(config);
     config.get = jest.fn((key: string) => {
       if (key === 'GEMINI_API_KEY') return 'test-gemini-key';
-      if (key === 'GEMINI_MODEL') return 'gemini-3.8-flash';
+      if (key === 'GEMINI_MODEL') return 'gemini-4-hydrogen';
       return undefined;
     }) as unknown as ConfigService['get'];
   });
@@ -37,7 +37,7 @@ describe('GeminiAiTextProvider', () => {
     expect(answer).toBe('إجابة تجريبية');
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toContain('/v1beta/models/gemini-3.8-flash:generateContent');
+    expect(url).toContain('/v1beta/models/gemini-4-hydrogen:generateContent');
     expect(options.headers['x-goog-api-key']).toBe('test-gemini-key');
     const requestBody = JSON.parse(options.body);
     const systemInstruction = requestBody.systemInstruction.parts[0].text as string;
