@@ -246,7 +246,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Publish signed APK as the latest public release
-        if: github.event_name == 'push' || inputs.publish_release == true
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release == true
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
