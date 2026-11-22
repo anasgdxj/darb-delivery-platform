@@ -131,7 +131,7 @@ class _CustomerHomeState extends State<CustomerHome> {
     bool primary = false,
   }) {
     final foreground = primary ? Colors.white : ink;
-    return Material(
+    return DarbGlassMaterial(
       color: primary ? DarbColors.forestSoft : DarbColors.surface,
       borderRadius: BorderRadius.circular(21),
       child: InkWell(
@@ -177,7 +177,7 @@ class _CustomerHomeState extends State<CustomerHome> {
     final count = vendor['_count']?['products'] ?? 0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
+      child: DarbGlassMaterial(
         color: DarbColors.surface,
         borderRadius: BorderRadius.circular(19),
         child: InkWell(
