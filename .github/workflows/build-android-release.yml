@@ -48,6 +48,7 @@ jobs:
           ROOT="$GITHUB_WORKSPACE"
           M="$ROOT/extracted/darb-project/mobile"
           cd "$M"
+          rm -rf android
           flutter create --platforms=android --org com.darb --project-name darb --no-pub .
           rm -rf "$M/lib/screens" "$M/lib/core" "$M/lib/features" "$M/lib/design_system.dart" "$M/lib/localizations.dart" "$M/lib/notifications.dart" "$M/lib/app_update.dart"
           mkdir -p "$M/lib" "$M/test"
