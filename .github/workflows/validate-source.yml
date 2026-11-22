@@ -110,6 +110,7 @@ jobs:
           cp mobile-overrides/account_pages.dart extracted/darb-project/mobile/lib/screens/account_pages.dart
           cp mobile-overrides/notifications.dart extracted/darb-project/mobile/lib/notifications.dart
           cp mobile-overrides/app_update.dart extracted/darb-project/mobile/lib/app_update.dart
+          cp mobile-overrides/settings_page.dart extracted/darb-project/mobile/lib/screens/settings_page.dart
           mkdir -p extracted/darb-project/backend/prisma/migrations/20261117160000_google_accounts
           cp backend-overrides/google-accounts.migration.sql extracted/darb-project/backend/prisma/migrations/20261117160000_google_accounts/migration.sql
           cp backend-overrides/schema.prisma extracted/darb-project/backend/prisma/schema.prisma

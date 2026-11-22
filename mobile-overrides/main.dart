@@ -27,7 +27,9 @@ class DarbApp extends StatelessWidget {
     valueListenable: darbLocale,
     builder: (context, locale, _) => ValueListenableBuilder<ThemeMode>(
       valueListenable: DarbTheme.mode,
-      builder: (context, themeMode, _) => MaterialApp(
+      builder: (context, themeMode, _) => ValueListenableBuilder<bool>(
+        valueListenable: DarbAppearance.glass,
+        builder: (context, glassMode, _) => MaterialApp(
       title: 'دَرْب',
       debugShowCheckedModeBanner: false,
       locale: locale,
@@ -45,10 +47,13 @@ class DarbApp extends StatelessWidget {
       themeAnimationCurve: DarbMotion.enter,
       builder: (context, child) {
         DarbTheme.updateBrightness(Theme.of(context).brightness);
-        return child ?? const SizedBox.shrink();
+        return DarbGlassBackdrop(
+          child: child ?? const SizedBox.shrink(),
+        );
       },
       home: DarbLaunchGate(locale: locale),
-    ),
+        ),
+      ),
     ),
   );
 }

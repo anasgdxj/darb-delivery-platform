@@ -49,7 +49,7 @@ class _AdminQueueState extends State<AdminQueue> {
     final city = widget.kind == 'drivers' && cityData is Map ? cityData['code']?.toString() ?? '' : '';
     final detail = widget.kind == 'vendors' ? row['type']?.toString() ?? '' : row['vehicleType']?.toString() ?? '';
     final id = row['id'].toString();
-    return Card(
+    return DarbGlassCard(
       margin:const EdgeInsets.only(bottom:12),
       child:Padding(
         padding:const EdgeInsets.all(16),
@@ -162,7 +162,7 @@ class _AdminDeliveryZonesState extends State<AdminDeliveryZones> {
     body:loading?Center(child:CircularProgressIndicator()):error!=null?Center(child:TextButton(onPressed:_load,child:Text(dt('تعذر تحميل المناطق: $error')))):zones.isEmpty?Center(child:_EmptyPanel(text: dt('لم تُضف رسوم توصيل بعد'))):RefreshIndicator(onRefresh:_load,child:ListView(padding:const EdgeInsets.all(16),children:[
       Text(dt('إعداد رسوم التوصيل'),style:TextStyle(fontSize:20,fontWeight:FontWeight.w900)),
       SizedBox(height:8),Text(dt('يُضبط رسم واحد لكل مدينة. احتساب رسم الكيلومتر يتطلب تحديد موقع المتجر وموقع عنوان العميل.'),style:TextStyle(color:DarbColors.muted)),
-      for(final zone in zones)Card(child:ListTile(
+      for(final zone in zones)DarbGlassCard(child:ListTile(
         leading:Icon(Icons.payments_outlined,color:green),
         title:Text(zone['name']?.toString()??dt('منطقة')),
         subtitle:Text(dt('رسوم المنطقة: ${zone['feeBase']} ل.س • لكل كم: ${zone['feePerKm']} ل.س')),

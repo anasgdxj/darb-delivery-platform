@@ -29,7 +29,7 @@ DARB should feel like a live logistics network: confident, clear, fast, and prem
 - **Navigation:** role-specific destinations remain stable and predictable. Do not add tabs merely for decoration.
 - **Map use:** show maps only where location materially helps a task. A map must not displace the primary action or make weak-network startup heavier.
 - **Motion:** dynamic and rich, but purposeful. Motion explains state, hierarchy, and transitions; it never delays critical actions.
-- **Surface language:** layered surfaces, deliberate negative space, restrained borders, and a small number of high-contrast accents. The app exposes a persisted Glass / Standard appearance preference; Glass uses translucent semantic surfaces while Standard uses opaque surfaces. Keep blur limited to purposeful focal surfaces, not every row or container.
+- **Surface language:** the persisted Glass mode is a real frosted-glass system across customer, driver, vendor, administration, account, settings, and navigation surfaces. Use the shared `DarbGlassBackdrop`, `DarbGlassSurface`, `DarbGlassCard`, and `DarbGlassMaterial` primitives for atmospheric backgrounds, blur, translucency, fine highlights, and layered depth. Standard mode remains opaque and disables blur. Keep text and critical controls high-contrast; do not apply blur to text itself.
 - **Content integrity:** no fake live data, placeholder ratings, fabricated availability, or invented delivery prices.
 
 ## Color system
@@ -136,7 +136,7 @@ Use motion for screen transitions, selected navigation, expanding details, order
 - Primary action: `FilledButton`, one clear primary action per view.
 - Secondary action: `OutlinedButton` or `TextButton`.
 - Destructive action: use the active theme's error color and require confirmation when consequential.
-- Cards: semantic surface, clear grouping, restrained elevation.
+- Cards: use `DarbGlassCard` in Glass mode (real `BackdropFilter` blur plus translucent fill) and opaque semantic surfaces in Standard mode.
 - Inputs: shared `InputDecorationTheme`; show validation beside the relevant field.
 - Navigation: shared Material 3 navigation; preserve role-specific destinations.
 - Dialogs and sheets: shared theme shapes and surfaces.

@@ -5,6 +5,7 @@ import 'package:darb/design_system.dart';
 void main() {
   group('DARB design system', () {
     test('defines the approved Material 3 theme', () {
+      DarbAppearance.glass.value = false;
       final theme = DarbTheme.light;
       expect(theme.useMaterial3, isTrue);
       expect(theme.colorScheme.primary, DarbColors.forest);
@@ -12,9 +13,11 @@ void main() {
       expect(DarbColors.onPrimary, const Color(0xFFFFFFFF));
       expect(theme.colorScheme.secondary, DarbColors.mint);
       expect(theme.scaffoldBackgroundColor, DarbColors.canvas);
+      DarbAppearance.glass.value = true;
     });
 
     test('defines a dark Material 3 theme with semantic contrast', () {
+      DarbAppearance.glass.value = false;
       DarbTheme.updateBrightness(Brightness.dark);
       final theme = DarbTheme.dark;
       expect(theme.useMaterial3, isTrue);
@@ -25,6 +28,45 @@ void main() {
       expect(DarbColors.onPrimary, DarbColors.forest);
       expect(theme.scaffoldBackgroundColor, const Color(0xFF0B1512));
       DarbTheme.updateBrightness(Brightness.light);
+      DarbAppearance.glass.value = true;
+    });
+
+    test('glass mode preserves readable brand colors and translucent surfaces', () {
+      DarbAppearance.glass.value = true;
+      DarbTheme.updateBrightness(Brightness.light);
+      final light = DarbTheme.light;
+      expect(DarbColors.surface.a, lessThan(1));
+      expect(DarbColors.ink, const Color(0xFF17231F));
+      expect(light.colorScheme.primary, DarbColors.forest);
+      expect(light.colorScheme.onPrimary, Colors.white);
+      expect(light.colorScheme.surface, DarbColors.surface);
+      expect(light.scaffoldBackgroundColor, Colors.transparent);
+
+      DarbTheme.updateBrightness(Brightness.dark);
+      final dark = DarbTheme.dark;
+      expect(DarbColors.surface.a, lessThan(1));
+      expect(DarbColors.ink, const Color(0xFFF1F5F1));
+      expect(dark.colorScheme.primary, DarbColors.mint);
+      expect(dark.colorScheme.onPrimary, DarbColors.forest);
+      expect(dark.colorScheme.surface, DarbColors.surface);
+      expect(dark.scaffoldBackgroundColor, Colors.transparent);
+
+      DarbTheme.updateBrightness(Brightness.light);
+      DarbAppearance.glass.value = false;
+    });
+
+    test('standard mode restores fully opaque surfaces in both themes', () {
+      DarbAppearance.glass.value = false;
+      DarbTheme.updateBrightness(Brightness.light);
+      expect(DarbColors.surface.a, 1);
+      expect(DarbTheme.light.scaffoldBackgroundColor, DarbColors.canvas);
+
+      DarbTheme.updateBrightness(Brightness.dark);
+      expect(DarbColors.surface.a, 1);
+      expect(DarbTheme.dark.scaffoldBackgroundColor, const Color(0xFF0B1512));
+
+      DarbTheme.updateBrightness(Brightness.light);
+      DarbAppearance.glass.value = true;
     });
 
     test('uses the same DARB route transition in light and dark themes', () {
@@ -52,6 +94,43 @@ void main() {
       expect(DarbColors.surface, glassSurface);
     });
 
+
+
+    testWidgets('glass surfaces use a real backdrop filter', (tester) async {
+      DarbAppearance.glass.value = true;
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: [
+                ColoredBox(color: Color(0xFFB9E4D2)),
+                Center(
+                  child: DarbGlassSurface(
+                    child: Text('Frosted surface'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byType(BackdropFilter), findsOneWidget);
+      expect(find.text('Frosted surface'), findsOneWidget);
+    });
+
+    testWidgets('standard surfaces do not apply backdrop blur', (tester) async {
+      DarbAppearance.glass.value = false;
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DarbGlassSurface(child: Text('Standard surface')),
+          ),
+        ),
+      );
+      expect(find.byType(BackdropFilter), findsNothing);
+      expect(find.text('Standard surface'), findsOneWidget);
+      DarbAppearance.glass.value = true;
+    });
 
     test('semantic palette adapts when active brightness changes', () {
       DarbTheme.updateBrightness(Brightness.light);
