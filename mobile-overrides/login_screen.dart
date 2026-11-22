@@ -288,11 +288,11 @@ class _LoginScreenState extends State<LoginScreen>
                   width: 54,
                   height: 54,
                   decoration: BoxDecoration(
-                    color: DarbColors.lime,
+                    color: DarbColors.mint,
                     borderRadius: BorderRadius.circular(19),
                     boxShadow: [
                       BoxShadow(
-                        color: DarbColors.lime.withValues(alpha: .2),
+                        color: DarbColors.mint.withValues(alpha: .2),
                         blurRadius: 22,
                         spreadRadius: 1,
                       ),
@@ -319,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.route_rounded, color: DarbColors.lime, size: 15),
+                      Icon(Icons.route_rounded, color: DarbColors.mint, size: 15),
                       SizedBox(width: 6),
                       Text(
                         'DARB',
@@ -381,7 +381,7 @@ class _LoginScreenState extends State<LoginScreen>
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: DarbColors.lime, size: 13),
+        Icon(icon, color: DarbColors.mint, size: 13),
         const SizedBox(width: 5),
         Text(
           label,
