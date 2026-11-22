@@ -71,6 +71,10 @@ The dark theme must use a separate semantic palette; do not invert the light pal
 | muted | #A4B2AA | Secondary text and hints |
 | line | #2A3B33 | Dividers and subtle borders |
 | borderStrong | #40564A | Stronger boundaries |
+| danger | #E56868 | Errors and destructive actions |
+| success | #4FB982 | Confirmed/success states |
+| warning | #E2A84B | Pending/attention states |
+| info | #63A6DC | Informational states |
 | primary | #B9E4D2 | Main interactive emphasis on dark surfaces |
 | onPrimary | #102B26 | Text/icons on primary |
 | accent | #B9E4D2 | Rare high-priority accent |
