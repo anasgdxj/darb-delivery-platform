@@ -19,7 +19,8 @@ class DriverTrackingScreen extends StatefulWidget {
   State<DriverTrackingScreen> createState() => _DriverTrackingScreenState();
 }
 
-class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
+class _DriverTrackingScreenState extends State<DriverTrackingScreen>
+    with WidgetsBindingObserver {
   static const LatLng _syriaCenter = LatLng(35.0, 38.5);
 
   Timer? _refreshTimer;
@@ -35,16 +36,38 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _refreshLocation();
+    _startPolling();
+  }
+
+  void _startPolling() {
+    if (_refreshTimer != null) return;
     _refreshTimer = Timer.periodic(
-      const Duration(seconds: 30),
+      const Duration(seconds: 25),
       (_) => _refreshLocation(silent: true),
     );
   }
 
+  void _stopPolling() {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _startPolling();
+      _refreshLocation(silent: true);
+    } else {
+      _stopPolling();
+    }
+  }
+
   @override
   void dispose() {
-    _refreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _stopPolling();
     super.dispose();
   }
 
