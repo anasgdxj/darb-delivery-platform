@@ -179,6 +179,14 @@ class _AppShellState extends State<AppShell> {
           ],
         ),
         actions: [
+          if (tab == titles.length - 1)
+            IconButton(
+              tooltip: dt('إعدادات دَرْب'),
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(builder: (_) => const DarbSettingsPage()),
+              ),
+              icon: const Icon(Icons.settings_rounded, color: Colors.white),
+            ),
           IconButton(
             tooltip: Theme.of(context).brightness == Brightness.dark
                 ? dt('التبديل إلى الوضع النهاري')
