@@ -447,13 +447,13 @@ class _AccountPageState extends State<AccountPage> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: DarbColors.lime,
+                        color: DarbColors.mint,
                         borderRadius: BorderRadius.circular(DarbRadius.pill),
                       ),
                       child: Text(
                         _roleLabel,
                         style: TextStyle(
-                          color: DarbColors.forest,
+                          color: DarbColors.brandForeground,
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
                         ),
@@ -488,7 +488,7 @@ class _AccountPageState extends State<AccountPage> {
                   children: [
                     Icon(
                       Icons.verified_user_outlined,
-                      color: DarbColors.lime,
+                      color: DarbColors.mint,
                       size: 16,
                     ),
                     SizedBox(width: 7),

@@ -8,15 +8,23 @@ void main() {
       final theme = DarbTheme.light;
       expect(theme.useMaterial3, isTrue);
       expect(theme.colorScheme.primary, DarbColors.forest);
+      expect(DarbColors.primary, DarbColors.forest);
+      expect(DarbColors.onPrimary, const Color(0xFFFFFFFF));
+      expect(theme.colorScheme.secondary, DarbColors.mint);
       expect(theme.scaffoldBackgroundColor, DarbColors.canvas);
     });
 
     test('defines a dark Material 3 theme with semantic contrast', () {
+      DarbTheme.updateBrightness(Brightness.dark);
       final theme = DarbTheme.dark;
       expect(theme.useMaterial3, isTrue);
       expect(theme.brightness, Brightness.dark);
       expect(theme.colorScheme.primary, const Color(0xFFB9E4D2));
+      expect(DarbColors.primary, DarbColors.mint);
+      expect(theme.colorScheme.secondary, DarbColors.mint);
+      expect(DarbColors.onPrimary, DarbColors.forest);
       expect(theme.scaffoldBackgroundColor, const Color(0xFF0B1512));
+      DarbTheme.updateBrightness(Brightness.light);
     });
 
     test('uses the same DARB route transition in light and dark themes', () {

@@ -12,11 +12,14 @@ abstract final class DarbColors {
   static Color get forest => const Color(0xFF102B26);
   static Color get forestSoft => const Color(0xFF1C443B);
   static Color get mint => const Color(0xFFB9E4D2);
-  static Color get lime => const Color(0xFFC8F169);
   static Color get canvas => _dark ? const Color(0xFF0B1512) : const Color(0xFFF5F6F2);
   static Color get surface => _dark ? const Color(0xFF13221D) : const Color(0xFFFFFFFF);
   static Color get surfaceAlt => _dark ? const Color(0xFF1A2D26) : const Color(0xFFEAF2EC);
   static Color get onForest => const Color(0xFFFFFFFF);
+  static Color get primary => _dark ? mint : forest;
+  static Color get onPrimary => _dark ? forest : const Color(0xFFFFFFFF);
+  static Color get surfaceElevated => _dark ? const Color(0xFF1A2D26) : surface;
+  static Color get onBrand => const Color(0xFFFFFFFF);
   static Color get brandForeground => _dark ? mint : forest;
   static Color get ink => _dark ? const Color(0xFFF1F5F1) : const Color(0xFF17231F);
   static Color get muted => _dark ? const Color(0xFFA4B2AA) : const Color(0xFF77837D);
@@ -292,7 +295,7 @@ abstract final class DarbTheme {
       brightness: Brightness.dark,
       primary: Color(0xFFB9E4D2),
       onPrimary: Color(0xFF102B26),
-      secondary: Color(0xFFC8F169),
+      secondary: Color(0xFFB9E4D2),
       onSecondary: Color(0xFF102B26),
       error: Color(0xFFE47777),
       onError: Color(0xFF2A1010),
@@ -356,6 +359,40 @@ abstract final class DarbTheme {
         linearTrackColor: Color(0xFF2A3B33),
         circularTrackColor: Color(0xFF2A3B33),
       ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color(0xFFB9E4D2),
+          foregroundColor: const Color(0xFF102B26),
+          disabledBackgroundColor: const Color(0xFF40564A),
+          disabledForegroundColor: const Color(0xFFA4B2AA),
+          minimumSize: const Size(0, 52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFF1F5F1),
+          side: const BorderSide(color: Color(0xFF40564A)),
+          minimumSize: const Size(0, 50),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: const Color(0xFF13221D),
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+          side: const BorderSide(color: Color(0xFF2A3B33)),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF1A2D26),
+        contentTextStyle: const TextStyle(color: Color(0xFFF1F5F1), fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
     );
   }
 
@@ -364,7 +401,7 @@ abstract final class DarbTheme {
       brightness: Brightness.light,
       primary: Color(0xFF102B26),
       onPrimary: Colors.white,
-      secondary: Color(0xFFC8F169),
+      secondary: Color(0xFFB9E4D2),
       onSecondary: Color(0xFF102B26),
       error: Color(0xFFB94747),
       onError: Colors.white,

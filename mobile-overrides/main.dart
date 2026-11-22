@@ -179,7 +179,7 @@ class _DarbSplashScreenState extends State<DarbSplashScreen>
                             border: Border.all(color: Colors.white.withValues(alpha: .2)),
                             boxShadow: [
                               BoxShadow(
-                                color: DarbColors.lime.withValues(alpha: .13),
+                                color: DarbColors.mint.withValues(alpha: .13),
                                 blurRadius: 42,
                                 spreadRadius: 2,
                               ),
@@ -189,7 +189,7 @@ class _DarbSplashScreenState extends State<DarbSplashScreen>
                             child: Text(
                               'د',
                               style: TextStyle(
-                                color: DarbColors.lime,
+                                color: DarbColors.mint,
                                 fontSize: 76,
                                 height: 1,
                                 fontWeight: FontWeight.w900,
@@ -228,7 +228,7 @@ class _DarbSplashScreenState extends State<DarbSplashScreen>
                       child: LinearProgressIndicator(
                         minHeight: 3,
                         backgroundColor: Color(0x334FFFFF),
-                        valueColor: AlwaysStoppedAnimation(DarbColors.lime),
+                        valueColor: AlwaysStoppedAnimation(DarbColors.mint),
                       ),
                     ),
                   ),
@@ -246,7 +246,7 @@ class _DarbSplashScreenState extends State<DarbSplashScreen>
                   Text(
                     'anasgdxj',
                     style: TextStyle(
-                      color: DarbColors.lime,
+                      color: DarbColors.mint,
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.1,
@@ -295,7 +295,7 @@ class _OrbitPainter extends CustomPainter {
     canvas.drawArc(rect, 0, 6.28318, false, track);
 
     final accent = Paint()
-      ..color = DarbColors.lime
+      ..color = DarbColors.mint
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 3.2;

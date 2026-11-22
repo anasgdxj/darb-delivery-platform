@@ -157,11 +157,11 @@ class _AppShellState extends State<AppShell> {
                 gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
-                  colors: [DarbColors.lime, DarbColors.mint],
+                  colors: [DarbColors.mint, DarbColors.mint],
                 ),
                 borderRadius: BorderRadius.circular(13),
               ),
-              child: Text(dt('د'), style: TextStyle(color: DarbColors.forest, fontWeight: FontWeight.w900, fontSize: 23)),
+              child: Text(dt('د'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 23)),
             ),
             SizedBox(width: 11),
             Column(
@@ -196,7 +196,7 @@ class _AppShellState extends State<AppShell> {
                     ? Icons.dark_mode_rounded
                     : Icons.light_mode_rounded,
                 key: ValueKey(Theme.of(context).brightness),
-                color: DarbColors.lime,
+                color: DarbColors.mint,
                 size: 25,
               ),
             ),
@@ -228,7 +228,7 @@ class _AppShellState extends State<AppShell> {
               },
               icon: Icon(
                 update == null ? Icons.system_update_alt_rounded : Icons.system_update_rounded,
-                color: update == null ? Colors.white : DarbColors.lime,
+                color: update == null ? Colors.white : DarbColors.mint,
               ),
             ),
           ),

@@ -55,7 +55,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.translate_rounded, color: DarbColors.lime, size: 32),
+                  Icon(Icons.translate_rounded, color: DarbColors.mint, size: 32),
                   const SizedBox(height: 16),
                   Text(l.t('languageTitle'), style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 7),
@@ -118,8 +118,8 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
               width: 48,
               height: 48,
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: DarbColors.forest, borderRadius: BorderRadius.circular(15)),
-              child: Text(tag, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+              decoration: BoxDecoration(color: DarbColors.primary, borderRadius: BorderRadius.circular(15)),
+              child: Text(tag, style: TextStyle(color: DarbColors.onPrimary, fontWeight: FontWeight.w900)),
             ),
             const SizedBox(width: 14),
             Expanded(

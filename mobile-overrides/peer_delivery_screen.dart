@@ -138,7 +138,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                 ),
                 if (position != null)
                   Text(dt('تم حفظ الإحداثيات لهذا العنوان'),
-                    style: TextStyle(color: DarbColors.forest, fontSize: 12),
+                    style: TextStyle(color: DarbColors.brandForeground, fontSize: 12),
                   ),
                 if (dialogError != null)
                   Text(dialogError!, style: TextStyle(color: DarbColors.danger)),
@@ -278,7 +278,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         context: context,
         barrierDismissible: false,
         builder: (dialogContext) => AlertDialog(
-          icon: Icon(Icons.check_circle, color: DarbColors.forest, size: 42),
+          icon: Icon(Icons.check_circle, color: DarbColors.brandForeground, size: 42),
           title: Text(dt('تم إرسال طلبك')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -318,7 +318,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
             Spacer(),
             Text(
               _stepTitles[step],
-              style: TextStyle(color: DarbColors.forest, fontSize: 13, fontWeight: FontWeight.w800),
+              style: TextStyle(color: DarbColors.brandForeground, fontSize: 13, fontWeight: FontWeight.w800),
             ),
           ],
         ),
@@ -475,7 +475,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: DarbColors.forest, size: 21),
+          Icon(icon, color: DarbColors.brandForeground, size: 21),
           SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -533,11 +533,11 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.payments_outlined, color: DarbColors.forest),
+              Icon(Icons.payments_outlined, color: DarbColors.brandForeground),
               SizedBox(width: 10),
               Expanded(
                 child: Text(dt('بعد إرسال الطلب سيحدد السائقون أجورهم وفق مسافة التوصيل، وستختار العرض المناسب قبل تأكيد الطلب.'),
-                  style: TextStyle(color: DarbColors.forest, fontSize: 12, height: 1.5),
+                  style: TextStyle(color: DarbColors.brandForeground, fontSize: 12, height: 1.5),
                 ),
               ),
             ],
