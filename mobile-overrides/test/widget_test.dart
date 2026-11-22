@@ -128,6 +128,7 @@ void main() {
   group('Widget & Motion Accessibility Smoke Tests', () {
     testWidgets('renders DarbGlassSurface in Standard mode without errors',
         (tester) async {
+      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.standard);
       await tester.pumpWidget(
         MaterialApp(
           theme: DarbTheme.light,
@@ -143,6 +144,7 @@ void main() {
       await tester.pump();
       expect(find.text('DARB surface'), findsOneWidget);
       expect(tester.takeException(), isNull);
+      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
     });
 
     testWidgets('respects MediaQuery disableAnimations for DarbMotion.reduceMotion',
