@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/api.dart';
 import '../design_system.dart';
@@ -17,6 +18,7 @@ part 'vendor_screens.dart';
 part 'driver_screens.dart';
 part 'account_screens.dart';
 part 'account_pages.dart';
+part 'settings_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
