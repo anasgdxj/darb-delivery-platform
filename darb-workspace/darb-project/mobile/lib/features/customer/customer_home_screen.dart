@@ -286,8 +286,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Expanded(
                         child: FilledButton.icon(
                           style: FilledButton.styleFrom(
-                            backgroundColor: DarbColors.lime,
-                            foregroundColor: DarbColors.forest,
+                            backgroundColor: DarbColors.primaryOf(context),
+                            foregroundColor: DarbColors.onPrimaryOf(context),
                           ),
                           onPressed: _selectedCityId == null
                               ? null
