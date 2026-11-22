@@ -89,6 +89,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
         });
       } else {
         setState(() {
+          _error = null;
           _stale = response is Map && response['reason'] == 'STALE';
           _message = _stale
               ? dt('آخر موقع للمندوب قديم، ننتظر تحديثه')
