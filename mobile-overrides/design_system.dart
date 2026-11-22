@@ -556,7 +556,7 @@ abstract final class DarbTheme {
   }
 
   static ThemeData get dark {
-    const scheme = ColorScheme(
+    final scheme = ColorScheme(
       brightness: Brightness.dark,
       primary: Color(0xFFB9E4D2),
       onPrimary: Color(0xFF102B26),
@@ -591,14 +591,14 @@ abstract final class DarbTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
-      navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: Color(0xFF13221D),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: DarbColors.surface,
         indicatorColor: Color(0xFF29483B),
         elevation: 0,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1A2D26),
+        fillColor: DarbColors.surfaceAlt,
         hintStyle: const TextStyle(color: Color(0xFFA4B2AA)),
         labelStyle: const TextStyle(color: Color(0xFFA4B2AA)),
         enabledBorder: OutlineInputBorder(
@@ -610,7 +610,7 @@ abstract final class DarbTheme {
           borderSide: const BorderSide(color: Color(0xFFB9E4D2), width: 1.5),
         ),
       ),
-      dialogTheme: const DialogThemeData(
+      dialogTheme: DialogThemeData(
         backgroundColor: DarbColors.surface,
         surfaceTintColor: Colors.transparent,
       ),
