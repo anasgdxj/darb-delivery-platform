@@ -150,7 +150,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                 color: primary ? Colors.white.withValues(alpha: .12) : DarbColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Icon(icon, color: primary ? DarbColors.lime : DarbColors.brandForeground, size: 23),
+              child: Icon(icon, color: primary ? DarbColors.mint : DarbColors.brandForeground, size: 23),
             ),
             SizedBox(width: 12),
             Expanded(child: Column(
@@ -317,7 +317,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(Icons.route_rounded, color: Color(0xFFC8F169), size: 14),
+                      Icon(Icons.route_rounded, color: DarbColors.mint, size: 14),
                       SizedBox(width: 6),
                       Text(dt('خدمة التوصيل المستقل'),
                         style: TextStyle(color: DarbColors.onForest, fontSize: 10, fontWeight: FontWeight.w800)),
@@ -338,7 +338,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                     child: FilledButton(
                       onPressed: cityId == null ? null : _openPeerDelivery,
                       style: FilledButton.styleFrom(
-                        backgroundColor: Color(0xFFC8F169),
+                        backgroundColor: DarbColors.mint,
                         foregroundColor: ink,
                         minimumSize: Size(0, 52),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -549,7 +549,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                 colors: [DarbColors.forestSoft, DarbColors.forest]),
               borderRadius: BorderRadius.circular(24)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Icon(Icons.auto_awesome_rounded, color: Color(0xFFC8F169), size: 28),
+              const Icon(Icons.auto_awesome_rounded, color: DarbColors.mint, size: 28),
               const SizedBox(height: 12),
               Text(dt('احكِ طلبك بطريقتك'), style: const TextStyle(
                 color: Colors.white, fontSize: 21, fontWeight: FontWeight.w900)),
