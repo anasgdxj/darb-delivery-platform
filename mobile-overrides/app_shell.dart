@@ -142,8 +142,8 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: DarbColors.primary,
-        foregroundColor: DarbColors.onPrimary,
+        backgroundColor: DarbColors.forest,
+        foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 18,
@@ -157,19 +157,19 @@ class _AppShellState extends State<AppShell> {
                 gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
-                  colors: [DarbColors.lime, DarbColors.mint],
+                  colors: [DarbColors.mint, DarbColors.mint],
                 ),
                 borderRadius: BorderRadius.circular(13),
               ),
-              child: Text(dt('د'), style: TextStyle(color: DarbColors.brandForeground, fontWeight: FontWeight.w900, fontSize: 23)),
+              child: Text(dt('د'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 23)),
             ),
             SizedBox(width: 11),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(dt('دَرْب'), style: TextStyle(color: DarbColors.onPrimary, fontWeight: FontWeight.w900, fontSize: 18, height: 1.1)),
-                Text(titles[tab], style: TextStyle(color: DarbColors.onPrimary.withValues(alpha: .72), fontSize: 11, fontWeight: FontWeight.w600)),
+                Text(dt('دَرْب'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, height: 1.1)),
+                Text(titles[tab], style: TextStyle(color: Colors.white.withValues(alpha: .72), fontSize: 11, fontWeight: FontWeight.w600)),
               ],
             ),
           ],
@@ -196,7 +196,7 @@ class _AppShellState extends State<AppShell> {
                     ? Icons.dark_mode_rounded
                     : Icons.light_mode_rounded,
                 key: ValueKey(Theme.of(context).brightness),
-                color: DarbColors.lime,
+                color: DarbColors.mint,
                 size: 25,
               ),
             ),
@@ -228,7 +228,7 @@ class _AppShellState extends State<AppShell> {
               },
               icon: Icon(
                 update == null ? Icons.system_update_alt_rounded : Icons.system_update_rounded,
-                color: update == null ? Colors.white : DarbColors.lime,
+                color: update == null ? Colors.white : DarbColors.mint,
               ),
             ),
           ),
