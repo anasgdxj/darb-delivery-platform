@@ -5,6 +5,7 @@ on:
     paths:
       - "index.html"
       - "admin-web/**"
+      - "assets/**"
       - ".github/workflows/deploy-admin-web.yml"
   workflow_dispatch:
 permissions:
@@ -50,8 +51,11 @@ jobs:
           test -s admin-web/index.html
           cp index.html .pages/index.html
           cp admin-web/index.html .pages/admin/index.html
+          test -d assets/cities
+          cp -R assets .pages/assets
+          test -s .pages/assets/cities/damascus.jpg
           cat > .pages/404.html <<'EOF'
-          <!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الصفحة غير موجودة | دَرْب</title><body style="font-family:Tahoma,Arial;background:#f6f7f2;color:#102b26;display:grid;place-items:center;min-height:90vh;text-align:center"><main><h1>هذه الصفحة غير موجودة</h1><p>قد يكون الرابط غير صحيح أو تم نقل الصفحة.</p><a href="/">العودة إلى موقع دَرْب</a></main></body></html>
+          <!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الصفحة غير موجودة | دَرْب</title><body style="font-family:Tahoma,Arial;background:#f6f7f2;color:#102b26;display:grid;place-items:center;min-height:90vh;text-align:center"><main><h1>هذه الصفحة غير موجودة</h1><p>قد يكون الرابط غير صحيح أو تم نقل الصفحة.</p><a href="./">العودة إلى موقع دَرْب</a></main></body></html>
           EOF
       - uses: actions/upload-pages-artifact@v3
         with:
