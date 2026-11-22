@@ -49,13 +49,13 @@ class DarbLocationService {
 }
 
 class DriverLocationReporter {
-  static Timer? _timer;
-  static bool _sending = false;
-  static bool _refreshing = false;
-  static bool _refreshRequested = false;
+  static StreamSubscription<Position>? _positionSubscription;
   static bool _enabled = false;
+  static bool _starting = false;
+  static bool _sending = false;
   static bool _observerRegistered = false;
   static int _generation = 0;
+  static DateTime? _lastSentAt;
 
   static final WidgetsBindingObserver _lifecycleObserver =
       _DriverLocationLifecycleObserver();
@@ -66,51 +66,106 @@ class DriverLocationReporter {
       WidgetsBinding.instance.addObserver(_lifecycleObserver);
       _observerRegistered = true;
     }
-    if (_timer != null || _refreshing) return;
-    unawaited(refresh());
+    if (_positionSubscription == null && !_starting) {
+      unawaited(_startStream());
+    }
   }
 
-  static Future<void> refresh() async {
-    if (!_enabled) return;
-    if (_refreshing) {
-      _refreshRequested = true;
-      return;
-    }
-    _refreshing = true;
+  static Future<void> _startStream() async {
+    if (!_enabled || _starting) return;
+    _starting = true;
     final generation = ++_generation;
-    _timer?.cancel();
-    _timer = null;
     try {
       final driver =
           Map<String, dynamic>.from(await Api.instance.get('/drivers/me') as Map);
-      if (generation != _generation ||
+      if (!_enabled ||
+          generation != _generation ||
           driver['status'] != 'APPROVED' ||
           driver['isOnline'] != true) {
         return;
       }
-      await _sendLocation();
-      if (generation != _generation) return;
-      _timer = Timer.periodic(
-        const Duration(seconds: 30),
-        (_) => unawaited(_sendLocation()),
+
+      if (!await Geolocator.isLocationServiceEnabled()) return;
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+
+      final settings = AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 20,
+        intervalDuration: const Duration(seconds: 30),
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationTitle: 'دَرْب - مشاركة موقع المندوب',
+          notificationText: 'يتم تحديث موقعك أثناء تنفيذ التوصيل',
+          enableWakeLock: true,
+          setOngoing: true,
+        ),
+      );
+
+      await _positionSubscription?.cancel();
+      _positionSubscription = Geolocator.getPositionStream(
+        locationSettings: settings,
+      ).listen(
+        (position) {
+          if (_enabled && generation == _generation) {
+            unawaited(_sendPosition(position));
+          }
+        },
+        onError: (_) {
+          _positionSubscription = null;
+          if (_enabled && generation == _generation) {
+            unawaited(_restartAfterDelay());
+          }
+        },
+        cancelOnError: true,
       );
     } catch (_) {
-      _timer?.cancel();
-      _timer = null;
-    } finally {
-      _refreshing = false;
-      if (_refreshRequested && _enabled) {
-        _refreshRequested = false;
-        unawaited(refresh());
+      if (_enabled && generation == _generation) {
+        unawaited(_restartAfterDelay());
       }
+    } finally {
+      _starting = false;
+    }
+  }
+
+  static Future<void> _sendPosition(Position position) async {
+    if (!_enabled || _sending) return;
+    final now = DateTime.now();
+    if (_lastSentAt != null &&
+        now.difference(_lastSentAt!) < const Duration(seconds: 20)) {
+      return;
+    }
+    _sending = true;
+    try {
+      await Api.instance.patch('/drivers/location', {
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+      });
+      _lastSentAt = now;
+    } catch (_) {
+      // A later position event retries after transient network failures.
+    } finally {
+      _sending = false;
+    }
+  }
+
+  static Future<void> _restartAfterDelay() async {
+    await Future<void>.delayed(const Duration(seconds: 15));
+    if (_enabled && _positionSubscription == null && !_starting) {
+      await _startStream();
     }
   }
 
   static void pause() {
     _generation++;
-    _refreshRequested = false;
-    _timer?.cancel();
-    _timer = null;
+    final subscription = _positionSubscription;
+    _positionSubscription = null;
+    if (subscription != null) unawaited(subscription.cancel());
   }
 
   static void stop() {
@@ -121,48 +176,13 @@ class DriverLocationReporter {
       _observerRegistered = false;
     }
   }
-
-  static Future<void> _sendLocation() async {
-    if (!_enabled || _sending) return;
-    _sending = true;
-    try {
-      if (!await Geolocator.isLocationServiceEnabled()) return;
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        return;
-      }
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 15),
-        ),
-      );
-      if (!_enabled) return;
-      await Api.instance.patch('/drivers/location', {
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-      });
-    } catch (_) {
-      // Location failures must not interrupt the driver's workflow.
-    } finally {
-      _sending = false;
-    }
-  }
 }
 
 class _DriverLocationLifecycleObserver extends WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      unawaited(DriverLocationReporter.refresh());
-    } else if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      DriverLocationReporter.pause();
+      DriverLocationReporter.start();
     }
   }
 }
