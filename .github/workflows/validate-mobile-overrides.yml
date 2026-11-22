@@ -52,6 +52,7 @@ jobs:
           cp mobile-overrides/driver_screens.dart "$M/lib/screens/driver_screens.dart"
           cp mobile-overrides/account_screens.dart "$M/lib/screens/account_screens.dart"
           cp mobile-overrides/account_pages.dart "$M/lib/screens/account_pages.dart"
+          cp mobile-overrides/settings_page.dart "$M/lib/screens/settings_page.dart"
           cp mobile-overrides/notifications.dart "$M/lib/notifications.dart"
           cp mobile-overrides/app_update.dart "$M/lib/app_update.dart"
           mkdir -p "$M/android/app/src/main/kotlin/com/darb/darb" "$M/android/app/src/main/res/xml"
