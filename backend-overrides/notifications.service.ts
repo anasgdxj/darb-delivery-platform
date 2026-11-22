@@ -35,7 +35,7 @@ export class NotificationsService {
         throw new Error('Service-account JSON is missing required fields.');
       }
 
-      credentials.private_key = credentials.private_key.replace(/\\\\n/g, '\\n');
+      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
       const app: App =
         getApps().find((x) => x.name === 'darb-notifications') ??
         initializeApp(
