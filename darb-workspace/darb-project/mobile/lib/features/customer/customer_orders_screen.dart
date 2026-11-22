@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import 'driver_tracking_screen.dart';
 
 class CustomerOrdersScreen extends StatefulWidget {
   const CustomerOrdersScreen({super.key});
@@ -412,34 +412,11 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   }
 
   Future<void> _openDriverLocation(String orderId) async {
-    try {
-      final loc = await Api.instance.get('/orders/$orderId/driver-location');
-      if (loc is! Map ||
-          loc['available'] != true ||
-          loc['latitude'] == null ||
-          loc['longitude'] == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(dt('لم يشارك السائق موقعه بعد'))),
-          );
-        }
-        return;
-      }
-      final lat = loc['latitude'];
-      final lng = loc['longitude'];
-      final uri = Uri.parse('https://maps.google.com/?q=$lat,$lng');
-      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(dt('تعذر فتح الخرائط'))),
-          );
-        }
-      }
-    } on ApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-      }
-    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => DriverTrackingScreen(orderId: orderId),
+      ),
+    );
   }
 
   @override
