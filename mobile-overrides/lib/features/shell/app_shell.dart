@@ -17,6 +17,7 @@ import '../admin/admin_operations_screens.dart';
 import '../auth/login_screen.dart';
 import '../customer/customer_home_screen.dart';
 import '../customer/customer_orders_screen.dart';
+import '../customer/driver_tracking_screen.dart';
 import '../driver/driver_dashboard_screen.dart';
 import '../driver/driver_orders_screen.dart';
 import '../notifications/notifications_screen.dart';
@@ -62,11 +63,11 @@ class _AppShellState extends State<AppShell> {
         ),
       );
     });
-    _openedNotificationSubscription = DarbNotifications.listenOpened(() {
-      if (mounted) unawaited(_openNotifications());
+    _openedNotificationSubscription = DarbNotifications.listenOpened((data) {
+      if (mounted) unawaited(_handleNotificationOpen(data));
     });
-    DarbNotifications.wasOpenedFromTerminated().then((opened) {
-      if (opened && mounted) unawaited(_openNotifications());
+    DarbNotifications.initialMessageData().then((data) {
+      if (data != null && mounted) unawaited(_handleNotificationOpen(data));
     });
   }
 
@@ -152,6 +153,29 @@ class _AppShellState extends State<AppShell> {
       MaterialPageRoute(builder: (_) => const NotificationsScreen()),
     );
     await _refreshUnreadCount();
+  }
+
+  Future<void> _handleNotificationOpen(Map<String, dynamic> data) async {
+    final orderId = (data['orderId'] ?? data['order_id'] ?? '').toString().trim();
+    final role = _user?['role']?.toString().toUpperCase() ?? 'CUSTOMER';
+
+    if (orderId.isNotEmpty && role == 'CUSTOMER') {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DriverTrackingScreen(orderId: orderId),
+        ),
+      );
+      await _refreshUnreadCount();
+      return;
+    }
+
+    if (role == 'DRIVER' && mounted) {
+      setState(() => _tabIndex = 1);
+      return;
+    }
+
+    await _openNotifications();
   }
 
   @override
