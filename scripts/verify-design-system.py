@@ -159,6 +159,8 @@ def main() -> int:
         failures.append("Admin web light/dark semantic token blocks are missing")
     else:
         for token, color in {
+            "--canvas": "#F5F6F2",
+            "--surface": "#FFFFFF",
             "--muted": "#626F69",
             "--danger": "#B94747",
             "--success": "#287A50",
@@ -168,6 +170,8 @@ def main() -> int:
             if not re.search(rf"{re.escape(token)}\s*:\s*{re.escape(color)}\s*;", admin_light.group(1)):
                 failures.append(f"Admin light token {token} does not match {color}")
         for token, color in {
+            "--canvas": "#0B1512",
+            "--surface": "#13221D",
             "--muted": "#A4B2AA",
             "--danger": "#E56868",
             "--success": "#4FB982",
