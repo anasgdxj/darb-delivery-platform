@@ -133,7 +133,7 @@ def main() -> int:
         "--primary-hover": "#269B73",
         "--on-primary": "#0A1916",
     }
-    dark_block = re.search(r"html\.dark\s*\\{([^}]+)\\}", site_text, re.DOTALL)
+    dark_block = re.search(r"html\.dark\s*\{([^}]+)\}", site_text, re.DOTALL)
     if not dark_block:
         failures.append("Public website dark theme token block is missing")
     else:
