@@ -43,10 +43,15 @@ class DarbApp extends StatelessWidget {
       themeMode: themeMode,
       themeAnimationDuration: DarbMotion.expressive,
       themeAnimationCurve: DarbMotion.enter,
-      builder: (context, child) {
-        DarbTheme.updateBrightness(Theme.of(context).brightness);
-        return child ?? const SizedBox.shrink();
-      },
+      builder: (context, child) => ValueListenableBuilder<bool>(
+        valueListenable: DarbAppearance.glass,
+        builder: (context, glassMode, _) {
+          DarbTheme.updateBrightness(Theme.of(context).brightness);
+          return DarbGlassBackdrop(
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
+      ),
       home: DarbLaunchGate(locale: locale),
     ),
     ),
