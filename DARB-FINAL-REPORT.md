@@ -18,7 +18,7 @@
 
 ### أبرز المنجزات المعمارية والوظيفية:
 1. **تطبيق نظام التصميم المعتمد `DESIGN_SYSTEM.md 2.0 (DARB PULSE 2026)`**:
-   - تطبيق لوحة الألوان الرسمية في الوضعين النهاري والليلي (`#102B26` Forest، `#1C443B` ForestSoft، `#B9E4D2` Mint، `#C8F169` Lime على الأسطح الداكنة، مع فصل دلالي كامل للوضع الليلي `#0B1512` / `#13221D` / `#1A2D26`).
+   - تطبيق لوحة الألوان الرسمية في الوضعين النهاري والليلي (`#102B26` Forest، `#1C443B` ForestSoft، `#B9E4D2` Mint على الأسطح الداكنة، مع فصل دلالي كامل للوضع الليلي `#0B1512` / `#13221D` / `#1A2D26`).
    - دعم النمط الزجاجي الحقيقي (`Glassmorphism` عبر `BackdropFilter` و`DarbAmbientBackground`) والنمط القياسي (`Standard`)، مع اختيار المظهر (`System / Light / Dark`) وحفظه عبر `FlutterSecureStorage`.
    - احترام إعدادات تقليل الحركة (`Reduce Motion`) ومقياس الحركات القياسي (`DarbMotion`).
 2. **إعادة الهيكلة البرمجية للموبايل (`29` ملف Dart في `lib/` + `widget_test.dart`)**:
@@ -42,13 +42,12 @@
 | الأخضر الغابي (`forest`) | `#102B26` | `#102B26` | الهوية الأساسية وبطاقة البطل والشارات الداكنة |
 | الغابي الناعم (`forestSoft`) | `#1C443B` | `#1C443B` | الأسطح الثانوية للعنصر الرئيسي |
 | النعناعي (`mint`) | `#B9E4D2` | `#B9E4D2` | اللون التفاعلي الرئيسي في الوضع الليلي والحالات النشطة |
-| الليموني (`lime`) | `#C8F169` | `#C8F169` | تمييز عالي التباين فوق الأسطح الداكنة (`forest`) |
 | الخلفية (`canvas`) | `#F5F6F2` | `#0B1512` | الخلفية العامة للشاشات |
 | السطح (`surface` / `elevated`) | `#FFFFFF` | `#13221D` / `#1A2D26` | البطاقات والأوراق المنبثقة |
 | النص الرئيسي (`ink`) | `#17231F` | `#F1F5F1` | العناوين والنصوص الأساسية |
-| النص الثانوي (`muted`) | `#77837D` | `#A4B2AA` | الأوصاف والتلميحات |
+| النص الثانوي (`muted`) | `#626F69` | `#A4B2AA` | الأوصاف والتلميحات |
 | الخطوط والفواصل (`line` / `borderStrong`) | `#E4E9E3` / `#CBD5CE` | `#2A3B33` / `#40564A` | الحدود والفواصل |
-| الحالات (`danger` / `success` / `warning` / `info`) | `#B94747` / `#287A50` / `#B7791F` / `#356D9A` | `#E56868` / `#4FB982` / `#E2A84B` / `#63A6DC` | الحالات والتنبيهات |
+| الحالات (`danger` / `success` / `warning` / `info`) | `#B94747` / `#287A50` / `#8A5A12` / `#356D9A` | `#E56868` / `#4FB982` / `#E2A84B` / `#63A6DC` | الحالات والتنبيهات |
 
 ### ب. الخطوط والمقاييس والحركة
 - **الخطوط:** دعم العربية أولاً (`Cairo` في الويب مع `Plus Jakarta Sans` و`IBM Plex Mono` للأرقام الجدولية `tabular-nums`) وتناسق الأرقام الجدولية في Flutter (`FontFeature.tabularFigures()`).
@@ -63,7 +62,7 @@
 ### أ. تطبيق الموبايل (`darb-workspace/darb-project/mobile/` ومزامَن في `mobile-overrides/`)
 - **نقطة الدخول:** `lib/main.dart`
 - **النواة (`lib/core/`):**
-  - `theme/darb_design_system.dart`
+  - `core/theme/darb_design_system.dart`
   - `widgets/darb_glass.dart`, `widgets/darb_components.dart`
   - `l10n/app_localizations.dart`
   - `network/api_client.dart`, `storage/local_cache.dart`
