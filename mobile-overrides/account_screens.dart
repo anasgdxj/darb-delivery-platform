@@ -447,7 +447,7 @@ class _AccountPageState extends State<AccountPage> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: DarbColors.lime,
+                        color: DarbColors.mint,
                         borderRadius: BorderRadius.circular(DarbRadius.pill),
                       ),
                       child: Text(
@@ -488,7 +488,7 @@ class _AccountPageState extends State<AccountPage> {
                   children: [
                     Icon(
                       Icons.verified_user_outlined,
-                      color: DarbColors.lime,
+                      color: DarbColors.mint,
                       size: 16,
                     ),
                     SizedBox(width: 7),
