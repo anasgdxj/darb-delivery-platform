@@ -6,11 +6,13 @@ on:
       - ".github/workflows/build-android-release.yml"
       - "DARB-source.zip"
       - "mobile-overrides/**"
+      - "darb-workspace/darb-project/mobile/**"
   pull_request:
     paths:
       - ".github/workflows/build-android-release.yml"
       - "DARB-source.zip"
       - "mobile-overrides/**"
+      - "darb-workspace/darb-project/mobile/**"
   workflow_dispatch:
     inputs:
       publish_release:
