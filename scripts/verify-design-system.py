@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "DESIGN_SYSTEM.md"
 TOKENS = ROOT / "mobile-overrides" / "lib" / "core" / "theme" / "darb_design_system.dart"
 ADMIN = ROOT / "admin-web" / "index.html"
+SITE = ROOT / "index.html"
 
 TOKEN_COLORS = {
     "forest": "#102B26",
@@ -56,6 +57,14 @@ CONTRAST_PAIRS = {
     "dark info status": ("#63A6DC", "#13221D", 4.5),
     "light button label": ("#FFFFFF", "#102B26", 4.5),
     "dark button label": ("#102B26", "#B9E4D2", 4.5),
+    "public site light muted": ("#626F69", "#F6F6F3", 4.5),
+    "public site dark muted": ("#9DB2AC", "#112621", 4.5),
+    "public site light danger": ("#B94747", "#F6F6F3", 4.5),
+    "public site dark primary link": ("#28A47C", "#112621", 4.5),
+    "public site dark primary button label": ("#0A1916", "#28A47C", 4.5),
+    "public site dark primary hover label": ("#0A1916", "#269B73", 4.5),
+    "public site light primary button label": ("#FFFFFF", "#167A5A", 4.5),
+    "public site mint button label": ("#12302A", "#B9E4D2", 4.5),
 }
 
 
@@ -79,7 +88,7 @@ def contrast(foreground: str, background: str) -> float:
 def main() -> int:
     missing = [
         str(path.relative_to(ROOT))
-        for path in (DOC, TOKENS, ADMIN)
+        for path in (DOC, TOKENS, ADMIN, SITE)
         if not path.is_file()
     ]
     if missing:
@@ -89,6 +98,7 @@ def main() -> int:
     doc_text = DOC.read_text(encoding="utf-8")
     token_text = TOKENS.read_text(encoding="utf-8")
     admin_text = ADMIN.read_text(encoding="utf-8")
+    site_text = SITE.read_text(encoding="utf-8")
     failures = []
 
     for token, color in TOKEN_COLORS.items():
@@ -99,6 +109,41 @@ def main() -> int:
         if color not in doc_text:
             failures.append(f"{color} for {token} is missing from DESIGN_SYSTEM.md")
 
+    site_colors = {
+        "--forest": "#12302A",
+        "--primary": "#167A5A",
+        "--primary-hover": "#116248",
+        "--on-primary": "#FFFFFF",
+        "--mint": "#B9E4D2",
+        "--canvas": "#F6F6F3",
+        "--surface": "#FFFFFF",
+        "--ink": "#1A2E29",
+        "--muted": "#626F69",
+        "--danger": "#B94747",
+    }
+    for token, color in site_colors.items():
+        if not re.search(rf"{re.escape(token)}\\s*:\\s*{re.escape(color)}\\s*;", site_text):
+            failures.append(f"Public website token {token} does not match {color}")
+
+    dark_site_colors = {
+        "--canvas": "#0A1916",
+        "--surface": "#112621",
+        "--muted": "#9DB2AC",
+        "--primary": "#28A47C",
+        "--primary-hover": "#269B73",
+        "--on-primary": "#0A1916",
+    }
+    dark_block = re.search(r"html\\.dark\\s*\\{([^}]+)\\}", site_text, re.DOTALL)
+    if not dark_block:
+        failures.append("Public website dark theme token block is missing")
+    else:
+        for token, color in dark_site_colors.items():
+            if not re.search(rf"{re.escape(token)}\\s*:\\s*{re.escape(color)}\\s*;", dark_block.group(1)):
+                failures.append(f"Public website dark token {token} does not match {color}")
+
+    if "color: var(--on-primary)" not in site_text:
+        failures.append("Public website primary buttons do not use the adaptive on-primary token")
+
     for name, (foreground, background, minimum) in CONTRAST_PAIRS.items():
         ratio = contrast(foreground, background)
         if ratio < minimum:
@@ -108,8 +153,14 @@ def main() -> int:
         if alias not in token_text:
             failures.append(f"Missing adaptive dark semantic alias: {alias}")
 
-    if "lime" in token_text.lower() or "#C8F169" in doc_text or "--lime" in admin_text:
-        failures.append("Obsolete lime accent remains in the mobile, design, or admin palette")
+    if (
+        "lime" in token_text.lower()
+        or "#C8F169" in doc_text
+        or "--lime" in admin_text
+        or "--lime" in site_text
+        or "var(--lime)" in site_text
+    ):
+        failures.append("Obsolete lime accent remains in the mobile, design, or website palette")
 
     if "mobile-overrides/lib/core/theme/darb_design_system.dart" not in doc_text:
         failures.append("DESIGN_SYSTEM.md does not point to the modular Flutter token source")
