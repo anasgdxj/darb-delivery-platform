@@ -15,6 +15,7 @@ Color get paper => DarbColors.canvas;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DarbTheme.restoreMode();
+  await DarbAppearance.restore();
   runApp(const DarbApp());
 }
 
