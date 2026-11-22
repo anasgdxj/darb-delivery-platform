@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+
+import '../l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,15 +15,31 @@ class DarbMapPicker extends StatelessWidget {
     required this.onPointSelected,
     this.selectedLatitude,
     this.selectedLongitude,
+    this.cityName,
     this.height = 232,
   });
 
   final double? selectedLatitude;
   final double? selectedLongitude;
+  final String? cityName;
   final void Function(double latitude, double longitude) onPointSelected;
   final double height;
 
   static const LatLng _syriaCenter = LatLng(35.0, 38.5);
+
+  static LatLng _centerForCity(String? cityName) {
+    final name = (cityName ?? '').trim().toLowerCase();
+    if (name.contains('حلب') || name.contains('aleppo')) return const LatLng(36.2021, 37.1343);
+    if (name.contains('دمشق') || name.contains('damascus')) return const LatLng(33.5138, 36.2765);
+    if (name.contains('حمص') || name.contains('homs')) return const LatLng(34.7324, 36.7137);
+    if (name.contains('حماة') || name.contains('hama')) return const LatLng(35.1318, 36.7515);
+    if (name.contains('اللاذقية') || name.contains('latakia')) return const LatLng(35.5317, 35.7901);
+    if (name.contains('طرطوس') || name.contains('tartus')) return const LatLng(34.8890, 35.8866);
+    if (name.contains('الرقة') || name.contains('raqqa')) return const LatLng(35.9528, 39.0079);
+    if (name.contains('دير الزور') || name.contains('deir')) return const LatLng(35.3359, 40.1408);
+    if (name.contains('درعا') || name.contains('daraa')) return const LatLng(32.6189, 36.1021);
+    return _syriaCenter;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +47,7 @@ class DarbMapPicker extends StatelessWidget {
     final selectedPoint = hasSelection
         ? LatLng(selectedLatitude!, selectedLongitude!)
         : null;
-    final center = selectedPoint ?? _syriaCenter;
+    final center = selectedPoint ?? _centerForCity(cityName);
     final isDark = DarbColors.isDark(context);
 
     return ClipRRect(
@@ -116,8 +134,8 @@ class DarbMapPicker extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         hasSelection
-                            ? 'حرّك العلامة بالضغط على الخريطة'
-                            : 'اضغط على الخريطة لتحديد الموقع',
+                            ? dt('حرّك العلامة بالضغط على الخريطة')
+                            : dt('اضغط على الخريطة لتحديد الموقع'),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
