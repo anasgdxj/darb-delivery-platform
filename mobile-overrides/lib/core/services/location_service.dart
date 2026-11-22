@@ -71,6 +71,18 @@ class DriverLocationReporter {
     }
   }
 
+  static Future<void> refresh() async {
+    _enabled = true;
+    if (!_observerRegistered) {
+      WidgetsBinding.instance.addObserver(_lifecycleObserver);
+      _observerRegistered = true;
+    }
+    final current = _positionSubscription;
+    _positionSubscription = null;
+    if (current != null) await current.cancel();
+    if (_enabled) await _startStream();
+  }
+
   static Future<void> _startStream() async {
     if (!_enabled || _starting) return;
     _starting = true;
