@@ -32,6 +32,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            DARB-source.zip
+            .github/workflows/build-android-release.yml
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -212,7 +216,25 @@ jobs:
           BUILD_NAME="1.0.$BUILD_NUMBER"
           echo "- Android versionCode: $BUILD_NUMBER" >> "$GITHUB_STEP_SUMMARY"
           echo "- Android versionName: $BUILD_NAME" >> "$GITHUB_STEP_SUMMARY"
-          flutter build apk "${args[@]}" --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME"
+          build_succeeded=false
+          for attempt in 1 2 3; do
+            build_log="$RUNNER_TEMP/darb-android-build-$attempt.log"
+            if flutter build apk "${args[@]}" --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME" 2>&1 | tee "$build_log"; then
+              build_succeeded=true
+              break
+            fi
+            if ! grep -Eiq '429|Too Many Requests|Could not GET|502|503|504|Connection reset|timed out' "$build_log"; then
+              exit 1
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::Transient Maven/Gradle download failure; retrying Android build (attempt $((attempt + 1))/3)."
+              sleep $((attempt * 30))
+            fi
+          done
+          if [ "$build_succeeded" != true ]; then
+            echo "::error::Android release build failed after three retries."
+            exit 1
+          fi
           APK="build/app/outputs/flutter-apk/app-release.apk"
           test -s "$APK"
           APK_SHA256="$(sha256sum "$APK" | cut -d' ' -f1)"
