@@ -12,7 +12,6 @@ abstract final class DarbColors {
   static Color get forest => const Color(0xFF102B26);
   static Color get forestSoft => const Color(0xFF1C443B);
   static Color get mint => const Color(0xFFB9E4D2);
-  static Color get lime => const Color(0xFFC8F169);
   static Color get canvas => _dark ? const Color(0xFF0B1512) : const Color(0xFFF5F6F2);
   static Color get surface => _dark ? const Color(0xFF13221D) : const Color(0xFFFFFFFF);
   static Color get surfaceAlt => _dark ? const Color(0xFF1A2D26) : const Color(0xFFEAF2EC);
@@ -296,7 +295,7 @@ abstract final class DarbTheme {
       brightness: Brightness.dark,
       primary: Color(0xFFB9E4D2),
       onPrimary: Color(0xFF102B26),
-      secondary: Color(0xFFC8F169),
+      secondary: Color(0xFFB9E4D2),
       onSecondary: Color(0xFF102B26),
       error: Color(0xFFE47777),
       onError: Color(0xFF2A1010),
@@ -402,7 +401,7 @@ abstract final class DarbTheme {
       brightness: Brightness.light,
       primary: Color(0xFF102B26),
       onPrimary: Colors.white,
-      secondary: Color(0xFFC8F169),
+      secondary: Color(0xFFB9E4D2),
       onSecondary: Color(0xFF102B26),
       error: Color(0xFFB94747),
       onError: Colors.white,
