@@ -29,6 +29,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
   bool _loading = true;
   bool _requesting = false;
   bool _stale = false;
+  bool _mapTilesUnavailable = false;
   String? _message;
   String? _error;
   int _mapRevision = 0;
@@ -183,6 +184,18 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                         ],
                       ),
                     ),
+                    if (point != null)
+                      IconButton(
+                        onPressed: () => launchUrl(
+                          Uri.parse(
+                            'https://www.openstreetmap.org/?mlat=\${point.latitude}'
+                            '&mlon=\${point.longitude}#map=16/\${point.latitude}/\${point.longitude}',
+                          ),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        icon: const Icon(Icons.open_in_new_rounded),
+                        tooltip: dt('فتح موقع المندوب خارج التطبيق'),
+                      ),
                     IconButton(
                       onPressed: _requesting
                           ? null
@@ -267,6 +280,13 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                                   'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                               userAgentPackageName: 'com.darb.darb',
                               maxZoom: 19,
+                              keepBuffer: 4,
+                              panBuffer: 2,
+                              errorTileCallback: (tile, error, stackTrace) {
+                                if (mounted && !_mapTilesUnavailable) {
+                                  setState(() => _mapTilesUnavailable = true);
+                                }
+                              },
                             ),
                             if (point != null)
                               MarkerLayer(
@@ -336,6 +356,36 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                             ),
                           ],
                         ),
+                        if (_mapTilesUnavailable)
+                          PositionedDirectional(
+                            top: 12,
+                            start: 12,
+                            end: 12,
+                            child: DarbGlassSurface(
+                              elevated: false,
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.signal_wifi_connected_no_internet_4_rounded,
+                                    size: 18,
+                                    color: DarbColors.warningOf(context),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      dt('تعذر تحميل بلاطات الخريطة. احتفظنا بآخر موقع معروف ويمكنك فتحه خارج التطبيق عند توفر الإنترنت.'),
+                                      style: TextStyle(
+                                        color: DarbColors.inkOf(context),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         PositionedDirectional(
                           end: 12,
                           bottom: 12,
