@@ -430,7 +430,7 @@ class DarbTheme {
       onPrimary: onPrimary,
       primaryContainer: isDark ? DarbColors.forestSoft : DarbColors.mintTint,
       onPrimaryContainer: isDark ? DarbColors.mint : DarbColors.forest,
-      secondary: isDark ? DarbColors.lime : DarbColors.forestSoft,
+      secondary: isDark ? DarbColors.mint : DarbColors.forestSoft,
       onSecondary: isDark ? DarbColors.forest : Colors.white,
       secondaryContainer: softSurf,
       onSecondaryContainer: ink,
