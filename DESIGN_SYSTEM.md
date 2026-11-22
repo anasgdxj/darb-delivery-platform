@@ -29,7 +29,7 @@ DARB should feel like a live logistics network: confident, clear, fast, and prem
 - **Navigation:** role-specific destinations remain stable and predictable. Do not add tabs merely for decoration.
 - **Map use:** show maps only where location materially helps a task. A map must not displace the primary action or make weak-network startup heavier.
 - **Motion:** dynamic and rich, but purposeful. Motion explains state, hierarchy, and transitions; it never delays critical actions.
-- **Surface language:** layered surfaces, deliberate negative space, restrained borders, and a small number of high-contrast accents. Avoid excessive gradients, glass effects, and decorative cards.
+- **Surface language:** layered surfaces, deliberate negative space, restrained borders, and a small number of high-contrast accents. The app exposes a persisted Glass / Standard appearance preference; Glass uses translucent semantic surfaces while Standard uses opaque surfaces. Keep blur limited to purposeful focal surfaces, not every row or container.
 - **Content integrity:** no fake live data, placeholder ratings, fabricated availability, or invented delivery prices.
 
 ## Color system
