@@ -40,7 +40,11 @@ export class NotificationsService {
         getApps().find((x) => x.name === 'darb-notifications') ??
         initializeApp(
           {
-            credential: cert(credentials),
+            credential: cert({
+              projectId: credentials.project_id,
+              clientEmail: credentials.client_email,
+              privateKey: credentials.private_key,
+            }),
             projectId: credentials.project_id,
           },
           'darb-notifications',
