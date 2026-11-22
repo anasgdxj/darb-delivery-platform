@@ -35,6 +35,7 @@ jobs:
           unzip -q DARB-source.zip -d extracted
           M="$GITHUB_WORKSPACE/extracted/darb-project/mobile"
           cd "$M"
+          rm -rf android
           flutter create --platforms=android --org com.darb --project-name darb --no-pub .
           cd "$GITHUB_WORKSPACE"
           rm -rf "$M/lib/screens" "$M/lib/core" "$M/lib/features" "$M/lib/design_system.dart" "$M/lib/localizations.dart" "$M/lib/notifications.dart" "$M/lib/app_update.dart"

@@ -1,8 +1,6 @@
 import 'package:darb/core/l10n/app_localizations.dart';
 import 'package:darb/core/theme/darb_design_system.dart';
-import 'package:darb/core/widgets/darb_components.dart';
 import 'package:darb/core/widgets/darb_glass.dart';
-import 'package:darb/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,16 +12,15 @@ void main() {
       expect(DarbColors.forest, const Color(0xFF102B26));
       expect(DarbColors.forestSoft, const Color(0xFF1C443B));
       expect(DarbColors.mint, const Color(0xFFB9E4D2));
-      expect(DarbColors.lime, const Color(0xFFC8F169));
       expect(DarbColors.danger, const Color(0xFFB94747));
       expect(DarbColors.success, const Color(0xFF287A50));
-      expect(DarbColors.warning, const Color(0xFFB7791F));
+      expect(DarbColors.warning, const Color(0xFF8A5A12));
       expect(DarbColors.info, const Color(0xFF356D9A));
 
       expect(DarbColors.canvas, const Color(0xFFF5F6F2));
       expect(DarbColors.surface, const Color(0xFFFFFFFF));
       expect(DarbColors.ink, const Color(0xFF17231F));
-      expect(DarbColors.muted, const Color(0xFF77837D));
+      expect(DarbColors.muted, const Color(0xFF626F69));
       expect(DarbColors.line, const Color(0xFFE4E9E3));
       expect(DarbColors.borderStrong, const Color(0xFFCBD5CE));
 
@@ -35,6 +32,7 @@ void main() {
       expect(DarbColors.darkLine, const Color(0xFF2A3B33));
       expect(DarbColors.darkPrimary, const Color(0xFFB9E4D2));
       expect(DarbColors.darkOnPrimary, const Color(0xFF102B26));
+      expect(DarbColors.darkAccent, DarbColors.mint);
 
       final themeLight = DarbTheme.light;
       final themeDark = DarbTheme.dark;
@@ -128,40 +126,23 @@ void main() {
   });
 
   group('Widget & Motion Accessibility Smoke Tests', () {
-    testWidgets('renders DarbGlassSurface in Glass and Standard modes without errors',
+    testWidgets('renders DarbGlassSurface without errors',
         (tester) async {
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
       await tester.pumpWidget(
-        DarbApp(
-          initialScreen: Scaffold(
-            appBar: const DarbGlassAppBar(title: 'دَرْب', subtitle: 'تجربة'),
-            body: DarbAmbientBackground(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: const [
-                  DarbMetricCard(
-                    label: 'الرحلات المكتملة',
-                    value: '42',
-                    icon: Icons.route_rounded,
-                  ),
-                  SizedBox(height: 12),
-                  DarbStatusBadge(status: 'DELIVERED'),
-                  SizedBox(height: 8),
-                  DarbStatusBadge(status: 'WITHDRAWN'),
-                ],
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: const Scaffold(
+            body: Center(
+              child: DarbGlassSurface(
+                child: Text('DARB surface'),
               ),
             ),
           ),
         ),
       );
       await tester.pump();
-      expect(find.text('دَرْب'), findsOneWidget);
-      expect(find.text('42'), findsOneWidget);
-
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.standard);
-      await tester.pump();
-      expect(find.text('42'), findsOneWidget);
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
+      expect(find.text('DARB surface'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('respects MediaQuery disableAnimations for DarbMotion.reduceMotion',

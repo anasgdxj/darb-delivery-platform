@@ -12,16 +12,15 @@ void main() {
       expect(DarbColors.forest, const Color(0xFF102B26));
       expect(DarbColors.forestSoft, const Color(0xFF1C443B));
       expect(DarbColors.mint, const Color(0xFFB9E4D2));
-      expect(DarbColors.lime, const Color(0xFFC8F169));
       expect(DarbColors.danger, const Color(0xFFB94747));
       expect(DarbColors.success, const Color(0xFF287A50));
-      expect(DarbColors.warning, const Color(0xFFB7791F));
+      expect(DarbColors.warning, const Color(0xFF8A5A12));
       expect(DarbColors.info, const Color(0xFF356D9A));
 
       expect(DarbColors.canvas, const Color(0xFFF5F6F2));
       expect(DarbColors.surface, const Color(0xFFFFFFFF));
       expect(DarbColors.ink, const Color(0xFF17231F));
-      expect(DarbColors.muted, const Color(0xFF77837D));
+      expect(DarbColors.muted, const Color(0xFF626F69));
       expect(DarbColors.line, const Color(0xFFE4E9E3));
       expect(DarbColors.borderStrong, const Color(0xFFCBD5CE));
 
@@ -33,6 +32,7 @@ void main() {
       expect(DarbColors.darkLine, const Color(0xFF2A3B33));
       expect(DarbColors.darkPrimary, const Color(0xFFB9E4D2));
       expect(DarbColors.darkOnPrimary, const Color(0xFF102B26));
+      expect(DarbColors.darkAccent, DarbColors.mint);
 
       final themeLight = DarbTheme.light;
       final themeDark = DarbTheme.dark;
