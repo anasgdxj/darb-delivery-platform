@@ -161,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen>
     final l = AppLocalizations.of(context);
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     return Scaffold(
-      backgroundColor: DarbColors.canvas,
+      backgroundColor: DarbAppearance.glass.value ? Colors.transparent : DarbColors.canvas,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
@@ -395,14 +395,9 @@ class _LoginScreenState extends State<LoginScreen>
     ),
   );
 
-  Widget _formPanel(AppLocalizations l, bool isRtl) => Container(
+  Widget _formPanel(AppLocalizations l, bool isRtl) => DarbGlassSurface(
     padding: const EdgeInsets.all(20),
-    decoration: BoxDecoration(
-      color: DarbColors.surface,
-      borderRadius: BorderRadius.circular(DarbRadius.xl),
-      border: Border.all(color: DarbColors.line),
-      boxShadow: DarbElevation.card,
-    ),
+    radius: DarbRadius.xl,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
