@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "index.html"
+      - "assets/**"
       - ".github/workflows/validate-public-web.yml"
   push:
     branches: [main]
@@ -33,6 +34,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           html = Path("index.html").read_text()
           required = [
               'lang="ar" dir="rtl"',
@@ -42,10 +44,27 @@ jobs:
               "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk",
               "تنزيل تطبيق أندرويد",
               "أحدث إصدار رسمي موقّع",
+              "assets/cities/damascus.jpg",
+              "assets/cities/aleppo.jpg",
+              "assets/cities/homs.jpg",
+              "assets/cities/hama.jpg",
+              "assets/cities/latakia.jpg",
           ]
           missing = [item for item in required if item not in html]
           if missing:
               raise SystemExit("Missing public website requirements: " + ", ".join(missing))
+          city_assets = [
+              "assets/cities/damascus.jpg",
+              "assets/cities/aleppo.jpg",
+              "assets/cities/homs.jpg",
+              "assets/cities/hama.jpg",
+              "assets/cities/latakia.jpg",
+          ]
+          missing_files = [path for path in city_assets if not Path(path).is_file()]
+          if missing_files:
+              raise SystemExit("Missing city image assets: " + ", ".join(missing_files))
+          if "/assets/cities/" in html:
+              raise SystemExit("GitHub Pages project assets must use relative URLs")
           if "app-debug.apk" in html:
               raise SystemExit("Debug APK must never be exposed as an official download")
           if "admin/" in html or "بوابة الإدارة" in html or "دخول الإدارة" in html:
