@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
@@ -34,12 +36,45 @@ class _AppShellState extends State<AppShell> {
   String? _error;
   int _tabIndex = 0;
   int _unreadNotifications = 0;
+  StreamSubscription? _foregroundNotificationSubscription;
+  StreamSubscription? _openedNotificationSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
     DarbUpdater.instance.checkForUpdate();
+    _foregroundNotificationSubscription =
+        DarbNotifications.listenForeground((title, body, data) {
+      if (!mounted) return;
+      unawaited(_refreshUnreadCount());
+      final message = [title, body]
+          .where((part) => part != null && part.trim().isNotEmpty)
+          .join('\n');
+      if (message.isEmpty) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: SnackBarAction(
+            label: dt('عرض'),
+            onPressed: () => unawaited(_openNotifications()),
+          ),
+        ),
+      );
+    });
+    _openedNotificationSubscription = DarbNotifications.listenOpened(() {
+      if (mounted) unawaited(_openNotifications());
+    });
+    DarbNotifications.wasOpenedFromTerminated().then((opened) {
+      if (opened && mounted) unawaited(_openNotifications());
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_foregroundNotificationSubscription?.cancel() ?? Future<void>.value());
+    unawaited(_openedNotificationSubscription?.cancel() ?? Future<void>.value());
+    super.dispose();
   }
 
   Future<void> _refreshUnreadCount() async {
