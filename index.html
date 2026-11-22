@@ -3,70 +3,858 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102b26">
-<meta name="description" content="دَرْب — منصة توصيل تربطك بالمتاجر والسائقين في سوريا. اطلب، قارن عروض التوصيل، وتابع طلبك بسهولة.">
-<title>دَرْب | طريقك الأقرب للتوصيل</title>
+<meta name="theme-color" content="#12302A">
+<meta name="description" content="دَرْب — منصة توصيل متعددة الأدوار في سوريا: طلبات المتاجر، التوصيل المستقل، السائقين، ولوحة تحكم الإدارة.">
+<meta property="og:title" content="دَرْب | طريقك الأقرب للتوصيل">
+<meta property="og:description" content="منصة توصيل متعددة الأدوار في سوريا: طلبات المتاجر، التوصيل المستقل بعروض الأسعار، وتتبع مباشر.">
+<title>دَرْب | Darb Delivery Platform</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800;900&display=swap');
-:root{--ink:#102b26;--green:#167a5a;--mint:#c8efdc;--paper:#f6f7f2;--white:#fff;--muted:#71817a;--line:#e4eae3;--lime:#d7f36a;--shadow:0 24px 70px #0d30251a}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Alexandria,Tahoma,Arial,sans-serif}a{color:inherit;text-decoration:none}button{font:inherit}.wrap{width:min(1160px,calc(100% - 44px));margin:auto}
-header{position:sticky;top:0;z-index:20;background:#f6f7f2eF;backdrop-filter:blur(18px);border-bottom:1px solid #e5ebe4}
-.nav{height:82px;display:flex;align-items:center;justify-content:space-between;gap:25px}.brand{display:flex;align-items:center;gap:11px;font-weight:900;font-size:22px;letter-spacing:-1px}.logo{width:43px;height:43px;border-radius:15px;background:var(--ink);display:grid;place-items:center;color:var(--lime);font-size:25px;box-shadow:0 8px 20px #102b2630}.links{display:flex;align-items:center;gap:30px;color:#53645c;font-size:13px;font-weight:600}.links a:hover{color:var(--green)}.nav-actions{display:flex;align-items:center;gap:10px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:14px;padding:14px 21px;font-size:13px;font-weight:800;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s}.btn:hover{transform:translateY(-2px)}.btn-primary{background:var(--green);color:white;box-shadow:0 10px 24px #167a5a30}.btn-primary:hover{background:#11664b;box-shadow:0 14px 28px #167a5a40}.btn-dark{background:var(--ink);color:white}.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
-.hero{position:relative;overflow:hidden;padding:76px 0 85px;background:radial-gradient(ellipse at 12% 10%,#d9efdd 0,transparent 36%),radial-gradient(ellipse at 90% 70%,#e4edcf 0,transparent 32%),var(--paper)}.hero:before{content:"";position:absolute;width:480px;height:480px;border:1px solid #c8d8cc;border-radius:50%;left:-230px;top:-210px;box-shadow:0 0 0 45px #dce9df55,0 0 0 90px #dce9df30}.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:45px;position:relative}.eyebrow{display:inline-flex;align-items:center;gap:9px;background:#e5f1e7;border:1px solid #d4e5d7;color:#28634a;padding:9px 14px;border-radius:40px;font-size:11px;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:#3d9b68;box-shadow:0 0 0 4px #3d9b6820}.hero h1{font-size:clamp(38px,5vw,65px);line-height:1.35;letter-spacing:-2.5px;margin:24px 0 18px;font-weight:900}.hero h1 span{color:var(--green);position:relative;white-space:nowrap}.hero p{font-size:15px;line-height:2.1;color:#64736c;max-width:540px;margin:0 0 28px}.hero-cta{display:flex;gap:12px;flex-wrap:wrap}.micro{display:flex;align-items:center;gap:10px;color:#748078;font-size:11px;margin-top:22px}.micro svg{color:var(--green)}
-.visual{min-height:460px;position:relative;display:grid;place-items:center}.halo{position:absolute;width:390px;height:390px;border-radius:50%;background:linear-gradient(145deg,#d4eddb,#edf1d7);border:1px solid #d1e3d4}.route{position:absolute;width:310px;height:310px;border:1px dashed #83aa91;border-radius:50%;transform:rotate(-22deg)}.phone{position:relative;width:240px;height:430px;border:8px solid #17372f;border-radius:38px;background:#fbfcf8;box-shadow:0 35px 80px #143c2d38;transform:rotate(-5deg);padding:18px 14px;z-index:2}.notch{height:18px;width:75px;background:#17372f;border-radius:0 0 14px 14px;margin:-18px auto 20px}.phone-top{display:flex;justify-content:space-between;font-size:10px;font-weight:800}.phone-greet{font-size:17px;font-weight:900;margin-top:24px}.phone-sub{font-size:9px;color:#829087;margin-top:5px}.search{margin-top:18px;background:#eef3ed;border-radius:12px;padding:11px;color:#8a9890;font-size:9px}.mini-card{margin-top:14px;background:white;border:1px solid #e8eee7;border-radius:15px;padding:12px;box-shadow:0 8px 18px #102b2608}.mini-label{font-size:9px;color:#84928a}.mini-title{font-size:12px;font-weight:800;margin-top:7px}.mini-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:9px}.mini-pill{background:#e2f3e7;color:#24734d;padding:5px 8px;border-radius:20px;font-weight:800}.map-art{height:112px;margin-top:12px;border-radius:12px;background:linear-gradient(30deg,#e6eee5,#f1f2e8);position:relative;overflow:hidden}.map-art:before,.map-art:after{content:"";position:absolute;width:180%;height:18px;border:2px solid #c5d9c9;transform:rotate(-27deg);top:45px;left:-35px;border-radius:50%}.map-art:after{transform:rotate(42deg);top:15px;border-color:#d3dfce}.pin{position:absolute;z-index:2;top:35px;right:48px;width:24px;height:24px;border-radius:50% 50% 50% 0;background:var(--green);transform:rotate(-45deg);box-shadow:0 4px 8px #167a5a55}.pin:after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:white;top:8px;left:8px}.float{position:absolute;z-index:3;background:white;border:1px solid #e6ece5;border-radius:16px;padding:13px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:11px;animation:float 5s ease-in-out infinite}.float.one{right:0;top:75px}.float.two{left:-2px;bottom:78px;animation-delay:-2s}.float-icon{width:37px;height:37px;border-radius:12px;background:#e8f5eb;color:var(--green);display:grid;place-items:center}.float b{display:block;font-size:11px}.float small{display:block;color:#829087;font-size:9px;margin-top:4px}@keyframes float{50%{transform:translateY(-10px)}}
-.trust{background:var(--ink);color:white;padding:23px 0}.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.trust-item{display:flex;align-items:center;justify-content:center;gap:12px;color:#dce9df;font-size:12px}.trust-item strong{color:var(--lime);font-size:18px}
-section.content{padding:95px 0}.section-head{text-align:center;max-width:650px;margin:0 auto 42px}.kicker{color:var(--green);font-size:11px;font-weight:900;letter-spacing:1px}.section-head h2{font-size:clamp(27px,3vw,39px);margin:13px 0;letter-spacing:-1.2px}.section-head p{color:var(--muted);font-size:13px;line-height:2}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:white;border:1px solid var(--line);border-radius:23px;padding:26px;min-height:230px;transition:transform .25s,box-shadow .25s}.card:hover{transform:translateY(-6px);box-shadow:var(--shadow)}.card-icon{width:51px;height:51px;border-radius:17px;background:#e8f4e9;color:var(--green);display:grid;place-items:center;margin-bottom:22px}.card h3{font-size:16px;margin:0 0 10px}.card p{font-size:12px;line-height:2;color:var(--muted);margin:0}
-.how{background:#edf2e9}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;counter-reset:step}.step{background:#fff;border:1px solid #e3eae1;border-radius:20px;padding:25px;position:relative}.step-num{font-size:12px;color:var(--green);font-weight:900;letter-spacing:1px}.step h3{font-size:15px;margin:16px 0 9px}.step p{font-size:12px;line-height:2;color:var(--muted);margin:0}
-.download{padding:76px 0!important}.download-panel{position:relative;overflow:hidden;border-radius:30px;background:var(--ink);color:white;padding:54px;display:flex;align-items:center;justify-content:space-between;gap:30px}.download-panel:after{content:"د";position:absolute;left:10%;top:-115px;font-size:360px;font-weight:900;color:#ffffff08;line-height:1}.download-copy{position:relative;z-index:1;max-width:610px}.download-copy .kicker{color:var(--lime)}.download-copy h2{font-size:clamp(26px,3vw,38px);margin:13px 0}.download-copy p{font-size:12px;line-height:2;color:#b9c9c0}.download-action{position:relative;z-index:1;min-width:190px}.download-action .btn{width:100%;background:var(--lime);color:var(--ink)}.download-status{font-size:10px;color:#c0d0c7;text-align:center;margin-top:12px;line-height:1.8}
-footer{background:#0b211c;color:#dce7df;padding:32px 0}.foot{display:flex;justify-content:space-between;align-items:center;gap:20px}.foot small{color:#8ea198;font-size:10px}.foot-links{display:flex;gap:20px;font-size:11px;color:#c3d0c8}
-@media(max-width:850px){.links{display:none}.hero-grid{grid-template-columns:1fr;text-align:center}.hero p{margin-inline:auto}.hero-cta,.micro{justify-content:center}.visual{min-height:440px}.float.one{right:4%}.float.two{left:4%}.cards,.steps{grid-template-columns:1fr 1fr}.download-panel{padding:38px;flex-direction:column;text-align:center}.download-action{width:min(100%,300px)}}
-@media(max-width:560px){.wrap{width:min(100% - 30px,1160px)}.nav{height:70px}.nav-actions .btn-ghost{display:none}.hero{padding:55px 0 48px}.hero h1{letter-spacing:-1.5px}.hero p{font-size:13px}.visual{min-height:390px;transform:scale(.88);margin:-10px -25px}.halo{width:330px;height:330px}.route{width:265px;height:265px}.phone{transform:scale(.88) rotate(-5deg)}.float.one{top:48px}.float.two{bottom:38px}.trust-grid{grid-template-columns:1fr;gap:13px}.trust-item{justify-content:flex-start}.content{padding:70px 0!important}.cards,.steps{grid-template-columns:1fr}.card{min-height:auto}.download-panel{padding:32px 22px}.foot{flex-direction:column;text-align:center}.foot-links{flex-wrap:wrap;justify-content:center}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap');
+
+:root {
+  --forest: #12302A;
+  --primary: #167A5A;
+  --primary-hover: #116248;
+  --mint: #B9E4D2;
+  --mint-tint: #E7F5EE;
+  --canvas: #F6F6F3;
+  --surface: #FFFFFF;
+  --surface-glass: rgba(255, 255, 255, 0.74);
+  --surface-soft: #EDF2EE;
+  --ink: #1A2E29;
+  --muted: #687A75;
+  --border: #DCE4DF;
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --shadow: 0 20px 50px rgba(18, 48, 42, 0.08);
+  --danger: #D64545;
+  --blur: 22px;
+}
+
+html.dark {
+  --canvas: #0A1916;
+  --surface: #112621;
+  --surface-glass: rgba(17, 38, 33, 0.76);
+  --surface-soft: #17332C;
+  --ink: #F1F5F3;
+  --muted: #9DB2AC;
+  --primary: #28A47C;
+  --primary-hover: #218B69;
+  --mint-tint: #14352C;
+  --border: #23473E;
+  --glass-border: rgba(185, 228, 210, 0.16);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  line-height: 1.65;
+  transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+.tabular { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+.wrap { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
+
+/* Ambient Glass Mesh */
+.ambient-field {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+  transition: opacity 200ms ease;
+}
+html[data-style="standard"] .ambient-field { opacity: 0; }
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.orb-a {
+  width: 460px; height: 460px;
+  top: -140px; right: -100px;
+  background: radial-gradient(circle, rgba(185, 228, 210, 0.55), transparent 70%);
+}
+.orb-b {
+  width: 420px; height: 420px;
+  top: 420px; left: -140px;
+  background: radial-gradient(circle, rgba(22, 122, 90, 0.16), transparent 70%);
+}
+html.dark .orb-a { background: radial-gradient(circle, rgba(185, 228, 210, 0.14), transparent 70%); }
+html.dark .orb-b { background: radial-gradient(circle, rgba(40, 164, 124, 0.18), transparent 70%); }
+
+/* Surface Mode: Glass vs Standard */
+.surface {
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 180ms ease, border-color 180ms ease;
+}
+html[data-style="standard"] .surface {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(18, 48, 42, 0.04);
+}
+
+/* Strictly 3-Zone Top Bar Contract */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--surface-glass);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-bottom: 1px solid var(--border);
+}
+html[data-style="standard"] header {
+  background: var(--surface);
+  backdrop-filter: none;
+}
+.topbar {
+  height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.brand-wordmark {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.nav-links a {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-block: 4px;
+  border-bottom: 2px solid transparent;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+.nav-links a:hover, .nav-links a:focus-visible {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  outline: none;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 22px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease, border-color 160ms ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.btn-primary { background: var(--primary); color: #FFFFFF; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-outline { background: transparent; border-color: var(--border); color: var(--ink); }
+.btn-outline:hover { background: var(--surface-soft); }
+
+/* Hero */
+.hero {
+  padding: 44px 0 68px;
+}
+.workspace-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 10px 14px;
+  border-radius: 18px;
+}
+.meta-inline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.segmented {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  gap: 4px;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 12px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  min-height: 34px;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.segmented button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 2px 6px rgba(18, 48, 42, 0.08);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: stretch;
+  gap: 40px;
+}
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero-kicker {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+.hero-copy h1 {
+  margin: 0 0 18px;
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  line-height: 1.24;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.hero-copy h1 span { color: var(--primary); }
+.hero-copy p {
+  margin: 0 0 28px;
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 58ch;
+  line-height: 1.8;
+}
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.hero-proof {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.proof-item strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--ink);
+}
+.proof-item span {
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Interactive City Visual Showcase in Hero */
+.hero-visual {
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  min-height: 440px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.hero-visual img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 220ms ease;
+}
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(18, 48, 42, 0.12) 0%, rgba(18, 48, 42, 0.55) 55%, rgba(12, 34, 29, 0.92) 100%);
+}
+.hero-visual-overlay {
+  position: relative;
+  z-index: 2;
+  padding: 24px;
+  color: #FFFFFF;
+}
+.hero-visual-meta {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--mint);
+  margin-bottom: 6px;
+}
+.hero-visual-title {
+  margin: 0 0 14px;
+  font-size: 22px;
+  font-weight: 900;
+}
+.city-switcher {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.city-switcher button {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(18, 48, 42, 0.58);
+  backdrop-filter: blur(12px);
+  color: #FFFFFF;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  min-height: 36px;
+  white-space: nowrap;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.city-switcher button[aria-selected="true"] {
+  background: var(--primary);
+  border-color: var(--mint);
+}
+
+/* Sections */
+section.band { padding: 76px 0; }
+section.band.alt { background: var(--surface-soft); border-block: 1px solid var(--border); }
+.section-head {
+  max-width: 680px;
+  margin-bottom: 36px;
+}
+.section-kicker {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+.section-head h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.65rem, 2.8vw, 2.35rem);
+  font-weight: 900;
+  text-wrap: balance;
+}
+.section-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* Asymmetric Bento Services Grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.bento-card {
+  border-radius: 24px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bento-card.wide { grid-column: span 2; }
+.bento-card:hover { transform: translateY(-2px); }
+.bento-num {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary);
+}
+.bento-card h3 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 900;
+}
+.bento-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* Syrian Cities Gallery */
+.cities-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+.city-tile {
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  min-height: 240px;
+  background: var(--forest);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+}
+.city-tile img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.city-tile .tile-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(18, 48, 42, 0.88) 100%);
+}
+.city-tile .tile-body {
+  position: relative;
+  z-index: 2;
+  padding: 16px;
+  color: #FFFFFF;
+}
+.city-tile strong { display: block; font-size: 16px; font-weight: 900; }
+.city-tile span { font-size: 12px; color: var(--mint); font-weight: 700; }
+
+/* Steps */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.step-card {
+  border-radius: 22px;
+  padding: 26px;
+}
+.step-index {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+.step-card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 900; }
+.step-card p { margin: 0; font-size: 14px; color: var(--muted); }
+
+/* Download Panel */
+.download-box {
+  border-radius: 28px;
+  background: linear-gradient(135deg, var(--forest) 0%, #15473A 55%, var(--primary) 100%);
+  color: #FFFFFF;
+  padding: 48px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 32px;
+  box-shadow: 0 28px 64px rgba(18, 48, 42, 0.22);
+}
+.download-box h2 { margin: 0 0 10px; font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 900; }
+.download-box p { margin: 0; color: rgba(255, 255, 255, 0.86); font-size: 15px; max-width: 54ch; }
+.download-kicker { color: var(--mint); font-size: 13px; font-weight: 800; margin-bottom: 8px; }
+.download-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.btn-mint {
+  background: var(--mint);
+  color: var(--forest);
+  min-height: 52px;
+  font-size: 15px;
+}
+.btn-mint:hover { background: #CBECE0; }
+.download-meta {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.86);
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Fallback Image Container */
+.img-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--forest), var(--primary));
+  color: var(--mint);
+  font-weight: 900;
+  font-size: 22px;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.foot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.foot-links { display: flex; gap: 20px; font-weight: 700; }
+.foot-links a:hover { color: var(--primary); }
+
+@media (max-width: 960px) {
+  .hero-grid, .download-box { grid-template-columns: 1fr; }
+  .bento-grid { grid-template-columns: 1fr 1fr; }
+  .bento-card.wide { grid-column: span 2; }
+  .cities-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .topbar { height: 64px; gap: 12px; }
+  .bento-grid, .cities-grid, .hero-proof { grid-template-columns: 1fr; }
+  .bento-card.wide { grid-column: span 1; }
+  .download-box { padding: 28px 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
 </style>
 </head>
 <body>
-<header><div class="wrap nav">
-<a class="brand" href="#"><span class="logo">د</span><span>دَرْب</span></a>
-<nav class="links"><a href="#services">الخدمات</a><a href="#how">كيف يعمل؟</a><a href="#download">تنزيل التطبيق</a></nav>
-<div class="nav-actions"><a class="btn btn-primary" href="#download">حمّل دَرْب <span>↙</span></a></div>
-</div></header>
+<div class="ambient-field" aria-hidden="true">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+</div>
+
+<header>
+  <div class="wrap topbar">
+    <a class="brand-wordmark" href="#">دَرْب</a>
+    <nav class="nav-links" aria-label="التنقل الرئيسي">
+      <a href="#services">الخدمات</a>
+      <a href="#cities">المدن</a>
+      <a href="#how">كيف يعمل؟</a>
+      <a href="#download">التنزيل</a>
+    </nav>
+    <a class="btn btn-primary" href="#download">تنزيل دَرْب</a>
+  </div>
+</header>
+
 <main>
-<section class="hero"><div class="wrap hero-grid">
-<div>
-<div class="eyebrow"><span class="dot"></span> طريقك الأقرب لكل ما تحتاجه</div>
-<h1>مشوارك يبدأ من هنا.<br><span>والباقي علينا.</span></h1>
-<p>دَرْب يجمع لك طلبات المتاجر وخدمات التوصيل في مكان واحد. اطلب بسهولة، اختر عرض التوصيل المناسب، وتابع رحلتك خطوة بخطوة.</p>
-<div class="hero-cta"><a class="btn btn-primary" href="#download">اكتشف التطبيق <span>←</span></a><a class="btn btn-ghost" href="#how">كيف يعمل دَرْب؟</a></div>
-<div class="micro"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg> تجربة مصممة لتكون واضحة وسهلة من أول استخدام</div>
-</div>
-<div class="visual" aria-label="تصميم توضيحي لواجهة تطبيق درب">
-<div class="halo"></div><div class="route"></div>
-<div class="phone"><div class="notch"></div><div class="phone-top"><span>9:41</span><span>● ● ●</span></div><div class="phone-greet">أهلاً بك في دَرْب</div><div class="phone-sub">إلى أين نوصلك اليوم؟</div><div class="search">⌕　ابحث عن متجر أو خدمة</div><div class="mini-card"><div class="mini-label">توصيل مستقل</div><div class="mini-title">أرسل غرضك إلى أي مكان</div><div class="mini-row"><span>حدد الاستلام والتسليم</span><span class="mini-pill">ابدأ الآن</span></div></div><div class="map-art"><span class="pin"></span></div><div class="mini-card"><div class="mini-label">عروض السائقين</div><div class="mini-title">اختر العرض الذي يناسبك</div><div class="mini-row"><span>عروض متعددة</span><span class="mini-pill">قارن واختر</span></div></div></div>
-<div class="float one"><span class="float-icon">⌖</span><span><b>توصيل أينما كنت</b><small>حدد وجهتك بسهولة</small></span></div>
-<div class="float two"><span class="float-icon">✓</span><span><b>أنت تختار العرض</b><small>السعر بيدك والقرار لك</small></span></div>
-</div>
-</div></section>
-<div class="trust"><div class="wrap trust-grid"><div class="trust-item"><strong>01</strong><span>طلبات المتاجر في مكان واحد</span></div><div class="trust-item"><strong>02</strong><span>قارن عروض السائقين بنفسك</span></div><div class="trust-item"><strong>03</strong><span>تابع حالة طلبك بوضوح</span></div></div></div>
-<section class="content" id="services"><div class="wrap"><div class="section-head"><div class="kicker">خدمات دَرْب</div><h2>أكثر من مجرد توصيل</h2><p>مساران واضحان يخدمان احتياجاتك اليومية؛ سواء كنت تريد التسوق أو إرسال غرض إلى شخص آخر.</p></div>
-<div class="cards">
-<article class="card"><div class="card-icon"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9h18l-2 11H5L3 9Z"/><path d="M7 9V6a5 5 0 0 1 10 0v3M8 13v3m8-3v3"/></svg></div><h3>اطلب من المتاجر</h3><p>استعرض المتاجر والمنتجات، أنشئ طلبك، وتابع تجهيزه وتوصيله من خلال التطبيق.</p></article>
-<article class="card"><div class="card-icon"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h11l3 4h2v6h-2"/><path d="M4 7v10h2m4 0h4"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/><path d="M15 7v4h6"/></svg></div><h3>أرسل مع سائق</h3><p>حدد مكان الاستلام والتسليم، واستقبل عروض أجرة من السائقين ثم اختر العرض المناسب لك.</p></article>
-<article class="card"><div class="card-icon"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 7v5c0 5 3.4 7.8 8 9 4.6-1.2 8-4 8-9V7l-8-4Z"/><path d="m8.5 12 2.3 2.3 4.7-4.8"/></svg></div><h3>قرارك بيدك</h3><p>في التوصيل المستقل، لا نفرض أجرة ثابتة؛ قارن عروض السائقين واختر ما يلائمك.</p></article>
-</div></div></section>
-<section class="content how" id="how"><div class="wrap"><div class="section-head"><div class="kicker">بكل بساطة</div><h2>ثلاث خطوات وتكون على دَرْب</h2><p>واجهة واضحة تساعدك على الوصول لما تريد دون تعقيد.</p></div>
-<div class="steps"><article class="step"><div class="step-num">الخطوة 01</div><h3>أنشئ طلبك</h3><p>اختر متجراً أو حدد موقع الاستلام والتسليم لإرسال غرضك.</p></article><article class="step"><div class="step-num">الخطوة 02</div><h3>راجع التفاصيل والعروض</h3><p>تابع حالة طلبك، وفي التوصيل المستقل قارن عروض السائقين المتاحة.</p></article><article class="step"><div class="step-num">الخطوة 03</div><h3>اختر وتابع</h3><p>اختر العرض المناسب عندما يكون ذلك متاحاً، وتابع تنفيذ طلبك داخل التطبيق.</p></article></div>
-</div></section>
-<section class="content download" id="download"><div class="wrap"><div class="download-panel"><div class="download-copy"><div class="kicker">دَرْب معك أينما كنت</div><h2>خلّ مشاويرك أسهل.</h2><p>حمّل تطبيق دَرْب على أندرويد وابدأ باستكشاف خدمات التوصيل. سنعرض هنا أحدث إصدار رسمي موقّع فور نشره.</p></div><div class="download-action"><a id="downloadBtn" class="btn" href="https://github.com/anasgdxj/darb-delivery-platform/releases" target="_blank" rel="noopener">عرض الإصدارات <span>↓</span></a><div id="downloadStatus" class="download-status" aria-live="polite">جارٍ التحقق من أحدث إصدار…</div></div></div></div></section>
+  <section class="hero">
+    <div class="wrap">
+      <div class="workspace-bar surface">
+        <div class="meta-inline">
+          <span>منصة توصيل متعددة الأدوار في سوريا</span>
+          <span aria-hidden="true">·</span>
+          <span>متاجر · توصيل مستقل · عروض سائقين</span>
+        </div>
+        <div class="controls-group">
+          <div class="segmented" role="group" aria-label="نمط الواجهة">
+            <button type="button" id="styleGlassBtn" aria-pressed="true">زجاجي حديث</button>
+            <button type="button" id="styleStandardBtn" aria-pressed="false">كلاسيكي</button>
+          </div>
+          <div class="segmented" role="group" aria-label="المظهر">
+            <button type="button" id="themeLightBtn" aria-pressed="true">نهاري</button>
+            <button type="button" id="themeDarkBtn" aria-pressed="false">ليلي</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="hero-kicker">تجربة توصيل عصرية مصممة للسوق السوري</div>
+          <h1>طريقك الأقرب لكل ما تحتاجه — <span>بوضوح وسرعة.</span></h1>
+          <p>
+            يجمع دَرْب بين طلبات المتاجر المحلية وخدمة التوصيل المستقل في تطبيق واحد. استعرض المتاجر القريبة أو أرسل طردك مع سائق مستقل وقارن عروض الأجرة بنفسك قبل التأكيد.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#download">تنزيل تطبيق أندرويد</a>
+            <a class="btn btn-outline" href="#how">كيف يعمل دَرْب؟</a>
+          </div>
+          <div class="hero-proof">
+            <div class="proof-item">
+              <strong class="tabular">5 مدن</strong>
+              <span>دمشق · حلب · حمص · حماة · اللاذقية</span>
+            </div>
+            <div class="proof-item">
+              <strong class="tabular">3 لغات</strong>
+              <span>العربية RTL · English · Türkçe</span>
+            </div>
+            <div class="proof-item">
+              <strong class="tabular">4 أدوار</strong>
+              <span>عميل · سائق · متجر · إدارة</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual surface" aria-label="المدن المدعومة في تطبيق درب">
+          <div class="img-fallback" aria-hidden="true">دَرْب سوريا</div>
+          <img id="heroCityImg" src="/assets/cities/damascus.jpg" alt="مدينة دمشق — تغطية دَرْب" referrerpolicy="no-referrer">
+          <div class="hero-scrim" aria-hidden="true"></div>
+          <div class="hero-visual-overlay">
+            <div id="heroCityMeta" class="hero-visual-meta">DAM · تغطية فعّالة للمتاجر والتوصيل المستقل</div>
+            <h2 id="heroCityTitle" class="hero-visual-title">دمشق — قلب الخدمة والانطلاق</h2>
+            <div class="city-switcher" role="tablist" aria-label="اختر المدينة">
+              <button type="button" role="tab" aria-selected="true" data-city="damascus">دمشق</button>
+              <button type="button" role="tab" aria-selected="false" data-city="aleppo">حلب</button>
+              <button type="button" role="tab" aria-selected="false" data-city="homs">حمص</button>
+              <button type="button" role="tab" aria-selected="false" data-city="hama">حماة</button>
+              <button type="button" role="tab" aria-selected="false" data-city="latakia">اللاذقية</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="services">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker">الخدمات والمسارات</div>
+        <h2>منظومة متكاملة للعميل والسائق والمتجر</h2>
+        <p>كل مسار مبني بوضوح لتصل إلى نتيجتك من الخطوة الأولى دون تعقيد أو خطوات مخفية.</p>
+      </div>
+      <div class="bento-grid">
+        <article class="bento-card surface wide">
+          <div class="bento-num tabular">01 · طلبات المتاجر المباشرة</div>
+          <h3>تصفح المتاجر والمنتجات مع حساب رسوم التوصيل قبل الإرسال</h3>
+          <p>ابحث حسب المدينة والنشاط والمنتج، راجع تكلفة التوصيل التقديرية بناءً على المسافة الفعلية قبل تأكيد السلة، وتابع مراحل التحضير والاستلام لحظة بلحظة.</p>
+        </article>
+        <article class="bento-card surface">
+          <div class="bento-num tabular">02 · التوصيل المستقل</div>
+          <h3>أنت تحدد المسار وتختار عرض السائق</h3>
+          <p>أرسل مستندات أو طروداً من أي نقطة استلام إلى أي نقطة تسليم في 3 خطوات، واستقبل عروض الأجرة من السائقين القريبين لاختيار الأنسب.</p>
+        </article>
+        <article class="bento-card surface">
+          <div class="bento-num tabular">03 · تطبيق السائق</div>
+          <h3>مرونة كاملة بالدراجة أو السيارة</h3>
+          <p>تحكم بحالة اتصالك، راجع الطلبات المتاحة في مدينتك، قدّم عروضك على التوصيل المستقل، وتابع أرباحك وعدد رحلاتك المكتملة.</p>
+        </article>
+        <article class="bento-card surface wide">
+          <div class="bento-num tabular">04 · مساعد الطلبات الذكي وإدارة المتجر</div>
+          <h3>أدوات عملية لإدارة المنتجات والطلبات بالصوت والنص</h3>
+          <p>يدعم التطبيق مساعد طلبات ذكياً يفهم احتياجك باللهجة السورية ويجهز السلة، كما يمنح المتاجر لوحة كاملة لإدارة المنتجات والمخزون وحالة الإغلاق والفتح.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="cities">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker">التغطية الجغرافية</div>
+        <h2>حاضرة في كبرى المدن السورية</h2>
+        <p>نبدأ بخمس مدن سورية أساسية مع جاهزية معمارية للتوسع نحو مدن أخرى وأسواق إقليمية مجاورة.</p>
+      </div>
+      <div class="cities-grid">
+        <article class="city-tile">
+          <div class="img-fallback" aria-hidden="true">دمشق</div>
+          <img src="/assets/cities/damascus.jpg" alt="دمشق" loading="lazy" referrerpolicy="no-referrer">
+          <div class="tile-scrim" aria-hidden="true"></div>
+          <div class="tile-body"><strong>دمشق</strong><span class="tabular">DAM · دمشق الكبرى</span></div>
+        </article>
+        <article class="city-tile">
+          <div class="img-fallback" aria-hidden="true">حلب</div>
+          <img src="/assets/cities/aleppo.jpg" alt="حلب" loading="lazy" referrerpolicy="no-referrer">
+          <div class="tile-scrim" aria-hidden="true"></div>
+          <div class="tile-body"><strong>حلب</strong><span class="tabular">ALE · الشهباء</span></div>
+        </article>
+        <article class="city-tile">
+          <div class="img-fallback" aria-hidden="true">حمص</div>
+          <img src="/assets/cities/homs.jpg" alt="حمص" loading="lazy" referrerpolicy="no-referrer">
+          <div class="tile-scrim" aria-hidden="true"></div>
+          <div class="tile-body"><strong>حمص</strong><span class="tabular">HMS · المنطقة الوسطى</span></div>
+        </article>
+        <article class="city-tile">
+          <div class="img-fallback" aria-hidden="true">حماة</div>
+          <img src="/assets/cities/hama.jpg" alt="حماة" loading="lazy" referrerpolicy="no-referrer">
+          <div class="tile-scrim" aria-hidden="true"></div>
+          <div class="tile-body"><strong>حماة</strong><span class="tabular">HMA · مدينة النواعير</span></div>
+        </article>
+        <article class="city-tile">
+          <div class="img-fallback" aria-hidden="true">اللاذقية</div>
+          <img src="/assets/cities/latakia.jpg" alt="اللاذقية" loading="lazy" referrerpolicy="no-referrer">
+          <div class="tile-scrim" aria-hidden="true"></div>
+          <div class="tile-body"><strong>اللاذقية</strong><span class="tabular">LAT · الساحل السوري</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker">آلية العمل</div>
+        <h2>ثلاث خطوات وتكون على دَرْب</h2>
+        <p>تجربة واضحة باللغات العربية والإنجليزية والتركية مع احترام تفضيلات المظهر وتقليل الحركة.</p>
+      </div>
+      <div class="steps-grid">
+        <article class="step-card surface">
+          <div class="step-index tabular">01. إنشاء الطلب</div>
+          <h3>اختر متجراً أو مسار توصيل</h3>
+          <p>حدد منتجاتك من متاجر مدينتك أو أنشئ رحلة توصيل مستقلة بتحديد موقع الاستلام والتسليم بدقة.</p>
+        </article>
+        <article class="step-card surface">
+          <div class="step-index tabular">02. التقدير والعروض</div>
+          <h3>تأكد من الأجرة أو اختر السائق</h3>
+          <p>اطّلع على رسوم التوصيل قبل الإرسال في طلبات المتاجر، أو قارن عروض السائقين في التوصيل المستقل.</p>
+        </article>
+        <article class="step-card surface">
+          <div class="step-index tabular">03. المتابعة والاستلام</div>
+          <h3>تتبع فوري حتى بابك</h3>
+          <p>راقب حالة طلبك وموقع المندوب داخل التطبيق مع خيار إلغاء الطلبات المعلقة فوراً قبل قبولها.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="download">
+    <div class="wrap">
+      <div class="download-box">
+        <div>
+          <div class="download-kicker">إصدار أندرويد الرسمي</div>
+          <h2>ابدأ رحلتك مع دَرْب اليوم</h2>
+          <p>قم بتنزيل أحدث إصدار رسمي موقّع من تطبيق دَرْب لأجهزة أندرويد واستفد من النظام الزجاجي الحديث والوضعين النهاري والليلي.</p>
+        </div>
+        <div class="download-cta">
+          <a id="downloadBtn" class="btn btn-mint" href="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" download="darb-app-release.apk">تنزيل تطبيق أندرويد</a>
+          <div id="downloadStatus" class="download-meta" aria-live="polite">أحدث إصدار رسمي موقّع · حزمة Android APK مباشرة</div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
-<footer><div class="wrap foot"><a class="brand" href="#"><span class="logo">د</span><span>دَرْب</span></a><small>© <span id="year"></span> دَرْب. جميع الحقوق محفوظة.</small><div class="foot-links"><a href="#services">الخدمات</a><a href="#download">التنزيل</a></div></div></footer>
+
+<footer>
+  <div class="wrap foot-row">
+    <div>دَرْب · <span id="year"></span> — جميع الحقوق محفوظة</div>
+    <div class="foot-links">
+      <a href="#services">الخدمات</a>
+      <a href="#cities">المدن</a>
+      <a href="#how">آلية العمل</a>
+      <a href="#download">التنزيل</a>
+    </div>
+  </div>
+</footer>
+
 <script>
-const directApk='https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk';
-document.getElementById('year').textContent=new Date().getFullYear();
-const downloadBtn=document.getElementById('downloadBtn');
-downloadBtn.href=directApk;
-downloadBtn.setAttribute('download','darb-app-release.apk');
-downloadBtn.innerHTML='تنزيل تطبيق أندرويد <span>↓</span>';
-document.getElementById('downloadStatus').textContent='أحدث إصدار رسمي موقّع · تنزيل مباشر لملف APK';
+const cityShowcase = {
+  damascus: {
+    img: '/assets/cities/damascus.jpg',
+    title: 'دمشق — قلب الخدمة والانطلاق',
+    meta: 'DAM · تغطية فعّالة للمتاجر والتوصيل المستقل'
+  },
+  aleppo: {
+    img: '/assets/cities/aleppo.jpg',
+    title: 'حلب — شبكة متاجر ومندوبين نشطة',
+    meta: 'ALE · طلبات المتاجر وعروض التوصيل المستقل'
+  },
+  homs: {
+    img: '/assets/cities/homs.jpg',
+    title: 'حمص — توصيل سريع بين الأحياء',
+    meta: 'HMS · تسعير واضح حسب المسافة الفعلية'
+  },
+  hama: {
+    img: '/assets/cities/hama.jpg',
+    title: 'حماة — متابعة فورية وموثوقة',
+    meta: 'HMA · تغطية للمتاجر والمندوبين المستقلين'
+  },
+  latakia: {
+    img: '/assets/cities/latakia.jpg',
+    title: 'اللاذقية — ربط مباشر على الساحل',
+    meta: 'LAT · رحلات مرنة بالدراجات والسيارات'
+  }
+};
+
+document.getElementById('year').textContent = String(new Date().getFullYear());
+
+const htmlEl = document.documentElement;
+const styleGlassBtn = document.getElementById('styleGlassBtn');
+const styleStandardBtn = document.getElementById('styleStandardBtn');
+const themeLightBtn = document.getElementById('themeLightBtn');
+const themeDarkBtn = document.getElementById('themeDarkBtn');
+
+function setStyleMode(mode) {
+  htmlEl.setAttribute('data-style', mode);
+  styleGlassBtn.setAttribute('aria-pressed', String(mode === 'glass'));
+  styleStandardBtn.setAttribute('aria-pressed', String(mode === 'standard'));
+}
+
+function setThemeMode(dark) {
+  htmlEl.classList.toggle('dark', dark);
+  themeLightBtn.setAttribute('aria-pressed', String(!dark));
+  themeDarkBtn.setAttribute('aria-pressed', String(dark));
+}
+
+styleGlassBtn.addEventListener('click', () => setStyleMode('glass'));
+styleStandardBtn.addEventListener('click', () => setStyleMode('standard'));
+themeLightBtn.addEventListener('click', () => setThemeMode(false));
+themeDarkBtn.addEventListener('click', () => setThemeMode(true));
+
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  setThemeMode(true);
+}
+
+const cityButtons = document.querySelectorAll('.city-switcher button');
+const heroCityImg = document.getElementById('heroCityImg');
+const heroCityTitle = document.getElementById('heroCityTitle');
+const heroCityMeta = document.getElementById('heroCityMeta');
+
+heroCityImg.addEventListener('error', () => {
+  heroCityImg.style.opacity = '0';
+});
+heroCityImg.addEventListener('load', () => {
+  heroCityImg.style.opacity = '1';
+});
+
+document.querySelectorAll('.city-tile img').forEach((img) => {
+  img.addEventListener('error', () => {
+    img.style.display = 'none';
+  });
+});
+
+cityButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const key = btn.getAttribute('data-city');
+    const info = cityShowcase[key];
+    if (!info) return;
+    cityButtons.forEach((b) => b.setAttribute('aria-selected', String(b === btn)));
+    heroCityImg.src = info.img;
+    heroCityImg.alt = info.title;
+    heroCityTitle.textContent = info.title;
+    heroCityMeta.textContent = info.meta;
+  });
+});
 </script>
-</body></html>
+</body>
+</html>

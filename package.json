@@ -1,0 +1,24 @@
+{
+  "name": "darb-delivery-platform",
+  "version": "1.0.0",
+  "description": "دَرْب - منصة توصيل متعددة الأدوار في سوريا",
+  "main": "server.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx server.ts",
+    "start": "node server.ts",
+    "lint": "echo 'No linting required'",
+    "build": "echo 'No build required for server-side Express app'"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.24",
+    "tsx": "^4.7.1"
+  }
+}

@@ -37,28 +37,15 @@ jobs:
           cd "$M"
           flutter create --platforms=android --org com.darb --project-name darb --no-pub .
           cd "$GITHUB_WORKSPACE"
-          cp mobile-overrides/login_screen.dart "$M/lib/screens/login_screen.dart"
-          cp mobile-overrides/city_carousel.dart "$M/lib/screens/city_carousel.dart"
+          rm -rf "$M/lib/screens" "$M/lib/core" "$M/lib/features" "$M/lib/design_system.dart" "$M/lib/localizations.dart" "$M/lib/notifications.dart" "$M/lib/app_update.dart"
+          mkdir -p "$M/lib" "$M/test"
+          cp -r mobile-overrides/lib/. "$M/lib/"
           bash mobile-overrides/prepare_city_assets.sh "$M"
-          cp mobile-overrides/main.dart "$M/lib/main.dart"
-          cp mobile-overrides/design_system.dart "$M/lib/design_system.dart"
-          cp mobile-overrides/localizations.dart "$M/lib/localizations.dart"
-          cp mobile-overrides/api.dart "$M/lib/core/api.dart"
-          cp mobile-overrides/app_shell.dart "$M/lib/screens/app_shell.dart"
-          cp mobile-overrides/admin_screens.dart "$M/lib/screens/admin_screens.dart"
-          cp mobile-overrides/customer_screens.dart "$M/lib/screens/customer_screens.dart"
-          cp mobile-overrides/peer_delivery_screen.dart "$M/lib/screens/peer_delivery_screen.dart"
-          cp mobile-overrides/vendor_screens.dart "$M/lib/screens/vendor_screens.dart"
-          cp mobile-overrides/driver_screens.dart "$M/lib/screens/driver_screens.dart"
-          cp mobile-overrides/account_screens.dart "$M/lib/screens/account_screens.dart"
-          cp mobile-overrides/account_pages.dart "$M/lib/screens/account_pages.dart"
-          cp mobile-overrides/notifications.dart "$M/lib/notifications.dart"
-          cp mobile-overrides/app_update.dart "$M/lib/app_update.dart"
           mkdir -p "$M/android/app/src/main/kotlin/com/darb/darb" "$M/android/app/src/main/res/xml"
           cp mobile-overrides/MainActivity.kt "$M/android/app/src/main/kotlin/com/darb/darb/MainActivity.kt"
           cp mobile-overrides/DarbUpdateDownloadReceiver.kt "$M/android/app/src/main/kotlin/com/darb/darb/DarbUpdateDownloadReceiver.kt"
           cp mobile-overrides/darb_file_paths.xml "$M/android/app/src/main/res/xml/darb_file_paths.xml"
-          cp mobile-overrides/design_system_test.dart "$M/test/widget_test.dart"
+          cp mobile-overrides/test/widget_test.dart "$M/test/widget_test.dart"
           mkdir -p "$M/android/app/src/main/res/drawable"
           cp mobile-overrides/ic_launcher.xml "$M/android/app/src/main/res/drawable/ic_launcher.xml"
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|' "$M/android/app/src/main/AndroidManifest.xml"
@@ -102,7 +89,7 @@ jobs:
           lines=[line for line in lines if not line.strip().startswith("intl:")]
           dep=next((i for i,line in enumerate(lines) if line.strip()=="dependencies:"),None)
           if dep is None: raise SystemExit("pubspec.yaml dependencies section missing")
-          for name, version in [("intl","^0.20.3"),("google_sign_in","^6.2.1"),("geolocator","^13.0.2"),("url_launcher","^6.3.1"),("firebase_core","^3.8.1"),("firebase_messaging","^15.1.6"),("package_info_plus","^8.1.2"),("crypto","^3.0.6"),("path_provider","^2.1.5"),("flutter_map","^7.0.2"),("latlong2","^0.9.1")]:
+          for name, version in [("intl","^0.20.3"),("google_sign_in","^6.2.1"),("geolocator","^13.0.2"),("url_launcher","^6.3.1"),("firebase_core","^3.8.1"),("firebase_messaging","^15.1.6"),("package_info_plus","^8.1.2"),("crypto","^3.0.6"),("path_provider","^2.1.5")]:
               if not any(line.strip().startswith(name + ":") for line in lines):
                   dep += 1
                   lines.insert(dep, f"  {name}: {version}")

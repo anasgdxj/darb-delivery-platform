@@ -1,0 +1,11 @@
+CREATE INDEX IF NOT EXISTS "Address_userId_idx" ON "public"."Address"("userId");
+CREATE INDEX IF NOT EXISTS "DeliveryZone_cityId_idx" ON "public"."DeliveryZone"("cityId");
+CREATE INDEX IF NOT EXISTS "Order_addressId_idx" ON "public"."Order"("addressId");
+CREATE INDEX IF NOT EXISTS "OrderItem_orderId_idx" ON "public"."OrderItem"("orderId");
+CREATE INDEX IF NOT EXISTS "OrderItem_productId_idx" ON "public"."OrderItem"("productId");
+CREATE INDEX IF NOT EXISTS "OrderItem_variantId_idx" ON "public"."OrderItem"("variantId");
+CREATE INDEX IF NOT EXISTS "ProductVariant_productId_idx" ON "public"."ProductVariant"("productId");
+CREATE INDEX IF NOT EXISTS "Review_authorId_idx" ON "public"."Review"("authorId");
+CREATE INDEX IF NOT EXISTS "Review_orderId_idx" ON "public"."Review"("orderId");
+CREATE INDEX IF NOT EXISTS "Review_vendorId_idx" ON "public"."Review"("vendorId");
+CREATE INDEX IF NOT EXISTS "VendorCity_cityId_idx" ON "public"."VendorCity"("cityId");

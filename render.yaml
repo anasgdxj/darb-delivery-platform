@@ -34,12 +34,6 @@ services:
       cp backend-overrides/ai-order-assistant.module.ts .render-build/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.module.ts &&
       cp backend-overrides/ai-order-assistant.controller.ts .render-build/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.controller.ts &&
       cp backend-overrides/ai-order-assistant.service.ts .render-build/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.service.ts &&
-      mkdir -p .render-build/darb-project/backend/src/modules/ai-role-assistant &&
-      cp backend-overrides/ai-role-assistant.module.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.module.ts &&
-      cp backend-overrides/ai-role-assistant.controller.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.controller.ts &&
-      cp backend-overrides/ai-role-assistant.service.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.service.ts &&
-      cp backend-overrides/ai-text-provider.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/ai-text-provider.ts &&
-      cp backend-overrides/gemini-ai-text-provider.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/gemini-ai-text-provider.ts &&
       mkdir -p .render-build/darb-project/backend/src/modules/notifications .render-build/darb-project/backend/src/modules/health &&
       cp -R backend/src/modules/health/. .render-build/darb-project/backend/src/modules/health/ &&
       cp backend-overrides/notifications.service.ts .render-build/darb-project/backend/src/modules/notifications/notifications.service.ts &&
@@ -98,4 +92,11 @@ services:
         value: whisper-1
       - key: OPENAI_ORDER_MODEL
         value: gpt-4o-mini
-
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-4-hydrogen
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

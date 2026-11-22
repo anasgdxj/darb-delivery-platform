@@ -1,0 +1,18 @@
+DARB city hero photography — attribution
+
+Aleppo — “Citadel of Aleppo, View of the city, Aleppo, Syria.jpg”, Vyacheslav Argenberg, CC BY 4.0.
+https://commons.wikimedia.org/wiki/File:Citadel_of_Aleppo,_View_of_the_city,_Aleppo,_Syria.jpg
+
+Homs — “Al-Dablan Street.jpg”, Bo yaser, CC BY-SA 2.5.
+https://commons.wikimedia.org/wiki/File:Al-Dablan_Street.jpg
+
+Hama — “Hama 008-009 Pan.jpg”, Yvonnefm, CC BY-SA 3.0.
+https://commons.wikimedia.org/wiki/File:Hama_008-009_Pan.jpg
+
+Damascus — “Damascus Panorama.jpg”, Wurzelgnohm, CC0 1.0.
+https://commons.wikimedia.org/wiki/File:Damascus_Panorama.jpg
+
+Latakia — “Latakia City.jpg”, Toni Elias, CC BY-SA 4.0.
+https://commons.wikimedia.org/wiki/File:Latakia_City.jpg
+
+Photos are downloaded and bundled at build time; the installed app does not need a network connection to display them.

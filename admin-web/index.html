@@ -1,164 +1,1390 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102b26"><meta name="robots" content="noindex,nofollow"><title>إدارة دَرْب</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#12302A">
+<meta name="robots" content="noindex,nofollow">
+<title>إدارة دَرْب | مركز العمليات</title>
 <style>
-:root{font-family:Tahoma,Arial,sans-serif;color:#17231f;background:#f5f6f2;--forest:#102b26;--soft:#1c443b;--mint:#b9e4d2;--line:#e2e8e1;--muted:#77837d;--danger:#b94747}
-*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer;border:0;border-radius:13px;padding:12px 17px;font-weight:700;background:var(--forest);color:white}button:disabled{opacity:.5;cursor:wait}.outline{background:white;color:var(--forest);border:1px solid var(--line)}.danger{background:#fff2f0;color:var(--danger);border:1px solid #f1d4d0}
-.shell{min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{background:var(--forest);color:white;padding:26px 18px;display:flex;flex-direction:column;gap:28px}.brand{display:flex;align-items:center;gap:12px}.mark{width:45px;height:45px;border-radius:15px;background:linear-gradient(140deg,#b9e4d2,#6fb99a);color:var(--forest);display:grid;place-items:center;font-size:27px;font-weight:900}.brand strong{font-size:20px}.brand small{display:block;color:#b9c9c1;margin-top:4px}.nav{display:grid;gap:8px}.nav button{min-height:46px}.nav button{background:transparent;color:#d7e2dc;text-align:right;display:flex;justify-content:space-between}.nav button.active,.nav button:hover{background:#ffffff18;color:white}.side-foot{margin-top:auto;color:#b9c9c1;font-size:12px;line-height:1.7}.main{padding:30px;max-width:1400px;width:100%;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:28px}.top h1{margin:0;font-size:25px}.muted{color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:22px}.filterbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}.filterbar select{min-width:150px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fbfcfa;color:#17231f}.order-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:10px}.order-top{display:flex;justify-content:space-between;gap:12px;align-items:center}.order-top strong{font-size:15px}.order-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;color:#52635b;font-size:13px;line-height:1.7}.order-meta span{background:#f7f9f6;padding:9px;border-radius:10px}.pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px}.zone-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}.zone-card{border:1px solid var(--line);border-radius:16px;padding:17px;background:#fff}.zone-card h3{margin:0 0 5px}.zone-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.zone-fields label{display:grid;gap:5px;font-size:12px;color:var(--muted)}.zone-fields input{min-width:0;width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fbfcfa;direction:ltr;text-align:left}.zone-card .zone-save{width:100%}.detail-line{margin-top:7px;padding-top:7px;border-top:1px solid var(--line);font-size:12px;color:#52635b;line-height:1.8}.stat,.panel,.request{background:white;border:1px solid var(--line);border-radius:20px;padding:20px}.stat b{display:block;font-size:30px;margin-top:8px;color:var(--forest)}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.panel-head h2{font-size:18px;margin:0}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{padding:9px 13px}.tabs .active{background:var(--forest)}.list{display:grid;gap:12px}.request{display:flex;justify-content:space-between;gap:20px;align-items:center}.request h3{margin:0 0 7px;font-size:16px}.meta{color:var(--muted);font-size:13px;line-height:1.8}.actions{display:flex;gap:8px;flex-shrink:0}.badge{display:inline-flex;padding:5px 9px;border-radius:30px;background:#fff5df;color:#95620e;font-size:11px;font-weight:700}.empty,.error{text-align:center;padding:38px;color:var(--muted)}.error{color:var(--danger)}.login-wrap{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 80% 10%,#d7eee4,transparent 35%),#f5f6f2}.login{width:min(430px,100%);background:white;border:1px solid var(--line);border-radius:25px;padding:30px;box-shadow:0 20px 70px #102b2612}.login .brand{margin-bottom:25px;color:var(--forest)}.login h1{font-size:22px}.login p{color:var(--muted);line-height:1.7;font-size:13px}.field{display:grid;gap:7px;margin:16px 0}.field label{font-size:13px;font-weight:700}.field input{border:1px solid var(--line);border-radius:13px;padding:14px;background:#fbfcfa;direction:ltr;text-align:left;outline:none}.field input:focus{border-color:var(--soft);box-shadow:0 0 0 3px #b9e4d255}.wide{width:100%}.hidden{display:none!important}.notice{padding:12px 14px;border-radius:12px;background:#eef7f1;color:#246044;font-size:13px;margin:12px 0}.notice.bad{background:#fff0ee;color:var(--danger)}
-@media(max-width:850px){.shell{grid-template-columns:1fr}.side{padding:14px 16px;gap:12px}.side .brand small,.side-foot{display:none}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.nav button{justify-content:center;text-align:center;padding:10px 5px;font-size:12px}.main{padding:20px 14px}.stats{grid-template-columns:1fr 1fr}.request{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions button{flex:1}}
-@media(max-width:430px){.stats{grid-template-columns:1fr}.top h1{font-size:20px}}
-</style><script src="https://accounts.google.com/gsi/client" async defer></script>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap');
+
+:root {
+  --forest: #12302A;
+  --primary: #167A5A;
+  --primary-hover: #116248;
+  --mint: #B9E4D2;
+  --mint-tint: #E7F5EE;
+  --canvas: #F6F6F3;
+  --surface: #FFFFFF;
+  --surface-glass: rgba(255, 255, 255, 0.76);
+  --surface-soft: #EDF2EE;
+  --ink: #1A2E29;
+  --muted: #687A75;
+  --border: #DCE4DF;
+  --glass-border: rgba(255, 255, 255, 0.88);
+  --danger: #D64545;
+  --danger-soft: #FBEBEB;
+  --warn: #B86B14;
+  --warn-soft: #FCF3E6;
+  --shadow: 0 18px 46px rgba(18, 48, 42, 0.08);
+  --blur: 22px;
+}
+
+html.dark {
+  --canvas: #0A1916;
+  --surface: #112621;
+  --surface-glass: rgba(17, 38, 33, 0.78);
+  --surface-soft: #17332C;
+  --ink: #F1F5F3;
+  --muted: #9DB2AC;
+  --primary: #28A47C;
+  --primary-hover: #218B69;
+  --mint-tint: #14352C;
+  --border: #23473E;
+  --glass-border: rgba(185, 228, 210, 0.16);
+  --danger: #E56868;
+  --danger-soft: rgba(214, 69, 69, 0.18);
+  --warn: #EAA244;
+  --warn-soft: rgba(184, 107, 20, 0.22);
+  --shadow: 0 22px 54px rgba(0, 0, 0, 0.42);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  line-height: 1.55;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+button, input, select { font: inherit; }
+button {
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  min-height: 40px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), background-color 150ms ease, border-color 150ms ease;
+}
+button:hover:not(:disabled) { transform: translateY(-1px); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.tabular { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+.hidden { display: none !important; }
+
+/* Ambient Glass Field */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 180ms ease;
+}
+html[data-style="standard"] .ambient { opacity: 0; }
+.orb { position: absolute; border-radius: 50%; filter: blur(64px); }
+.orb-1 {
+  width: 440px; height: 440px; top: -120px; left: -120px;
+  background: radial-gradient(circle, rgba(185, 228, 210, 0.5), transparent 70%);
+}
+.orb-2 {
+  width: 380px; height: 380px; bottom: -120px; right: -80px;
+  background: radial-gradient(circle, rgba(22, 122, 90, 0.16), transparent 70%);
+}
+html.dark .orb-1 { background: radial-gradient(circle, rgba(185, 228, 210, 0.14), transparent 70%); }
+html.dark .orb-2 { background: radial-gradient(circle, rgba(40, 164, 124, 0.18), transparent 70%); }
+
+.surface {
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+}
+html[data-style="standard"] .surface {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(18, 48, 42, 0.04);
+}
+
+.btn-primary { background: var(--primary); color: #FFFFFF; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+.btn-outline { background: transparent; border-color: var(--border); color: var(--ink); }
+.btn-outline:hover:not(:disabled) { background: var(--surface-soft); }
+.btn-danger { background: var(--danger-soft); color: var(--danger); border-color: rgba(214, 69, 69, 0.25); }
+
+input, select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13.5px;
+}
+
+/* Login View */
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.login-card {
+  width: min(460px, 100%);
+  border-radius: 26px;
+  padding: 32px;
+  display: grid;
+  gap: 16px;
+}
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-mark {
+  width: 46px; height: 46px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, var(--forest), var(--primary));
+  color: var(--mint);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.login-card h1 { margin: 0; font-size: 22px; font-weight: 900; }
+.login-card p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.notice {
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--mint-tint);
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+.notice.bad {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: rgba(214, 69, 69, 0.3);
+}
+
+/* Admin Workspace Shell */
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+}
+.sidebar {
+  background: var(--forest);
+  color: #FFFFFF;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-inline-end: 1px solid rgba(185, 228, 210, 0.14);
+}
+.sidebar .brand-sub { font-size: 12px; color: var(--mint); font-weight: 700; }
+.side-nav {
+  display: grid;
+  gap: 6px;
+}
+.side-nav button {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+}
+.side-nav button:hover { background: rgba(255, 255, 255, 0.08); color: #FFFFFF; }
+.side-nav button.active {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+.count-tag {
+  font-size: 12px;
+  color: var(--mint);
+}
+.side-controls {
+  margin-top: auto;
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.side-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 4px;
+  border-radius: 11px;
+}
+.side-seg button {
+  min-height: 32px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
+  background: transparent;
+  border-radius: 8px;
+}
+.side-seg button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+}
+
+.workspace {
+  padding: 24px 28px;
+  max-width: 1380px;
+  width: 100%;
+  margin-inline: auto;
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.crumb { font-size: 12.5px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+.topbar h1 { margin: 0; font-size: 22px; font-weight: 900; }
+.top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* KPI Strip */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.kpi-card {
+  border-radius: 20px;
+  padding: 18px 20px;
+}
+.kpi-label { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.kpi-value {
+  display: block;
+  margin-top: 6px;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+/* Main Panel & Filters */
+.panel {
+  border-radius: 22px;
+  padding: 22px;
+  display: grid;
+  gap: 16px;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.panel-head h2 { margin: 0; font-size: 17px; font-weight: 900; }
+.panel-meta { font-size: 13px; color: var(--muted); font-weight: 700; }
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.toolbar > * { flex: 1 1 180px; max-width: 280px; }
+
+/* Data Table & Row Cards */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th, td {
+  text-align: right;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+th {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  white-space: nowrap;
+}
+tbody tr:hover { background: var(--surface-soft); }
+.state-text {
+  font-weight: 800;
+  font-size: 12.5px;
+}
+.state-ok { color: var(--primary); }
+.state-warn { color: var(--warn); }
+.state-bad { color: var(--danger); }
+
+.row-list { display: grid; gap: 12px; }
+.row-item {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.row-info h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 900; }
+.row-meta { font-size: 13px; color: var(--muted); }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.zone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.zone-box {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+.zone-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-group { display: grid; gap: 5px; }
+.field-group label { font-size: 12px; color: var(--muted); font-weight: 700; }
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+}
+.empty-box, .error-box {
+  padding: 36px 20px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.error-box { color: var(--danger); }
+
+/* In-page Modal Dialog & Toast */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(10, 25, 22, 0.56);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.modal-card {
+  width: min(460px, 100%);
+  border-radius: 22px;
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+}
+.modal-card h3 { margin: 0; font-size: 18px; font-weight: 900; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.toast {
+  position: fixed;
+  bottom: 22px;
+  left: 22px;
+  z-index: 70;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 800;
+  background: var(--forest);
+  color: #FFFFFF;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--mint);
+}
+.toast.bad { background: var(--danger); border-color: #FFFFFF; }
+
+@media (max-width: 960px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { border-inline-end: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.14); }
+  .side-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .workspace { padding: 16px; }
+  .side-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-<section id="loginView" class="login-wrap"><div class="login">
-<div class="brand"><div class="mark">د</div><div><strong>دَرْب</strong><small>بوابة الإدارة</small></div></div>
-<h1>تسجيل دخول المدير</h1><p>الدخول متاح للحسابات التي تحمل صلاحية ADMIN فقط. سيتم التحقق من الصلاحية قبل فتح لوحة التحكم.</p>
-<p>سجّل الدخول بحساب Google المصرّح له من إدارة دَرْب. لا تحتاج إلى رقم هاتف.</p>
-<div id="googleButton" style="display:flex;justify-content:center;min-height:44px"></div>
-<div id="loginNotice" aria-live="polite"></div>
-<div class="muted" style="font-size:11px;margin-top:18px;text-align:center">الوصول محصور بالبريد الإلكتروني المدرج لدى الإدارة</div>
-</div></section>
-<section id="appView" class="shell hidden">
-<aside class="side"><div class="brand"><div class="mark">د</div><div><strong>دَرْب</strong><small>مركز العمليات والإدارة</small></div></div>
-<nav class="nav"><button data-kind="drivers" class="active">طلبات السائقين <span id="driverCount">—</span></button><button data-kind="vendors">طلبات المتاجر <span id="vendorCount">—</span></button><button data-kind="zones">مناطق ورسوم التوصيل</button><button data-kind="orders">مراقبة الطلبات</button><button id="refresh">تحديث البيانات</button></nav>
-<div class="side-foot">بوابة داخلية محمية<br>لا تمنح الموافقة إلا بعد مراجعة البيانات والمستندات خارج هذه الشاشة.</div>
-</aside>
-<main class="main"><header class="top"><div><h1 id="pageTitle">طلبات انضمام السائقين</h1><div class="muted" style="font-size:13px;margin-top:6px">مراجعة واعتماد شركاء التوصيل في دَرْب</div></div><button id="logout" class="outline">تسجيل الخروج</button></header>
-<div class="stats"><div class="stat"><span class="muted">طلبات السائقين المعلقة</span><b id="driverStat">—</b></div><div class="stat"><span class="muted">طلبات المتاجر المعلقة</span><b id="vendorStat">—</b></div><div class="stat"><span class="muted">صلاحية الجلسة</span><b style="font-size:18px;margin-top:14px">مدير معتمد</b></div></div>
-<section class="panel"><div class="panel-head"><h2 id="listTitle">قائمة المراجعة</h2><span id="panelBadge" class="badge">تتطلب قرار الإدارة</span></div><div id="list" class="list"><div class="empty">جارٍ تحميل الطلبات…</div></div></section>
-</main></section>
+<div class="ambient" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+</div>
+
+<!-- Login Gate -->
+<section id="loginView" class="login-shell">
+  <div class="login-card surface">
+    <div class="brand-row">
+      <div class="brand-mark">د</div>
+      <div>
+        <strong>دَرْب</strong>
+        <div class="panel-meta">بوابة العمليات والإدارة</div>
+      </div>
+    </div>
+    <div>
+      <h1>تسجيل دخول الإدارة</h1>
+      <p>الوصول محصور بحسابات ADMIN المعتمدة. يتم التحقق من صلاحية الحساب على الخادم قبل فتح لوحة التحكم.</p>
+    </div>
+
+    <div class="field-group">
+      <label for="apiEnvSelect">بيئة الخادم</label>
+      <select id="apiEnvSelect">
+        <option value="local">خادم المعاينة المحلي (/api/v1)</option>
+        <option value="prod">خادم الإنتاج (darb-api-yapv.onrender.com)</option>
+      </select>
+    </div>
+
+    <div id="googleButton" style="display:flex;justify-content:center;min-height:44px"></div>
+
+    <button type="button" id="previewLoginBtn" class="btn-primary">دخول سريع لوضع المعاينة (Admin Preview)</button>
+
+    <div id="loginNotice" class="hidden" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- Main Operations Workspace -->
+<section id="appView" class="app-shell hidden">
+  <aside class="sidebar">
+    <div class="brand-row">
+      <div class="brand-mark">د</div>
+      <div>
+        <strong>دَرْب</strong>
+        <div class="brand-sub">مركز العمليات والإدارة</div>
+      </div>
+    </div>
+
+    <nav class="side-nav" aria-label="أقسام الإدارة">
+      <button type="button" data-tab="pending" class="active">الموافقات المعلقة <span id="navPendingCount" class="count-tag tabular">0</span></button>
+      <button type="button" data-tab="vendors">دليل المتاجر</button>
+      <button type="button" data-tab="drivers">دليل السائقين</button>
+      <button type="button" data-tab="users">المستخدمون والصلاحيات</button>
+      <button type="button" data-tab="cities">المدن ومناطق التوصيل</button>
+      <button type="button" data-tab="orders">مراقبة الطلبات</button>
+      <button type="button" data-tab="settings">الإعدادات والتدقيق</button>
+    </nav>
+
+    <div class="side-controls">
+      <div class="side-seg" role="group" aria-label="نمط الواجهة">
+        <button type="button" id="adminGlassBtn" aria-pressed="true">Glass</button>
+        <button type="button" id="adminStandardBtn" aria-pressed="false">Standard</button>
+      </div>
+      <div class="side-seg" role="group" aria-label="المظهر">
+        <button type="button" id="adminLightBtn" aria-pressed="true">نهاري</button>
+        <button type="button" id="adminDarkBtn" aria-pressed="false">ليلي</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div>
+        <div id="breadcrumb" class="crumb">إدارة دَرْب / الموافقات المعلقة</div>
+        <h1 id="pageTitle">مراجعة طلبات الانضمام والمؤشرات</h1>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="refreshBtn" class="btn-outline">تحديث البيانات</button>
+        <button type="button" id="logoutBtn" class="btn-danger">تسجيل الخروج</button>
+      </div>
+    </header>
+
+    <div class="kpi-grid">
+      <article class="kpi-card surface">
+        <span class="kpi-label">طلبات نشطة</span>
+        <strong id="kpiActiveOrders" class="kpi-value tabular">—</strong>
+      </article>
+      <article class="kpi-card surface">
+        <span class="kpi-label">إجمالي الطلبات</span>
+        <strong id="kpiTotalOrders" class="kpi-value tabular">—</strong>
+      </article>
+      <article class="kpi-card surface">
+        <span class="kpi-label">بانتظار الاعتماد</span>
+        <strong id="kpiPendingTotal" class="kpi-value tabular">—</strong>
+      </article>
+      <article class="kpi-card surface">
+        <span class="kpi-label">حجم المبيعات (SYP)</span>
+        <strong id="kpiGmv" class="kpi-value tabular">—</strong>
+      </article>
+    </div>
+
+    <section class="panel surface">
+      <div class="panel-head">
+        <div>
+          <h2 id="panelTitle">طلبات السائقين والمتاجر بانتظار القرار</h2>
+        </div>
+        <div id="panelSummary" class="panel-meta tabular"></div>
+      </div>
+      <div id="contentRoot">
+        <div class="empty-box">جارٍ تحميل البيانات…</div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- Custom In-Page Modal -->
+<div id="modalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card surface">
+    <h3 id="modalTitle">تأكيد الإجراء</h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button type="button" id="modalCancelBtn" class="btn-outline">إلغاء</button>
+      <button type="button" id="modalConfirmBtn" class="btn-primary">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
 <script>
-const API='https://darb-api-yapv.onrender.com/api/v1';
-const GOOGLE_WEB_CLIENT_ID='1005839784892-3b1sctr2c32hfa6ssq17nunfhn2d9pji.apps.googleusercontent.com';
-const $=id=>document.getElementById(id);let kind='drivers',rows=[],zones=[],ordersPage=1,ordersPages=1,ordersStatus='',ordersType='';
-const token=()=>sessionStorage.getItem('darb_access');
-function message(text,bad=false){$('loginNotice').className='notice'+(bad?' bad':'');$('loginNotice').textContent=text;}
-async function raw(path,method='GET',body=null,auth=true){const headers={'Accept':'application/json'};if(body)headers['Content-Type']='application/json';if(auth&&token())headers.Authorization='Bearer '+token();let res=await fetch(API+path,{method,headers,body:body?JSON.stringify(body):undefined});if(res.status===401&&auth){const refresh=sessionStorage.getItem('darb_refresh');if(refresh){const rr=await fetch(API+'/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:refresh})});if(rr.ok){const data=await rr.json();sessionStorage.setItem('darb_access',data.accessToken);sessionStorage.setItem('darb_refresh',data.refreshToken);headers.Authorization='Bearer '+data.accessToken;res=await fetch(API+path,{method,headers,body:body?JSON.stringify(body):undefined});}}}const data=await res.json().catch(()=>({message:'استجابة غير مفهومة من الخادم'}));if(!res.ok)throw new Error(Array.isArray(data.message)?data.message.join('، '):(data.message||'فشل الطلب'));return data;}
-async function handleGoogleCredential(response){
- try{
-  message('جارٍ التحقق من حساب Google…');
-  const data=await raw('/auth/google','POST',{idToken:response.credential,locale:'ar'},false);
-  sessionStorage.setItem('darb_access',data.tokens.accessToken);
-  sessionStorage.setItem('darb_refresh',data.tokens.refreshToken);
-  const me=await raw('/auth/me');
-  if(me.role!=='ADMIN'){sessionStorage.removeItem('darb_access');sessionStorage.removeItem('darb_refresh');throw new Error('هذا البريد غير مصرح له بإدارة دَرْب.');}
-  $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');
-  await load();
- }catch(e){sessionStorage.removeItem('darb_access');sessionStorage.removeItem('darb_refresh');message(e.message,true);}
+const GOOGLE_WEB_CLIENT_ID = '1005839784892-3b1sctr2c32hfa6ssq17nunfhn2d9pji.apps.googleusercontent.com';
+const PROD_API = 'https://darb-api-yapv.onrender.com/api/v1';
+const LOCAL_API = (window.location.origin || 'http://localhost:3000') + '/api/v1';
+const isLocalPreviewHost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname) || window.location.protocol === 'http:';
+
+let API = isLocalPreviewHost ? LOCAL_API : PROD_API;
+// Hold auth tokens strictly in JS runtime memory only
+let accessToken = null;
+let refreshToken = null;
+const token = () => accessToken;
+
+const $ = (id) => document.getElementById(id);
+
+let currentTab = 'pending';
+let ordersPage = 1;
+let ordersStatusFilter = '';
+let ordersTypeFilter = '';
+let vendorStatusFilter = '';
+let driverStatusFilter = '';
+let userRoleFilter = '';
+let userQuery = '';
+
+function notify(text, isError = false) {
+  const toast = $('toast');
+  toast.textContent = text;
+  toast.className = 'toast' + (isError ? ' bad' : '');
+  clearTimeout(notify._timer);
+  notify._timer = setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 3600);
 }
-function initializeGoogleLogin(){
- if(GOOGLE_WEB_CLIENT_ID.startsWith('REPLACE_')){message('يلزم ضبط Google Web Client ID قبل تفعيل تسجيل الدخول.',true);return;}
- if(!window.google?.accounts?.id){setTimeout(initializeGoogleLogin,250);return;}
- window.google.accounts.id.initialize({client_id:GOOGLE_WEB_CLIENT_ID,callback:handleGoogleCredential,auto_select:false});
- window.google.accounts.id.renderButton($('googleButton'),{theme:'outline',size:'large',shape:'pill',text:'signin_with',locale:'ar',width:320});
+
+function setLoginNotice(text, isError = false) {
+  const box = $('loginNotice');
+  box.textContent = text;
+  box.className = 'notice' + (isError ? ' bad' : '');
 }
-window.addEventListener('load',initializeGoogleLogin);
-async function load(){
- if(kind==='orders'){
-  const params=new URLSearchParams({page:String(ordersPage),limit:'20'});
-  if(ordersStatus)params.set('status',ordersStatus);if(ordersType)params.set('type',ordersType);
-  const result=await raw('/admin/orders?'+params.toString());
-  rows=result.items||[];ordersPages=result.pages||1;renderOrders(result);return;
- }
- if(kind==='zones'){
-  zones=await raw('/admin/delivery-zones');
-  renderZones();
-  return;
- }
- const [drivers,vendors]=await Promise.all([raw('/admin/drivers/pending'),raw('/admin/vendors/pending')]);
- $('driverCount').textContent=drivers.length;$('vendorCount').textContent=vendors.length;
- $('driverStat').textContent=drivers.length;$('vendorStat').textContent=vendors.length;
- rows=kind==='drivers'?drivers:vendors;render();
+
+function openModal({ title, contentNode, confirmLabel = 'تأكيد', danger = false }) {
+  return new Promise((resolve) => {
+    $('modalTitle').textContent = title;
+    const body = $('modalBody');
+    body.replaceChildren(contentNode);
+    const confirmBtn = $('modalConfirmBtn');
+    const cancelBtn = $('modalCancelBtn');
+    confirmBtn.textContent = confirmLabel;
+    confirmBtn.className = danger ? 'btn-danger' : 'btn-primary';
+    $('modalBackdrop').classList.remove('hidden');
+
+    const cleanup = (val) => {
+      $('modalBackdrop').classList.add('hidden');
+      confirmBtn.onclick = null;
+      cancelBtn.onclick = null;
+      resolve(val);
+    };
+    confirmBtn.onclick = () => cleanup(true);
+    cancelBtn.onclick = () => cleanup(false);
+  });
 }
-function renderOrders(result){
- $('pageTitle').textContent='مراقبة الطلبات';$('listTitle').textContent='سجل طلبات دَرْب';$('panelBadge').textContent=(result.total||0)+' طلب';
- const list=$('list');list.innerHTML='';
- const filters=document.createElement('div');filters.className='filterbar';
- const status=document.createElement('select');status.setAttribute('aria-label','تصفية حسب الحالة');
- const statusOptions=[['','كل الحالات'],['PENDING','قيد الانتظار'],['ACCEPTED','مقبول'],['PREPARING','قيد التجهيز'],['READY','جاهز'],['ASSIGNED','تم تعيين سائق'],['PICKED_UP','تم الاستلام'],['DELIVERED','تم التسليم'],['CANCELLED','ملغي']];
- for(const [value,label] of statusOptions){const o=document.createElement('option');o.value=value;o.textContent=label;status.append(o);}status.value=ordersStatus;status.onchange=()=>{ordersStatus=status.value;ordersPage=1;load().catch(showLoadError);};
- const type=document.createElement('select');type.setAttribute('aria-label','تصفية حسب نوع الطلب');
- for(const [value,label] of [['','كل أنواع الطلبات'],['VENDOR_ORDER','طلبات المتاجر'],['PEER_DELIVERY','التوصيل المستقل']]){const o=document.createElement('option');o.value=value;o.textContent=label;type.append(o);}type.value=ordersType;type.onchange=()=>{ordersType=type.value;ordersPage=1;load().catch(showLoadError);};
- filters.append(status,type);list.append(filters);
- if(!rows.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='لا توجد طلبات تطابق عوامل التصفية.';list.append(empty);return;}
- const statusNames={PENDING:'قيد الانتظار',ACCEPTED:'مقبول',PREPARING:'قيد التجهيز',READY:'جاهز',ASSIGNED:'تم تعيين سائق',PICKED_UP:'تم الاستلام',DELIVERED:'تم التسليم',CANCELLED:'ملغي'};
- const typeNames={VENDOR_ORDER:'طلب متجر',PEER_DELIVERY:'توصيل مستقل'};
- for(const order of rows){
-  const card=document.createElement('article');card.className='order-card';
-  const top=document.createElement('div');top.className='order-top';
-  const number=document.createElement('strong');number.textContent='#'+order.orderNumber;
-  const badge=document.createElement('span');badge.className='badge';badge.textContent=statusNames[order.status]||order.status;
-  top.append(number,badge);
-  const meta=document.createElement('div');meta.className='order-meta';
-  const city=order.city?.names?.find(x=>x.locale==='ar')?.name||order.city?.code||'—';
-  const vendorName=order.vendor?.translations?.find(x=>x.locale==='ar')?.name||order.vendor?.translations?.[0]?.name||'—';
-  const values=[['النوع',typeNames[order.type]||order.type],['المدينة',city],['العميل',order.customer?.name||order.customer?.phone||'—'],['المتجر',order.type==='VENDOR_ORDER'?vendorName:'—'],['السائق',order.driver?.user?.name||order.driver?.user?.phone||'لم يعيّن'],['الإجمالي',(order.total??'—')+' '+(order.currency||'')],['الدفع',order.payment?.status||'—'],['تاريخ الطلب',order.createdAt?new Date(order.createdAt).toLocaleString('ar'):'—']];
-  for(const [label,value] of values){const cell=document.createElement('span');cell.textContent=label+': '+value;meta.append(cell);}
-  card.append(top,meta);list.append(card);
- }
- const pager=document.createElement('div');pager.className='pager';
- const prev=document.createElement('button');prev.className='outline';prev.textContent='السابق';prev.disabled=ordersPage<=1;prev.onclick=()=>{ordersPage--;load().catch(showLoadError);};
- const pageLabel=document.createElement('span');pageLabel.className='muted';pageLabel.textContent='صفحة '+ordersPage+' من '+ordersPages;
- const next=document.createElement('button');next.className='outline';next.textContent='التالي';next.disabled=ordersPage>=ordersPages;next.onclick=()=>{ordersPage++;load().catch(showLoadError);};
- pager.append(prev,pageLabel,next);list.append(pager);
+
+async function confirmDialog(title, message, danger = false) {
+  const p = document.createElement('p');
+  p.style.margin = '0';
+  p.style.color = 'var(--muted)';
+  p.textContent = message;
+  return openModal({ title, contentNode: p, confirmLabel: 'تأكيد', danger });
 }
-function showLoadError(e){$('list').innerHTML='';const el=document.createElement('div');el.className='error';el.textContent=e.message;$('list').append(el);}
-function render(){
- $('pageTitle').textContent=kind==='drivers'?'طلبات انضمام السائقين':'طلبات انضمام المتاجر';
- $('listTitle').textContent=kind==='drivers'?'السائقون بانتظار الاعتماد':'المتاجر بانتظار الاعتماد';
- $('panelBadge').textContent='تتطلب قرار الإدارة';
- const list=$('list');list.innerHTML='';
- if(!rows.length){list.innerHTML='<div class="empty">لا توجد طلبات معلقة حالياً.</div>';return;}
- for(const r of rows){
-  const user=r.user||{},city=r.city?.names?.find(x=>x.locale==='ar')?.name||r.city?.code||'',translation=r.translations?.find(x=>x.locale==='ar')||r.translations?.[0]||{};
-  const title=kind==='drivers'?(user.name||'سائق جديد'):(translation.name||'متجر جديد');
-  const detail=kind==='drivers'?(r.vehicleType||'نوع المركبة غير محدد'):(r.type||'نوع النشاط غير محدد');
-  const lines=[user.phone||user.email||'لا يوجد رقم تواصل',detail,city?'المدينة: '+city:'',user.email&&user.phone?'البريد: '+user.email:''];
-  if(kind==='vendors'){
-   if(r.commercialRegNo)lines.push('السجل التجاري: '+r.commercialRegNo);
-   const address=r.location?.address;if(address)lines.push('العنوان: '+address);
-   const cities=(r.cities||[]).map(x=>x.city?.names?.find(n=>n.locale==='ar')?.name||x.city?.code).filter(Boolean);
-   if(cities.length)lines.push('نطاق العمل: '+cities.join('، '));
-   if(translation.description)lines.push('الوصف: '+translation.description);
-  }else if(r.createdAt){lines.push('تاريخ التقديم: '+new Date(r.createdAt).toLocaleDateString('ar'));}
-  const el=document.createElement('article');el.className='request';
-  const info=document.createElement('div');info.style.flex='1';
-  const heading=document.createElement('h3');heading.textContent=title;
-  const meta=document.createElement('div');meta.className='meta';meta.textContent=lines.filter(Boolean).join(' • ');
-  info.append(heading,meta);
-  const actions=document.createElement('div');actions.className='actions';
-  const approve=document.createElement('button');approve.textContent='اعتماد الطلب';approve.onclick=()=>decide(r.id,'APPROVED',approve);
-  const reject=document.createElement('button');reject.className='danger';reject.textContent=kind==='drivers'?'تعليق الطلب':'رفض الطلب';reject.onclick=()=>decide(r.id,kind==='drivers'?'SUSPENDED':'REJECTED',reject);
-  actions.append(approve,reject);el.append(info,actions);list.append(el);
- }
+
+async function apiFetch(path, method = 'GET', body = null, auth = true) {
+  const headers = { Accept: 'application/json' };
+  if (body !== null) headers['Content-Type'] = 'application/json';
+  if (auth && token()) {
+    headers.Authorization='Bearer '+token();
+  }
+  let res = await fetch(API + path, {
+    method,
+    headers,
+    body: body !== null ? JSON.stringify(body) : undefined,
+  });
+
+  if (res.status === 401 && auth && refreshToken) {
+    const rr = await fetch(API + '/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (rr.ok) {
+      const refreshed = await rr.json();
+      accessToken = refreshed.accessToken;
+      refreshToken = refreshed.refreshToken;
+      headers.Authorization='Bearer '+token();
+      res = await fetch(API + path, {
+        method,
+        headers,
+        body: body !== null ? JSON.stringify(body) : undefined,
+      });
+    }
+  }
+
+  const data = await res.json().catch(() => ({ message: 'استجابة غير مفهومة من الخادم' }));
+  if (!res.ok) {
+    const msg = Array.isArray(data.message) ? data.message.join('، ') : (data.message || 'فشل الطلب');
+    throw new Error(msg);
+  }
+  return data;
 }
-function renderZones(){
- $('pageTitle').textContent='مناطق ورسوم التوصيل';
- $('listTitle').textContent='إعدادات رسوم المدن';
- $('panelBadge').textContent='تُطبق على طلبات المتاجر';
- const list=$('list');list.innerHTML='';
- if(!zones.length){list.innerHTML='<div class="empty">لا توجد مناطق توصيل مُعدة حالياً. لا يمكن إضافة مدينة من هذه الشاشة لأن واجهة إدارة المدن غير متاحة ضمن الخادم الحالي.</div>';return;}
- const grid=document.createElement('div');grid.className='zone-grid';
- for(const zone of zones){
-  const city=zone.city?.names?.find(x=>x.locale==='ar')?.name||zone.city?.code||'مدينة غير معروفة';
-  const card=document.createElement('article');card.className='zone-card';
-  const title=document.createElement('h3');title.textContent=city;
-  const subtitle=document.createElement('div');subtitle.className='muted';subtitle.style.fontSize='12px';subtitle.textContent=zone.name+' · '+(zone.city?.code||'');
-  const fields=document.createElement('div');fields.className='zone-fields';
-  const makeField=(label,value,name)=>{const wrap=document.createElement('label');wrap.textContent=label;const input=document.createElement('input');input.type=name==='name'?'text':'number';if(name!=='name'){input.min='0';input.step='0.01';}input.required=true;input.value=String(value??0);input.dataset.field=name;wrap.append(input);fields.append(wrap);};
-  makeField('اسم المنطقة',zone.name,'name');
-  makeField('الرسوم الأساسية (ل.س)',zone.feeBase,'feeBase');
-  makeField('رسوم كل كم (ل.س)',zone.feePerKm,'feePerKm');
-  const save=document.createElement('button');save.className='zone-save';save.textContent='حفظ التعديلات';
-  save.onclick=async()=>{const inputs=[...fields.querySelectorAll('input')];if(inputs.some(i=>!i.value.trim()||Number(i.value)<0)){alert('أدخل قيماً صحيحة غير سالبة.');return;}save.disabled=true;save.textContent='جارٍ الحفظ…';try{await raw('/admin/delivery-zones/'+zone.id,'PATCH',{name:fields.querySelector('[data-field="name"]').value.trim(),feeBase:Number(fields.querySelector('[data-field="feeBase"]').value),feePerKm:Number(fields.querySelector('[data-field="feePerKm"]').value)});await load();}catch(e){alert(e.message);save.disabled=false;save.textContent='حفظ التعديلات';}};
-  card.append(title,subtitle,fields,save);grid.append(card);
- }
- list.append(grid);
+
+async function enterDashboard(authPayload) {
+  accessToken = authPayload.tokens.accessToken;
+  refreshToken = authPayload.tokens.refreshToken;
+  const me = await apiFetch('/auth/me');
+  if (me.role!=='ADMIN') {
+    accessToken = null;
+    refreshToken = null;
+    throw new Error('هذا الحساب لا يحمل صلاحية ADMIN لإدارة دَرْب.');
+  }
+  $('loginView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  await refreshAll();
 }
-async function decide(id,status,button){const label=button.textContent;if(!confirm(status==='APPROVED'?'تأكيد اعتماد هذا الطلب؟':'تأكيد رفض/تعليق هذا الطلب؟'))return;try{button.disabled=true;await raw('/admin/'+kind+'/'+id+'/status','PATCH',{status});await load();}catch(e){alert(e.message);button.disabled=false;button.textContent=label;}}
-document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=async()=>{kind=b.dataset.kind;document.querySelectorAll('[data-kind]').forEach(x=>x.classList.toggle('active',x===b));try{await load();}catch(e){$('list').innerHTML='<div class="error"></div>';$('list').firstChild.textContent=e.message;}});
-$('refresh').onclick=async()=>{try{await load();}catch(e){alert(e.message);}};
-$('logout').onclick=()=>{sessionStorage.clear();location.reload();};
-</script></body></html>
+
+async function handleGoogleCredential(response) {
+  try {
+    setLoginNotice('جارٍ التحقق من حساب Google…');
+    const data = await apiFetch('/auth/google', 'POST', { idToken: response.credential, locale: 'ar' }, false);
+    await enterDashboard(data);
+  } catch (e) {
+    accessToken = null;
+    refreshToken = null;
+    setLoginNotice(e.message, true);
+  }
+}
+
+async function loginWithPreviewAdmin() {
+  try {
+    setLoginNotice('جارٍ فتح جلسة المعاينة…');
+    const data = await apiFetch('/auth/preview-admin', 'POST', {}, false);
+    await enterDashboard(data);
+  } catch (e) {
+    setLoginNotice(e.message, true);
+  }
+}
+
+function initializeGoogleLogin() {
+  if (GOOGLE_WEB_CLIENT_ID.startsWith('REPLACE_')) {
+    setLoginNotice('يلزم ضبط Google Web Client ID قبل تفعيل تسجيل الدخول.', true);
+    return;
+  }
+  if (!window.google?.accounts?.id) {
+    setTimeout(initializeGoogleLogin, 250);
+    return;
+  }
+  window.google.accounts.id.initialize({
+    client_id: GOOGLE_WEB_CLIENT_ID,
+    callback: handleGoogleCredential,
+    auto_select: false,
+  });
+  window.google.accounts.id.renderButton($('googleButton'), {
+    theme: 'outline',
+    size: 'large',
+    shape: 'rectangular',
+    text: 'signin_with',
+    locale: 'ar',
+    width: 320,
+  });
+}
+
+function statusMeta(status) {
+  const map = {
+    PENDING: ['قيد الانتظار', 'state-warn'],
+    ACCEPTED: ['مقبول', 'state-ok'],
+    PREPARING: ['قيد التحضير', 'state-warn'],
+    READY: ['جاهز', 'state-ok'],
+    ASSIGNED: ['تم تعيين مندوب', 'state-ok'],
+    PICKED_UP: ['في الطريق', 'state-ok'],
+    DELIVERED: ['تم التسليم', 'state-ok'],
+    CANCELLED: ['ملغي', 'state-bad'],
+    APPROVED: ['معتمد', 'state-ok'],
+    REJECTED: ['مرفوض', 'state-bad'],
+    SUSPENDED: ['موقوف', 'state-bad'],
+  };
+  return map[status] || [status, ''];
+}
+
+function formatMoney(val) {
+  return new Intl.NumberFormat('en-US').format(Number(val || 0));
+}
+
+function cityName(city) {
+  return city?.names?.find((x) => x.locale === 'ar')?.name || city?.names?.[0]?.name || city?.code || '—';
+}
+
+async function refreshStats() {
+  try {
+    const stats = await apiFetch('/admin/stats');
+    $('kpiActiveOrders').textContent = formatMoney(stats.activeOrders);
+    $('kpiTotalOrders').textContent = formatMoney(stats.orders);
+    const pendingSum = Number(stats.pendingDrivers || 0) + Number(stats.pendingVendors || 0);
+    $('kpiPendingTotal').textContent = formatMoney(pendingSum);
+    $('navPendingCount').textContent = String(pendingSum);
+    $('kpiGmv').textContent = formatMoney(stats.gmv);
+  } catch (_) {}
+}
+
+async function refreshAll() {
+  const root = $('contentRoot');
+  root.replaceChildren(elText('div', 'empty-box', 'جارٍ تحميل البيانات…'));
+  await refreshStats();
+
+  try {
+    if (currentTab === 'pending') await loadPending(root);
+    else if (currentTab === 'vendors') await loadDirectory(root, 'vendors');
+    else if (currentTab === 'drivers') await loadDirectory(root, 'drivers');
+    else if (currentTab === 'users') await loadUsers(root);
+    else if (currentTab === 'cities') await loadCitiesAndZones(root);
+    else if (currentTab === 'orders') await loadOrders(root);
+    else if (currentTab === 'settings') await loadSettingsAndAudit(root);
+  } catch (err) {
+    root.replaceChildren(elText('div', 'error-box', err.message || 'تعذر تحميل البيانات'));
+  }
+}
+
+function elText(tag, cls, text) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  node.textContent = text;
+  return node;
+}
+
+async function loadPending(root) {
+  $('breadcrumb').textContent = 'إدارة دَرْب / الموافقات المعلقة';
+  $('pageTitle').textContent = 'طلبات انضمام السائقين والمتاجر';
+  $('panelTitle').textContent = 'قائمة المراجعة والاعتماد';
+
+  const [drivers, vendors] = await Promise.all([
+    apiFetch('/admin/drivers/pending'),
+    apiFetch('/admin/vendors/pending'),
+  ]);
+  $('panelSummary').textContent = `${drivers.length} سائق · ${vendors.length} متجر`;
+  $('navPendingCount').textContent = String(drivers.length + vendors.length);
+
+  if (!drivers.length && !vendors.length) {
+    root.replaceChildren(elText('div', 'empty-box', 'لا توجد طلبات انضمام معلقة حالياً.'));
+    return;
+  }
+
+  const list = document.createElement('div');
+  list.className = 'row-list';
+
+  for (const d of drivers) {
+    const item = document.createElement('article');
+    item.className = 'row-item';
+    const info = document.createElement('div');
+    info.className = 'row-info';
+    info.append(
+      elText('h3', '', `${d.user?.name || 'سائق جديد'} — سائق`),
+      elText('div', 'row-meta', `${d.user?.phone || d.user?.email || '—'} · المركبة: ${d.vehicleType || '—'} · المدينة: ${cityName(d.city)}`)
+    );
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+    const okBtn = elText('button', 'btn-primary', 'اعتماد السائق');
+    okBtn.onclick = async () => {
+      if (!(await confirmDialog('اعتماد السائق', 'تأكيد اعتماد السائق وتفعيل استقبال الطلبات؟'))) return;
+      await apiFetch(`/admin/drivers/${d.id}/status`, 'PATCH', { status: 'APPROVED' });
+      notify('تم اعتماد السائق');
+      await refreshAll();
+    };
+    const rejBtn = elText('button', 'btn-danger', 'تعليق');
+    rejBtn.onclick = async () => {
+      if (!(await confirmDialog('تعليق الطلب', 'تأكيد تعليق طلب السائق؟', true))) return;
+      await apiFetch(`/admin/drivers/${d.id}/status`, 'PATCH', { status: 'SUSPENDED' });
+      notify('تم تعليق السائق');
+      await refreshAll();
+    };
+    actions.append(okBtn, rejBtn);
+    item.append(info, actions);
+    list.append(item);
+  }
+
+  for (const v of vendors) {
+    const tr = v.translations?.find((t) => t.locale === 'ar') || v.translations?.[0] || {};
+    const item = document.createElement('article');
+    item.className = 'row-item';
+    const info = document.createElement('div');
+    info.className = 'row-info';
+    info.append(
+      elText('h3', '', `${tr.name || 'متجر جديد'} — متجر`),
+      elText('div', 'row-meta', `${v.type || '—'} · الهاتف: ${v.user?.phone || '—'} · السجل: ${v.commercialRegNo || '—'} · ${v.location?.address || ''}`)
+    );
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+    const okBtn = elText('button', 'btn-primary', 'اعتماد المتجر');
+    okBtn.onclick = async () => {
+      if (!(await confirmDialog('اعتماد المتجر', 'تأكيد اعتماد المتجر وظهوره للعملاء؟'))) return;
+      await apiFetch(`/admin/vendors/${v.id}/status`, 'PATCH', { status: 'APPROVED' });
+      notify('تم اعتماد المتجر');
+      await refreshAll();
+    };
+    const rejBtn = elText('button', 'btn-danger', 'رفض');
+    rejBtn.onclick = async () => {
+      if (!(await confirmDialog('رفض المتجر', 'تأكيد رفض طلب انضمام المتجر؟', true))) return;
+      await apiFetch(`/admin/vendors/${v.id}/status`, 'PATCH', { status: 'REJECTED' });
+      notify('تم رفض الطلب');
+      await refreshAll();
+    };
+    actions.append(okBtn, rejBtn);
+    item.append(info, actions);
+    list.append(item);
+  }
+
+  root.replaceChildren(list);
+}
+
+async function loadDirectory(root, kind) {
+  const isVendors = kind === 'vendors';
+  $('breadcrumb').textContent = `إدارة دَرْب / ${isVendors ? 'دليل المتاجر' : 'دليل السائقين'}`;
+  $('pageTitle').textContent = isVendors ? 'إدارة المتاجر المسجلة' : 'إدارة السائقين المسجلين';
+  $('panelTitle').textContent = isVendors ? 'كافة المتاجر' : 'كافة السائقين';
+
+  const currentFilter = isVendors ? vendorStatusFilter : driverStatusFilter;
+  const rows = await apiFetch(`/admin/${kind}${currentFilter ? '?status=' + currentFilter : ''}`);
+  $('panelSummary').textContent = `${rows.length} سجل`;
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  const select = document.createElement('select');
+  for (const [val, lbl] of [['', 'كل الحالات'], ['APPROVED', 'معتمد'], ['PENDING', 'قيد الانتظار'], ['SUSPENDED', 'موقوف'], ['REJECTED', 'مرفوض']]) {
+    const o = document.createElement('option');
+    o.value = val;
+    o.textContent = lbl;
+    select.append(o);
+  }
+  select.value = currentFilter;
+  select.onchange = () => {
+    if (isVendors) vendorStatusFilter = select.value;
+    else driverStatusFilter = select.value;
+    refreshAll();
+  };
+  toolbar.append(select);
+
+  if (!rows.length) {
+    root.replaceChildren(toolbar, elText('div', 'empty-box', 'لا توجد نتائج مطابقة.'));
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  for (const col of ['الاسم', 'التفاصيل', 'الهاتف', 'الحالة', 'إجراء']) {
+    headRow.append(elText('th', '', col));
+  }
+  thead.append(headRow);
+  const tbody = document.createElement('tbody');
+
+  for (const row of rows) {
+    const tr = document.createElement('tr');
+    const name = isVendors
+      ? (row.translations?.find((t) => t.locale === 'ar')?.name || row.translations?.[0]?.name || 'متجر')
+      : (row.user?.name || 'سائق');
+    const detail = isVendors
+      ? `${row.type || '—'} · ${row.isOpen === false ? 'مغلق' : 'مفتوح'}`
+      : `${row.vehicleType || '—'} · ${row.isOnline ? 'متصل' : 'غير متصل'}`;
+    const [statusLabel, statusClass] = statusMeta(row.status);
+    tr.append(
+      elText('td', '', name),
+      elText('td', '', detail),
+      elText('td', 'tabular', row.user?.phone || '—'),
+      elText('td', `state-text ${statusClass}`, statusLabel)
+    );
+    const actTd = document.createElement('td');
+    const actWrap = document.createElement('div');
+    actWrap.className = 'row-actions';
+    if (row.status !== 'APPROVED') {
+      const b = elText('button', 'btn-primary', 'اعتماد');
+      b.onclick = async () => {
+        await apiFetch(`/admin/${kind}/${row.id}/status`, 'PATCH', { status: 'APPROVED' });
+        notify('تم تحديث الحالة إلى معتمد');
+        refreshAll();
+      };
+      actWrap.append(b);
+    }
+    if (row.status !== 'SUSPENDED') {
+      const b = elText('button', 'btn-danger', 'إيقاف');
+      b.onclick = async () => {
+        await apiFetch(`/admin/${kind}/${row.id}/status`, 'PATCH', { status: 'SUSPENDED' });
+        notify('تم إيقاف الحساب');
+        refreshAll();
+      };
+      actWrap.append(b);
+    }
+    actTd.append(actWrap);
+    tr.append(actTd);
+    tbody.append(tr);
+  }
+
+  table.append(thead, tbody);
+  wrap.append(table);
+  root.replaceChildren(toolbar, wrap);
+}
+
+async function loadUsers(root) {
+  $('breadcrumb').textContent = 'إدارة دَرْب / المستخدمون';
+  $('pageTitle').textContent = 'إدارة المستخدمين والصلاحيات';
+  $('panelTitle').textContent = 'دليل الحسابات';
+
+  const params = new URLSearchParams();
+  if (userRoleFilter) params.set('role', userRoleFilter);
+  if (userQuery) params.set('q', userQuery);
+  const rows = await apiFetch('/admin/users' + (params.toString() ? '?' + params.toString() : ''));
+  $('panelSummary').textContent = `${rows.length} مستخدم`;
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  const searchInput = document.createElement('input');
+  searchInput.placeholder = 'ابحث بالاسم أو الهاتف أو البريد…';
+  searchInput.value = userQuery;
+  const searchBtn = elText('button', 'btn-primary', 'بحث');
+  searchBtn.onclick = () => {
+    userQuery = searchInput.value.trim();
+    refreshAll();
+  };
+  const roleSelect = document.createElement('select');
+  for (const [val, lbl] of [['', 'كل الصلاحيات'], ['CUSTOMER', 'عميل'], ['DRIVER', 'سائق'], ['VENDOR', 'متجر'], ['ADMIN', 'إدارة']]) {
+    const o = document.createElement('option');
+    o.value = val;
+    o.textContent = lbl;
+    roleSelect.append(o);
+  }
+  roleSelect.value = userRoleFilter;
+  roleSelect.onchange = () => {
+    userRoleFilter = roleSelect.value;
+    refreshAll();
+  };
+  toolbar.append(searchInput, roleSelect, searchBtn);
+
+  if (!rows.length) {
+    root.replaceChildren(toolbar, elText('div', 'empty-box', 'لا توجد حسابات مطابقة.'));
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const htr = document.createElement('tr');
+  for (const c of ['الاسم', 'الهاتف', 'البريد', 'الصلاحية', 'تعديل الصلاحية']) htr.append(elText('th', '', c));
+  thead.append(htr);
+  const tbody = document.createElement('tbody');
+
+  for (const u of rows) {
+    const tr = document.createElement('tr');
+    tr.append(
+      elText('td', '', u.name || 'مستخدم دَرْب'),
+      elText('td', 'tabular', u.phone || '—'),
+      elText('td', '', u.email || '—'),
+      elText('td', 'tabular', u.role)
+    );
+    const td = document.createElement('td');
+    const sel = document.createElement('select');
+    for (const r of ['CUSTOMER', 'DRIVER', 'VENDOR', 'ADMIN']) {
+      const o = document.createElement('option');
+      o.value = r;
+      o.textContent = r;
+      sel.append(o);
+    }
+    sel.value = u.role;
+    sel.onchange = async () => {
+      const ok = await confirmDialog('تغيير الصلاحية', `هل تريد تغيير صلاحية ${u.name || u.phone} إلى ${sel.value}؟`);
+      if (!ok) {
+        sel.value = u.role;
+        return;
+      }
+      await apiFetch(`/admin/users/${u.id}/role`, 'PATCH', { role: sel.value });
+      notify('تم تحديث صلاحية المستخدم');
+      refreshAll();
+    };
+    td.append(sel);
+    tr.append(td);
+    tbody.append(tr);
+  }
+  table.append(thead, tbody);
+  wrap.append(table);
+  root.replaceChildren(toolbar, wrap);
+}
+
+async function loadCitiesAndZones(root) {
+  $('breadcrumb').textContent = 'إدارة دَرْب / المدن ومناطق التوصيل';
+  $('pageTitle').textContent = 'المدن السورية ومناطق التسعير';
+  $('panelTitle').textContent = 'إعدادات المدن والرسوم';
+
+  const [cities, zones] = await Promise.all([
+    apiFetch('/admin/cities'),
+    apiFetch('/admin/delivery-zones'),
+  ]);
+  $('panelSummary').textContent = `${cities.length} مدينة · ${zones.length} منطقة توصيل`;
+
+  const actionsBar = document.createElement('div');
+  actionsBar.className = 'toolbar';
+
+  const addCityBtn = elText('button', 'btn-primary', 'إضافة مدينة جديدة');
+  addCityBtn.onclick = async () => {
+    const form = document.createElement('div');
+    form.style.display = 'grid';
+    form.style.gap = '10px';
+    const codeIn = document.createElement('input'); codeIn.placeholder = 'الرمز (مثل TAR)';
+    const arIn = document.createElement('input'); arIn.placeholder = 'الاسم بالعربية (مثل طرطوس)';
+    const enIn = document.createElement('input'); enIn.placeholder = 'الاسم بالإنجليزية (مثل Tartus)';
+    form.append(codeIn, arIn, enIn);
+    const ok = await openModal({ title: 'إضافة مدينة', contentNode: form, confirmLabel: 'حفظ المدينة' });
+    if (!ok) return;
+    await apiFetch('/admin/cities', 'POST', {
+      code: codeIn.value.trim().toUpperCase(),
+      nameAr: arIn.value.trim(),
+      nameEn: enIn.value.trim() || arIn.value.trim(),
+      countryCode: 'SY',
+    });
+    notify('تمت إضافة المدينة');
+    refreshAll();
+  };
+
+  const addZoneBtn = elText('button', 'btn-outline', 'إضافة منطقة توصيل');
+  addZoneBtn.onclick = async () => {
+    const form = document.createElement('div');
+    form.style.display = 'grid';
+    form.style.gap = '10px';
+    const citySel = document.createElement('select');
+    for (const c of cities) {
+      const o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = `${cityName(c)} (${c.code})`;
+      citySel.append(o);
+    }
+    const nameIn = document.createElement('input'); nameIn.placeholder = 'اسم المنطقة (مثلاً المركزية)';
+    const baseIn = document.createElement('input'); baseIn.type = 'number'; baseIn.placeholder = 'الرسوم الأساسية (SYP)';
+    const kmIn = document.createElement('input'); kmIn.type = 'number'; kmIn.placeholder = 'لكل كم (SYP)';
+    form.append(citySel, nameIn, baseIn, kmIn);
+    const ok = await openModal({ title: 'إضافة منطقة توصيل', contentNode: form, confirmLabel: 'حفظ المنطقة' });
+    if (!ok) return;
+    await apiFetch('/admin/delivery-zones', 'POST', {
+      cityId: citySel.value,
+      name: nameIn.value.trim() || 'منطقة رئيسية',
+      feeBase: Number(baseIn.value || 0),
+      feePerKm: Number(kmIn.value || 0),
+    });
+    notify('تم إنشاء منطقة التوصيل');
+    refreshAll();
+  };
+
+  actionsBar.append(addCityBtn, addZoneBtn);
+
+  // Cities row list
+  const citiesTitle = elText('h3', '', 'المدن المفعّلة');
+  const citiesList = document.createElement('div');
+  citiesList.className = 'row-list';
+  for (const c of cities) {
+    const item = document.createElement('div');
+    item.className = 'row-item';
+    const info = document.createElement('div');
+    info.append(
+      elText('strong', '', `${cityName(c)} (${c.code})`),
+      elText('div', 'row-meta', c.isActive ? 'مفعّلة للطلبات' : 'متوقفة مؤقتاً')
+    );
+    const toggleBtn = elText('button', c.isActive ? 'btn-danger' : 'btn-primary', c.isActive ? 'تعطيل' : 'تفعيل');
+    toggleBtn.onclick = async () => {
+      await apiFetch(`/admin/cities/${c.id}`, 'PATCH', { isActive: !c.isActive });
+      notify('تم تحديث حالة المدينة');
+      refreshAll();
+    };
+    item.append(info, toggleBtn);
+    citiesList.append(item);
+  }
+
+  // Zones grid
+  const zonesTitle = elText('h3', '', 'مناطق التسعير');
+  const zoneGrid = document.createElement('div');
+  zoneGrid.className = 'zone-grid';
+  for (const z of zones) {
+    const box = document.createElement('article');
+    box.className = 'zone-box';
+    const title = elText('strong', '', `${cityName(z.city)} · ${z.name}`);
+    const fields = document.createElement('div');
+    fields.className = 'zone-fields';
+
+    const baseGroup = document.createElement('div'); baseGroup.className = 'field-group';
+    const baseIn = document.createElement('input'); baseIn.type = 'number'; baseIn.value = String(z.feeBase ?? 0);
+    baseGroup.append(elText('label', '', 'الأساسي (SYP)'), baseIn);
+
+    const kmGroup = document.createElement('div'); kmGroup.className = 'field-group';
+    const kmIn = document.createElement('input'); kmIn.type = 'number'; kmIn.value = String(z.feePerKm ?? 0);
+    kmGroup.append(elText('label', '', 'لكل كم (SYP)'), kmIn);
+
+    fields.append(baseGroup, kmGroup);
+
+    const btns = document.createElement('div');
+    btns.className = 'row-actions';
+    const saveBtn = elText('button', 'btn-primary', 'حفظ الرسوم');
+    saveBtn.onclick = async () => {
+      const fb = Number(baseIn.value);
+      const fk = Number(kmIn.value);
+      if (fb < 0 || fk < 0 || Number.isNaN(fb) || Number.isNaN(fk)) {
+        notify('أدخل قيماً صحيحة غير سالبة', true);
+        return;
+      }
+      await apiFetch(`/admin/delivery-zones/${z.id}`, 'PATCH', { feeBase: fb, feePerKm: fk });
+      notify('تم حفظ رسوم المنطقة');
+      refreshAll();
+    };
+    const delBtn = elText('button', 'btn-danger', 'حذف');
+    delBtn.onclick = async () => {
+      if (!(await confirmDialog('حذف منطقة التوصيل', `هل تريد حذف منطقة ${z.name}؟`, true))) return;
+      await apiFetch(`/admin/delivery-zones/${z.id}`, 'DELETE');
+      notify('تم حذف المنطقة');
+      refreshAll();
+    };
+    btns.append(saveBtn, delBtn);
+    box.append(title, fields, btns);
+    zoneGrid.append(box);
+  }
+
+  root.replaceChildren(actionsBar, citiesTitle, citiesList, zonesTitle, zoneGrid);
+}
+
+async function loadOrders(root) {
+  $('breadcrumb').textContent = 'إدارة دَرْب / مراقبة الطلبات';
+  $('pageTitle').textContent = 'سجل الطلبات المباشر';
+  $('panelTitle').textContent = 'كل الطلبات';
+
+  const params = new URLSearchParams({ page: String(ordersPage), limit: '20' });
+  if (ordersStatusFilter) params.set('status', ordersStatusFilter);
+  if (ordersTypeFilter) params.set('type', ordersTypeFilter);
+
+  const result = await apiFetch('/admin/orders?' + params.toString());
+  const items = result.items || [];
+  $('panelSummary').textContent = `${result.total || 0} طلب`;
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  const sSel = document.createElement('select');
+  for (const [val, lbl] of [['', 'كل الحالات'], ['PENDING', 'قيد الانتظار'], ['ACCEPTED', 'مقبول'], ['PREPARING', 'قيد التحضير'], ['READY', 'جاهز'], ['ASSIGNED', 'تم تعيين مندوب'], ['PICKED_UP', 'في الطريق'], ['DELIVERED', 'تم التسليم'], ['CANCELLED', 'ملغي']]) {
+    const o = document.createElement('option'); o.value = val; o.textContent = lbl; sSel.append(o);
+  }
+  sSel.value = ordersStatusFilter;
+  sSel.onchange = () => { ordersStatusFilter = sSel.value; ordersPage = 1; refreshAll(); };
+
+  const tSel = document.createElement('select');
+  for (const [val, lbl] of [['', 'كل الأنواع'], ['VENDOR_ORDER', 'طلب متجر'], ['PEER_DELIVERY', 'توصيل مستقل']]) {
+    const o = document.createElement('option'); o.value = val; o.textContent = lbl; tSel.append(o);
+  }
+  tSel.value = ordersTypeFilter;
+  tSel.onchange = () => { ordersTypeFilter = tSel.value; ordersPage = 1; refreshAll(); };
+  toolbar.append(sSel, tSel);
+
+  if (!items.length) {
+    root.replaceChildren(toolbar, elText('div', 'empty-box', 'لا توجد طلبات مطابقة لعوامل التصفية.'));
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const htr = document.createElement('tr');
+  for (const h of ['رقم الطلب', 'النوع', 'المدينة', 'العميل', 'المتجر / السائق', 'الإجمالي', 'الحالة']) htr.append(elText('th', '', h));
+  thead.append(htr);
+  const tbody = document.createElement('tbody');
+
+  for (const o of items) {
+    const tr = document.createElement('tr');
+    const [stLabel, stCls] = statusMeta(o.status);
+    const vendorName = o.vendor?.translations?.[0]?.name || '—';
+    const driverName = o.driver?.user?.name || 'بانتظار مندوب';
+    tr.append(
+      elText('td', 'tabular', '#' + o.orderNumber),
+      elText('td', '', o.type === 'PEER_DELIVERY' ? 'توصيل مستقل' : 'طلب متجر'),
+      elText('td', '', cityName(o.city)),
+      elText('td', '', o.customer?.name || o.customer?.phone || '—'),
+      elText('td', '', `${o.type === 'VENDOR_ORDER' ? vendorName : 'مسار خاص'} · ${driverName}`),
+      elText('td', 'tabular', `${formatMoney(o.total)} ${o.currency || 'SYP'}`),
+      elText('td', `state-text ${stCls}`, stLabel)
+    );
+    tbody.append(tr);
+  }
+  table.append(thead, tbody);
+  wrap.append(table);
+
+  const pager = document.createElement('div');
+  pager.className = 'pager';
+  const prevBtn = elText('button', 'btn-outline', 'السابق');
+  prevBtn.disabled = ordersPage <= 1;
+  prevBtn.onclick = () => { ordersPage--; refreshAll(); };
+  const pageLbl = elText('span', 'panel-meta tabular', `صفحة ${ordersPage} من ${result.pages || 1}`);
+  const nextBtn = elText('button', 'btn-outline', 'التالي');
+  nextBtn.disabled = ordersPage >= (result.pages || 1);
+  nextBtn.onclick = () => { ordersPage++; refreshAll(); };
+  pager.append(prevBtn, pageLbl, nextBtn);
+
+  root.replaceChildren(toolbar, wrap, pager);
+}
+
+async function loadSettingsAndAudit(root) {
+  $('breadcrumb').textContent = 'إدارة دَرْب / الإعدادات والتدقيق';
+  $('pageTitle').textContent = 'إعدادات المنصة وسجل التدقيق';
+  $('panelTitle').textContent = 'التحكم العام والرقابة';
+
+  const [settings, logs] = await Promise.all([
+    apiFetch('/admin/settings'),
+    apiFetch('/admin/audit-logs'),
+  ]);
+  $('panelSummary').textContent = `${logs.length} سجل تدقيق`;
+
+  const box = document.createElement('div');
+  box.className = 'zone-box';
+  const grid = document.createElement('div');
+  grid.className = 'zone-fields';
+
+  const commG = document.createElement('div'); commG.className = 'field-group';
+  const commIn = document.createElement('input'); commIn.type = 'number'; commIn.value = String(settings.commissionPercent ?? '10');
+  commG.append(elText('label', '', 'نسبة العمولة (%)'), commIn);
+
+  const phoneG = document.createElement('div'); phoneG.className = 'field-group';
+  const phoneIn = document.createElement('input'); phoneIn.value = String(settings.supportPhone ?? '');
+  phoneG.append(elText('label', '', 'هاتف الدعم'), phoneIn);
+
+  const maintG = document.createElement('div'); maintG.className = 'field-group';
+  const maintSel = document.createElement('select');
+  for (const [v, l] of [['false', 'النظام يعمل بشكل طبيعي'], ['true', 'تفعيل وضع الصيانة']]) {
+    const o = document.createElement('option'); o.value = v; o.textContent = l; maintSel.append(o);
+  }
+  maintSel.value = String(settings.maintenanceMode ?? 'false');
+  maintG.append(elText('label', '', 'حالة المنصة'), maintSel);
+
+  grid.append(commG, phoneG, maintG);
+  const saveBtn = elText('button', 'btn-primary', 'حفظ إعدادات المنصة');
+  saveBtn.onclick = async () => {
+    await apiFetch('/admin/settings', 'PATCH', {
+      commissionPercent: commIn.value.trim(),
+      supportPhone: phoneIn.value.trim(),
+      maintenanceMode: maintSel.value,
+    });
+    notify('تم حفظ الإعدادات');
+    refreshAll();
+  };
+  box.append(grid, saveBtn);
+
+  const logsTitle = elText('h3', '', 'أحدث إجراءات الإدارة');
+  const logList = document.createElement('div');
+  logList.className = 'row-list';
+  for (const l of logs) {
+    const item = document.createElement('div');
+    item.className = 'row-item';
+    const dt = l.createdAt ? new Date(l.createdAt).toLocaleString('ar') : '—';
+    item.append(
+      elText('strong', 'tabular', `${l.action} (${l.entityType})`),
+      elText('span', 'row-meta tabular', `${l.actor?.name || l.actor?.email || 'نظام'} · ${dt}`)
+    );
+    logList.append(item);
+  }
+
+  root.replaceChildren(box, logsTitle, logList);
+}
+
+// Navigation & Controls Wiring
+document.querySelectorAll('.side-nav button[data-tab]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    currentTab = btn.dataset.tab;
+    document.querySelectorAll('.side-nav button[data-tab]').forEach((b) => b.classList.toggle('active', b === btn));
+    refreshAll();
+  });
+});
+
+$('refreshBtn').addEventListener('click', () => refreshAll());
+$('previewLoginBtn').addEventListener('click', () => loginWithPreviewAdmin());
+
+$('apiEnvSelect').value = isLocalPreviewHost ? 'local' : 'prod';
+if (!isLocalPreviewHost) $('previewLoginBtn').classList.add('hidden');
+$('apiEnvSelect').addEventListener('change', (e) => {
+  const mode = e.target.value;
+  API = mode === 'local' ? LOCAL_API : PROD_API;
+  $('previewLoginBtn').classList.toggle('hidden', mode !== 'local');
+  setLoginNotice('تم تبديل الخادم المستهدف بنجاح.');
+});
+
+$('logoutBtn').addEventListener('click', async () => {
+  try {
+    if (refreshToken) await apiFetch('/auth/logout', 'POST', { refreshToken }, false);
+  } catch (_) {}
+  accessToken = null;
+  refreshToken = null;
+  $('appView').classList.add('hidden');
+  $('loginView').classList.remove('hidden');
+  setLoginNotice('تم تسجيل الخروج بأمان.');
+});
+
+function setAdminStyle(style) {
+  document.documentElement.setAttribute('data-style', style);
+  $('adminGlassBtn').setAttribute('aria-pressed', String(style === 'glass'));
+  $('adminStandardBtn').setAttribute('aria-pressed', String(style === 'standard'));
+}
+function setAdminTheme(dark) {
+  document.documentElement.classList.toggle('dark', dark);
+  $('adminLightBtn').setAttribute('aria-pressed', String(!dark));
+  $('adminDarkBtn').setAttribute('aria-pressed', String(dark));
+}
+$('adminGlassBtn').addEventListener('click', () => setAdminStyle('glass'));
+$('adminStandardBtn').addEventListener('click', () => setAdminStyle('standard'));
+$('adminLightBtn').addEventListener('click', () => setAdminTheme(false));
+$('adminDarkBtn').addEventListener('click', () => setAdminTheme(true));
+
+window.addEventListener('load', initializeGoogleLogin);
+</script>
+</body>
+</html>
