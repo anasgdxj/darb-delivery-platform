@@ -62,7 +62,7 @@ jobs:
           import sys
           pubspec, manifest = map(Path, sys.argv[1:])
           lines = pubspec.read_text().splitlines()
-          deps = ["  geolocator: ^13.0.2", "  url_launcher: ^6.3.1", "  firebase_core: ^3.8.1", "  firebase_messaging: ^15.1.6", "  package_info_plus: ^8.1.2", "  crypto: ^3.0.6", "  path_provider: ^2.1.5"]
+          deps = ["  geolocator: ^13.0.2", "  flutter_map: ^7.0.2", "  latlong2: ^0.9.1", "  url_launcher: ^6.3.1", "  firebase_core: ^3.8.1", "  firebase_messaging: ^15.1.6", "  package_info_plus: ^8.1.2", "  crypto: ^3.0.6", "  path_provider: ^2.1.5"]
           dep_index = next((i for i, line in enumerate(lines) if line.strip() == "dependencies:"), None)
           if dep_index is None: raise SystemExit("dependencies section missing")
           for dep in deps:
