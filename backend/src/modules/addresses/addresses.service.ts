@@ -10,16 +10,30 @@ export class AddressesService {
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
-    const locations = await this.prisma.$queryRaw<Array<{ id: string; hasLocation: boolean }>>`
-      SELECT "id", "point" IS NOT NULL AS "hasLocation"
+    const locations = await this.prisma.$queryRaw<Array<{
+      id: string;
+      hasLocation: boolean;
+      latitude: number | null;
+      longitude: number | null;
+    }>>`
+      SELECT
+        "id",
+        "point" IS NOT NULL AS "hasLocation",
+        ST_Y("point"::geometry) AS "latitude",
+        ST_X("point"::geometry) AS "longitude"
       FROM "Address"
       WHERE "userId" = ${userId}
     `;
-    const locationById = new Map(locations.map((item) => [item.id, item.hasLocation]));
-    return addresses.map((address) => ({
-      ...address,
-      hasLocation: locationById.get(address.id) === true,
-    }));
+    const locationById = new Map(locations.map((item) => [item.id, item]));
+    return addresses.map((address) => {
+      const location = locationById.get(address.id);
+      return {
+        ...address,
+        hasLocation: location?.hasLocation === true,
+        latitude: location?.latitude ?? null,
+        longitude: location?.longitude ?? null,
+      };
+    });
   }
 
   async create(userId: string, dto: { label?: string; details: string; latitude?: number; longitude?: number }) {
