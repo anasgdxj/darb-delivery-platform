@@ -153,8 +153,8 @@ def main() -> int:
     if "color: var(--on-primary)" not in site_text:
         failures.append("Public website primary buttons do not use the adaptive on-primary token")
 
-    admin_light = re.search(r":root\\s*\\{([^}]+)\\}", admin_text, re.DOTALL)
-    admin_dark = re.search(r"html\\.dark\\s*\\{([^}]+)\\}", admin_text, re.DOTALL)
+    admin_light = re.search(r":root\s*\{([^}]+)\}", admin_text, re.DOTALL)
+    admin_dark = re.search(r"html\.dark\s*\{([^}]+)\}", admin_text, re.DOTALL)
     if not admin_light or not admin_dark:
         failures.append("Admin web light/dark semantic token blocks are missing")
     else:
@@ -165,7 +165,7 @@ def main() -> int:
             "--warn": "#8A5A12",
             "--info": "#356D9A",
         }.items():
-            if not re.search(rf"{re.escape(token)}\\s*:\\s*{re.escape(color)}\\s*;", admin_light.group(1)):
+            if not re.search(rf"{re.escape(token)}\s*:\s*{re.escape(color)}\s*;", admin_light.group(1)):
                 failures.append(f"Admin light token {token} does not match {color}")
         for token, color in {
             "--muted": "#A4B2AA",
@@ -176,7 +176,7 @@ def main() -> int:
             "--primary": "#B9E4D2",
             "--on-primary": "#102B26",
         }.items():
-            if not re.search(rf"{re.escape(token)}\\s*:\\s*{re.escape(color)}\\s*;", admin_dark.group(1)):
+            if not re.search(rf"{re.escape(token)}\s*:\s*{re.escape(color)}\s*;", admin_dark.group(1)):
                 failures.append(f"Admin dark token {token} does not match {color}")
 
     for name, (foreground, background, minimum) in CONTRAST_PAIRS.items():
