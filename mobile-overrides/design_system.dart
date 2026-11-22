@@ -564,7 +564,7 @@ abstract final class DarbTheme {
       onSecondary: Color(0xFF102B26),
       error: Color(0xFFE47777),
       onError: Color(0xFF2A1010),
-      surface: Color(0xFF13221D),
+      surface: DarbColors.surface,
       onSurface: Color(0xFFF1F5F1),
     );
     return ThemeData(
@@ -573,7 +573,7 @@ abstract final class DarbTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: DarbAppearance.glass.value ? Colors.transparent : const Color(0xFF0B1512),
       canvasColor: const Color(0xFF13221D),
-      cardColor: const Color(0xFF13221D),
+      cardColor: DarbColors.surface,
       fontFamily: 'Arial',
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -585,8 +585,8 @@ abstract final class DarbTheme {
           TargetPlatform.windows: DarbPageTransitionsBuilder(),
         },
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF102B26),
+      appBarTheme: AppBarTheme(
+        backgroundColor: DarbAppearance.glass.value ? Colors.transparent : DarbColors.forest,
         foregroundColor: Color(0xFFF1F5F1),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -611,11 +611,11 @@ abstract final class DarbTheme {
         ),
       ),
       dialogTheme: const DialogThemeData(
-        backgroundColor: Color(0xFF13221D),
+        backgroundColor: DarbColors.surface,
         surfaceTintColor: Colors.transparent,
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: Color(0xFF13221D),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: DarbColors.surface,
         surfaceTintColor: Colors.transparent,
       ),
       dividerTheme: const DividerThemeData(color: Color(0xFF2A3B33)),
@@ -670,7 +670,7 @@ abstract final class DarbTheme {
       onSecondary: Color(0xFF102B26),
       error: Color(0xFFB94747),
       onError: Colors.white,
-      surface: Color(0xFFFFFFFF),
+      surface: DarbColors.surface,
       onSurface: Color(0xFF17231F),
     );
     return ThemeData(
@@ -705,13 +705,13 @@ abstract final class DarbTheme {
         circularTrackColor: Color(0xFFE4E9E3),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: Color(0xFFFFFFFF),
+        backgroundColor: DarbColors.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DarbRadius.xl)),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: Color(0xFFFFFFFF),
+        backgroundColor: DarbColors.surface,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
         dragHandleColor: Color(0xFFCBD5CE),
@@ -720,7 +720,7 @@ abstract final class DarbTheme {
         ),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: Color(0xFFF5F6F2),
+        backgroundColor: DarbAppearance.glass.value ? Colors.transparent : DarbColors.canvas,
         foregroundColor: Color(0xFF17231F),
         elevation: 0,
         centerTitle: false,
@@ -740,7 +740,7 @@ abstract final class DarbTheme {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Color(0xFFFFFFFF),
+        backgroundColor: DarbColors.surface,
         indicatorColor: Color(0xFFB9E4D2).withValues(alpha: .55),
         labelTextStyle: WidgetStateProperty.resolveWith((states) =>
           TextStyle(
