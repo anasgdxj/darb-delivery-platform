@@ -13,12 +13,18 @@ abstract final class DarbColors {
   static Color get forestSoft => const Color(0xFF1C443B);
   static Color get mint => const Color(0xFFB9E4D2);
   static Color get canvas => _dark ? const Color(0xFF0B1512) : const Color(0xFFF5F6F2);
-  static Color get surface => _dark ? const Color(0xFF13221D) : const Color(0xFFFFFFFF);
-  static Color get surfaceAlt => _dark ? const Color(0xFF1A2D26) : const Color(0xFFEAF2EC);
+  static Color get surface => DarbAppearance.glass.value
+      ? (_dark ? const Color(0xE613221D) : const Color(0xE6FFFFFF))
+      : (_dark ? const Color(0xFF13221D) : const Color(0xFFFFFFFF));
+  static Color get surfaceAlt => DarbAppearance.glass.value
+      ? (_dark ? const Color(0xD91A2D26) : const Color(0xD9EAF2EC))
+      : (_dark ? const Color(0xFF1A2D26) : const Color(0xFFEAF2EC));
   static Color get onForest => const Color(0xFFFFFFFF);
   static Color get primary => _dark ? mint : forest;
   static Color get onPrimary => _dark ? forest : const Color(0xFFFFFFFF);
-  static Color get surfaceElevated => _dark ? const Color(0xFF1A2D26) : surface;
+  static Color get surfaceElevated => DarbAppearance.glass.value
+      ? (_dark ? const Color(0xE61A2D26) : const Color(0xE6FFFFFF))
+      : (_dark ? const Color(0xFF1A2D26) : surface);
   static Color get onBrand => const Color(0xFFFFFFFF);
   static Color get brandForeground => _dark ? mint : forest;
   static Color get ink => _dark ? const Color(0xFFF1F5F1) : const Color(0xFF17231F);
@@ -252,6 +258,30 @@ abstract final class DarbElevation {
   ];
 }
 
+
+abstract final class DarbAppearance {
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
+  static const String _storageKey = 'darb_surface_style';
+  static final ValueNotifier<bool> glass = ValueNotifier<bool>(true);
+
+  static Future<void> restore() async {
+    try {
+      final saved = await _storage.read(key: _storageKey);
+      glass.value = saved != 'normal';
+    } catch (_) {
+      glass.value = true;
+    }
+  }
+
+  static Future<void> setGlass(bool value) async {
+    glass.value = value;
+    try {
+      await _storage.write(key: _storageKey, value: value ? 'glass' : 'normal');
+    } catch (_) {
+      // Keep the selected appearance for the current session if storage fails.
+    }
+  }
+}
 
 abstract final class DarbTheme {
   static const _storage = FlutterSecureStorage();
