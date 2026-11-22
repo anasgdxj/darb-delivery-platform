@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "mobile-overrides/**"
+      - "darb-workspace/darb-project/mobile/**"
       - "DARB-source.zip"
       - ".github/workflows/validate-mobile-overrides.yml"
       - ".github/workflows/build-android-release.yml"
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - "mobile-overrides/**"
+      - "darb-workspace/darb-project/mobile/**"
       - "DARB-source.zip"
       - ".github/workflows/validate-mobile-overrides.yml"
   workflow_dispatch:
