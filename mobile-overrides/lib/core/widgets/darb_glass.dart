@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/darb_design_system.dart';
 
@@ -346,7 +347,12 @@ class DarbGlassBottomNav extends StatelessWidget {
         return Expanded(
           child: InkWell(
             borderRadius: BorderRadius.circular(DarbRadius.md),
-            onTap: () => onSelect(i),
+            onTap: () {
+              if (!active) {
+                HapticFeedback.selectionClick();
+                onSelect(i);
+              }
+            },
             child: AnimatedContainer(
               duration:
                   DarbMotion.effectiveDuration(context, DarbMotion.fast),
@@ -363,13 +369,54 @@ class DarbGlassBottomNav extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  AnimatedContainer(
+                    duration: DarbMotion.effectiveDuration(
+                      context,
+                      DarbMotion.fast,
+                    ),
+                    curve: DarbMotion.emphasis,
+                    width: active ? 34 : 28,
+                    height: 3,
+                    margin: const EdgeInsets.only(bottom: 5),
+                    decoration: BoxDecoration(
+                      color: active ? DarbColors.mint : Colors.transparent,
+                      borderRadius: BorderRadius.circular(DarbRadius.pill),
+                      boxShadow: active && isDark
+                          ? [
+                              BoxShadow(
+                                color: DarbColors.mint.withValues(alpha: 0.38),
+                                blurRadius: 9,
+                                spreadRadius: 1,
+                              ),
+                            ]
+                          : null,
+                    ),
+                  ),
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      Icon(
-                        active ? item.selectedIcon : item.icon,
-                        size: 22,
-                        color: active ? primary : muted,
+                      AnimatedSwitcher(
+                        duration: DarbMotion.effectiveDuration(
+                          context,
+                          DarbMotion.standard,
+                        ),
+                        switchInCurve: DarbMotion.emphasis,
+                        switchOutCurve: DarbMotion.exit,
+                        transitionBuilder: (child, animation) =>
+                            FadeTransition(
+                          opacity: animation,
+                          child: ScaleTransition(
+                            scale: Tween<double>(begin: 0.72, end: 1)
+                                .animate(animation),
+                            child: child,
+                          ),
+                        ),
+                        child: Icon(
+                          active ? item.selectedIcon : item.icon,
+                          key: ValueKey(active),
+                          size: active ? 24 : 22,
+                          color: active ? primary : muted,
+                        ),
                       ),
                       if (item.badgeCount > 0)
                         PositionedDirectional(
@@ -400,14 +447,21 @@ class DarbGlassBottomNav extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 3),
-                  Text(
-                    item.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  AnimatedDefaultTextStyle(
+                    duration: DarbMotion.effectiveDuration(
+                      context,
+                      DarbMotion.fast,
+                    ),
+                    curve: DarbMotion.enter,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: active ? 11.5 : 11,
                       fontWeight: active ? FontWeight.w900 : FontWeight.w600,
                       color: active ? primary : muted,
+                    ),
+                    child: Text(
+                      item.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
