@@ -10,6 +10,7 @@ Future<void> darbFirebaseBackgroundHandler(RemoteMessage message) async {}
 
 class DarbNotifications {
   static bool _ready = false;
+  static String? lastError;
   static StreamSubscription<String>? _tokenSubscription;
 
   static Future<void> initialize() async {
@@ -17,7 +18,10 @@ class DarbNotifications {
     const appId = String.fromEnvironment('FIREBASE_APP_ID');
     const senderId = String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID');
     const projectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
-    if ([apiKey, appId, senderId, projectId].any((x) => x.isEmpty)) return;
+    if ([apiKey, appId, senderId, projectId].any((x) => x.isEmpty)) {
+      lastError = 'إعدادات Firebase غير مكتملة';
+      return;
+    }
     try {
       await Firebase.initializeApp(
         options: const FirebaseOptions(
@@ -29,8 +33,10 @@ class DarbNotifications {
       );
       FirebaseMessaging.onBackgroundMessage(darbFirebaseBackgroundHandler);
       _ready = true;
-    } catch (_) {
+      lastError = null;
+    } catch (error) {
       _ready = false;
+      lastError = 'تعذر تهيئة Firebase: $error';
     }
   }
 
@@ -48,18 +54,22 @@ class DarbNotifications {
   }
 
   static StreamSubscription<RemoteMessage>? listenOpened(
-    void Function() onOpened,
+    void Function(Map<String, dynamic> data) onOpened,
   ) {
     if (!_ready) return null;
-    return FirebaseMessaging.onMessageOpenedApp.listen((_) => onOpened());
+    return FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) => onOpened(Map<String, dynamic>.from(message.data)),
+    );
   }
 
-  static Future<bool> wasOpenedFromTerminated() async {
-    if (!_ready) return false;
+  static Future<Map<String, dynamic>?> initialMessageData() async {
+    if (!_ready) return null;
     try {
-      return await FirebaseMessaging.instance.getInitialMessage() != null;
-    } catch (_) {
-      return false;
+      final message = await FirebaseMessaging.instance.getInitialMessage();
+      return message == null ? null : Map<String, dynamic>.from(message.data);
+    } catch (error) {
+      lastError = 'تعذر قراءة الإشعار الأولي: $error';
+      return null;
     }
   }
 
@@ -72,19 +82,30 @@ class DarbNotifications {
         sound: true,
       );
       final token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        await Api.instance.post('/notifications/device', {
-          'token': token,
-          'platform': 'android',
-        });
+      if (token == null || token.isEmpty) {
+        throw StateError('Firebase لم يُرجع رمز الجهاز');
       }
-      _tokenSubscription ??= FirebaseMessaging.instance.onTokenRefresh.listen((token) {
-        Api.instance.post('/notifications/device', {
-          'token': token,
-          'platform': 'android',
-        }).catchError((_) {});
+      await Api.instance.post('/notifications/device', {
+        'token': token,
+        'platform': 'android',
       });
-    } catch (_) {}
+      lastError = null;
+      _tokenSubscription ??= FirebaseMessaging.instance.onTokenRefresh.listen(
+        (token) {
+          Api.instance.post('/notifications/device', {
+            'token': token,
+            'platform': 'android',
+          }).catchError((error) {
+            lastError = 'تعذر تحديث رمز الإشعارات: $error';
+          });
+        },
+        onError: (Object error) {
+          lastError = 'فشل تحديث رمز الإشعارات: $error';
+        },
+      );
+    } catch (error) {
+      lastError = 'تعذر تسجيل هذا الجهاز للإشعارات: $error';
+    }
   }
 
   static Future<void> unregister() async {
@@ -97,6 +118,8 @@ class DarbNotifications {
           'platform': 'android',
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      lastError = 'تعذر إلغاء تسجيل الجهاز: $error';
+    }
   }
 }
