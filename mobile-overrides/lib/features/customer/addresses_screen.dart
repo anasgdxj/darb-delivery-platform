@@ -6,6 +6,7 @@ import '../../core/services/location_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_map_picker.dart';
 
 Future<Map<String, dynamic>?> showAddressFormSheet(
   BuildContext context, {
@@ -36,6 +37,7 @@ class _AddressFormSheetState extends State<_AddressFormSheet> {
   late final TextEditingController _details;
   double? _lat;
   double? _lng;
+  int _mapRevision = 0;
   bool _locating = false;
   bool _saving = false;
   String? _error;
@@ -45,6 +47,8 @@ class _AddressFormSheetState extends State<_AddressFormSheet> {
     super.initState();
     _label = TextEditingController(text: widget.existing?['label']?.toString() ?? '');
     _details = TextEditingController(text: widget.existing?['details']?.toString() ?? '');
+    _lat = (widget.existing?['latitude'] as num?)?.toDouble();
+    _lng = (widget.existing?['longitude'] as num?)?.toDouble();
   }
 
   @override
@@ -65,6 +69,7 @@ class _AddressFormSheetState extends State<_AddressFormSheet> {
       setState(() {
         _lat = coords.latitude;
         _lng = coords.longitude;
+        _mapRevision++;
       });
     } on DarbLocationException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -168,6 +173,19 @@ class _AddressFormSheetState extends State<_AddressFormSheet> {
                     ? '${dt('تم تحديد الموقع')} (${_lat!.toStringAsFixed(4)}, ${_lng!.toStringAsFixed(4)})'
                     : (hasSavedCoords ? dt('تم حفظ الإحداثيات لهذا العنوان') : dt('استخدام موقعي الحالي'))),
           ),
+        ),
+        const SizedBox(height: 12),
+        DarbMapPicker(
+          key: ValueKey('address-map-$_mapRevision'),
+          selectedLatitude: _lat,
+          selectedLongitude: _lng,
+          onPointSelected: (latitude, longitude) {
+            setState(() {
+              _lat = latitude;
+              _lng = longitude;
+              _error = null;
+            });
+          },
         ),
         if (_error != null) ...[
           const SizedBox(height: 10),

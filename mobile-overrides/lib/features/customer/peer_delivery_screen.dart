@@ -6,6 +6,7 @@ import '../../core/services/location_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_map_picker.dart';
 import 'addresses_screen.dart';
 
 class PeerDeliveryScreen extends StatefulWidget {
@@ -35,6 +36,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   int _step = 0;
   double? _pickupLat;
   double? _pickupLng;
+  int _pickupMapRevision = 0;
   bool _locatingPickup = false;
   bool _loadingAddresses = true;
   bool _submitting = false;
@@ -90,6 +92,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
       setState(() {
         _pickupLat = coords.latitude;
         _pickupLng = coords.longitude;
+        _pickupMapRevision++;
       });
     } on DarbLocationException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -307,6 +310,20 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                   ? '${dt('تم تحديد موقع الاستلام')} (${_pickupLat!.toStringAsFixed(4)}, ${_pickupLng!.toStringAsFixed(4)})'
                   : dt('استخدام موقعي الحالي'),
             ),
+          ),
+          const SizedBox(height: 12),
+          DarbMapPicker(
+            key: ValueKey('pickup-map-$_pickupMapRevision'),
+            selectedLatitude: _pickupLat,
+            selectedLongitude: _pickupLng,
+            cityName: widget.cityName,
+            onPointSelected: (latitude, longitude) {
+              setState(() {
+                _pickupLat = latitude;
+                _pickupLng = longitude;
+                _error = null;
+              });
+            },
           ),
           const SizedBox(height: 18),
           Row(
