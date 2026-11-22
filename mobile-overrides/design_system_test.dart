@@ -5,6 +5,7 @@ import 'package:darb/design_system.dart';
 void main() {
   group('DARB design system', () {
     test('defines the approved Material 3 theme', () {
+      DarbAppearance.glass.value = false;
       final theme = DarbTheme.light;
       expect(theme.useMaterial3, isTrue);
       expect(theme.colorScheme.primary, DarbColors.forest);
@@ -12,9 +13,11 @@ void main() {
       expect(DarbColors.onPrimary, const Color(0xFFFFFFFF));
       expect(theme.colorScheme.secondary, DarbColors.mint);
       expect(theme.scaffoldBackgroundColor, DarbColors.canvas);
+      DarbAppearance.glass.value = true;
     });
 
     test('defines a dark Material 3 theme with semantic contrast', () {
+      DarbAppearance.glass.value = false;
       DarbTheme.updateBrightness(Brightness.dark);
       final theme = DarbTheme.dark;
       expect(theme.useMaterial3, isTrue);
@@ -25,6 +28,7 @@ void main() {
       expect(DarbColors.onPrimary, DarbColors.forest);
       expect(theme.scaffoldBackgroundColor, const Color(0xFF0B1512));
       DarbTheme.updateBrightness(Brightness.light);
+      DarbAppearance.glass.value = true;
     });
 
     test('uses the same DARB route transition in light and dark themes', () {
