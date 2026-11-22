@@ -83,8 +83,6 @@ class AppLocalizations {
     'التحقق من وجود تحديث': 'Check for updates|Güncellemeleri kontrol et',
     'جارٍ التحقق من التحديثات': 'Checking for updates|Güncellemeler kontrol ediliyor',
     'توجد نسخة أحدث متاحة': 'A newer version is available|Daha yeni bir sürüm mevcut',
-    'تطبيقك محدّث إلى آخر إصدار': 'Your app is up to date|Uygulamanız güncel',
-    'تعذر التحقق من التحديث': 'Could not check for updates|Güncellemeler kontrol edilemedi',
     'حول دَرْب': 'About DARB|DARB hakkında',
     'منصة توصيل تربط العملاء بالمندوبين والمتاجر': 'A delivery platform connecting customers, couriers and stores|Müşterileri, kuryeleri ve mağazaları buluşturan teslimat platformu',
     'يتم حفظ اختيارات المظهر على هذا الجهاز': 'Appearance choices are saved on this device|Görünüm tercihleri bu cihazda saklanır',
