@@ -187,3 +187,20 @@ Pending vendor/driver approvals, delivery-zone and fee configuration, operationa
 ## Current implementation notes
 
 The token implementation lives in `mobile-overrides/lib/core/theme/darb_design_system.dart`. Keep this document aligned with the code. A theme is incomplete until all customer, driver, vendor, and administration screens use semantic colors and all key components are legible in both modes.
+
+
+### Public website semantic tokens
+
+| Token | Light | Dark |
+|---|---|---|
+| Canvas | `#F6F6F3` | `#0A1916` |
+| Surface | `#FFFFFF` | `#112621` |
+| Ink | `#1A2E29` | `#F1F5F1` |
+| Muted | `#626F69` | `#9DB2AC` |
+| Primary | `#167A5A` | `#28A47C` |
+| Primary hover | `#116248` | `#269B73` |
+| On primary | `#FFFFFF` | `#0A1916` |
+| Mint accent | `#B9E4D2` | `#B9E4D2` |
+| Danger | `#B94747` | `#E56868` |
+
+Primary buttons must use the semantic `on-primary` token instead of hard-coded white text. This keeps dark-mode buttons readable while primary links retain their lighter green foreground.
