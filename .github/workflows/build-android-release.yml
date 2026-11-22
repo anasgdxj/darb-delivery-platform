@@ -182,6 +182,7 @@ jobs:
           args=(--release --dart-define=GOOGLE_SERVER_CLIENT_ID="$GOOGLE_SERVER_CLIENT_ID")
           if [ -n "$FIREBASE_API_KEY" ] && [ -n "$FIREBASE_APP_ID" ] && [ -n "$FIREBASE_MESSAGING_SENDER_ID" ] && [ -n "$FIREBASE_PROJECT_ID" ]; then
             args+=(--dart-define=FIREBASE_API_KEY="$FIREBASE_API_KEY" --dart-define=FIREBASE_APP_ID="$FIREBASE_APP_ID" --dart-define=FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID")
+            echo "::notice::Firebase configuration secrets are present; FCM will be enabled in this APK."
             echo "Firebase configuration: present" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "::warning::Firebase secrets incomplete; notifications will be disabled in this APK."
