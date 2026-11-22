@@ -1,3 +1,4 @@
+import 'dart:ui' show ImageFilter;
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -146,8 +147,30 @@ class _AppShellState extends State<AppShell> {
       valueListenable: DarbAppearance.glass,
       builder: (context, glassMode, _) => Scaffold(
       appBar: AppBar(
-        backgroundColor: DarbColors.forest,
+        backgroundColor: glassMode ? Colors.transparent : DarbColors.forest,
         foregroundColor: Colors.white,
+        flexibleSpace: glassMode
+            ? ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: AlignmentDirectional.topStart,
+                        end: AlignmentDirectional.bottomEnd,
+                        colors: [
+                          DarbColors.forest.withValues(alpha: .92),
+                          DarbColors.forestSoft.withValues(alpha: .84),
+                        ],
+                      ),
+                      border: Border(
+                        bottom: BorderSide(color: Colors.white.withValues(alpha: .12)),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 18,
@@ -265,8 +288,14 @@ class _AppShellState extends State<AppShell> {
         ),
         child: KeyedSubtree(key: ValueKey(tab), child: pages[tab]),
       ),
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: DarbColors.surface,
+      bottomNavigationBar: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: glassMode ? 24 : 0,
+            sigmaY: glassMode ? 24 : 0,
+          ),
+          child: NavigationBar(
+        backgroundColor: glassMode ? DarbColors.surface.withValues(alpha: .72) : DarbColors.surface,
         indicatorColor: DarbColors.mint.withValues(alpha: .62),
         elevation: 8,
         selectedIndex: tab,
@@ -275,6 +304,8 @@ class _AppShellState extends State<AppShell> {
           for (var i = 0; i < titles.length; i++)
             NavigationDestination(icon: Icon(icons[i]), selectedIcon: Icon(icons[i]), label: titles[i]),
         ],
+          ),
+        ),
       ),
       ),
     );
