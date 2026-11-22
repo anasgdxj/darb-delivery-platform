@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { IsArray, IsInt, IsOptional, IsEnum, IsString, IsUUID, IsLatitude, IsLongitude, IsNumber, Max, MaxLength, Min, ValidateNested } from 'class-validator';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { IsArray, IsEnum, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { OrderStatus, UserRole } from '@prisma/client';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -50,6 +50,11 @@ class CreateDeliveryOfferDto {
   @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(1) @Max(10000000) amount!: number;
 }
 
+class CreateReviewDto {
+  @Type(() => Number) @IsInt() @Min(1) @Max(5) rating!: number;
+  @IsOptional() @IsString() @MaxLength(500) comment?: string;
+}
+
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class OrdersController {
@@ -85,12 +90,26 @@ export class OrdersController {
 
   @Post(':id/cancel')
   @Roles(UserRole.CUSTOMER)
-  async cancelByCustomer(@CurrentUser() user: { id: string }, @Param('id') id: string, @Body() dto: CancelOrderDto) {
+  async cancelByCustomer(
+    @CurrentUser() user: { id: string },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: CancelOrderDto,
+  ) {
     const order = await this.orders.cancelByCustomer(user.id, id, dto?.reason);
     if (order?.vendorId) {
       await this.notifications.notifyVendor(order.vendorId, 'إلغاء طلب', `ألغى العميل الطلب ${order.orderNumber}`, { type: 'ORDER_CANCELLED', orderId: id });
     }
     return order;
+  }
+
+  @Post(':id/review')
+  @Roles(UserRole.CUSTOMER)
+  createReview(
+    @CurrentUser() user: { id: string },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: CreateReviewDto,
+  ) {
+    return this.orders.createReview(user.id, id, dto);
   }
 
   @Get('vendor')
@@ -111,21 +130,41 @@ export class OrdersController {
     return this.orders.driverMine(user.id);
   }
 
+  @Post(':id/dismiss')
+  @Roles(UserRole.DRIVER)
+  dismissOrder(@CurrentUser() user: { id: string }, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.orders.dismissOrder(user.id, id);
+  }
+
   @Post(':id/offers')
   @Roles(UserRole.DRIVER)
-  submitDeliveryOffer(@CurrentUser() user: { id: string }, @Param('id') id: string, @Body() dto: CreateDeliveryOfferDto) {
+  submitDeliveryOffer(
+    @CurrentUser() user: { id: string },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: CreateDeliveryOfferDto,
+  ) {
     return this.orders.submitDeliveryOffer(user.id, id, dto.amount);
+  }
+
+  @Post(':id/offers/withdraw')
+  @Roles(UserRole.DRIVER)
+  withdrawDeliveryOffer(@CurrentUser() user: { id: string }, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.orders.withdrawDeliveryOffer(user.id, id);
   }
 
   @Get(':id/offers')
   @Roles(UserRole.CUSTOMER)
-  deliveryOffers(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+  deliveryOffers(@CurrentUser() user: { id: string }, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.orders.deliveryOffersForCustomer(user.id, id);
   }
 
   @Post(':id/offers/:offerId/select')
   @Roles(UserRole.CUSTOMER)
-  async selectDeliveryOffer(@CurrentUser() user: { id: string }, @Param('id') id: string, @Param('offerId') offerId: string) {
+  async selectDeliveryOffer(
+    @CurrentUser() user: { id: string },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('offerId', new ParseUUIDPipe()) offerId: string,
+  ) {
     const order = await this.orders.selectDeliveryOffer(user.id, id, offerId);
     if (order?.driverId) {
       await this.notifications.notifyDriver(
@@ -140,17 +179,32 @@ export class OrdersController {
 
   @Post(':id/claim')
   @Roles(UserRole.DRIVER)
-  async claim(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+  async claim(@CurrentUser() user: { id: string }, @Param('id', new ParseUUIDPipe()) id: string) {
     const order = await this.orders.claim(user.id, id);
-    if (order) await this.notifications.notifyCustomer(order.customerId, 'تم تعيين سائق لطلبك', 'بدأ السائق استلام طلبك', { type: 'ORDER_ASSIGNED', orderId: id });
+    if (order) {
+      await this.notifications.notifyCustomer(order.customerId, 'تم تعيين سائق لطلبك', 'بدأ السائق استلام طلبك', {
+        type: 'ORDER_ASSIGNED',
+        orderId: id,
+      });
+    }
     return order;
   }
 
   @Patch(':id/status')
   @Roles(UserRole.VENDOR, UserRole.DRIVER)
-  async status(@CurrentUser() user: { id: string; role: UserRole }, @Param('id') id: string, @Body() dto: UpdateStatusDto) {
+  async status(
+    @CurrentUser() user: { id: string; role: UserRole },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: UpdateStatusDto,
+  ) {
     const order = await this.orders.updateStatus(user.id, user.role, id, dto.status);
-    if (order) await this.notifications.notifyCustomer(order.customerId, 'تحديث حالة الطلب', `تم تحديث حالة طلبك إلى ${dto.status}`, { type: 'ORDER_STATUS', orderId: id, status: dto.status });
+    if (order) {
+      await this.notifications.notifyCustomer(order.customerId, 'تحديث حالة الطلب', `تم تحديث حالة طلبك إلى ${dto.status}`, {
+        type: 'ORDER_STATUS',
+        orderId: id,
+        status: dto.status,
+      });
+    }
     return order;
   }
 }

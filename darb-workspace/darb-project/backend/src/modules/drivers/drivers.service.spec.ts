@@ -31,8 +31,11 @@ describe('DriversService', () => {
       isOnline: true,
       vehicleType: 'CAR',
       cityId: 'city-1',
+      city: { defaultCurrency: 'SYP' },
     });
-    prisma.order.aggregate.mockResolvedValue({ _count: { id: 14 }, _sum: { deliveryFee: 84000 } });
+    prisma.order.aggregate
+      .mockResolvedValueOnce({ _count: { id: 14 }, _sum: { deliveryFee: 84000 } })
+      .mockResolvedValueOnce({ _count: { id: 3 }, _sum: { deliveryFee: 18000 } });
     prisma.order.count.mockResolvedValue(2);
     prisma.deliveryOffer.count.mockResolvedValue(1);
 
@@ -42,9 +45,12 @@ describe('DriversService', () => {
       vehicleType: 'CAR',
       isOnline: true,
       completedTrips: 14,
+      todayTrips: 3,
       activeTrips: 2,
       pendingOffers: 1,
       totalEarnings: 84000,
+      todayEarnings: 18000,
+      currency: 'SYP',
     });
   });
 });

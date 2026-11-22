@@ -39,7 +39,8 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       _error = null;
     });
     try {
-      final driver = await Api.instance.get('/drivers/me') as Map<String, dynamic>;
+      final driver =
+          await Api.instance.get('/drivers/me') as Map<String, dynamic>;
       Map<String, dynamic>? stats;
       List<Map<String, dynamic>> available = const [];
 
@@ -49,9 +50,11 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
 
       if (driver['status'] == 'APPROVED' && driver['isOnline'] == true) {
         try {
-          available = (await Api.instance.get('/orders/driver/available') as List? ?? [])
-              .whereType<Map<String, dynamic>>()
-              .toList();
+          available =
+              (await Api.instance.get('/orders/driver/available') as List? ??
+                      [])
+                  .whereType<Map<String, dynamic>>()
+                  .toList();
         } catch (_) {}
       }
 
@@ -77,7 +80,8 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
       }
     } finally {
       if (mounted) setState(() => _togglingOnline = false);
@@ -99,9 +103,15 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         );
       }
     } on DarbLocationException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
     } finally {
       if (mounted) setState(() => _sendingLocation = false);
     }
@@ -117,7 +127,11 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         children: [
           Text(
             dt('تحديث المركبة'),
-            style: TextStyle(color: DarbColors.inkOf(ctx), fontSize: 18, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: DarbColors.inkOf(ctx),
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 12),
           for (final entry in [
@@ -127,8 +141,16 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
           ])
             ListTile(
               leading: Icon(entry.$3, color: DarbColors.primaryOf(ctx)),
-              title: Text(entry.$2, style: const TextStyle(fontWeight: FontWeight.w800)),
-              trailing: current == entry.$1 ? Icon(Icons.check_circle_rounded, color: DarbColors.primaryOf(ctx)) : null,
+              title: Text(
+                entry.$2,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              trailing: current == entry.$1
+                  ? Icon(
+                      Icons.check_circle_rounded,
+                      color: DarbColors.primaryOf(ctx),
+                    )
+                  : null,
               onTap: () => Navigator.pop(ctx, entry.$1),
             ),
         ],
@@ -139,7 +161,10 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       await Api.instance.patch('/drivers/vehicle', {'vehicleType': selected});
       await _load();
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
     }
   }
 
@@ -149,10 +174,48 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       await _load();
       widget.onClaimedOrAccepted?.call();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(dt('تم قبول الطلب'))));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(dt('تم قبول الطلب'))));
       }
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
+  Future<void> _dismissOrder(String id) async {
+    try {
+      await Api.instance.post('/orders/$id/dismiss', {});
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('تم استبعاد الطلب'))),
+        );
+      }
+      await _load();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
+  Future<void> _withdrawOffer(String orderId) async {
+    try {
+      await Api.instance.post('/orders/$orderId/offers/withdraw', {});
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('تم سحب العرض'))),
+        );
+      }
+      await _load();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
     }
   }
 
@@ -166,14 +229,19 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+          ],
           decoration: InputDecoration(
             labelText: dt('أدخل المبلغ'),
             suffixText: currency,
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(dt('إلغاء'))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(dt('إلغاء')),
+          ),
           FilledButton(
             onPressed: () {
               final parsed = double.tryParse(controller.text.trim());
@@ -187,13 +255,18 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     controller.dispose();
     if (amount == null) return;
     try {
-      await Api.instance.post('/orders/${order['id']}/offers', {'amount': amount});
+      await Api.instance
+          .post('/orders/${order['id']}/offers', {'amount': amount});
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(dt('تم إرسال عرضك للعميل'))));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(dt('تم إرسال عرضك للعميل'))));
       }
       await _load();
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
     }
   }
 
@@ -212,6 +285,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     final isApproved = driver['status'] == 'APPROVED';
     final isOnline = driver['isOnline'] == true;
     final stats = _stats ?? {};
+    final statsCurrency = stats['currency']?.toString() ?? 'SYP';
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -232,10 +306,14 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                         children: [
                           Text(
                             isApproved
-                                ? (isOnline ? dt('متصل لاستلام الطلبات') : dt('غير متصل'))
+                                ? (isOnline
+                                    ? dt('متصل لاستلام الطلبات')
+                                    : dt('غير متصل'))
                                 : dt('حساب السائق بانتظار اعتماد الإدارة'),
                             style: TextStyle(
-                              color: isOnline ? Colors.white : DarbColors.inkOf(context),
+                              color: isOnline
+                                  ? Colors.white
+                                  : DarbColors.inkOf(context),
                               fontSize: 17,
                               fontWeight: FontWeight.w900,
                             ),
@@ -246,7 +324,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                                 ? dt('فعّل الحالة لتظهر لك الطلبات الجاهزة')
                                 : dt('قيد مراجعة الإدارة'),
                             style: TextStyle(
-                              color: isOnline ? DarbColors.mint : DarbColors.mutedOf(context),
+                              color: isOnline
+                                  ? DarbColors.mint
+                                  : DarbColors.mutedOf(context),
                               fontSize: 12.5,
                               fontWeight: FontWeight.w600,
                             ),
@@ -256,7 +336,8 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     ),
                     Switch(
                       value: isOnline,
-                      onChanged: (!isApproved || _togglingOnline) ? null : _toggleOnline,
+                      onChanged:
+                          (!isApproved || _togglingOnline) ? null : _toggleOnline,
                     ),
                   ],
                 ),
@@ -266,28 +347,43 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isOnline ? Colors.white : DarbColors.inkOf(context),
+                          foregroundColor: isOnline
+                              ? Colors.white
+                              : DarbColors.inkOf(context),
                           side: BorderSide(
-                            color: isOnline ? Colors.white.withValues(alpha: 0.3) : DarbColors.borderOf(context),
+                            color: isOnline
+                                ? Colors.white.withValues(alpha: 0.3)
+                                : DarbColors.borderOf(context),
                           ),
                         ),
                         onPressed: _pickVehicle,
                         icon: const Icon(Icons.two_wheeler_rounded, size: 18),
-                        label: Text(_vehicleLabel(driver['vehicleType']?.toString())),
+                        label: Text(
+                          _vehicleLabel(driver['vehicleType']?.toString()),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isOnline ? DarbColors.mint : DarbColors.primaryOf(context),
+                          foregroundColor: isOnline
+                              ? DarbColors.mint
+                              : DarbColors.primaryOf(context),
                           side: BorderSide(
-                            color: isOnline ? DarbColors.mint.withValues(alpha: 0.4) : DarbColors.borderOf(context),
+                            color: isOnline
+                                ? DarbColors.mint.withValues(alpha: 0.4)
+                                : DarbColors.borderOf(context),
                           ),
                         ),
-                        onPressed: (!isApproved || _sendingLocation) ? null : _updateGpsNow,
+                        onPressed:
+                            (!isApproved || _sendingLocation) ? null : _updateGpsNow,
                         icon: _sendingLocation
-                            ? const SizedBox(width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2))
+                            ? const SizedBox(
+                                width: 15,
+                                height: 15,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
                             : const Icon(Icons.my_location_rounded, size: 18),
                         label: Text(dt('موقع السائق')),
                       ),
@@ -307,13 +403,29 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             childAspectRatio: 1.55,
             children: [
               DarbMetricCard(
+                label: dt('رحلات اليوم'),
+                value: '${stats['todayTrips'] ?? 0}',
+                icon: Icons.today_rounded,
+              ),
+              DarbMetricCard(
+                label: dt('أرباح اليوم'),
+                value: formatDarbMoney(
+                  (stats['todayEarnings'] as num?) ?? 0,
+                  statsCurrency,
+                ),
+                icon: Icons.trending_up_rounded,
+              ),
+              DarbMetricCard(
                 label: dt('الرحلات المكتملة'),
                 value: '${stats['completedTrips'] ?? 0}',
                 icon: Icons.task_alt_rounded,
               ),
               DarbMetricCard(
                 label: dt('الأرباح المحققة'),
-                value: formatDarbMoney((stats['totalEarnings'] as num?) ?? 0),
+                value: formatDarbMoney(
+                  (stats['totalEarnings'] as num?) ?? 0,
+                  statsCurrency,
+                ),
                 icon: Icons.account_balance_wallet_outlined,
               ),
             ],
@@ -321,15 +433,27 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
           const SizedBox(height: 18),
           DarbSectionHeader(
             title: dt('طلبات جاهزة للاستلام'),
-            trailing: IconButton(onPressed: _load, icon: const Icon(Icons.refresh_rounded)),
+            trailing: IconButton(
+              onPressed: _load,
+              icon: const Icon(Icons.refresh_rounded),
+            ),
           ),
           const SizedBox(height: 10),
           if (!isApproved)
-            DarbStateView.empty(message: dt('حساب السائق بانتظار اعتماد الإدارة'), icon: Icons.hourglass_bottom_rounded)
+            DarbStateView.empty(
+              message: dt('حساب السائق بانتظار اعتماد الإدارة'),
+              icon: Icons.hourglass_bottom_rounded,
+            )
           else if (!isOnline)
-            DarbStateView.empty(message: dt('فعّل الحالة لتظهر لك الطلبات الجاهزة'), icon: Icons.power_settings_new_rounded)
+            DarbStateView.empty(
+              message: dt('فعّل الحالة لتظهر لك الطلبات الجاهزة'),
+              icon: Icons.power_settings_new_rounded,
+            )
           else if (_available.isEmpty)
-            DarbStateView.empty(message: dt('لا توجد طلبات متاحة حالياً'), icon: Icons.delivery_dining_outlined)
+            DarbStateView.empty(
+              message: dt('لا توجد طلبات متاحة حالياً'),
+              icon: Icons.delivery_dining_outlined,
+            )
           else
             for (final order in _available)
               Padding(
@@ -342,12 +466,23 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   }
 
   Widget _buildAvailableCard(Map<String, dynamic> order) {
+    final id = order['id'].toString();
     final isPeer = order['type'] == 'PEER_DELIVERY';
     final dist = order['distanceKm'];
     final distLabel = dist is num ? '${dist.toStringAsFixed(1)} km' : null;
-    final storeName = order['vendor']?['translations'] is List && (order['vendor']['translations'] as List).isNotEmpty
+    final storeName = order['vendor']?['translations'] is List &&
+            (order['vendor']['translations'] as List).isNotEmpty
         ? (order['vendor']['translations'] as List).first['name']?.toString()
         : null;
+    final offers = (order['deliveryOffers'] as List? ?? [])
+        .whereType<Map<String, dynamic>>()
+        .where((o) => o['status'] == 'PENDING')
+        .toList();
+    final activeOffer = offers.isNotEmpty ? offers.first : null;
+    final offerCurrency =
+        activeOffer?['currency']?.toString() ?? order['currency']?.toString() ?? 'SYP';
+    final offerAmount =
+        num.tryParse(activeOffer?['amount']?.toString() ?? '0') ?? 0;
 
     return DarbGlassSurface(
       padding: const EdgeInsets.all(16),
@@ -358,31 +493,104 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             children: [
               Expanded(
                 child: Text(
-                  isPeer ? dt('طلب توصيل مستقل') : (storeName ?? dt('متجر')),
-                  style: TextStyle(color: DarbColors.inkOf(context), fontSize: 15.5, fontWeight: FontWeight.w900),
+                  isPeer
+                      ? dt('طلب توصيل مستقل')
+                      : (storeName ?? dt('متجر')),
+                  style: TextStyle(
+                    color: DarbColors.inkOf(context),
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
               if (distLabel != null)
                 Text(
                   distLabel,
-                  style: TextStyle(color: DarbColors.primaryOf(context), fontWeight: FontWeight.w900),
+                  style: TextStyle(
+                    color: DarbColors.primaryOf(context),
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
             ],
           ),
           const SizedBox(height: 6),
           if (isPeer && order['pickupAddress'] != null)
-            Text('${dt('الاستلام')}: ${order['pickupAddress']}', style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 13)),
+            Text(
+              '${dt('الاستلام')}: ${order['pickupAddress']}',
+              style: TextStyle(
+                color: DarbColors.mutedOf(context),
+                fontSize: 13,
+              ),
+            ),
           if (order['address']?['details'] != null)
-            Text('${dt('التسليم')}: ${order['address']['details']}', style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 13)),
-          if (order['notes'] != null && order['notes'].toString().trim().isNotEmpty)
+            Text(
+              '${dt('التسليم')}: ${order['address']['details']}',
+              style: TextStyle(
+                color: DarbColors.mutedOf(context),
+                fontSize: 13,
+              ),
+            ),
+          if (order['notes'] != null &&
+              order['notes'].toString().trim().isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Text(order['notes'].toString(), style: TextStyle(color: DarbColors.inkOf(context), fontSize: 12.5)),
+              child: Text(
+                order['notes'].toString(),
+                style: TextStyle(
+                  color: DarbColors.inkOf(context),
+                  fontSize: 12.5,
+                ),
+              ),
+            ),
+          if (activeOffer != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: DarbGlassSurface(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                borderRadius: DarbRadius.sm,
+                child: Text(
+                  '${dt('عرضك الحالي')}: ${formatDarbMoney(offerAmount, offerCurrency)}',
+                  style: TextStyle(
+                    color: DarbColors.primaryOf(context),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
             ),
           const SizedBox(height: 12),
-          FilledButton(
-            onPressed: () => isPeer ? _submitOffer(order) : _claimOrder(order['id'].toString()),
-            child: Text(isPeer ? dt('تقديم أجرة التوصيل') : dt('استلام الطلب')),
+          Row(
+            children: [
+              Expanded(
+                child: activeOffer != null
+                    ? OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: DarbColors.dangerOf(context),
+                        ),
+                        onPressed: () => _withdrawOffer(id),
+                        child: Text(dt('سحب العرض')),
+                      )
+                    : FilledButton(
+                        onPressed: () => isPeer
+                            ? _submitOffer(order)
+                            : _claimOrder(id),
+                        child: Text(
+                          isPeer
+                              ? dt('تقديم أجرة التوصيل')
+                              : dt('استلام الطلب'),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: DarbColors.mutedOf(context),
+                ),
+                onPressed: () => _dismissOrder(id),
+                child: Text(dt('استبعاد')),
+              ),
+            ],
           ),
         ],
       ),

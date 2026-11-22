@@ -17,18 +17,22 @@ class DarbBrandMark extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [DarbColors.forest, DarbColors.primary],
+          colors: [DarbColors.forest, DarbColors.forestSoft],
         ),
         borderRadius: BorderRadius.circular(size * 0.28),
         boxShadow: [
           BoxShadow(
-            color: DarbColors.forest.withValues(alpha: 0.24),
+            color: DarbColors.forest.withValues(alpha: 0.28),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Icon(Icons.route_rounded, color: DarbColors.mint, size: size * 0.56),
+      child: Icon(
+        Icons.route_rounded,
+        color: DarbColors.mint,
+        size: size * 0.56,
+      ),
     );
   }
 }
@@ -69,7 +73,11 @@ class DarbSectionHeader extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(
                     subtitle!,
-                    style: TextStyle(color: muted, fontSize: 12.5, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: muted,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
             ],
@@ -122,9 +130,11 @@ class DarbMetricCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: DarbColors.inkOf(context),
-              fontSize: 20,
+              fontSize: 18.5,
               fontWeight: FontWeight.w900,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
@@ -156,24 +166,31 @@ class DarbStatusBadge extends StatelessWidget {
     final isDark = DarbColors.isDark(context);
 
     final (Color fg, Color bg, String label) = switch (normalized) {
-      'DELIVERED' || 'APPROVED' || 'OPEN' || 'ONLINE' => (
-          isDark ? DarbColors.mint : DarbColors.primary,
-          isDark ? DarbColors.forest : DarbColors.mintTint,
+      'DELIVERED' || 'APPROVED' || 'OPEN' || 'ONLINE' || 'ACCEPTED' => (
+          isDark ? DarbColors.mint : DarbColors.success,
+          isDark
+              ? DarbColors.forestSoft.withValues(alpha: 0.9)
+              : DarbColors.mintTint,
           _translateStatus(normalized),
         ),
       'CANCELLED' || 'REJECTED' || 'SUSPENDED' || 'CLOSED' || 'OFFLINE' => (
           DarbColors.dangerOf(context),
-          DarbColors.danger.withValues(alpha: isDark ? 0.22 : 0.12),
+          DarbColors.dangerOf(context).withValues(alpha: isDark ? 0.20 : 0.11),
           _translateStatus(normalized),
         ),
-      'PICKED_UP' || 'ASSIGNED' || 'READY' => (
-          DarbColors.info,
-          DarbColors.info.withValues(alpha: isDark ? 0.24 : 0.12),
+      'PICKED_UP' || 'ASSIGNED' || 'READY' || 'PREPARING' => (
+          DarbColors.infoOf(context),
+          DarbColors.infoOf(context).withValues(alpha: isDark ? 0.22 : 0.12),
+          _translateStatus(normalized),
+        ),
+      'WITHDRAWN' => (
+          DarbColors.mutedOf(context),
+          DarbColors.softSurfaceOf(context),
           _translateStatus(normalized),
         ),
       _ => (
-          DarbColors.warning,
-          DarbColors.warning.withValues(alpha: isDark ? 0.24 : 0.14),
+          DarbColors.warningOf(context),
+          DarbColors.warningOf(context).withValues(alpha: isDark ? 0.22 : 0.13),
           _translateStatus(normalized),
         ),
     };
@@ -204,6 +221,7 @@ class DarbStatusBadge extends StatelessWidget {
         'APPROVED' => dt('معتمد'),
         'REJECTED' => dt('مرفوض'),
         'SUSPENDED' => dt('موقوف'),
+        'WITHDRAWN' => dt('مسحوب'),
         'OPEN' => dt('مفتوح'),
         'CLOSED' => dt('مغلق'),
         'ONLINE' => dt('متصل'),
@@ -251,7 +269,8 @@ class DarbStateView extends StatelessWidget {
     }
 
     final isError = _kind == _StateKind.error;
-    final tint = isError ? DarbColors.dangerOf(context) : DarbColors.primaryOf(context);
+    final tint =
+        isError ? DarbColors.dangerOf(context) : DarbColors.primaryOf(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -312,19 +331,22 @@ class _DarbSkeletonCard extends StatelessWidget {
           Container(
             width: 140,
             height: 14,
-            decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
+            decoration:
+                BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
           ),
           const SizedBox(height: 10),
           Container(
             width: double.infinity,
             height: 11,
-            decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
+            decoration:
+                BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
           ),
           const SizedBox(height: 8),
           Container(
             width: 210,
             height: 11,
-            decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
+            decoration:
+                BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
           ),
         ],
       ),
@@ -351,6 +373,7 @@ class DarbRadioOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = DarbColors.primaryOf(context);
+    final onPrimary = DarbColors.onPrimaryOf(context);
     final isDark = DarbColors.isDark(context);
 
     return InkWell(
@@ -364,9 +387,9 @@ class DarbRadioOptionTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(DarbRadius.md),
           color: selected
               ? (isDark
-                  ? DarbColors.forest.withValues(alpha: 0.55)
-                  : DarbColors.mintTint.withValues(alpha: 0.72))
-              : DarbColors.softSurfaceOf(context).withValues(alpha: 0.55),
+                  ? DarbColors.forestSoft.withValues(alpha: 0.72)
+                  : DarbColors.mintTint.withValues(alpha: 0.78))
+              : DarbColors.softSurfaceOf(context).withValues(alpha: 0.60),
           border: Border.all(
             color: selected ? primary : DarbColors.borderOf(context),
             width: selected ? 1.5 : 1,
@@ -389,7 +412,7 @@ class DarbRadioOptionTile extends StatelessWidget {
                 ),
               ),
               child: selected
-                  ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+                  ? Icon(Icons.check_rounded, size: 14, color: onPrimary)
                   : null,
             ),
             const SizedBox(width: 10),
@@ -432,4 +455,3 @@ class DarbRadioOptionTile extends StatelessWidget {
     );
   }
 }
-

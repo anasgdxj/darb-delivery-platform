@@ -21,7 +21,7 @@ describe('OrdersService safety checks', () => {
     const tx: any = {
       address: { findFirst: jest.fn().mockResolvedValue({ id: 'address-1' }) },
       city: { findFirst: jest.fn().mockResolvedValue({ id: 'city-1', defaultCurrency: 'SYP' }) },
-      
+
       order: { create },
     };
     prisma.$transaction.mockImplementation(async (callback: (tx: any) => unknown) => callback(tx));
@@ -427,5 +427,66 @@ describe('Driver available-order proximity ranking', () => {
     await expect(service.availableForDriver('driver-user-1')).rejects.toBeInstanceOf(ForbiddenException);
     expect(prisma.order.findMany).not.toHaveBeenCalled();
     expect(prisma.$queryRaw).not.toHaveBeenCalled();
+  });
+});
+
+describe('Order dismissal, offer withdrawal, and reviews', () => {
+  const prisma: any = {
+    $transaction: jest.fn(),
+    driver: { findUnique: jest.fn() },
+    order: { findFirst: jest.fn() },
+    driverDismissedOrder: { upsert: jest.fn() },
+  };
+  const service = new OrdersService(prisma);
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('records a driver dismissal for an available order', async () => {
+    prisma.driver.findUnique.mockResolvedValue({ id: 'driver-1', cityId: 'city-1', status: 'APPROVED' });
+    prisma.order.findFirst.mockResolvedValue({ id: 'order-1' });
+    prisma.driverDismissedOrder.upsert.mockResolvedValue({ id: 'dismiss-1' });
+
+    const res = await service.dismissOrder('driver-user-1', 'order-1');
+    expect(res).toEqual({ dismissed: true, orderId: 'order-1' });
+    expect(prisma.driverDismissedOrder.upsert).toHaveBeenCalled();
+  });
+
+  it('allows a driver to withdraw their own pending delivery offer', async () => {
+    prisma.driver.findUnique.mockResolvedValue({ id: 'driver-1', status: 'APPROVED' });
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    prisma.$transaction.mockImplementation(async (cb: (tx: any) => unknown) => cb({ deliveryOffer: { updateMany } }));
+
+    const res = await service.withdrawDeliveryOffer('driver-user-1', 'order-1');
+    expect(res).toEqual({ withdrawn: true, orderId: 'order-1' });
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { orderId: 'order-1', driverId: 'driver-1', status: 'PENDING' },
+      data: { status: 'WITHDRAWN' },
+    });
+  });
+
+  it('creates a review for a delivered order and recalculates vendor ratingAvg', async () => {
+    const tx: any = {
+      order: { findFirst: jest.fn().mockResolvedValue({ id: 'order-1', status: 'DELIVERED', vendorId: 'vendor-1' }) },
+      review: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({ id: 'rev-1', orderId: 'order-1', vendorId: 'vendor-1', rating: 5, comment: 'ممتاز' }),
+        aggregate: jest.fn().mockResolvedValue({ _avg: { rating: 4.5 } }),
+      },
+      vendor: { update: jest.fn() },
+    };
+    prisma.$transaction.mockImplementation(async (cb: (t: any) => unknown) => cb(tx));
+
+    const result = await service.createReview('customer-1', 'order-1', { rating: 5, comment: 'ممتاز' });
+    expect(result.ratingAvg).toBe(4.5);
+    expect(tx.vendor.update).toHaveBeenCalledWith({ where: { id: 'vendor-1' }, data: { ratingAvg: 4.5 } });
+  });
+
+  it('rejects reviewing an order that has not been delivered yet', async () => {
+    const tx: any = {
+      order: { findFirst: jest.fn().mockResolvedValue({ id: 'order-1', status: 'PREPARING', vendorId: 'vendor-1' }) },
+    };
+    prisma.$transaction.mockImplementation(async (cb: (t: any) => unknown) => cb(tx));
+
+    await expect(service.createReview('customer-1', 'order-1', { rating: 5 })).rejects.toBeInstanceOf(BadRequestException);
   });
 });

@@ -53,6 +53,54 @@ export class VendorsService {
     });
   }
 
+  async stats(userId: string) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        isOpen: true,
+        ratingAvg: true,
+        cities: { take: 1, select: { city: { select: { defaultCurrency: true } } } },
+      },
+    });
+    if (!vendor) throw new ForbiddenException('لا يوجد متجر مرتبط بهذا الحساب');
+
+    const now = new Date();
+    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+    const [totalOrders, pendingOrders, activeOrders, deliveredAgg, todayOrders, todayRevenueAgg] = await Promise.all([
+      this.prisma.order.count({ where: { vendorId: vendor.id } }),
+      this.prisma.order.count({ where: { vendorId: vendor.id, status: 'PENDING' } }),
+      this.prisma.order.count({
+        where: { vendorId: vendor.id, status: { in: ['PENDING', 'ACCEPTED', 'PREPARING', 'READY', 'ASSIGNED', 'PICKED_UP'] } },
+      }),
+      this.prisma.order.aggregate({
+        where: { vendorId: vendor.id, status: 'DELIVERED' },
+        _count: { id: true },
+        _sum: { subtotal: true },
+      }),
+      this.prisma.order.count({ where: { vendorId: vendor.id, createdAt: { gte: todayStart } } }),
+      this.prisma.order.aggregate({
+        where: { vendorId: vendor.id, status: 'DELIVERED', updatedAt: { gte: todayStart } },
+        _sum: { subtotal: true },
+      }),
+    ]);
+
+    return {
+      vendorId: vendor.id,
+      isOpen: vendor.isOpen,
+      ratingAvg: Number(vendor.ratingAvg ?? 0),
+      totalOrders,
+      pendingOrders,
+      activeOrders,
+      deliveredOrders: deliveredAgg._count.id,
+      totalRevenue: Number(deliveredAgg._sum.subtotal ?? 0),
+      todayOrders,
+      todayRevenue: Number(todayRevenueAgg._sum.subtotal ?? 0),
+      currency: vendor.cities[0]?.city?.defaultCurrency ?? 'SYP',
+    };
+  }
+
   async updateMine(
     userId: string,
     dto: {
@@ -135,7 +183,7 @@ export class VendorsService {
         ratingAvg: true,
         translations: { where: { locale: { in: [safeLocale, Locale.ar] } } },
         location: { select: { address: true, cityId: true } },
-        _count: { select: { products: true } },
+        _count: { select: { products: true, reviews: true } },
       },
     });
   }
@@ -152,9 +200,39 @@ export class VendorsService {
         translations: { where: { locale: { in: [safeLocale, Locale.ar] } } },
         location: { select: { address: true, cityId: true } },
         cities: { select: { city: { select: { id: true, code: true, names: true } } } },
+        _count: { select: { reviews: true } },
       },
     });
     if (!vendor) throw new NotFoundException('المتجر غير موجود');
     return vendor;
+  }
+
+  async reviews(id: string) {
+    const vendor = await this.prisma.vendor.findFirst({
+      where: { id, status: 'APPROVED' },
+      select: { id: true, ratingAvg: true },
+    });
+    if (!vendor) throw new NotFoundException('المتجر غير موجود');
+    const [items, total] = await Promise.all([
+      this.prisma.review.findMany({
+        where: { vendorId: id },
+        orderBy: { createdAt: 'desc' },
+        take: 30,
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+          author: { select: { name: true } },
+        },
+      }),
+      this.prisma.review.count({ where: { vendorId: id } }),
+    ]);
+    return {
+      vendorId: id,
+      ratingAvg: Number(vendor.ratingAvg ?? 0),
+      total,
+      items,
+    };
   }
 }

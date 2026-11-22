@@ -9,27 +9,63 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('DARB Design System & Brand Integrity', () {
-    test('enforces exact brand color palette and bans legacy lime colors', () {
-      expect(DarbColors.forest, const Color(0xFF12302A));
-      expect(DarbColors.primary, const Color(0xFF167A5A));
+  group('DARB Design System 2.0 & Brand Integrity', () {
+    test('enforces exact DESIGN_SYSTEM.md 2.0 light and dark semantic tokens', () {
+      expect(DarbColors.forest, const Color(0xFF102B26));
+      expect(DarbColors.forestSoft, const Color(0xFF1C443B));
       expect(DarbColors.mint, const Color(0xFFB9E4D2));
-      expect(DarbColors.canvas, const Color(0xFFF6F6F3));
+      expect(DarbColors.lime, const Color(0xFFC8F169));
+      expect(DarbColors.danger, const Color(0xFFB94747));
+      expect(DarbColors.success, const Color(0xFF287A50));
+      expect(DarbColors.warning, const Color(0xFFB7791F));
+      expect(DarbColors.info, const Color(0xFF356D9A));
+
+      expect(DarbColors.canvas, const Color(0xFFF5F6F2));
       expect(DarbColors.surface, const Color(0xFFFFFFFF));
-      expect(DarbColors.ink, const Color(0xFF1A2E29));
-      expect(DarbColors.muted, const Color(0xFF687A75));
-      expect(DarbColors.danger, const Color(0xFFD64545));
+      expect(DarbColors.ink, const Color(0xFF17231F));
+      expect(DarbColors.muted, const Color(0xFF77837D));
+      expect(DarbColors.line, const Color(0xFFE4E9E3));
+      expect(DarbColors.borderStrong, const Color(0xFFCBD5CE));
+
+      expect(DarbColors.darkCanvas, const Color(0xFF0B1512));
+      expect(DarbColors.darkSurface, const Color(0xFF13221D));
+      expect(DarbColors.darkSurfaceElevated, const Color(0xFF1A2D26));
+      expect(DarbColors.darkInk, const Color(0xFFF1F5F1));
+      expect(DarbColors.darkMuted, const Color(0xFFA4B2AA));
+      expect(DarbColors.darkLine, const Color(0xFF2A3B33));
+      expect(DarbColors.darkPrimary, const Color(0xFFB9E4D2));
+      expect(DarbColors.darkOnPrimary, const Color(0xFF102B26));
 
       final themeLight = DarbTheme.light;
       final themeDark = DarbTheme.dark;
 
-      expect(themeLight.colorScheme.primary, DarbColors.primary);
+      expect(themeLight.colorScheme.primary, DarbColors.forest);
+      expect(themeLight.colorScheme.onPrimary, Colors.white);
       expect(themeLight.scaffoldBackgroundColor, DarbColors.canvas);
+
+      expect(themeDark.colorScheme.primary, DarbColors.darkPrimary);
+      expect(themeDark.colorScheme.onPrimary, DarbColors.darkOnPrimary);
       expect(themeDark.scaffoldBackgroundColor, DarbColors.darkCanvas);
       expect(themeDark.colorScheme.brightness, Brightness.dark);
     });
 
-    test('switches cleanly between Glass and Standard visual styles and ThemeModes', () async {
+    test('provides standardized DarbSpace, DarbRadius, and DarbMotion scales', () {
+      expect(DarbSpace.xxs, 4);
+      expect(DarbSpace.md, 16);
+      expect(DarbSpace.section, 40);
+      expect(DarbRadius.hero, 36);
+      expect(DarbRadius.pill, 999);
+
+      expect(DarbMotion.press.inMilliseconds, 120);
+      expect(DarbMotion.fast.inMilliseconds, 160);
+      expect(DarbMotion.standard.inMilliseconds, 260);
+      expect(DarbMotion.route.inMilliseconds, 340);
+      expect(DarbMotion.expressive.inMilliseconds, 420);
+      expect(DarbMotion.staggerDelay(2).inMilliseconds, 110);
+    });
+
+    test('switches cleanly between Glass and Standard visual styles and ThemeModes',
+        () async {
       final controller = DarbAppearanceController.instance;
       await controller.setVisualStyle(DarbVisualStyle.standard);
       expect(controller.isGlass, isFalse);
@@ -69,18 +105,22 @@ void main() {
       expect(res.text, '0933 123 456');
     });
 
-    test('supports Arabic, English, and Turkish localization', () {
+    test('supports Arabic, English, and Turkish localization including new flows',
+        () {
       darbLocale.value = const Locale('ar');
       expect(dt('إلغاء الطلب'), 'إلغاء الطلب');
+      expect(dt('الإشعارات'), 'الإشعارات');
       expect(formatDarbMoney(15000), '15,000 ل.س');
 
       darbLocale.value = const Locale('en');
       expect(dt('إلغاء الطلب'), 'Cancel order');
+      expect(dt('الإشعارات'), 'Notifications');
       expect(dt('5 منتج متاح'), '5 products available');
       expect(formatDarbMoney(15000), '15,000 SYP');
 
       darbLocale.value = const Locale('tr');
       expect(dt('إلغاء الطلب'), 'Siparişi iptal et');
+      expect(dt('الإشعارات'), 'Bildirimler');
       expect(dt('3 منتج متاح'), '3 ürün mevcut');
 
       darbLocale.value = const Locale('ar');
@@ -106,6 +146,8 @@ void main() {
                   ),
                   SizedBox(height: 12),
                   DarbStatusBadge(status: 'DELIVERED'),
+                  SizedBox(height: 8),
+                  DarbStatusBadge(status: 'WITHDRAWN'),
                 ],
               ),
             ),

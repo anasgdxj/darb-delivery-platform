@@ -17,6 +17,8 @@ services:
       cp backend-overrides/auth.controller.ts .render-build/darb-project/backend/src/modules/auth/auth.controller.ts &&
       cp backend-overrides/otp.service.ts .render-build/darb-project/backend/src/modules/auth/otp.service.ts &&
       cp backend-overrides/admin.controller.ts .render-build/darb-project/backend/src/modules/admin/admin.controller.ts &&
+      cp backend-overrides/admin.service.ts .render-build/darb-project/backend/src/modules/admin/admin.service.ts &&
+      cp backend-overrides/vendors.controller.ts .render-build/darb-project/backend/src/modules/vendors/vendors.controller.ts &&
       cp backend-overrides/vendors.service.ts .render-build/darb-project/backend/src/modules/vendors/vendors.service.ts &&
       cp backend-overrides/vendor-application.dto.ts .render-build/darb-project/backend/src/modules/vendors/vendor-application.dto.ts &&
       cp backend-overrides/addresses.service.ts .render-build/darb-project/backend/src/modules/addresses/addresses.service.ts &&
@@ -34,6 +36,12 @@ services:
       cp backend-overrides/ai-order-assistant.module.ts .render-build/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.module.ts &&
       cp backend-overrides/ai-order-assistant.controller.ts .render-build/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.controller.ts &&
       cp backend-overrides/ai-order-assistant.service.ts .render-build/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.service.ts &&
+      mkdir -p .render-build/darb-project/backend/src/modules/ai-role-assistant &&
+      cp backend-overrides/ai-role-assistant.module.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.module.ts &&
+      cp backend-overrides/ai-role-assistant.controller.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.controller.ts &&
+      cp backend-overrides/ai-role-assistant.service.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.service.ts &&
+      cp backend-overrides/ai-text-provider.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/ai-text-provider.ts &&
+      cp backend-overrides/gemini-ai-text-provider.ts .render-build/darb-project/backend/src/modules/ai-role-assistant/gemini-ai-text-provider.ts &&
       mkdir -p .render-build/darb-project/backend/src/modules/notifications .render-build/darb-project/backend/src/modules/health &&
       cp -R backend/src/modules/health/. .render-build/darb-project/backend/src/modules/health/ &&
       cp backend-overrides/notifications.service.ts .render-build/darb-project/backend/src/modules/notifications/notifications.service.ts &&

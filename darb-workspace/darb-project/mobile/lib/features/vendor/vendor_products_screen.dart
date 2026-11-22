@@ -16,6 +16,7 @@ class VendorProductsScreen extends StatefulWidget {
 class _VendorProductsScreenState extends State<VendorProductsScreen> {
   final _searchCtrl = TextEditingController();
   List<Map<String, dynamic>> _products = const [];
+  String _selectedCategory = '';
   String? _vendorStatus;
   bool _loading = true;
   String? _error;
@@ -44,7 +45,8 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
       _error = null;
     });
     try {
-      final mine = await Api.instance.get('/vendors/mine') as Map<String, dynamic>;
+      final mine =
+          await Api.instance.get('/vendors/mine') as Map<String, dynamic>;
       final status = mine['status']?.toString() ?? 'PENDING';
       if (status != 'APPROVED') {
         if (mounted) {
@@ -75,6 +77,15 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
     }
   }
 
+  List<String> get _categories {
+    final set = <String>{};
+    for (final p in _products) {
+      final c = p['category']?.toString().trim();
+      if (c != null && c.isNotEmpty) set.add(c);
+    }
+    return set.toList();
+  }
+
   String _productTitle(Map<String, dynamic> p) {
     final tr = (p['translations'] as List? ?? []);
     final locale = darbLocale.value.languageCode;
@@ -102,6 +113,9 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
   Future<void> _openProductSheet({Map<String, dynamic>? existing}) async {
     final nameCtrl = TextEditingController(
       text: existing != null ? _productTitle(existing) : '',
+    );
+    final categoryCtrl = TextEditingController(
+      text: existing?['category']?.toString() ?? '',
     );
     final descCtrl = TextEditingController(
       text: existing != null ? _productDesc(existing) : '',
@@ -136,8 +150,14 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
             ),
             const SizedBox(height: 10),
             TextField(
+              controller: categoryCtrl,
+              decoration: InputDecoration(labelText: dt('التصنيف (اختياري)')),
+            ),
+            const SizedBox(height: 10),
+            TextField(
               controller: priceCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(labelText: dt('السعر')),
             ),
             const SizedBox(height: 10),
@@ -180,6 +200,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                   ? null
                   : () async {
                       final name = nameCtrl.text.trim();
+                      final category = categoryCtrl.text.trim();
                       final price = double.tryParse(priceCtrl.text.trim());
                       final stock = stockCtrl.text.trim().isEmpty
                           ? null
@@ -199,6 +220,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                             'price': price,
                             'description': descCtrl.text.trim(),
                             'currency': 'SYP',
+                            if (category.isNotEmpty) 'category': category,
                             if (stock != null) 'stockQty': stock,
                           });
                         } else {
@@ -207,6 +229,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                             'name': name,
                             'price': price,
                             'description': descCtrl.text.trim(),
+                            'category': category,
                             if (stock != null) 'stockQty': stock,
                             'isAvailable': isAvailable,
                           });
@@ -232,6 +255,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
     );
 
     nameCtrl.dispose();
+    categoryCtrl.dispose();
     descCtrl.dispose();
     priceCtrl.dispose();
     stockCtrl.dispose();
@@ -242,7 +266,9 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(dt('حذف المنتج')),
-        content: Text(dt('سيتم حذف المنتج أو إخفاؤه تلقائياً إذا ارتبط بطلبات سابقة.')),
+        content: Text(
+          dt('سيتم حذف المنتج أو إخفاؤه تلقائياً إذا ارتبط بطلبات سابقة.'),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -294,8 +320,13 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
       );
     }
 
+    final categories = _categories;
     final q = _searchCtrl.text.trim().toLowerCase();
     final filtered = _products.where((p) {
+      if (_selectedCategory.isNotEmpty &&
+          p['category']?.toString() != _selectedCategory) {
+        return false;
+      }
       if (q.isEmpty) return true;
       return _productTitle(p).toLowerCase().contains(q);
     }).toList();
@@ -327,6 +358,31 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                 ),
               ],
             ),
+            if (categories.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    ChoiceChip(
+                      label: Text(dt('الكل')),
+                      selected: _selectedCategory.isEmpty,
+                      onSelected: (_) =>
+                          setState(() => _selectedCategory = ''),
+                    ),
+                    for (final c in categories) ...[
+                      const SizedBox(width: 8),
+                      ChoiceChip(
+                        label: Text(c),
+                        selected: _selectedCategory == c,
+                        onSelected: (_) =>
+                            setState(() => _selectedCategory = c),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 14),
             if (filtered.isEmpty)
               DarbStateView.empty(
@@ -349,6 +405,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
   Widget _buildProductRow(Map<String, dynamic> p) {
     final id = p['id'].toString();
     final name = _productTitle(p);
+    final category = p['category']?.toString();
     final price = num.tryParse(p['basePrice']?.toString() ?? '0') ?? 0;
     final currency = p['currency']?.toString() ?? 'SYP';
     final available = p['isAvailable'] != false;
@@ -375,7 +432,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      '${formatDarbMoney(price, currency)}${stock != null ? ' · # $stock' : ''}',
+                      '${formatDarbMoney(price, currency)}${category != null && category.isNotEmpty ? ' · $category' : ''}${stock != null ? ' · # $stock' : ''}',
                       style: TextStyle(
                         color: DarbColors.primaryOf(context),
                         fontWeight: FontWeight.w800,

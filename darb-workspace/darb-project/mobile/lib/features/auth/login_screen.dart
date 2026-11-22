@@ -297,10 +297,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             FilledButton(
                               onPressed: _loading ? null : _sendOtp,
                               child: _loading
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                       width: 20,
                                       height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: DarbColors.onPrimaryOf(context),
+                                      ),
                                     )
                                   : Text(l.t('sendOtp')),
                             ),
@@ -369,10 +372,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             FilledButton(
                               onPressed: _loading ? null : _verifyOtp,
                               child: _loading
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                       width: 20,
                                       height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: DarbColors.onPrimaryOf(context),
+                                      ),
                                     )
                                   : Text(l.t('verify')),
                             ),

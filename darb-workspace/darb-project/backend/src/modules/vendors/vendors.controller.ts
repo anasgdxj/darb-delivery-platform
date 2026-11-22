@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query, UseGuards } from '@nestjs/common';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsLatitude, IsLongitude, IsOptional, IsString, MaxLength, MinLength, ValidateIf } from 'class-validator';
 import { UserRole } from '@prisma/client';
@@ -29,6 +29,13 @@ export class VendorsController {
     return this.vendors.mine(user.id);
   }
 
+  @Get('mine/stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.VENDOR)
+  stats(@CurrentUser() user: { id: string }) {
+    return this.vendors.stats(user.id);
+  }
+
   @Patch('mine')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.VENDOR)
@@ -46,8 +53,13 @@ export class VendorsController {
     return this.vendors.list(cityId, locale, { type, q });
   }
 
+  @Get(':id/reviews')
+  reviews(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.vendors.reviews(id);
+  }
+
   @Get(':id')
-  get(@Param('id') id: string, @Query('locale') locale = 'ar') {
+  get(@Param('id', new ParseUUIDPipe()) id: string, @Query('locale') locale = 'ar') {
     return this.vendors.get(id, locale);
   }
 }

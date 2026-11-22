@@ -62,11 +62,15 @@ jobs:
           cp backend-overrides/auth.controller.ts extracted/darb-project/backend/src/modules/auth/auth.controller.ts
           cp backend-overrides/otp.service.ts extracted/darb-project/backend/src/modules/auth/otp.service.ts
           cp backend-overrides/admin.controller.ts extracted/darb-project/backend/src/modules/admin/admin.controller.ts
+          cp backend-overrides/admin.service.ts extracted/darb-project/backend/src/modules/admin/admin.service.ts
+          cp backend-overrides/vendors.controller.ts extracted/darb-project/backend/src/modules/vendors/vendors.controller.ts
           cp backend-overrides/vendors.service.ts extracted/darb-project/backend/src/modules/vendors/vendors.service.ts
+          cp backend-overrides/vendors.service.spec.ts extracted/darb-project/backend/src/modules/vendors/vendors.service.spec.ts
           cp backend-overrides/vendor-application.dto.ts extracted/darb-project/backend/src/modules/vendors/vendor-application.dto.ts
           cp backend-overrides/addresses.service.ts extracted/darb-project/backend/src/modules/addresses/addresses.service.ts
           cp backend-overrides/addresses.controller.ts extracted/darb-project/backend/src/modules/addresses/addresses.controller.ts
           cp backend-overrides/drivers.service.ts extracted/darb-project/backend/src/modules/drivers/drivers.service.ts
+          cp backend-overrides/drivers.service.spec.ts extracted/darb-project/backend/src/modules/drivers/drivers.service.spec.ts
           cp backend-overrides/drivers.module.ts extracted/darb-project/backend/src/modules/drivers/drivers.module.ts
           cp backend-overrides/driver-location.controller.ts extracted/darb-project/backend/src/modules/drivers/driver-location.controller.ts
           cp backend-overrides/driver-location.service.ts extracted/darb-project/backend/src/modules/drivers/driver-location.service.ts

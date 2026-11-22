@@ -1,5 +1,5 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { OrderStatus, UserRole } from '@prisma/client';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { OfferStatus, OrderStatus, UserRole } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -276,7 +276,15 @@ export class OrdersService {
     return this.prisma.order.findMany({
       where: { customerId: userId },
       orderBy: { createdAt: 'desc' },
-      include: { items: true, address: true, payment: true, statusHistory: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        items: true,
+        address: true,
+        payment: true,
+        vendor: { select: { id: true, type: true, ratingAvg: true, translations: { where: { locale: 'ar' }, take: 1 } } },
+        driver: { select: { id: true, vehicleType: true, user: { select: { name: true, phone: true } } } },
+        reviews: { where: { authorId: userId }, select: { id: true, rating: true, comment: true, createdAt: true } },
+        statusHistory: { orderBy: { createdAt: 'asc' } },
+      },
     });
   }
 
@@ -286,7 +294,12 @@ export class OrdersService {
     return this.prisma.order.findMany({
       where: { vendorId: vendor.id },
       orderBy: { createdAt: 'desc' },
-      include: { items: true, address: true, customer: { select: { name: true, phone: true } } },
+      include: {
+        items: true,
+        address: true,
+        driver: { select: { id: true, vehicleType: true, user: { select: { name: true, phone: true } } } },
+        customer: { select: { name: true, phone: true } },
+      },
     });
   }
 
@@ -296,7 +309,12 @@ export class OrdersService {
     return this.prisma.order.findMany({
       where: { driverId: driver.id },
       orderBy: { createdAt: 'desc' },
-      include: { items: true, address: true, vendor: { include: { location: true, translations: true } } },
+      include: {
+        items: true,
+        address: true,
+        customer: { select: { name: true, phone: true } },
+        vendor: { include: { location: true, translations: true } },
+      },
     });
   }
 
@@ -312,13 +330,22 @@ export class OrdersService {
       where: {
         cityId: driver.cityId,
         driverId: null,
+        dismissedByDrivers: { none: { driverId: driver.id } },
         OR: [
           { type: 'VENDOR_ORDER', status: 'READY' },
           { type: 'PEER_DELIVERY', status: 'PENDING' },
         ],
       },
       orderBy: { createdAt: 'asc' },
-      include: { items: true, vendor: { include: { location: true, translations: true } }, address: true },
+      include: {
+        items: true,
+        vendor: { include: { location: true, translations: true } },
+        address: true,
+        deliveryOffers: {
+          where: { driverId: driver.id },
+          select: { id: true, amount: true, currency: true, status: true },
+        },
+      },
     });
     if (!orders.length) return orders;
 
@@ -341,6 +368,10 @@ export class OrdersService {
       LEFT JOIN "VendorLocation" vl ON vl."vendorId" = o."vendorId"
       WHERE o."cityId" = ${driver.cityId}
         AND o."driverId" IS NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM "DriverDismissedOrder" ddo
+          WHERE ddo."orderId" = o."id" AND ddo."driverId" = ${driver.id}
+        )
         AND ((o."type" = 'VENDOR_ORDER' AND o."status" = 'READY')
           OR (o."type" = 'PEER_DELIVERY' AND o."status" = 'PENDING'))
     `;
@@ -355,6 +386,103 @@ export class OrdersService {
         if (b.distanceKm == null) return -1;
         return a.distanceKm - b.distanceKm || a.createdAt.getTime() - b.createdAt.getTime();
       });
+  }
+
+  async dismissOrder(userId: string, orderId: string) {
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+      select: { id: true, cityId: true, status: true },
+    });
+    if (!driver || driver.status !== 'APPROVED') {
+      throw new ForbiddenException('السائق غير معتمد');
+    }
+    const order = await this.prisma.order.findFirst({
+      where: {
+        id: orderId,
+        cityId: driver.cityId,
+        driverId: null,
+        OR: [
+          { type: 'VENDOR_ORDER', status: 'READY' },
+          { type: 'PEER_DELIVERY', status: 'PENDING' },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!order) throw new NotFoundException('الطلب غير متاح أو تم إسناده بالفعل');
+    await this.prisma.driverDismissedOrder.upsert({
+      where: { driverId_orderId: { driverId: driver.id, orderId } },
+      create: { driverId: driver.id, orderId },
+      update: {},
+    });
+    return { dismissed: true, orderId };
+  }
+
+  async withdrawDeliveryOffer(userId: string, orderId: string) {
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+      select: { id: true, status: true },
+    });
+    if (!driver || driver.status !== 'APPROVED') {
+      throw new ForbiddenException('السائق غير معتمد');
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.deliveryOffer.updateMany({
+        where: { orderId, driverId: driver.id, status: OfferStatus.PENDING },
+        data: { status: OfferStatus.WITHDRAWN },
+      });
+      if (!updated.count) {
+        throw new BadRequestException('لا يوجد عرض قيد الانتظار لسحبه');
+      }
+      return { withdrawn: true, orderId };
+    });
+  }
+
+  async createReview(customerId: string, orderId: string, dto: { rating: number; comment?: string }) {
+    if (!Number.isInteger(dto.rating) || dto.rating < 1 || dto.rating > 5) {
+      throw new BadRequestException('التقييم يجب أن يكون بين 1 و 5 نجوم');
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.findFirst({
+        where: { id: orderId, customerId },
+        select: { id: true, status: true, vendorId: true },
+      });
+      if (!order) throw new NotFoundException('الطلب غير موجود');
+      if (order.status !== OrderStatus.DELIVERED) {
+        throw new BadRequestException('يمكن تقييم الطلب بعد تسليمه فقط');
+      }
+      const existing = await tx.review.findUnique({
+        where: { orderId_authorId: { orderId, authorId: customerId } },
+        select: { id: true },
+      });
+      if (existing) {
+        throw new ConflictException('تم تقييم هذا الطلب مسبقاً');
+      }
+      const cleanComment = dto.comment?.trim().slice(0, 500) || null;
+      const review = await tx.review.create({
+        data: {
+          orderId,
+          authorId: customerId,
+          vendorId: order.vendorId,
+          rating: dto.rating,
+          comment: cleanComment,
+        },
+        select: { id: true, orderId: true, vendorId: true, rating: true, comment: true, createdAt: true },
+      });
+      let ratingAvg: number | null = null;
+      if (order.vendorId) {
+        const agg = await tx.review.aggregate({
+          where: { vendorId: order.vendorId },
+          _avg: { rating: true },
+        });
+        const avg = Number((agg._avg.rating ?? dto.rating).toFixed(2));
+        ratingAvg = avg;
+        await tx.vendor.update({
+          where: { id: order.vendorId },
+          data: { ratingAvg: avg },
+        });
+      }
+      return { review, ratingAvg };
+    });
   }
 
   async submitDeliveryOffer(userId: string, orderId: string, amount: number) {

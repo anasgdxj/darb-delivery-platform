@@ -3,51 +3,60 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#12302A">
+<meta name="theme-color" content="#102B26">
 <meta name="robots" content="noindex,nofollow">
 <title>إدارة دَرْب | مركز العمليات</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap');
 
 :root {
-  --forest: #12302A;
-  --primary: #167A5A;
-  --primary-hover: #116248;
+  --forest: #102B26;
+  --forest-soft: #1C443B;
+  --primary: #102B26;
+  --primary-hover: #1C443B;
+  --on-primary: #FFFFFF;
   --mint: #B9E4D2;
-  --mint-tint: #E7F5EE;
-  --canvas: #F6F6F3;
+  --mint-tint: #E5F4EC;
+  --lime: #C8F169;
+  --canvas: #F5F6F2;
   --surface: #FFFFFF;
-  --surface-glass: rgba(255, 255, 255, 0.76);
-  --surface-soft: #EDF2EE;
-  --ink: #1A2E29;
-  --muted: #687A75;
-  --border: #DCE4DF;
+  --surface-glass: rgba(255, 255, 255, 0.78);
+  --surface-soft: #EDF1EC;
+  --ink: #17231F;
+  --muted: #77837D;
+  --border: #E4E9E3;
+  --border-strong: #CBD5CE;
   --glass-border: rgba(255, 255, 255, 0.88);
-  --danger: #D64545;
-  --danger-soft: #FBEBEB;
-  --warn: #B86B14;
+  --danger: #B94747;
+  --danger-soft: #FBEAEA;
+  --success: #287A50;
+  --warn: #B7791F;
   --warn-soft: #FCF3E6;
-  --shadow: 0 18px 46px rgba(18, 48, 42, 0.08);
+  --info: #356D9A;
+  --shadow: 0 18px 46px rgba(16, 43, 38, 0.08);
   --blur: 22px;
 }
 
 html.dark {
-  --canvas: #0A1916;
-  --surface: #112621;
-  --surface-glass: rgba(17, 38, 33, 0.78);
-  --surface-soft: #17332C;
-  --ink: #F1F5F3;
-  --muted: #9DB2AC;
-  --primary: #28A47C;
-  --primary-hover: #218B69;
-  --mint-tint: #14352C;
-  --border: #23473E;
+  --canvas: #0B1512;
+  --surface: #13221D;
+  --surface-glass: rgba(19, 34, 29, 0.82);
+  --surface-soft: #1A2D26;
+  --ink: #F1F5F1;
+  --muted: #A4B2AA;
+  --primary: #B9E4D2;
+  --primary-hover: #A4D9C4;
+  --on-primary: #102B26;
+  --mint-tint: #1A2D26;
+  --border: #2A3B33;
+  --border-strong: #40564A;
   --glass-border: rgba(185, 228, 210, 0.16);
-  --danger: #E56868;
-  --danger-soft: rgba(214, 69, 69, 0.18);
+  --danger: #E06C6C;
+  --danger-soft: rgba(185, 71, 71, 0.18);
+  --success: #56B881;
   --warn: #EAA244;
-  --warn-soft: rgba(184, 107, 20, 0.22);
-  --shadow: 0 22px 54px rgba(0, 0, 0, 0.42);
+  --warn-soft: rgba(183, 121, 31, 0.22);
+  --shadow: 0 22px 54px rgba(0, 0, 0, 0.44);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -55,23 +64,24 @@ body {
   margin: 0;
   background: var(--canvas);
   color: var(--ink);
-  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  font-family: 'Cairo', 'Plus Jakarta Sans', Tahoma, Arial, sans-serif;
   line-height: 1.55;
-  transition: background-color 180ms ease, color 180ms ease;
+  transition: background-color 220ms cubic-bezier(0.22, 1, 0.36, 1), color 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 button, input, select { font: inherit; }
 button {
   cursor: pointer;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 14px;
   min-height: 40px;
   padding: 8px 16px;
   font-size: 13.5px;
   font-weight: 800;
   white-space: nowrap;
-  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), background-color 150ms ease, border-color 150ms ease;
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease, border-color 160ms ease;
 }
 button:hover:not(:disabled) { transform: translateY(-1px); }
+button:active:not(:disabled) { transform: scale(0.98); }
 button:disabled { opacity: 0.55; cursor: not-allowed; }
 button:focus-visible, input:focus-visible, select:focus-visible {
   outline: 2px solid var(--primary);
@@ -87,20 +97,20 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
-  transition: opacity 180ms ease;
+  transition: opacity 200ms ease;
 }
 html[data-style="standard"] .ambient { opacity: 0; }
-.orb { position: absolute; border-radius: 50%; filter: blur(64px); }
+.orb { position: absolute; border-radius: 50%; filter: blur(68px); }
 .orb-1 {
   width: 440px; height: 440px; top: -120px; left: -120px;
-  background: radial-gradient(circle, rgba(185, 228, 210, 0.5), transparent 70%);
+  background: radial-gradient(circle, rgba(185, 228, 210, 0.48), transparent 70%);
 }
 .orb-2 {
   width: 380px; height: 380px; bottom: -120px; right: -80px;
-  background: radial-gradient(circle, rgba(22, 122, 90, 0.16), transparent 70%);
+  background: radial-gradient(circle, rgba(16, 43, 38, 0.16), transparent 70%);
 }
 html.dark .orb-1 { background: radial-gradient(circle, rgba(185, 228, 210, 0.14), transparent 70%); }
-html.dark .orb-2 { background: radial-gradient(circle, rgba(40, 164, 124, 0.18), transparent 70%); }
+html.dark .orb-2 { background: radial-gradient(circle, rgba(28, 68, 59, 0.28), transparent 70%); }
 
 .surface {
   background: var(--surface-glass);
@@ -114,21 +124,22 @@ html[data-style="standard"] .surface {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid var(--border);
-  box-shadow: 0 4px 16px rgba(18, 48, 42, 0.04);
+  box-shadow: 0 4px 16px rgba(16, 43, 38, 0.04);
 }
 
-.btn-primary { background: var(--primary); color: #FFFFFF; }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
-.btn-outline { background: transparent; border-color: var(--border); color: var(--ink); }
+.btn-accent { background: var(--lime); color: var(--forest); }
+.btn-outline { background: transparent; border-color: var(--border-strong); color: var(--ink); }
 .btn-outline:hover:not(:disabled) { background: var(--surface-soft); }
-.btn-danger { background: var(--danger-soft); color: var(--danger); border-color: rgba(214, 69, 69, 0.25); }
+.btn-danger { background: var(--danger-soft); color: var(--danger); border-color: rgba(185, 71, 71, 0.28); }
 
 input, select {
   width: 100%;
   min-height: 42px;
   padding: 9px 12px;
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   background: var(--surface);
   color: var(--ink);
   font-size: 13.5px;
@@ -143,7 +154,7 @@ input, select {
 }
 .login-card {
   width: min(460px, 100%);
-  border-radius: 26px;
+  border-radius: 28px;
   padding: 32px;
   display: grid;
   gap: 16px;
@@ -156,8 +167,9 @@ input, select {
 .brand-mark {
   width: 46px; height: 46px;
   border-radius: 15px;
-  background: linear-gradient(135deg, var(--forest), var(--primary));
-  color: var(--mint);
+  background: linear-gradient(135deg, var(--forest), var(--forest-soft));
+  color: var(--lime);
+  border: 1px solid rgba(185, 228, 210, 0.28);
   display: grid;
   place-items: center;
   font-size: 22px;
@@ -178,18 +190,18 @@ input, select {
 .notice.bad {
   background: var(--danger-soft);
   color: var(--danger);
-  border-color: rgba(214, 69, 69, 0.3);
+  border-color: rgba(185, 71, 71, 0.3);
 }
 
 /* Admin Workspace Shell */
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 270px minmax(0, 1fr);
+  grid-template-columns: 274px minmax(0, 1fr);
 }
 .sidebar {
   background: var(--forest);
-  color: #FFFFFF;
+  color: #F1F5F1;
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
@@ -203,7 +215,7 @@ input, select {
 }
 .side-nav button {
   background: transparent;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(241, 245, 241, 0.82);
   text-align: right;
   display: flex;
   align-items: center;
@@ -214,12 +226,14 @@ input, select {
 }
 .side-nav button:hover { background: rgba(255, 255, 255, 0.08); color: #FFFFFF; }
 .side-nav button.active {
-  background: var(--primary);
-  color: #FFFFFF;
+  background: var(--forest-soft);
+  color: var(--mint);
+  border: 1px solid rgba(185, 228, 210, 0.32);
 }
 .count-tag {
   font-size: 12px;
-  color: var(--mint);
+  color: var(--lime);
+  font-weight: 800;
 }
 .side-controls {
   margin-top: auto;
@@ -240,12 +254,12 @@ input, select {
   min-height: 32px;
   padding: 4px 8px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(241, 245, 241, 0.72);
   background: transparent;
   border-radius: 8px;
 }
 .side-seg button[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(185, 228, 210, 0.2);
   color: #FFFFFF;
 }
 
@@ -278,7 +292,7 @@ input, select {
   gap: 14px;
 }
 .kpi-card {
-  border-radius: 20px;
+  border-radius: 22px;
   padding: 18px 20px;
 }
 .kpi-label { font-size: 12.5px; color: var(--muted); font-weight: 700; }
@@ -338,7 +352,7 @@ tbody tr:hover { background: var(--surface-soft); }
   font-weight: 800;
   font-size: 12.5px;
 }
-.state-ok { color: var(--primary); }
+.state-ok { color: var(--success); }
 .state-warn { color: var(--warn); }
 .state-bad { color: var(--danger); }
 
@@ -396,7 +410,7 @@ tbody tr:hover { background: var(--surface-soft); }
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(10, 25, 22, 0.56);
+  background: rgba(11, 23, 19, 0.6);
   backdrop-filter: blur(8px);
   display: grid;
   place-items: center;
@@ -497,7 +511,7 @@ tbody tr:hover { background: var(--surface-soft); }
       <button type="button" data-tab="vendors">دليل المتاجر</button>
       <button type="button" data-tab="drivers">دليل السائقين</button>
       <button type="button" data-tab="users">المستخدمون والصلاحيات</button>
-      <button type="button" data-tab="cities">المدن ومناطق التوصيل</button>
+      <button type="button" data-tab="cities" data-kind="zones">المدن ومناطق التوصيل</button>
       <button type="button" data-tab="orders">مراقبة الطلبات</button>
       <button type="button" data-tab="settings">الإعدادات والتدقيق</button>
     </nav>
@@ -540,7 +554,7 @@ tbody tr:hover { background: var(--surface-soft); }
         <strong id="kpiPendingTotal" class="kpi-value tabular">—</strong>
       </article>
       <article class="kpi-card surface">
-        <span class="kpi-label">حجم المبيعات (SYP)</span>
+        <span class="kpi-label">حجم المبيعات المكتمل (SYP)</span>
         <strong id="kpiGmv" class="kpi-value tabular">—</strong>
       </article>
     </div>
@@ -580,7 +594,7 @@ const LOCAL_API = (window.location.origin || 'http://localhost:3000') + '/api/v1
 const isLocalPreviewHost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname) || window.location.protocol === 'http:';
 
 let API = isLocalPreviewHost ? LOCAL_API : PROD_API;
-// Hold auth tokens strictly in JS runtime memory only
+// Hold auth tokens strictly in JS runtime memory only (never persisted in Web Storage)
 let accessToken = null;
 let refreshToken = null;
 const token = () => accessToken;
@@ -769,12 +783,12 @@ function cityName(city) {
 async function refreshStats() {
   try {
     const stats = await apiFetch('/admin/stats');
-    $('kpiActiveOrders').textContent = formatMoney(stats.activeOrders);
-    $('kpiTotalOrders').textContent = formatMoney(stats.orders);
-    const pendingSum = Number(stats.pendingDrivers || 0) + Number(stats.pendingVendors || 0);
+    $('kpiActiveOrders').textContent = formatMoney(stats.ordersActive);
+    $('kpiTotalOrders').textContent = formatMoney(stats.ordersTotal);
+    const pendingSum = Number(stats.driversPending || 0) + Number(stats.vendorsPending || 0);
     $('kpiPendingTotal').textContent = formatMoney(pendingSum);
     $('navPendingCount').textContent = String(pendingSum);
-    $('kpiGmv').textContent = formatMoney(stats.gmv);
+    $('kpiGmv').textContent = formatMoney(stats.deliveredGrossTotal);
   } catch (_) {}
 }
 
@@ -984,8 +998,9 @@ async function loadUsers(root) {
   const params = new URLSearchParams();
   if (userRoleFilter) params.set('role', userRoleFilter);
   if (userQuery) params.set('q', userQuery);
-  const rows = await apiFetch('/admin/users' + (params.toString() ? '?' + params.toString() : ''));
-  $('panelSummary').textContent = `${rows.length} مستخدم`;
+  const res = await apiFetch('/admin/users' + (params.toString() ? '?' + params.toString() : ''));
+  const rows = Array.isArray(res) ? res : (res.items || []);
+  $('panelSummary').textContent = `${res.total ?? rows.length} مستخدم`;
 
   const toolbar = document.createElement('div');
   toolbar.className = 'toolbar';
@@ -1061,97 +1076,8 @@ async function loadUsers(root) {
   root.replaceChildren(toolbar, wrap);
 }
 
-async function loadCitiesAndZones(root) {
-  $('breadcrumb').textContent = 'إدارة دَرْب / المدن ومناطق التوصيل';
-  $('pageTitle').textContent = 'المدن السورية ومناطق التسعير';
-  $('panelTitle').textContent = 'إعدادات المدن والرسوم';
-
-  const [cities, zones] = await Promise.all([
-    apiFetch('/admin/cities'),
-    apiFetch('/admin/delivery-zones'),
-  ]);
-  $('panelSummary').textContent = `${cities.length} مدينة · ${zones.length} منطقة توصيل`;
-
-  const actionsBar = document.createElement('div');
-  actionsBar.className = 'toolbar';
-
-  const addCityBtn = elText('button', 'btn-primary', 'إضافة مدينة جديدة');
-  addCityBtn.onclick = async () => {
-    const form = document.createElement('div');
-    form.style.display = 'grid';
-    form.style.gap = '10px';
-    const codeIn = document.createElement('input'); codeIn.placeholder = 'الرمز (مثل TAR)';
-    const arIn = document.createElement('input'); arIn.placeholder = 'الاسم بالعربية (مثل طرطوس)';
-    const enIn = document.createElement('input'); enIn.placeholder = 'الاسم بالإنجليزية (مثل Tartus)';
-    form.append(codeIn, arIn, enIn);
-    const ok = await openModal({ title: 'إضافة مدينة', contentNode: form, confirmLabel: 'حفظ المدينة' });
-    if (!ok) return;
-    await apiFetch('/admin/cities', 'POST', {
-      code: codeIn.value.trim().toUpperCase(),
-      nameAr: arIn.value.trim(),
-      nameEn: enIn.value.trim() || arIn.value.trim(),
-      countryCode: 'SY',
-    });
-    notify('تمت إضافة المدينة');
-    refreshAll();
-  };
-
-  const addZoneBtn = elText('button', 'btn-outline', 'إضافة منطقة توصيل');
-  addZoneBtn.onclick = async () => {
-    const form = document.createElement('div');
-    form.style.display = 'grid';
-    form.style.gap = '10px';
-    const citySel = document.createElement('select');
-    for (const c of cities) {
-      const o = document.createElement('option');
-      o.value = c.id;
-      o.textContent = `${cityName(c)} (${c.code})`;
-      citySel.append(o);
-    }
-    const nameIn = document.createElement('input'); nameIn.placeholder = 'اسم المنطقة (مثلاً المركزية)';
-    const baseIn = document.createElement('input'); baseIn.type = 'number'; baseIn.placeholder = 'الرسوم الأساسية (SYP)';
-    const kmIn = document.createElement('input'); kmIn.type = 'number'; kmIn.placeholder = 'لكل كم (SYP)';
-    form.append(citySel, nameIn, baseIn, kmIn);
-    const ok = await openModal({ title: 'إضافة منطقة توصيل', contentNode: form, confirmLabel: 'حفظ المنطقة' });
-    if (!ok) return;
-    await apiFetch('/admin/delivery-zones', 'POST', {
-      cityId: citySel.value,
-      name: nameIn.value.trim() || 'منطقة رئيسية',
-      feeBase: Number(baseIn.value || 0),
-      feePerKm: Number(kmIn.value || 0),
-    });
-    notify('تم إنشاء منطقة التوصيل');
-    refreshAll();
-  };
-
-  actionsBar.append(addCityBtn, addZoneBtn);
-
-  // Cities row list
-  const citiesTitle = elText('h3', '', 'المدن المفعّلة');
-  const citiesList = document.createElement('div');
-  citiesList.className = 'row-list';
-  for (const c of cities) {
-    const item = document.createElement('div');
-    item.className = 'row-item';
-    const info = document.createElement('div');
-    info.append(
-      elText('strong', '', `${cityName(c)} (${c.code})`),
-      elText('div', 'row-meta', c.isActive ? 'مفعّلة للطلبات' : 'متوقفة مؤقتاً')
-    );
-    const toggleBtn = elText('button', c.isActive ? 'btn-danger' : 'btn-primary', c.isActive ? 'تعطيل' : 'تفعيل');
-    toggleBtn.onclick = async () => {
-      await apiFetch(`/admin/cities/${c.id}`, 'PATCH', { isActive: !c.isActive });
-      notify('تم تحديث حالة المدينة');
-      refreshAll();
-    };
-    item.append(info, toggleBtn);
-    citiesList.append(item);
-  }
-
-  // Zones grid
-  const zonesTitle = elText('h3', '', 'مناطق التسعير');
-  const zoneGrid = document.createElement('div');
-  zoneGrid.className = 'zone-grid';
+function renderZones(zoneGrid, zones) {
+  zoneGrid.replaceChildren();
   for (const z of zones) {
     const box = document.createElement('article');
     box.className = 'zone-box';
@@ -1194,8 +1120,134 @@ async function loadCitiesAndZones(root) {
     box.append(title, fields, btns);
     zoneGrid.append(box);
   }
+}
+
+async function loadCitiesAndZones(root) {
+  $('breadcrumb').textContent = 'إدارة دَرْب / المدن ومناطق التوصيل';
+  $('pageTitle').textContent = 'المدن السورية ومناطق التسعير';
+  $('panelTitle').textContent = 'إعدادات المدن والرسوم';
+
+  const [cities, zones] = await Promise.all([
+    apiFetch('/admin/cities'),
+    apiFetch('/admin/delivery-zones'),
+  ]);
+  $('panelSummary').textContent = `${cities.length} مدينة · ${zones.length} منطقة توصيل`;
+
+  const actionsBar = document.createElement('div');
+  actionsBar.className = 'toolbar';
+
+  const addCityBtn = elText('button', 'btn-primary', 'إضافة مدينة جديدة');
+  addCityBtn.onclick = async () => {
+    const form = document.createElement('div');
+    form.style.display = 'grid';
+    form.style.gap = '10px';
+    const codeIn = document.createElement('input'); codeIn.placeholder = 'الرمز بالإنجليزية الصغيرة (مثل tartus)';
+    const arIn = document.createElement('input'); arIn.placeholder = 'الاسم بالعربية (مثل طرطوس)';
+    const enIn = document.createElement('input'); enIn.placeholder = 'الاسم بالإنجليزية (مثل Tartus)';
+    form.append(codeIn, arIn, enIn);
+    const ok = await openModal({ title: 'إضافة مدينة', contentNode: form, confirmLabel: 'حفظ المدينة' });
+    if (!ok) return;
+    const code = codeIn.value.trim().toLowerCase();
+    const nameAr = arIn.value.trim();
+    if (!/^[a-z0-9_-]{2,24}$/.test(code) || !nameAr) {
+      notify('أدخل رمزاً إنجليزياً صالحاً واسماً عربياً للمدينة', true);
+      return;
+    }
+    await apiFetch('/admin/cities', 'POST', {
+      code,
+      nameAr,
+      nameEn: enIn.value.trim() || undefined,
+      defaultCurrency: 'SYP',
+    });
+    notify('تمت إضافة المدينة');
+    refreshAll();
+  };
+
+  const addZoneBtn = elText('button', 'btn-outline', 'إضافة منطقة توصيل');
+  addZoneBtn.onclick = async () => {
+    const form = document.createElement('div');
+    form.style.display = 'grid';
+    form.style.gap = '10px';
+    const citySel = document.createElement('select');
+    for (const c of cities) {
+      const o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = `${cityName(c)} (${c.code})`;
+      citySel.append(o);
+    }
+    const nameIn = document.createElement('input'); nameIn.placeholder = 'اسم المنطقة (مثلاً المركزية)';
+    const baseIn = document.createElement('input'); baseIn.type = 'number'; baseIn.placeholder = 'الرسوم الأساسية (SYP)';
+    const kmIn = document.createElement('input'); kmIn.type = 'number'; kmIn.placeholder = 'لكل كم (SYP)';
+    form.append(citySel, nameIn, baseIn, kmIn);
+    const ok = await openModal({ title: 'إضافة منطقة توصيل', contentNode: form, confirmLabel: 'حفظ المنطقة' });
+    if (!ok) return;
+    await apiFetch('/admin/delivery-zones', 'POST', {
+      cityId: citySel.value,
+      name: nameIn.value.trim() || 'منطقة رئيسية',
+      feeBase: Number(baseIn.value || 0),
+      feePerKm: Number(kmIn.value || 0),
+    });
+    notify('تم إنشاء منطقة التوصيل');
+    refreshAll();
+  };
+
+  actionsBar.append(addCityBtn, addZoneBtn);
+
+  const citiesTitle = elText('h3', '', 'المدن المفعّلة');
+  const citiesList = document.createElement('div');
+  citiesList.className = 'row-list';
+  for (const c of cities) {
+    const item = document.createElement('div');
+    item.className = 'row-item';
+    const info = document.createElement('div');
+    info.append(
+      elText('strong', '', `${cityName(c)} (${c.code})`),
+      elText('div', 'row-meta', c.isActive ? 'مفعّلة للطلبات' : 'متوقفة مؤقتاً')
+    );
+    const toggleBtn = elText('button', c.isActive ? 'btn-danger' : 'btn-primary', c.isActive ? 'تعطيل' : 'تفعيل');
+    toggleBtn.onclick = async () => {
+      await apiFetch(`/admin/cities/${c.id}`, 'PATCH', { isActive: !c.isActive });
+      notify('تم تحديث حالة المدينة');
+      refreshAll();
+    };
+    item.append(info, toggleBtn);
+    citiesList.append(item);
+  }
+
+  const zonesTitle = elText('h3', '', 'مناطق التسعير');
+  const zoneGrid = document.createElement('div');
+  zoneGrid.className = 'zone-grid';
+  renderZones(zoneGrid, zones);
 
   root.replaceChildren(actionsBar, citiesTitle, citiesList, zonesTitle, zoneGrid);
+}
+
+function renderOrders(wrap, items) {
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const htr = document.createElement('tr');
+  for (const h of ['رقم الطلب', 'النوع', 'المدينة', 'العميل', 'المتجر / السائق', 'الإجمالي', 'الحالة']) htr.append(elText('th', '', h));
+  thead.append(htr);
+  const tbody = document.createElement('tbody');
+
+  for (const o of items) {
+    const tr = document.createElement('tr');
+    const [stLabel, stCls] = statusMeta(o.status);
+    const vendorName = o.vendor?.translations?.[0]?.name || '—';
+    const driverName = o.driver?.user?.name || 'بانتظار مندوب';
+    tr.append(
+      elText('td', 'tabular', '#' + o.orderNumber),
+      elText('td', '', o.type === 'PEER_DELIVERY' ? 'توصيل مستقل' : 'طلب متجر'),
+      elText('td', '', cityName(o.city)),
+      elText('td', '', o.customer?.name || o.customer?.phone || '—'),
+      elText('td', '', `${o.type === 'VENDOR_ORDER' ? vendorName : 'مسار خاص'} · ${driverName}`),
+      elText('td', 'tabular', `${formatMoney(o.total)} ${o.currency || 'SYP'}`),
+      elText('td', `state-text ${stCls}`, stLabel)
+    );
+    tbody.append(tr);
+  }
+  table.append(thead, tbody);
+  wrap.replaceChildren(table);
 }
 
 async function loadOrders(root) {
@@ -1235,31 +1287,7 @@ async function loadOrders(root) {
 
   const wrap = document.createElement('div');
   wrap.className = 'table-wrap';
-  const table = document.createElement('table');
-  const thead = document.createElement('thead');
-  const htr = document.createElement('tr');
-  for (const h of ['رقم الطلب', 'النوع', 'المدينة', 'العميل', 'المتجر / السائق', 'الإجمالي', 'الحالة']) htr.append(elText('th', '', h));
-  thead.append(htr);
-  const tbody = document.createElement('tbody');
-
-  for (const o of items) {
-    const tr = document.createElement('tr');
-    const [stLabel, stCls] = statusMeta(o.status);
-    const vendorName = o.vendor?.translations?.[0]?.name || '—';
-    const driverName = o.driver?.user?.name || 'بانتظار مندوب';
-    tr.append(
-      elText('td', 'tabular', '#' + o.orderNumber),
-      elText('td', '', o.type === 'PEER_DELIVERY' ? 'توصيل مستقل' : 'طلب متجر'),
-      elText('td', '', cityName(o.city)),
-      elText('td', '', o.customer?.name || o.customer?.phone || '—'),
-      elText('td', '', `${o.type === 'VENDOR_ORDER' ? vendorName : 'مسار خاص'} · ${driverName}`),
-      elText('td', 'tabular', `${formatMoney(o.total)} ${o.currency || 'SYP'}`),
-      elText('td', `state-text ${stCls}`, stLabel)
-    );
-    tbody.append(tr);
-  }
-  table.append(thead, tbody);
-  wrap.append(table);
+  renderOrders(wrap, items);
 
   const pager = document.createElement('div');
   pager.className = 'pager';
@@ -1292,28 +1320,44 @@ async function loadSettingsAndAudit(root) {
   grid.className = 'zone-fields';
 
   const commG = document.createElement('div'); commG.className = 'field-group';
-  const commIn = document.createElement('input'); commIn.type = 'number'; commIn.value = String(settings.commissionPercent ?? '10');
+  const commIn = document.createElement('input'); commIn.type = 'number'; commIn.min = '0'; commIn.max = '50'; commIn.step = '0.5';
+  commIn.value = String(settings.commissionPercent ?? 10);
   commG.append(elText('label', '', 'نسبة العمولة (%)'), commIn);
 
-  const phoneG = document.createElement('div'); phoneG.className = 'field-group';
-  const phoneIn = document.createElement('input'); phoneIn.value = String(settings.supportPhone ?? '');
-  phoneG.append(elText('label', '', 'هاتف الدعم'), phoneIn);
+  const contactG = document.createElement('div'); contactG.className = 'field-group';
+  const contactIn = document.createElement('input');
+  contactIn.value = String(settings.supportContact ?? '');
+  contactG.append(elText('label', '', 'تواصل الدعم (هاتف أو بريد)'), contactIn);
 
   const maintG = document.createElement('div'); maintG.className = 'field-group';
   const maintSel = document.createElement('select');
   for (const [v, l] of [['false', 'النظام يعمل بشكل طبيعي'], ['true', 'تفعيل وضع الصيانة']]) {
     const o = document.createElement('option'); o.value = v; o.textContent = l; maintSel.append(o);
   }
-  maintSel.value = String(settings.maintenanceMode ?? 'false');
+  maintSel.value = String(Boolean(settings.maintenanceMode));
   maintG.append(elText('label', '', 'حالة المنصة'), maintSel);
 
-  grid.append(commG, phoneG, maintG);
+  const peerG = document.createElement('div'); peerG.className = 'field-group';
+  const peerSel = document.createElement('select');
+  for (const [v, l] of [['true', 'مفعّل'], ['false', 'متوقف']]) {
+    const o = document.createElement('option'); o.value = v; o.textContent = l; peerSel.append(o);
+  }
+  peerSel.value = String(settings.peerDeliveryEnabled !== false);
+  peerG.append(elText('label', '', 'خدمة التوصيل المستقل'), peerSel);
+
+  grid.append(commG, contactG, maintG, peerG);
   const saveBtn = elText('button', 'btn-primary', 'حفظ إعدادات المنصة');
   saveBtn.onclick = async () => {
+    const pct = Number(commIn.value);
+    if (Number.isNaN(pct) || pct < 0 || pct > 50) {
+      notify('يجب أن تكون نسبة العمولة بين 0 و 50%', true);
+      return;
+    }
     await apiFetch('/admin/settings', 'PATCH', {
-      commissionPercent: commIn.value.trim(),
-      supportPhone: phoneIn.value.trim(),
-      maintenanceMode: maintSel.value,
+      commissionPercent: pct,
+      supportContact: contactIn.value.trim(),
+      maintenanceMode: maintSel.value === 'true',
+      peerDeliveryEnabled: peerSel.value === 'true',
     });
     notify('تم حفظ الإعدادات');
     refreshAll();
@@ -1328,8 +1372,8 @@ async function loadSettingsAndAudit(root) {
     item.className = 'row-item';
     const dt = l.createdAt ? new Date(l.createdAt).toLocaleString('ar') : '—';
     item.append(
-      elText('strong', 'tabular', `${l.action} (${l.entityType})`),
-      elText('span', 'row-meta tabular', `${l.actor?.name || l.actor?.email || 'نظام'} · ${dt}`)
+      elText('strong', 'tabular', `${l.action} (${l.targetType || 'System'}${l.targetId ? ' · ' + String(l.targetId).slice(0, 8) : ''})`),
+      elText('span', 'row-meta tabular', `${l.actorRole || 'ADMIN'} · ${dt}`)
     );
     logList.append(item);
   }
@@ -1373,16 +1417,30 @@ function setAdminStyle(style) {
   document.documentElement.setAttribute('data-style', style);
   $('adminGlassBtn').setAttribute('aria-pressed', String(style === 'glass'));
   $('adminStandardBtn').setAttribute('aria-pressed', String(style === 'standard'));
+  try { sessionStorage.setItem('darb_admin_style', style); } catch (_) {}
 }
 function setAdminTheme(dark) {
   document.documentElement.classList.toggle('dark', dark);
   $('adminLightBtn').setAttribute('aria-pressed', String(!dark));
   $('adminDarkBtn').setAttribute('aria-pressed', String(dark));
+  try { sessionStorage.setItem('darb_admin_theme', dark ? 'dark' : 'light'); } catch (_) {}
 }
 $('adminGlassBtn').addEventListener('click', () => setAdminStyle('glass'));
 $('adminStandardBtn').addEventListener('click', () => setAdminStyle('standard'));
 $('adminLightBtn').addEventListener('click', () => setAdminTheme(false));
 $('adminDarkBtn').addEventListener('click', () => setAdminTheme(true));
+
+// Restore non-sensitive UI appearance preferences from sessionStorage / OS preference
+try {
+  const savedStyle = sessionStorage.getItem('darb_admin_style');
+  if (savedStyle === 'standard' || savedStyle === 'glass') setAdminStyle(savedStyle);
+  const savedTheme = sessionStorage.getItem('darb_admin_theme');
+  if (savedTheme === 'dark' || savedTheme === 'light') {
+    setAdminTheme(savedTheme === 'dark');
+  } else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+    setAdminTheme(true);
+  }
+} catch (_) {}
 
 window.addEventListener('load', initializeGoogleLogin);
 </script>

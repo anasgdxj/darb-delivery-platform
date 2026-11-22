@@ -31,8 +31,16 @@ class DarbAmbientBackground extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: isDark
-                    ? const [Color(0xFF0A1916), Color(0xFF0D221D), Color(0xFF091613)]
-                    : const [Color(0xFFF6F6F3), Color(0xFFEFF4F0), Color(0xFFF6F6F3)],
+                    ? const [
+                        DarbColors.darkCanvas,
+                        Color(0xFF0E1D18),
+                        DarbColors.darkCanvas,
+                      ]
+                    : const [
+                        DarbColors.canvas,
+                        Color(0xFFEDF2EC),
+                        DarbColors.canvas,
+                      ],
               ),
             ),
           ),
@@ -48,7 +56,7 @@ class DarbAmbientBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DarbColors.mint.withValues(alpha: isDark ? 0.16 : 0.42),
+                    DarbColors.mint.withValues(alpha: isDark ? 0.14 : 0.40),
                     DarbColors.mint.withValues(alpha: 0),
                   ],
                 ),
@@ -57,7 +65,7 @@ class DarbAmbientBackground extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: 220,
+          top: 230,
           left: -100,
           child: IgnorePointer(
             child: Container(
@@ -67,8 +75,9 @@ class DarbAmbientBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DarbColors.primary.withValues(alpha: isDark ? 0.18 : 0.14),
-                    DarbColors.primary.withValues(alpha: 0),
+                    DarbColors.forestSoft
+                        .withValues(alpha: isDark ? 0.22 : 0.10),
+                    DarbColors.forestSoft.withValues(alpha: 0),
                   ],
                 ),
               ),
@@ -117,15 +126,10 @@ class DarbGlassSurface extends StatelessWidget {
             : DarbColors.borderOf(context));
 
     final shadow = elevated
-        ? [
-            BoxShadow(
-              color: (isDark ? Colors.black : DarbColors.forest)
-                  .withValues(alpha: isGlass ? (isDark ? 0.34 : 0.07) : 0.04),
-              blurRadius: isGlass ? 24 : 12,
-              offset: const Offset(0, 8),
-            ),
-          ]
-        : null;
+        ? (isGlass
+            ? DarbElevation.floating(isDark)
+            : DarbElevation.card(isDark))
+        : DarbElevation.none;
 
     if (!isGlass) {
       return Container(
@@ -143,8 +147,8 @@ class DarbGlassSurface extends StatelessWidget {
 
     final fill = tintColor ??
         (isDark
-            ? DarbColors.darkSurface.withValues(alpha: 0.72)
-            : Colors.white.withValues(alpha: 0.74));
+            ? DarbColors.darkSurface.withValues(alpha: 0.76)
+            : Colors.white.withValues(alpha: 0.76));
 
     return Container(
       margin: margin,
@@ -168,15 +172,16 @@ class DarbGlassSurface extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: isDark
                           ? [
-                              DarbColors.darkSurfaceHigh.withValues(alpha: 0.80),
-                              DarbColors.darkSurface.withValues(alpha: 0.66),
+                              DarbColors.darkSurfaceElevated
+                                  .withValues(alpha: 0.82),
+                              DarbColors.darkSurface.withValues(alpha: 0.68),
                             ]
                           : [
-                              Colors.white.withValues(alpha: 0.84),
-                              Colors.white.withValues(alpha: 0.64),
+                              Colors.white.withValues(alpha: 0.86),
+                              Colors.white.withValues(alpha: 0.66),
                             ],
                     ),
-              border: Border.all(color: effectiveBorder, width: 1.1),
+              border: Border.all(color: effectiveBorder, width: 1.05),
             ),
             child: child,
           ),
@@ -222,7 +227,11 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
             else if (Navigator.canPop(context))
               IconButton(
                 onPressed: () => Navigator.maybePop(context),
-                icon: Icon(Icons.arrow_back_ios_new_rounded, size: 19, color: ink),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 19,
+                  color: ink,
+                ),
               )
             else
               const SizedBox(width: 6),
@@ -280,12 +289,12 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: (isDark ? DarbColors.darkSurface : Colors.white)
-                .withValues(alpha: 0.78),
+                .withValues(alpha: 0.80),
             border: Border(
               bottom: BorderSide(
                 color: isDark
                     ? DarbColors.mint.withValues(alpha: 0.14)
-                    : DarbColors.border.withValues(alpha: 0.65),
+                    : DarbColors.line.withValues(alpha: 0.85),
               ),
             ),
           ),
@@ -339,14 +348,15 @@ class DarbGlassBottomNav extends StatelessWidget {
             borderRadius: BorderRadius.circular(DarbRadius.md),
             onTap: () => onSelect(i),
             child: AnimatedContainer(
-              duration: DarbMotion.effectiveDuration(context, DarbMotion.fast),
+              duration:
+                  DarbMotion.effectiveDuration(context, DarbMotion.fast),
               curve: DarbMotion.enter,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(DarbRadius.md),
                 color: active
                     ? (isDark
-                        ? DarbColors.forest.withValues(alpha: 0.85)
+                        ? DarbColors.forestSoft.withValues(alpha: 0.90)
                         : DarbColors.mintTint)
                     : Colors.transparent,
               ),
@@ -366,13 +376,19 @@ class DarbGlassBottomNav extends StatelessWidget {
                           top: -4,
                           end: -8,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 1,
+                            ),
                             decoration: BoxDecoration(
-                              color: DarbColors.danger,
-                              borderRadius: BorderRadius.circular(DarbRadius.pill),
+                              color: DarbColors.dangerOf(context),
+                              borderRadius:
+                                  BorderRadius.circular(DarbRadius.pill),
                             ),
                             child: Text(
-                              item.badgeCount > 99 ? '99+' : '${item.badgeCount}',
+                              item.badgeCount > 99
+                                  ? '99+'
+                                  : '${item.badgeCount}',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
@@ -414,7 +430,12 @@ class DarbGlassBottomNav extends StatelessWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding > 0 ? bottomPadding : 10),
+      padding: EdgeInsets.fromLTRB(
+        12,
+        0,
+        12,
+        bottomPadding > 0 ? bottomPadding : 10,
+      ),
       child: DarbGlassSurface(
         borderRadius: DarbRadius.xl,
         blurSigma: 24,
@@ -432,6 +453,7 @@ Future<T?> showDarbGlassModalSheet<T>({
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
+    barrierColor: DarbColors.scrimOf(context),
     backgroundColor: Colors.transparent,
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),

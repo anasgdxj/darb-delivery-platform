@@ -25,7 +25,8 @@ export class MsgPlusSmsProvider implements SmsProvider {
     const senderName = configuredSenderName?.trim().toLowerCase() === 'msgplus'
       ? 'MsgPlus'
       : configuredSenderName?.trim();
-    const templateId = 1;
+    const rawTemplateId = Number(this.config.get<string>('MSGPLUS_TEMPLATE_ID') ?? '1');
+    const templateId = Number.isInteger(rawTemplateId) && rawTemplateId > 0 ? rawTemplateId : 1;
     const match = message.match(/(?:^|\D)(\d{6})(?:\D|$)/);
     const normalized = phone.replace(/[\s()-]/g, '').replace(/^\+/, '');
 

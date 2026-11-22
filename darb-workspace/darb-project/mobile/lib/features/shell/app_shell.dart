@@ -17,6 +17,7 @@ import '../customer/customer_home_screen.dart';
 import '../customer/customer_orders_screen.dart';
 import '../driver/driver_dashboard_screen.dart';
 import '../driver/driver_orders_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../vendor/vendor_orders_screen.dart';
 import '../vendor/vendor_products_screen.dart';
 
@@ -32,12 +33,24 @@ class _AppShellState extends State<AppShell> {
   bool _loading = true;
   String? _error;
   int _tabIndex = 0;
+  int _unreadNotifications = 0;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
     DarbUpdater.instance.checkForUpdate();
+  }
+
+  Future<void> _refreshUnreadCount() async {
+    try {
+      final res = await Api.instance.get('/notifications');
+      if (res is Map<String, dynamic> && mounted) {
+        setState(() {
+          _unreadNotifications = (res['unreadCount'] as num?)?.toInt() ?? 0;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadUser() async {
@@ -60,6 +73,7 @@ class _AppShellState extends State<AppShell> {
       } else {
         DriverLocationReporter.stop();
       }
+      await _refreshUnreadCount();
       if (!mounted) return;
       setState(() {
         _user = data;
@@ -97,6 +111,14 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  Future<void> _openNotifications() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+    );
+    await _refreshUnreadCount();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading && _user == null) {
@@ -128,7 +150,11 @@ class _AppShellState extends State<AppShell> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.cloud_off_rounded, size: 42, color: DarbColors.dangerOf(context)),
+                    Icon(
+                      Icons.cloud_off_rounded,
+                      size: 42,
+                      color: DarbColors.dangerOf(context),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       dt('تعذر تحميل حسابك'),
@@ -306,9 +332,50 @@ class _AppShellState extends State<AppShell> {
                   context: context,
                   builder: (_) => DarbUpdateDialog(info: update),
                 ),
-                icon: Icon(Icons.system_update_rounded, color: DarbColors.primaryOf(context)),
+                icon: Icon(
+                  Icons.system_update_rounded,
+                  color: DarbColors.primaryOf(context),
+                ),
               );
             },
+          ),
+          IconButton(
+            tooltip: dt('الإشعارات'),
+            onPressed: _openNotifications,
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  Icons.notifications_none_rounded,
+                  color: DarbColors.inkOf(context),
+                ),
+                if (_unreadNotifications > 0)
+                  PositionedDirectional(
+                    top: -3,
+                    end: -4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: DarbColors.dangerOf(context),
+                        borderRadius: BorderRadius.circular(DarbRadius.pill),
+                      ),
+                      child: Text(
+                        _unreadNotifications > 99
+                            ? '99+'
+                            : '$_unreadNotifications',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
           IconButton(
             tooltip: dt('المساعد الذكي'),
@@ -316,7 +383,10 @@ class _AppShellState extends State<AppShell> {
               context,
               MaterialPageRoute(builder: (_) => const AiRoleAssistantScreen()),
             ),
-            icon: Icon(Icons.auto_awesome_rounded, color: DarbColors.primaryOf(context)),
+            icon: Icon(
+              Icons.auto_awesome_rounded,
+              color: DarbColors.primaryOf(context),
+            ),
           ),
         ],
       ),
@@ -329,7 +399,10 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: DarbGlassBottomNav(
         destinations: destinations,
         selectedIndex: safeIndex,
-        onSelect: (index) => setState(() => _tabIndex = index),
+        onSelect: (index) {
+          setState(() => _tabIndex = index);
+          _refreshUnreadCount();
+        },
       ),
     );
   }

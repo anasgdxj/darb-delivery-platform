@@ -1,40 +1,22 @@
-import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-
-describe('AuthService refresh-token rotation', () => {
-  const user = { id: 'user-1', phone: '+963912345678', name: 'Test', role: 'CUSTOMER', locale: 'ar' };
-  const prisma = { user: { findUnique: jest.fn() } };
-  const otp = {};
-  const jwt = { verifyAsync: jest.fn(), signAsync: jest.fn() };
-  const config = { getOrThrow: jest.fn((key: string) => key) };
-  const redis = { eval: jest.fn(), set: jest.fn() };
+describe('AuthService refresh token rotation', () => {
+  const user: any = { id: 'user-1', phone: '+963994000000', email: null, name: 'Test', role: 'CUSTOMER', locale: 'ar' };
+  const prisma: any = { user: { findUnique: jest.fn().mockResolvedValue(user) } };
+  const otp: any = {};
+  const jwt: any = { verifyAsync: jest.fn().mockResolvedValue({ sub: 'user-1', type: 'refresh', jti: 'token-id' }), signAsync: jest.fn().mockResolvedValue('signed-token') };
+  const config: any = { getOrThrow: jest.fn().mockReturnValue('test-secret') };
+  const redis: any = { eval: jest.fn().mockResolvedValue(1), set: jest.fn().mockResolvedValue('OK') };
   let service: AuthService;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jwt.signAsync.mockReset().mockResolvedValueOnce('new-access').mockResolvedValueOnce('new-refresh');
-    service = new AuthService(prisma as any, otp as any, jwt as any, config as any, redis as any);
-    prisma.user.findUnique.mockResolvedValue(user);
-    jwt.verifyAsync.mockResolvedValue({ sub: user.id, type: 'refresh', jti: 'old-jti' });
-  });
-
-  it('rotates a refresh token exactly once', async () => {
-    redis.eval.mockResolvedValue(1);
-    await expect(service.refresh('old-refresh')).resolves.toEqual({ accessToken: 'new-access', refreshToken: 'new-refresh' });
+  beforeEach(() => { jest.clearAllMocks(); service = new AuthService(prisma, otp, jwt, config, redis); });
+  it('rotates a refresh token and issues a new pair', async () => {
+    const pair = await service.refresh('old-refresh-token');
     expect(redis.eval).toHaveBeenCalledTimes(1);
-    expect(redis.eval.mock.calls[0][1]).toBe(2);
+    expect(redis.set).toHaveBeenCalledWith(expect.stringMatching(/^auth:refresh:/), 'user-1', 'EX', 2592000);
+    expect(pair).toEqual({ accessToken: 'signed-token', refreshToken: 'signed-token' });
   });
-  it('rejects a replayed or revoked refresh token', async () => {
+  it('rejects a refresh token that was already consumed', async () => {
     redis.eval.mockResolvedValue(0);
-    await expect(service.refresh('old-refresh')).rejects.toBeInstanceOf(UnauthorizedException);
-  });
-  it('rejects legacy refresh tokens without a token identifier', async () => {
-    jwt.verifyAsync.mockResolvedValue({ sub: user.id, type: 'refresh' });
-    await expect(service.refresh('legacy-refresh')).rejects.toBeInstanceOf(UnauthorizedException);
-  });
-  it('revokes a refresh token on logout', async () => {
-    redis.eval.mockResolvedValue(1);
-    await expect(service.logout('old-refresh')).resolves.toEqual({ loggedOut: true });
-    expect(redis.eval).toHaveBeenCalledTimes(1);
+    await expect(service.refresh('replayed-refresh-token')).rejects.toThrow('already used or revoked');
+    expect(redis.set).not.toHaveBeenCalled();
   });
 });

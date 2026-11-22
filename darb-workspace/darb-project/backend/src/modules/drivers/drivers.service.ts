@@ -54,13 +54,28 @@ export class DriversService {
   async stats(userId: string) {
     const driver = await this.prisma.driver.findUnique({
       where: { userId },
-      select: { id: true, status: true, isOnline: true, vehicleType: true, cityId: true },
+      select: {
+        id: true,
+        status: true,
+        isOnline: true,
+        vehicleType: true,
+        cityId: true,
+        city: { select: { defaultCurrency: true } },
+      },
     });
     if (!driver) throw new BadRequestException('لا يوجد ملف سائق لهذا الحساب');
 
-    const [deliveredAgg, activeCount, peerOffersCount] = await Promise.all([
+    const now = new Date();
+    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+    const [deliveredAgg, todayAgg, activeCount, peerOffersCount] = await Promise.all([
       this.prisma.order.aggregate({
         where: { driverId: driver.id, status: 'DELIVERED' },
+        _count: { id: true },
+        _sum: { deliveryFee: true },
+      }),
+      this.prisma.order.aggregate({
+        where: { driverId: driver.id, status: 'DELIVERED', updatedAt: { gte: todayStart } },
         _count: { id: true },
         _sum: { deliveryFee: true },
       }),
@@ -77,9 +92,12 @@ export class DriversService {
       vehicleType: driver.vehicleType ?? 'MOTORCYCLE',
       isOnline: driver.isOnline,
       completedTrips: deliveredAgg._count.id,
+      todayTrips: todayAgg._count.id,
       activeTrips: activeCount,
       pendingOffers: peerOffersCount,
       totalEarnings: Number(deliveredAgg._sum.deliveryFee ?? 0),
+      todayEarnings: Number(todayAgg._sum.deliveryFee ?? 0),
+      currency: driver.city?.defaultCurrency ?? 'SYP',
     };
   }
 

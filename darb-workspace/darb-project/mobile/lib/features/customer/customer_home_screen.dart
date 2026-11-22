@@ -24,6 +24,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   List<Map<String, dynamic>> _vendors = const [];
   String? _selectedCityId;
   String _selectedType = '';
+  bool _openOnly = false;
   bool _loading = true;
   bool _offline = false;
   String? _error;
@@ -48,13 +49,16 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   String _cityDisplayName(Map<String, dynamic> city) {
     final code = darbLocale.value.languageCode;
-    final names = (city['names'] as List? ?? []).whereType<Map<String, dynamic>>().toList();
+    final names =
+        (city['names'] as List? ?? []).whereType<Map<String, dynamic>>().toList();
     final exact = names.cast<Map<String, dynamic>?>().firstWhere(
           (n) => n?['locale'] == code,
           orElse: () => null,
         );
     return exact?['name']?.toString() ??
-        (names.isNotEmpty ? names.first['name']?.toString() ?? '' : city['code']?.toString() ?? '');
+        (names.isNotEmpty
+            ? names.first['name']?.toString() ?? ''
+            : city['code']?.toString() ?? '');
   }
 
   String get _selectedCityName {
@@ -72,8 +76,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     });
     try {
       final cityRes = await Api.instance.getWithCache('/cities', 'active_cities');
-      final cities = (cityRes.data as List? ?? []).whereType<Map<String, dynamic>>().toList();
-      final chosenId = _selectedCityId ?? (cities.isNotEmpty ? cities.first['id']?.toString() : null);
+      final cities = (cityRes.data as List? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .toList();
+      final chosenId = _selectedCityId ??
+          (cities.isNotEmpty ? cities.first['id']?.toString() : null);
 
       List<Map<String, dynamic>> vendors = const [];
       var usedCache = cityRes.fromCache;
@@ -82,7 +89,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           '/vendors?cityId=$chosenId&locale=${darbLocale.value.languageCode}',
           'city_vendors_$chosenId',
         );
-        vendors = (vRes.data as List? ?? []).whereType<Map<String, dynamic>>().toList();
+        vendors = (vRes.data as List? ?? [])
+            .whereType<Map<String, dynamic>>()
+            .toList();
         usedCache = usedCache || vRes.fromCache;
       }
 
@@ -111,7 +120,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         '/vendors?cityId=$cityId&locale=${darbLocale.value.languageCode}',
         'city_vendors_$cityId',
       );
-      final vendors = (res.data as List? ?? []).whereType<Map<String, dynamic>>().toList();
+      final vendors =
+          (res.data as List? ?? []).whereType<Map<String, dynamic>>().toList();
       if (!mounted) return;
       setState(() {
         _vendors = vendors;
@@ -136,10 +146,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   List<Map<String, dynamic>> get _filteredVendors {
     final q = _searchController.text.trim().toLowerCase();
     return _vendors.where((v) {
-      if (_selectedType.isNotEmpty && v['type']?.toString() != _selectedType) return false;
+      if (_openOnly && v['isOpen'] == false) return false;
+      if (_selectedType.isNotEmpty && v['type']?.toString() != _selectedType) {
+        return false;
+      }
       if (q.isEmpty) return true;
       final tr = (v['translations'] as List? ?? []);
-      final name = tr.isNotEmpty ? tr.first['name']?.toString().toLowerCase() ?? '' : '';
+      final name =
+          tr.isNotEmpty ? tr.first['name']?.toString().toLowerCase() ?? '' : '';
       final type = v['type']?.toString().toLowerCase() ?? '';
       return name.contains(q) || type.contains(q);
     }).toList();
@@ -148,8 +162,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading && _cities.isEmpty) return const DarbStateView.loading();
-    if (_error != null && _cities.isEmpty) return DarbStateView.error(message: _error, onRetry: _bootstrap);
+    if (_error != null && _cities.isEmpty) {
+      return DarbStateView.error(message: _error, onRetry: _bootstrap);
+    }
 
+    final isDark = DarbColors.isDark(context);
     final types = _vendorTypes;
     final filtered = _filteredVendors;
 
@@ -162,11 +179,16 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: DarbGlassSurface(
-                tintColor: DarbColors.warningSoft,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                tintColor: DarbColors.warningOf(context)
+                    .withValues(alpha: isDark ? 0.18 : 0.12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Text(
                   dt('بيانات مخزنة محلياً لضعف الاتصال'),
-                  style: const TextStyle(color: DarbColors.warning, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: DarbColors.warningOf(context),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -179,10 +201,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: DarbColors.primaryOf(context).withValues(alpha: 0.14),
+                      color:
+                          DarbColors.primaryOf(context).withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(11),
                     ),
-                    child: Icon(Icons.location_city_rounded, size: 19, color: DarbColors.primaryOf(context)),
+                    child: Icon(
+                      Icons.location_city_rounded,
+                      size: 19,
+                      color: DarbColors.primaryOf(context),
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -190,6 +217,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       child: DropdownButton<String>(
                         value: _selectedCityId,
                         isExpanded: true,
+                        dropdownColor: DarbColors.surfaceElevatedOf(context),
                         style: TextStyle(
                           color: DarbColors.inkOf(context),
                           fontWeight: FontWeight.w800,
@@ -212,9 +240,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     tooltip: dt('عناوين التوصيل'),
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const AddressesScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const AddressesScreen(),
+                      ),
                     ),
-                    icon: Icon(Icons.bookmarks_outlined, color: DarbColors.primaryOf(context)),
+                    icon: Icon(
+                      Icons.bookmarks_outlined,
+                      color: DarbColors.primaryOf(context),
+                    ),
                   ),
                 ],
               ),
@@ -231,7 +264,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 children: [
                   Text(
                     dt('توصيل من الباب إلى الباب'),
-                    style: const TextStyle(color: DarbColors.mint, fontSize: 12.5, fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                      color: DarbColors.mint,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -248,7 +285,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     children: [
                       Expanded(
                         child: FilledButton.icon(
-                          style: FilledButton.styleFrom(backgroundColor: DarbColors.primary),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: DarbColors.lime,
+                            foregroundColor: DarbColors.forest,
+                          ),
                           onPressed: _selectedCityId == null
                               ? null
                               : () => Navigator.push(
@@ -261,14 +301,18 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                                       ),
                                     ),
                                   ),
-                          icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                          icon: const Icon(
+                            Icons.local_shipping_outlined,
+                            size: 18,
+                          ),
                           label: Text(dt('إرسال غرض مستقل')),
                         ),
                       ),
                       const SizedBox(width: 10),
                       IconButton.filledTonal(
                         style: IconButton.styleFrom(
-                          backgroundColor: DarbColors.mint.withValues(alpha: 0.20),
+                          backgroundColor:
+                              DarbColors.mint.withValues(alpha: 0.20),
                           foregroundColor: DarbColors.mint,
                           minimumSize: const Size(50, 50),
                         ),
@@ -297,6 +341,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           DarbSectionHeader(
             title: dt('المتاجر المتاحة'),
             subtitle: dt('تصفح المتاجر والمنتجات واطلب إلى بابك'),
+            trailing: FilterChip(
+              label: Text(dt('المفتوحة فقط')),
+              selected: _openOnly,
+              onSelected: (v) => setState(() => _openOnly = v),
+            ),
           ),
           const SizedBox(height: 10),
           TextField(
@@ -307,7 +356,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      onPressed: () => setState(() => _searchController.clear()),
+                      onPressed: () =>
+                          setState(() => _searchController.clear()),
                       icon: const Icon(Icons.close_rounded),
                     )
                   : null,
@@ -341,7 +391,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             const DarbStateView.loading()
           else if (filtered.isEmpty)
             DarbStateView.empty(
-              message: _vendors.isEmpty ? dt('لا توجد متاجر متاحة في هذه المدينة') : dt('لم نعثر على نتائج مطابقة'),
+              message: _vendors.isEmpty
+                  ? dt('لا توجد متاجر متاحة في هذه المدينة')
+                  : dt('لم نعثر على نتائج مطابقة'),
               icon: Icons.storefront_outlined,
             )
           else
@@ -349,7 +401,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: DarbFadeSlide(
-                  delay: Duration(milliseconds: (i * 40).clamp(0, 240)),
+                  delay: DarbMotion.staggerDelay(i),
                   child: _buildVendorCard(filtered[i]),
                 ),
               ),
@@ -360,11 +412,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   Widget _buildVendorCard(Map<String, dynamic> v) {
     final tr = (v['translations'] as List? ?? []);
-    final name = tr.isNotEmpty ? (tr.first['name']?.toString() ?? dt('متجر')) : dt('متجر');
+    final name = tr.isNotEmpty
+        ? (tr.first['name']?.toString() ?? dt('متجر'))
+        : dt('متجر');
     final type = v['type']?.toString() ?? dt('متجر');
     final address = v['location']?['address']?.toString();
     final isOpen = v['isOpen'] != false;
     final count = (v['_count']?['products'] as num?)?.toInt() ?? 0;
+    final reviewsCount = (v['_count']?['reviews'] as num?)?.toInt() ?? 0;
+    final ratingAvg = num.tryParse(v['ratingAvg']?.toString() ?? '')?.toDouble() ?? 0;
 
     return DarbPressScale(
       onTap: _selectedCityId == null
@@ -395,7 +451,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(Icons.storefront_rounded, color: DarbColors.primaryOf(context), size: 28),
+              child: Icon(
+                Icons.storefront_rounded,
+                color: DarbColors.primaryOf(context),
+                size: 28,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -407,7 +467,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Expanded(
                         child: Text(
                           name,
-                          style: TextStyle(color: DarbColors.inkOf(context), fontSize: 16, fontWeight: FontWeight.w900),
+                          style: TextStyle(
+                            color: DarbColors.inkOf(context),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
                       DarbStatusBadge(status: isOpen ? 'OPEN' : 'CLOSED'),
@@ -415,15 +479,45 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    address != null && address.isNotEmpty ? '$type · $address' : type,
+                    address != null && address.isNotEmpty
+                        ? '$type · $address'
+                        : type,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 13),
+                    style: TextStyle(
+                      color: DarbColors.mutedOf(context),
+                      fontSize: 13,
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    dt('$count منتج متاح'),
-                    style: TextStyle(color: DarbColors.primaryOf(context), fontSize: 12.5, fontWeight: FontWeight.w800),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Text(
+                        dt('$count منتج متاح'),
+                        style: TextStyle(
+                          color: DarbColors.primaryOf(context),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      if (ratingAvg > 0 || reviewsCount > 0) ...[
+                        const SizedBox(width: 10),
+                        Icon(
+                          Icons.star_rounded,
+                          size: 16,
+                          color: DarbColors.warningOf(context),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${ratingAvg.toStringAsFixed(1)} ($reviewsCount)',
+                          style: TextStyle(
+                            color: DarbColors.inkOf(context),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),

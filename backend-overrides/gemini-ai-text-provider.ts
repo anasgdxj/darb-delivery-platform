@@ -22,7 +22,7 @@ export class GeminiAiTextProvider extends AiTextProvider {
       throw new ServiceUnavailableException('مساعد دَرْب الذكي غير مهيأ حالياً');
     }
 
-    const model = this.config.get<string>('GEMINI_MODEL') ?? 'gemini-3.8-flash';
+    const model = this.config.get<string>('GEMINI_MODEL') ?? 'gemini-4-hydrogen';
     if (!/^[a-zA-Z0-9.-]+$/.test(model)) {
       throw new ServiceUnavailableException('إعداد نموذج الذكاء الاصطناعي غير صالح');
     }

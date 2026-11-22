@@ -1,0 +1,10 @@
+node_modules/
+darb-workspace/darb-project/backend/node_modules/
+darb-workspace/darb-project/backend/dist/
+darb-workspace/darb-project/mobile/.dart_tool/
+darb-workspace/darb-project/mobile/build/
+.env
+*.jks
+*.keystore
+extracted/
+.render-build/
