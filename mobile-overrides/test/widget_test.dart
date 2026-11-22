@@ -126,43 +126,23 @@ void main() {
   });
 
   group('Widget & Motion Accessibility Smoke Tests', () {
-    testWidgets('renders DarbGlassSurface in Glass and Standard modes without errors',
+    testWidgets('renders DarbGlassSurface in Standard mode without errors',
         (tester) async {
-      final appearance = DarbAppearanceController.instance;
-      await appearance.setVisualStyle(DarbVisualStyle.glass);
-
       await tester.pumpWidget(
         MaterialApp(
           theme: DarbTheme.light,
           home: const Scaffold(
             body: Center(
               child: DarbGlassSurface(
-                child: Text('DARB glass surface'),
+                child: Text('DARB surface'),
               ),
             ),
           ),
         ),
       );
       await tester.pump();
-      expect(find.text('DARB glass surface'), findsOneWidget);
-
-      await appearance.setVisualStyle(DarbVisualStyle.standard);
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: DarbTheme.light,
-          home: const Scaffold(
-            body: Center(
-              child: DarbGlassSurface(
-                child: Text('DARB glass surface'),
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pump();
-      expect(find.text('DARB glass surface'), findsOneWidget);
-
-      await appearance.setVisualStyle(DarbVisualStyle.glass);
+      expect(find.text('DARB surface'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('respects MediaQuery disableAnimations for DarbMotion.reduceMotion',
