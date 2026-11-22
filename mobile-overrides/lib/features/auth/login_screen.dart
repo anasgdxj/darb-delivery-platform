@@ -9,7 +9,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../shell/app_shell.dart';
-import 'city_carousel.dart';
+import 'darb_animated_map_hero.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -168,85 +168,11 @@ class _LoginScreenState extends State<LoginScreen> {
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: SizedBox(
-                height: 295,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    const DarbCityCarousel(),
-                    SafeArea(
-                      bottom: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 12, 18, 22),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const DarbBrandMark(size: 40),
-                                const SizedBox(width: 10),
-                                const Text(
-                                  'دَرْب · DARB',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                                const Spacer(),
-                                DarbGlassSurface(
-                                  borderRadius: DarbRadius.pill,
-                                  blurSigma: 12,
-                                  tintColor: Colors.black.withValues(alpha: 0.30),
-                                  borderColor: Colors.white.withValues(alpha: 0.25),
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value: darbLocale.value.languageCode,
-                                      dropdownColor: DarbColors.forest,
-                                      iconEnabledColor: Colors.white,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                      items: const [
-                                        DropdownMenuItem(value: 'ar', child: Text('AR')),
-                                        DropdownMenuItem(value: 'en', child: Text('EN')),
-                                        DropdownMenuItem(value: 'tr', child: Text('TR')),
-                                      ],
-                                      onChanged: (code) {
-                                        if (code != null) darbLocale.value = Locale(code);
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Text(
-                              l.t('welcomeTitle'),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              l.t('welcomeSubtitle'),
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.90),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              child: DarbAnimatedMapHero(
+                title: l.t('welcomeTitle'),
+                subtitle: l.t('welcomeSubtitle'),
+                localeCode: darbLocale.value.languageCode,
+                onLocaleChanged: (code) => darbLocale.value = Locale(code),
               ),
             ),
             SliverToBoxAdapter(
