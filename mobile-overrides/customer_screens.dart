@@ -549,7 +549,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                 colors: [DarbColors.forestSoft, DarbColors.forest]),
               borderRadius: BorderRadius.circular(24)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Icon(Icons.auto_awesome_rounded, color: DarbColors.mint, size: 28),
+              Icon(Icons.auto_awesome_rounded, color: DarbColors.mint, size: 28),
               const SizedBox(height: 12),
               Text(dt('احكِ طلبك بطريقتك'), style: const TextStyle(
                 color: Colors.white, fontSize: 21, fontWeight: FontWeight.w900)),
