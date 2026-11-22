@@ -34,6 +34,35 @@ class DarbNotifications {
     }
   }
 
+  static StreamSubscription<RemoteMessage>? listenForeground(
+    void Function(String? title, String? body, Map<String, dynamic> data) onMessage,
+  ) {
+    if (!_ready) return null;
+    return FirebaseMessaging.onMessage.listen((message) {
+      onMessage(
+        message.notification?.title,
+        message.notification?.body,
+        Map<String, dynamic>.from(message.data),
+      );
+    });
+  }
+
+  static StreamSubscription<RemoteMessage>? listenOpened(
+    void Function() onOpened,
+  ) {
+    if (!_ready) return null;
+    return FirebaseMessaging.onMessageOpenedApp.listen((_) => onOpened());
+  }
+
+  static Future<bool> wasOpenedFromTerminated() async {
+    if (!_ready) return false;
+    try {
+      return await FirebaseMessaging.instance.getInitialMessage() != null;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Future<void> register() async {
     if (!_ready || Api.instance.accessToken == null) return;
     try {
