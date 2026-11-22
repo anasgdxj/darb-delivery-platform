@@ -15,10 +15,9 @@ class DarbColors {
   static const forest = Color(0xFF102B26);
   static const forestSoft = Color(0xFF1C443B);
   static const mint = Color(0xFFB9E4D2);
-  static const lime = Color(0xFFC8F169);
   static const danger = Color(0xFFB94747);
   static const success = Color(0xFF287A50);
-  static const warning = Color(0xFFB7791F);
+  static const warning = Color(0xFF8A5A12);
   static const info = Color(0xFF356D9A);
 
   // Light Semantic Surfaces
@@ -26,7 +25,7 @@ class DarbColors {
   static const surface = Color(0xFFFFFFFF);
   static const surfaceAlt = Color(0xFFECF0EA);
   static const ink = Color(0xFF17231F);
-  static const muted = Color(0xFF77837D);
+  static const muted = Color(0xFF626F69);
   static const line = Color(0xFFE4E9E3);
   static const borderStrong = Color(0xFFCBD5CE);
   static const scrim = Color(0x990B1713);
@@ -53,7 +52,7 @@ class DarbColors {
   static const darkBorderStrong = Color(0xFF40564A);
   static const darkPrimary = mint;
   static const darkOnPrimary = forest;
-  static const darkAccent = lime;
+  static const darkAccent = mint;
   static const darkScrim = Color(0xB3000000);
   static const darkDanger = Color(0xFFE56868);
   static const darkSuccess = Color(0xFF4FB982);
