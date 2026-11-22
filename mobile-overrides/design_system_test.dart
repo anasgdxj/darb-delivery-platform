@@ -31,6 +31,44 @@ void main() {
       DarbAppearance.glass.value = true;
     });
 
+    test('glass mode preserves readable brand colors and translucent surfaces', () {
+      DarbAppearance.glass.value = true;
+      DarbTheme.updateBrightness(Brightness.light);
+      final light = DarbTheme.light;
+      expect(DarbColors.surface.a, lessThan(1));
+      expect(DarbColors.ink, const Color(0xFF17231F));
+      expect(light.colorScheme.primary, DarbColors.forest);
+      expect(light.colorScheme.onPrimary, Colors.white);
+      expect(light.colorScheme.surface, DarbColors.surface);
+      expect(light.scaffoldBackgroundColor, Colors.transparent);
+
+      DarbTheme.updateBrightness(Brightness.dark);
+      final dark = DarbTheme.dark;
+      expect(DarbColors.surface.a, lessThan(1));
+      expect(DarbColors.ink, const Color(0xFFF1F5F1));
+      expect(dark.colorScheme.primary, DarbColors.mint);
+      expect(dark.colorScheme.onPrimary, DarbColors.forest);
+      expect(dark.colorScheme.surface, DarbColors.surface);
+      expect(dark.scaffoldBackgroundColor, Colors.transparent);
+
+      DarbTheme.updateBrightness(Brightness.light);
+      DarbAppearance.glass.value = false;
+    });
+
+    test('standard mode restores fully opaque surfaces in both themes', () {
+      DarbAppearance.glass.value = false;
+      DarbTheme.updateBrightness(Brightness.light);
+      expect(DarbColors.surface.a, 1);
+      expect(DarbTheme.light.scaffoldBackgroundColor, DarbColors.canvas);
+
+      DarbTheme.updateBrightness(Brightness.dark);
+      expect(DarbColors.surface.a, 1);
+      expect(DarbTheme.dark.scaffoldBackgroundColor, const Color(0xFF0B1512));
+
+      DarbTheme.updateBrightness(Brightness.light);
+      DarbAppearance.glass.value = true;
+    });
+
     test('uses the same DARB route transition in light and dark themes', () {
       for (final theme in [DarbTheme.light, DarbTheme.dark]) {
         for (final platform in TargetPlatform.values) {
