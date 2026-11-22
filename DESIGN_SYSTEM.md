@@ -41,7 +41,6 @@ DARB should feel like a live logistics network: confident, clear, fast, and prem
 | forest | #102B26 | Primary brand and high-emphasis actions |
 | forestSoft | #1C443B | Secondary brand surfaces |
 | mint | #B9E4D2 | Selected and supportive states |
-| lime | #C8F169 | High-emphasis accent on dark brand surfaces |
 | danger | #B94747 | Destructive actions and errors |
 | success | #287A50 | Confirmed/success states |
 | warning | #B7791F | Pending/attention states |
@@ -74,10 +73,9 @@ The dark theme must use a separate semantic palette; do not invert the light pal
 | borderStrong | #40564A | Stronger boundaries |
 | primary | #B9E4D2 | Main interactive emphasis on dark surfaces |
 | onPrimary | #102B26 | Text/icons on primary |
-| accent | #C8F169 | Rare high-priority accent |
 | scrim | #B3000000 | Modal backdrops |
 
-Dark palette values are implemented through adaptive `DarbColors` semantic tokens, including `primary` / `onPrimary` for interactive controls and `surfaceElevated` for raised containers. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Contrast and component states must be verified in implementation before this theme is considered complete.
+Dark palette values are implemented through adaptive `DarbColors` semantic tokens, including `primary` / `onPrimary` for interactive controls and `surfaceElevated` for raised containers. The palette uses forest green and muted mint only; lime green is not part of the product palette. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Contrast and component states must be verified in implementation before this theme is considered complete.
 
 Do not introduce near-duplicate brand colors in individual screens. Add genuinely new semantic colors centrally and document their use. All screen colors must resolve through the active theme; screen-specific hard-coded palette values are not permitted except for intentional brand artwork and media. Use `DarbColors.primary` with `DarbColors.onPrimary` for primary controls; use `DarbColors.brandForeground` for text and icons placed on ordinary surfaces. Keep `forest` and `forestSoft` only for intentional fixed brand artwork and photo overlays.
 
