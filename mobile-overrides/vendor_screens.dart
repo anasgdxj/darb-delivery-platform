@@ -56,10 +56,10 @@ Widget build(BuildContext context) {
                   borderRadius:BorderRadius.circular(DarbRadius.xl),
                 ),
                 child:Row(children:[
-                  Icon(Icons.storefront_rounded,color:DarbColors.lime,size:25),
+                  Icon(Icons.storefront_rounded,color:DarbColors.mint,size:25),
                   const SizedBox(width:11),
                   Expanded(child:Text(dt('منتجات المتجر'),style:const TextStyle(color:Colors.white,fontSize:17,fontWeight:FontWeight.w900))),
-                  Text('${products.length}',style:TextStyle(color:DarbColors.lime,fontSize:14,fontWeight:FontWeight.w900)),
+                  Text('${products.length}',style:TextStyle(color:DarbColors.mint,fontSize:14,fontWeight:FontWeight.w900)),
                 ]),
               ),
               const SizedBox(height:15),
@@ -362,7 +362,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     borderRadius: BorderRadius.circular(DarbRadius.xl),
                   ),
                   child: Row(children: [
-                    Icon(Icons.receipt_long_rounded, color: DarbColors.lime, size: 27),
+                    Icon(Icons.receipt_long_rounded, color: DarbColors.mint, size: 27),
                     const SizedBox(width: 12),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text(dt('مراجعة طلبك'), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
