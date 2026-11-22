@@ -188,8 +188,8 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                       IconButton(
                         onPressed: () => launchUrl(
                           Uri.parse(
-                            'https://www.openstreetmap.org/?mlat=\${point.latitude}'
-                            '&mlon=\${point.longitude}#map=16/\${point.latitude}/\${point.longitude}',
+                            'https://www.openstreetmap.org/?mlat=${point.latitude}'
+                            '&mlon=${point.longitude}#map=16/${point.latitude}/${point.longitude}',
                           ),
                           mode: LaunchMode.externalApplication,
                         ),
