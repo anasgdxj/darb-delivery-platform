@@ -250,6 +250,50 @@ class _DarbPressScaleState extends State<DarbPressScale> {
   }
 }
 
+/// Glass-backed Material for tappable grouped surfaces.
+class DarbGlassMaterial extends StatelessWidget {
+  const DarbGlassMaterial({
+    super.key,
+    this.color,
+    this.borderRadius,
+    required this.child,
+  });
+
+  final Color? color;
+  final BorderRadiusGeometry? borderRadius;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = borderRadius ?? BorderRadius.circular(DarbRadius.lg);
+    final glass = DarbAppearance.glass.value;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final tint = color ??
+        (dark ? const Color(0xB81B3028) : const Color(0xBFFFFFFF));
+    final material = Material(
+      color: glass ? tint : (color ?? DarbColors.surface),
+      borderRadius: radius,
+      child: child,
+    );
+    if (!glass) return material;
+    return ClipRRect(
+      borderRadius: radius.resolve(Directionality.of(context)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: dark ? .12 : .68),
+            ),
+          ),
+          child: material,
+        ),
+      ),
+    );
+  }
+}
+
 /// Drop-in Card replacement that adds real backdrop blur while Glass mode is active.
 class DarbGlassCard extends Card {
   const DarbGlassCard({
