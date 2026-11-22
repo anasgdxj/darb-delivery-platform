@@ -122,7 +122,7 @@ def main() -> int:
         "--danger": "#B94747",
     }
     for token, color in site_colors.items():
-        if not re.search(rf"{re.escape(token)}\\s*:\\s*{re.escape(color)}\\s*;", site_text):
+        if not re.search(rf"{re.escape(token)}\s*:\s*{re.escape(color)}\s*;", site_text):
             failures.append(f"Public website token {token} does not match {color}")
 
     dark_site_colors = {
@@ -133,12 +133,12 @@ def main() -> int:
         "--primary-hover": "#269B73",
         "--on-primary": "#0A1916",
     }
-    dark_block = re.search(r"html\\.dark\\s*\\{([^}]+)\\}", site_text, re.DOTALL)
+    dark_block = re.search(r"html\.dark\s*\\{([^}]+)\\}", site_text, re.DOTALL)
     if not dark_block:
         failures.append("Public website dark theme token block is missing")
     else:
         for token, color in dark_site_colors.items():
-            if not re.search(rf"{re.escape(token)}\\s*:\\s*{re.escape(color)}\\s*;", dark_block.group(1)):
+            if not re.search(rf"{re.escape(token)}\s*:\s*{re.escape(color)}\s*;", dark_block.group(1)):
                 failures.append(f"Public website dark token {token} does not match {color}")
 
     if "color: var(--on-primary)" not in site_text:
