@@ -97,14 +97,9 @@ class _DarbSettingsPageState extends State<DarbSettingsPage> {
             ],
           ),
         ),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: DarbColors.surface,
-            borderRadius: BorderRadius.circular(DarbRadius.lg),
-            border: Border.all(color: DarbColors.line),
-            boxShadow: DarbElevation.card,
-          ),
+        DarbGlassSurface(
+          padding: EdgeInsets.zero,
+          radius: DarbRadius.lg,
           child: child,
         ),
       ],
