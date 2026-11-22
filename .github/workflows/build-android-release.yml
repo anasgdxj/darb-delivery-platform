@@ -77,12 +77,15 @@ jobs:
                   lines.insert(dep_index, dep)
           pubspec.write_text("\n".join(lines) + "\n")
           m = manifest.read_text()
+          internet = '<uses-permission android:name="android.permission.INTERNET" />'
+          if internet not in m:
+              m = m.replace("<application", internet + "\n    <application", 1)
+          if internet not in m:
+              raise SystemExit("Could not add INTERNET permission to Android manifest")
           for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
               tag = f'<uses-permission android:name="android.permission.{p}" />'
               if tag not in m:
-                  internet = '<uses-permission android:name="android.permission.INTERNET" />'
-                  if internet not in m: raise SystemExit("INTERNET permission anchor missing")
-                  m = m.replace(internet, internet + "\n    " + tag)
+                  m = m.replace(internet, internet + "\n    " + tag, 1)
           provider = """    <provider
                   android:name="androidx.core.content.FileProvider"
                   android:authorities="${applicationId}.fileprovider"
