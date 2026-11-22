@@ -1,3 +1,4 @@
+import 'dart:ui' show ImageFilter;
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -14,16 +15,16 @@ abstract final class DarbColors {
   static Color get mint => const Color(0xFFB9E4D2);
   static Color get canvas => _dark ? const Color(0xFF0B1512) : const Color(0xFFF5F6F2);
   static Color get surface => DarbAppearance.glass.value
-      ? (_dark ? const Color(0xE613221D) : const Color(0xE6FFFFFF))
+      ? (_dark ? const Color(0xB813221D) : const Color(0xB8FFFFFF))
       : (_dark ? const Color(0xFF13221D) : const Color(0xFFFFFFFF));
   static Color get surfaceAlt => DarbAppearance.glass.value
-      ? (_dark ? const Color(0xD91A2D26) : const Color(0xD9EAF2EC))
+      ? (_dark ? const Color(0xB31A2D26) : const Color(0xB3EAF2EC))
       : (_dark ? const Color(0xFF1A2D26) : const Color(0xFFEAF2EC));
   static Color get onForest => const Color(0xFFFFFFFF);
   static Color get primary => _dark ? mint : forest;
   static Color get onPrimary => _dark ? forest : const Color(0xFFFFFFFF);
   static Color get surfaceElevated => DarbAppearance.glass.value
-      ? (_dark ? const Color(0xE61A2D26) : const Color(0xE6FFFFFF))
+      ? (_dark ? const Color(0xCC1A2D26) : const Color(0xCCFFFFFF))
       : (_dark ? const Color(0xFF1A2D26) : surface);
   static Color get onBrand => const Color(0xFFFFFFFF);
   static Color get brandForeground => _dark ? mint : forest;
@@ -249,6 +250,167 @@ class _DarbPressScaleState extends State<DarbPressScale> {
   }
 }
 
+/// Shared atmospheric canvas used behind every route when Glass mode is enabled.
+class DarbGlassBackdrop extends StatelessWidget {
+  const DarbGlassBackdrop({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!DarbAppearance.glass.value) return child;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
+              colors: dark
+                  ? const [Color(0xFF09130F), Color(0xFF14251E), Color(0xFF0B1712)]
+                  : const [Color(0xFFF2F8F4), Color(0xFFE6F0EA), Color(0xFFF8FAF7)],
+            ),
+          ),
+        ),
+        Positioned(
+          top: -130,
+          right: -100,
+          child: _DarbGlassGlow(
+            size: 300,
+            color: dark ? const Color(0xFF28634D) : const Color(0xFFB9E4D2),
+          ),
+        ),
+        Positioned(
+          bottom: -150,
+          left: -110,
+          child: _DarbGlassGlow(
+            size: 330,
+            color: dark ? const Color(0xFF1D4A3B) : const Color(0xFFD3E9DD),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
+class _DarbGlassGlow extends StatelessWidget {
+  const _DarbGlassGlow({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+        child: ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 34, sigmaY: 34),
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [color.withValues(alpha: .58), color.withValues(alpha: 0)],
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Frosted glass panel. BackdropFilter blurs the content actually behind the panel.
+class DarbGlassSurface extends StatelessWidget {
+  const DarbGlassSurface({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.radius = DarbRadius.lg,
+    this.blur = 18,
+    this.tint,
+    this.borderColor,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+  final double blur;
+  final Color? tint;
+  final Color? borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = DarbAppearance.glass.value;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final fill = tint ??
+        (dark
+            ? const Color(0xB81B3028)
+            : const Color(0xBFFFFFFF));
+    return AnimatedContainer(
+      duration: DarbMotion.standard,
+      curve: DarbMotion.enter,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: glass ? DarbElevation.card : const [],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: glass
+            ? BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                child: _DarbGlassPanelContent(
+                  padding: padding,
+                  fill: fill,
+                  borderColor: borderColor ??
+                      (dark
+                          ? Colors.white.withValues(alpha: .13)
+                          : const Color(0xFFFFFFFF).withValues(alpha: .82)),
+                  child: child,
+                ),
+              )
+            : _DarbGlassPanelContent(
+                padding: padding,
+                fill: dark ? const Color(0xFF13221D) : Colors.white,
+                borderColor: DarbColors.line,
+                child: child,
+              ),
+      ),
+    );
+  }
+}
+
+class _DarbGlassPanelContent extends StatelessWidget {
+  const _DarbGlassPanelContent({
+    required this.padding,
+    required this.fill,
+    required this.borderColor,
+    required this.child,
+  });
+
+  final EdgeInsetsGeometry padding;
+  final Color fill;
+  final Color borderColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: fill,
+          border: Border.all(color: borderColor),
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: [
+              fill,
+              fill.withValues(alpha: fill.a * .82),
+            ],
+          ),
+        ),
+        child: Padding(padding: padding, child: child),
+      );
+}
+
 abstract final class DarbElevation {
   static const card = <BoxShadow>[
     BoxShadow(color: Color(0x080F2B24), blurRadius: 18, offset: Offset(0, 6)),
@@ -336,7 +498,7 @@ abstract final class DarbTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFF0B1512),
+      scaffoldBackgroundColor: DarbAppearance.glass.value ? Colors.transparent : const Color(0xFF0B1512),
       canvasColor: const Color(0xFF13221D),
       cardColor: const Color(0xFF13221D),
       fontFamily: 'Arial',
@@ -441,7 +603,7 @@ abstract final class DarbTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: Color(0xFFF5F6F2),
+      scaffoldBackgroundColor: DarbAppearance.glass.value ? Colors.transparent : Color(0xFFF5F6F2),
       fontFamily: 'Arial',
       textTheme: TextTheme(
         headlineLarge: TextStyle(color: Color(0xFF17231F), fontSize: 28, fontWeight: FontWeight.w900, height: 1.2),
