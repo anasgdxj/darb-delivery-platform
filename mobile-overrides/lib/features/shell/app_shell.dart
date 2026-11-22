@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
@@ -15,6 +17,7 @@ import '../admin/admin_operations_screens.dart';
 import '../auth/login_screen.dart';
 import '../customer/customer_home_screen.dart';
 import '../customer/customer_orders_screen.dart';
+import '../customer/driver_tracking_screen.dart';
 import '../driver/driver_dashboard_screen.dart';
 import '../driver/driver_orders_screen.dart';
 import '../notifications/notifications_screen.dart';
@@ -34,12 +37,51 @@ class _AppShellState extends State<AppShell> {
   String? _error;
   int _tabIndex = 0;
   int _unreadNotifications = 0;
+  StreamSubscription? _foregroundNotificationSubscription;
+  StreamSubscription? _openedNotificationSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
     DarbUpdater.instance.checkForUpdate();
+    _foregroundNotificationSubscription =
+        DarbNotifications.listenForeground((title, body, data) {
+      if (!mounted) return;
+      unawaited(_refreshUnreadCount());
+      final message = [title, body]
+          .where((part) => part != null && part.trim().isNotEmpty)
+          .join('\n');
+      if (message.isEmpty) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: SnackBarAction(
+            label: dt('عرض'),
+            onPressed: () {
+              if (data.isNotEmpty) {
+                unawaited(_handleNotificationOpen(data));
+              } else {
+                unawaited(_openNotifications());
+              }
+            },
+          ),
+        ),
+      );
+    });
+    _openedNotificationSubscription = DarbNotifications.listenOpened((data) {
+      if (mounted) unawaited(_handleNotificationOpen(data));
+    });
+    DarbNotifications.initialMessageData().then((data) {
+      if (data != null && mounted) unawaited(_handleNotificationOpen(data));
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_foregroundNotificationSubscription?.cancel() ?? Future<void>.value());
+    unawaited(_openedNotificationSubscription?.cancel() ?? Future<void>.value());
+    super.dispose();
   }
 
   Future<void> _refreshUnreadCount() async {
@@ -117,6 +159,51 @@ class _AppShellState extends State<AppShell> {
       MaterialPageRoute(builder: (_) => const NotificationsScreen()),
     );
     await _refreshUnreadCount();
+  }
+
+  Future<void> _handleNotificationOpen(Map<String, dynamic> data) async {
+    if (!mounted) return;
+
+    if (_user == null) {
+      try {
+        final currentUser = await Api.instance.get('/auth/me');
+        if (currentUser is Map<String, dynamic> && mounted) {
+          setState(() => _user = currentUser);
+        }
+      } catch (_) {
+        await _openNotifications();
+        return;
+      }
+    }
+
+    final orderId = (data['orderId'] ?? data['order_id'] ?? '').toString().trim();
+    final type = (data['type'] ?? '').toString().toUpperCase();
+    final role = _user?['role']?.toString().toUpperCase() ?? 'CUSTOMER';
+
+    if (role == 'CUSTOMER' && orderId.isNotEmpty) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DriverTrackingScreen(orderId: orderId),
+        ),
+      );
+      await _refreshUnreadCount();
+      return;
+    }
+
+    if (role == 'DRIVER' && mounted) {
+      final destination = switch (type) {
+        'PEER_DELIVERY_AVAILABLE' => 0,
+        'DELIVERY_OFFER_SELECTED' || 'ORDER_ASSIGNED' || 'ORDER_STATUS' => 1,
+        _ => -1,
+      };
+      if (destination >= 0) {
+        setState(() => _tabIndex = destination);
+        return;
+      }
+    }
+
+    await _openNotifications();
   }
 
   @override

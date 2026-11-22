@@ -13,13 +13,47 @@ export class NotificationsService {
     const raw = config.get<string>('FIREBASE_SERVICE_ACCOUNT_JSON');
     if (!raw) return;
     try {
-      const credentials = JSON.parse(raw);
+      let parsed: unknown = JSON.parse(raw.trim());
+      if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('Service-account value must be a JSON object.');
+      }
+
+      const credentials = parsed as {
+        type?: string;
+        project_id?: string;
+        client_email?: string;
+        private_key?: string;
+      };
+
+      if (
+        credentials.type !== 'service_account' ||
+        !credentials.project_id ||
+        !credentials.client_email ||
+        !credentials.private_key
+      ) {
+        throw new Error('Service-account JSON is missing required fields.');
+      }
+
+      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
       const app: App =
         getApps().find((x) => x.name === 'darb-notifications') ??
-        initializeApp({ credential: cert(credentials), projectId: credentials.project_id }, 'darb-notifications');
+        initializeApp(
+          {
+            credential: cert({
+              projectId: credentials.project_id,
+              clientEmail: credentials.client_email,
+              privateKey: credentials.private_key,
+            }),
+            projectId: credentials.project_id,
+          },
+          'darb-notifications',
+        );
       this.messaging = getMessaging(app);
+      this.logger.log(`Firebase Admin initialized for project ${credentials.project_id}.`);
     } catch (error) {
-      this.logger.error('Firebase Admin credentials are invalid; push delivery is disabled.');
+      const reason = error instanceof Error ? error.message : 'Unknown initialization error';
+      this.logger.error(`Firebase Admin initialization failed: ${reason}. Push delivery is disabled.`);
     }
   }
 

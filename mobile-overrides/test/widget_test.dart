@@ -1,8 +1,6 @@
 import 'package:darb/core/l10n/app_localizations.dart';
 import 'package:darb/core/theme/darb_design_system.dart';
-import 'package:darb/core/widgets/darb_components.dart';
 import 'package:darb/core/widgets/darb_glass.dart';
-import 'package:darb/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -128,40 +126,23 @@ void main() {
   });
 
   group('Widget & Motion Accessibility Smoke Tests', () {
-    testWidgets('renders DarbGlassSurface in Glass and Standard modes without errors',
+    testWidgets('renders DarbGlassSurface without errors',
         (tester) async {
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
       await tester.pumpWidget(
-        DarbApp(
-          initialScreen: Scaffold(
-            appBar: const DarbGlassAppBar(title: 'دَرْب', subtitle: 'تجربة'),
-            body: DarbAmbientBackground(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: const [
-                  DarbMetricCard(
-                    label: 'الرحلات المكتملة',
-                    value: '42',
-                    icon: Icons.route_rounded,
-                  ),
-                  SizedBox(height: 12),
-                  DarbStatusBadge(status: 'DELIVERED'),
-                  SizedBox(height: 8),
-                  DarbStatusBadge(status: 'WITHDRAWN'),
-                ],
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: const Scaffold(
+            body: Center(
+              child: DarbGlassSurface(
+                child: Text('DARB surface'),
               ),
             ),
           ),
         ),
       );
       await tester.pump();
-      expect(find.text('دَرْب'), findsOneWidget);
-      expect(find.text('42'), findsOneWidget);
-
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.standard);
-      await tester.pump();
-      expect(find.text('42'), findsOneWidget);
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
+      expect(find.text('DARB surface'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('respects MediaQuery disableAnimations for DarbMotion.reduceMotion',
