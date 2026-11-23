@@ -71,6 +71,27 @@ describe('OrdersService safety checks', () => {
     })).rejects.toBeInstanceOf(BadRequestException);
   });
 
+  it('rejects checkout for a closed vendor before reading products or reserving stock', async () => {
+    const productFindMany = jest.fn();
+    const tx: any = {
+      address: { findFirst: jest.fn().mockResolvedValue({ id: 'address-1' }) },
+      city: { findFirst: jest.fn().mockResolvedValue({ id: 'city-1', defaultCurrency: 'SYP' }) },
+      vendor: { findFirst: jest.fn().mockResolvedValue({ id: 'vendor-1', isOpen: false }) },
+      deliveryZone: { findUnique: jest.fn().mockResolvedValue({ feeBase: 100, feePerKm: 0 }) },
+      product: { findMany: productFindMany },
+    };
+    prisma.$transaction.mockImplementation(async (callback: (tx: any) => unknown) => callback(tx));
+
+    await expect(service.create('customer-1', {
+      cityId: 'city-1',
+      addressId: 'address-1',
+      vendorId: 'vendor-1',
+      items: [{ productId: 'product-1', quantity: 1 }],
+    })).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(productFindMany).not.toHaveBeenCalled();
+  });
+
   it('adds the rounded-up PostGIS distance fee to the order total', async () => {
     const create = jest.fn().mockResolvedValue({ id: 'order-1' });
     const tx: any = {
