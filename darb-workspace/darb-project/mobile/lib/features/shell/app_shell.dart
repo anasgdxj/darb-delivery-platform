@@ -8,6 +8,7 @@ import '../../core/services/notifications_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 import '../account/account_screen.dart';
 import '../account/ai_role_assistant_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
@@ -112,6 +113,7 @@ class _AppShellState extends State<AppShell> {
   }
 
   Future<void> _openNotifications() async {
+    DarbHaptics.light();
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const NotificationsScreen()),
@@ -172,16 +174,20 @@ class _AppShellState extends State<AppShell> {
                       style: TextStyle(color: DarbColors.mutedOf(context)),
                     ),
                     const SizedBox(height: 18),
-                    FilledButton.icon(
+                    DarbActionButton(
+                      label: dt('إعادة المحاولة'),
+                      icon: Icons.refresh_rounded,
+                      state: _loading
+                          ? DarbActionState.loading
+                          : DarbActionState.idle,
                       onPressed: _loadUser,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: Text(dt('إعادة المحاولة')),
                     ),
                     const SizedBox(height: 10),
-                    OutlinedButton.icon(
+                    DarbActionButton(
+                      label: dt('تسجيل الخروج'),
+                      icon: Icons.logout_rounded,
+                      variant: DarbActionVariant.outlined,
                       onPressed: _signOutFromError,
-                      icon: const Icon(Icons.logout_rounded),
-                      label: Text(dt('تسجيل الخروج')),
                     ),
                   ],
                 ),
@@ -328,10 +334,13 @@ class _AppShellState extends State<AppShell> {
               if (update == null) return const SizedBox.shrink();
               return IconButton(
                 tooltip: dt('تحديث التطبيق'),
-                onPressed: () => showDialog<void>(
-                  context: context,
-                  builder: (_) => DarbUpdateDialog(info: update),
-                ),
+                onPressed: () {
+                  DarbHaptics.light();
+                  showDialog<void>(
+                    context: context,
+                    builder: (_) => DarbUpdateDialog(info: update),
+                  );
+                },
                 icon: Icon(
                   Icons.system_update_rounded,
                   color: DarbColors.primaryOf(context),
@@ -353,24 +362,12 @@ class _AppShellState extends State<AppShell> {
                   PositionedDirectional(
                     top: -3,
                     end: -4,
-                    child: Container(
+                    child: DarbAnimatedBadge(
+                      count: _unreadNotifications,
+                      fontSize: 9.5,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 4,
                         vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: DarbColors.dangerOf(context),
-                        borderRadius: BorderRadius.circular(DarbRadius.pill),
-                      ),
-                      child: Text(
-                        _unreadNotifications > 99
-                            ? '99+'
-                            : '$_unreadNotifications',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w900,
-                        ),
                       ),
                     ),
                   ),
@@ -379,10 +376,13 @@ class _AppShellState extends State<AppShell> {
           ),
           IconButton(
             tooltip: dt('المساعد الذكي'),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AiRoleAssistantScreen()),
-            ),
+            onPressed: () {
+              DarbHaptics.light();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AiRoleAssistantScreen()),
+              );
+            },
             icon: Icon(
               Icons.auto_awesome_rounded,
               color: DarbColors.primaryOf(context),
@@ -391,7 +391,7 @@ class _AppShellState extends State<AppShell> {
         ],
       ),
       body: DarbAmbientBackground(
-        child: IndexedStack(
+        child: DarbTabViewStack(
           index: safeIndex,
           children: pages,
         ),

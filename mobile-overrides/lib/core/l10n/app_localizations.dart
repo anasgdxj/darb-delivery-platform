@@ -196,6 +196,7 @@ class AppLocalizations {
     'حسب الجهاز': 'System default|Sistem varsayılanı',
     'نهاري': 'Light|Açık',
     'ليلي': 'Dark|Koyu',
+    'تم الحفظ': 'Saved|Kaydedildi',
     'الإشعارات': 'Notifications|Bildirimler',
     'تحديد الكل كمقروء': 'Mark all read|Tümünü okundu say',
     'لا توجد إشعارات حتى الآن': 'No notifications yet|Henüz bildirim yok',

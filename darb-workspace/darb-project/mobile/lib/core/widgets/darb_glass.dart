@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/darb_design_system.dart';
+import 'darb_motion_components.dart';
 
 class DarbAmbientBackground extends StatelessWidget {
   const DarbAmbientBackground({
@@ -241,14 +242,30 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                  AnimatedSwitcher(
+                    duration: DarbMotion.effectiveDuration(
+                      context,
+                      DarbMotion.fast,
+                    ),
+                    switchInCurve: DarbMotion.enter,
+                    switchOutCurve: DarbMotion.exit,
+                    layoutBuilder: (currentChild, previousChildren) => Stack(
+                      alignment: AlignmentDirectional.centerStart,
+                      children: [
+                        ...previousChildren,
+                        if (currentChild != null) currentChild,
+                      ],
+                    ),
+                    child: Text(
+                      title,
+                      key: ValueKey(title),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                   if (subtitle != null && subtitle!.isNotEmpty)
@@ -333,10 +350,7 @@ class DarbGlassBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = DarbColors.isDark(context);
     final isGlass = DarbAppearanceController.instance.isGlass;
-    final primary = DarbColors.primaryOf(context);
-    final muted = DarbColors.mutedOf(context);
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     final itemsRow = Row(
@@ -344,82 +358,26 @@ class DarbGlassBottomNav extends StatelessWidget {
         final item = destinations[i];
         final active = i == selectedIndex;
         return Expanded(
-          child: InkWell(
-            borderRadius: BorderRadius.circular(DarbRadius.md),
-            onTap: () => onSelect(i),
-            child: AnimatedContainer(
-              duration:
-                  DarbMotion.effectiveDuration(context, DarbMotion.fast),
-              curve: DarbMotion.enter,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(DarbRadius.md),
-                color: active
-                    ? (isDark
-                        ? DarbColors.forestSoft.withValues(alpha: 0.90)
-                        : DarbColors.mintTint)
-                    : Colors.transparent,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Icon(
-                        active ? item.selectedIcon : item.icon,
-                        size: 22,
-                        color: active ? primary : muted,
-                      ),
-                      if (item.badgeCount > 0)
-                        PositionedDirectional(
-                          top: -4,
-                          end: -8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: DarbColors.dangerOf(context),
-                              borderRadius:
-                                  BorderRadius.circular(DarbRadius.pill),
-                            ),
-                            child: Text(
-                              item.badgeCount > 99
-                                  ? '99+'
-                                  : '${item.badgeCount}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    item.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: active ? FontWeight.w900 : FontWeight.w600,
-                      color: active ? primary : muted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          child: _DarbNavTile(
+            destination: item,
+            active: active,
+            onTap: () {
+              if (!active) {
+                DarbHaptics.selection();
+              } else {
+                DarbHaptics.light();
+              }
+              onSelect(i);
+            },
           ),
         );
       }),
     );
 
     if (!isGlass) {
-      return Container(
+      return AnimatedContainer(
+        duration: DarbMotion.effectiveDuration(context, DarbMotion.interactive),
+        curve: DarbMotion.enter,
         padding: EdgeInsets.fromLTRB(8, 6, 8, bottomPadding + 6),
         decoration: BoxDecoration(
           color: DarbColors.surfaceOf(context),
@@ -441,6 +399,152 @@ class DarbGlassBottomNav extends StatelessWidget {
         blurSigma: 24,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: itemsRow,
+      ),
+    );
+  }
+}
+
+class _DarbNavTile extends StatefulWidget {
+  const _DarbNavTile({
+    required this.destination,
+    required this.active,
+    required this.onTap,
+  });
+
+  final DarbNavDestination destination;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  State<_DarbNavTile> createState() => _DarbNavTileState();
+}
+
+class _DarbNavTileState extends State<_DarbNavTile> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = DarbColors.isDark(context);
+    final reduced = DarbMotion.reduceMotion(context);
+    final primary = DarbColors.primaryOf(context);
+    final muted = DarbColors.mutedOf(context);
+    final active = widget.active;
+    final item = widget.destination;
+    final indicatorColor = isDark ? DarbColors.mint : primary;
+
+    return Semantics(
+      button: true,
+      selected: active,
+      label: item.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: (!reduced && _pressed) ? 0.94 : 1.0,
+          duration: DarbMotion.effectiveDuration(
+            context,
+            _pressed ? DarbMotion.press : DarbMotion.interactive,
+          ),
+          curve: (!reduced && !_pressed)
+              ? DarbMotion.emphasis
+              : DarbMotion.enter,
+          child: AnimatedContainer(
+            duration: DarbMotion.effectiveDuration(context, DarbMotion.tab),
+            curve: DarbMotion.enter,
+            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(DarbRadius.md),
+              color: active
+                  ? (isDark
+                      ? DarbColors.forestSoft.withValues(alpha: 0.90)
+                      : DarbColors.mintTint)
+                  : Colors.transparent,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    AnimatedScale(
+                      scale: (!reduced && active) ? 1.12 : 1.0,
+                      duration: DarbMotion.effectiveDuration(
+                        context,
+                        DarbMotion.interactive,
+                      ),
+                      curve: (!reduced && active)
+                          ? DarbMotion.emphasis
+                          : DarbMotion.enter,
+                      child: AnimatedSwitcher(
+                        duration: DarbMotion.effectiveDuration(
+                          context,
+                          DarbMotion.fast,
+                        ),
+                        child: Icon(
+                          active ? item.selectedIcon : item.icon,
+                          key: ValueKey('${item.label}_$active'),
+                          size: 22,
+                          color: active ? primary : muted,
+                        ),
+                      ),
+                    ),
+                    if (item.badgeCount > 0)
+                      PositionedDirectional(
+                        top: -4,
+                        end: -8,
+                        child: DarbAnimatedBadge(count: item.badgeCount),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                AnimatedDefaultTextStyle(
+                  duration: DarbMotion.effectiveDuration(
+                    context,
+                    DarbMotion.fast,
+                  ),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: active ? FontWeight.w900 : FontWeight.w600,
+                    color: active ? primary : muted,
+                  ),
+                  child: Text(
+                    item.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                AnimatedContainer(
+                  duration: DarbMotion.effectiveDuration(
+                    context,
+                    DarbMotion.interactive,
+                  ),
+                  curve: DarbMotion.enter,
+                  width: active ? 22 : 0,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: active ? indicatorColor : Colors.transparent,
+                    borderRadius: BorderRadius.circular(DarbRadius.pill),
+                    boxShadow: active
+                        ? [
+                            BoxShadow(
+                              color: indicatorColor.withValues(
+                                alpha: isDark ? 0.55 : 0.35,
+                              ),
+                              blurRadius: 8,
+                              offset: const Offset(0, 1),
+                            ),
+                          ]
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

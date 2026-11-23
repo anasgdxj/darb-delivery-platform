@@ -17,24 +17,127 @@ class DarbBrandMark extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [DarbColors.forest, DarbColors.forestSoft],
+          colors: [DarbColors.forestSoft, DarbColors.forest],
         ),
         borderRadius: BorderRadius.circular(size * 0.28),
+        border: Border.all(
+          color: DarbColors.mint.withValues(alpha: 0.38),
+          width: size >= 56 ? 1.4 : 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: DarbColors.forest.withValues(alpha: 0.28),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: DarbColors.forest.withValues(alpha: 0.30),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Icon(
-        Icons.route_rounded,
-        color: DarbColors.mint,
-        size: size * 0.56,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.28),
+        child: CustomPaint(
+          painter: const _DarbBrandMarkPainter(),
+          size: Size.square(size),
+        ),
       ),
     );
   }
+}
+
+class _DarbBrandMarkPainter extends CustomPainter {
+  const _DarbBrandMarkPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.width;
+
+    // Subtle geometric sage map lines inside the emblem
+    final gridPaint = Paint()
+      ..color = const Color(0xFF28584B).withValues(alpha: 0.55)
+      ..strokeWidth = (s * 0.025).clamp(0.7, 1.8)
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final grid = Path()
+      ..moveTo(0, s * 0.27)
+      ..lineTo(s, s * 0.27)
+      ..moveTo(0, s * 0.73)
+      ..lineTo(s, s * 0.73)
+      ..moveTo(s * 0.27, 0)
+      ..lineTo(s * 0.27, s)
+      ..moveTo(s * 0.73, 0)
+      ..lineTo(s * 0.73, s);
+    canvas.drawPath(grid, gridPaint);
+
+    // Symmetrical S-route matching Android ic_launcher.xml
+    final start = Offset(s * 0.28, s * 0.72);
+    final end = Offset(s * 0.72, s * 0.28);
+    final route = Path()
+      ..moveTo(start.dx, start.dy)
+      ..cubicTo(
+        s * 0.19,
+        s * 0.34,
+        s * 0.43,
+        s * 0.41,
+        s * 0.50,
+        s * 0.50,
+      )
+      ..cubicTo(
+        s * 0.57,
+        s * 0.59,
+        s * 0.81,
+        s * 0.66,
+        end.dx,
+        end.dy,
+      );
+
+    // Soft mint glow
+    canvas.drawPath(
+      route,
+      Paint()
+        ..color = DarbColors.mint.withValues(alpha: 0.28)
+        ..strokeWidth = s * 0.15
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke,
+    );
+
+    // Core mint route ribbon
+    canvas.drawPath(
+      route,
+      Paint()
+        ..color = DarbColors.mint
+        ..strokeWidth = (s * 0.082).clamp(2.2, 7.0)
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke,
+    );
+
+    // Start origin node (Mint ring)
+    final nodeRadius = (s * 0.088).clamp(2.8, 7.5);
+    canvas.drawCircle(start, nodeRadius, Paint()..color = DarbColors.forest);
+    canvas.drawCircle(
+      start,
+      nodeRadius,
+      Paint()
+        ..color = DarbColors.mint
+        ..strokeWidth = (s * 0.036).clamp(1.2, 3.0)
+        ..style = PaintingStyle.stroke,
+    );
+
+    // Destination beacon (Lime accent)
+    canvas.drawCircle(
+      end,
+      nodeRadius * 1.45,
+      Paint()..color = DarbColors.lime.withValues(alpha: 0.24),
+    );
+    canvas.drawCircle(end, nodeRadius, Paint()..color = DarbColors.lime);
+    canvas.drawCircle(
+      end,
+      nodeRadius * 0.38,
+      Paint()..color = DarbColors.forest,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _DarbBrandMarkPainter oldDelegate) => false;
 }
 
 class DarbSectionHeader extends StatelessWidget {

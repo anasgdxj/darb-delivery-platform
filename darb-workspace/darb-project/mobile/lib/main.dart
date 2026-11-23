@@ -46,6 +46,11 @@ class DarbApp extends StatelessWidget {
           themeMode: appearance.themeMode,
           theme: DarbTheme.light,
           darkTheme: DarbTheme.dark,
+          themeAnimationDuration: DarbMotion.effectiveDuration(
+            context,
+            const Duration(milliseconds: 280),
+          ),
+          themeAnimationCurve: DarbMotion.enter,
           home: initialScreen ?? const _DarbSplashGate(),
         );
       },

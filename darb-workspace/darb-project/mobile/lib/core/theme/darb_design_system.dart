@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 enum DarbVisualStyle { glass, standard }
@@ -226,6 +227,8 @@ class DarbMotion {
 
   static const Duration press = Duration(milliseconds: 120);
   static const Duration fast = Duration(milliseconds: 160);
+  static const Duration interactive = Duration(milliseconds: 220);
+  static const Duration tab = Duration(milliseconds: 240);
   static const Duration standard = Duration(milliseconds: 260);
   static const Duration medium = standard;
   static const Duration route = Duration(milliseconds: 340);
@@ -365,11 +368,15 @@ class DarbPressScale extends StatefulWidget {
     required this.child,
     this.onTap,
     this.borderRadius = DarbRadius.md,
+    this.scaleFactor = 0.974,
+    this.enableHaptics = true,
   });
 
   final Widget child;
   final VoidCallback? onTap;
   final double borderRadius;
+  final double scaleFactor;
+  final bool enableHaptics;
 
   @override
   State<DarbPressScale> createState() => _DarbPressScaleState();
@@ -377,6 +384,16 @@ class DarbPressScale extends StatefulWidget {
 
 class _DarbPressScaleState extends State<DarbPressScale> {
   bool _pressed = false;
+
+  void _handleTap() {
+    if (widget.onTap == null) return;
+    if (widget.enableHaptics) {
+      try {
+        HapticFeedback.selectionClick();
+      } catch (_) {}
+    }
+    widget.onTap!.call();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -389,11 +406,16 @@ class _DarbPressScaleState extends State<DarbPressScale> {
           widget.onTap == null ? null : (_) => setState(() => _pressed = false),
       onTapCancel:
           widget.onTap == null ? null : () => setState(() => _pressed = false),
-      onTap: widget.onTap,
+      onTap: widget.onTap == null ? null : _handleTap,
       child: AnimatedScale(
-        scale: (!reduced && _pressed) ? 0.976 : 1.0,
-        duration: DarbMotion.effectiveDuration(context, DarbMotion.press),
-        curve: DarbMotion.enter,
+        scale: (!reduced && _pressed) ? widget.scaleFactor : 1.0,
+        duration: DarbMotion.effectiveDuration(
+          context,
+          _pressed ? DarbMotion.press : DarbMotion.interactive,
+        ),
+        curve: (!reduced && !_pressed)
+            ? DarbMotion.emphasis
+            : DarbMotion.enter,
         child: widget.child,
       ),
     );

@@ -1,6 +1,97 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="1024dp" android:height="1024dp"
-    android:viewportWidth="1024" android:viewportHeight="1024">
-    <path android:fillColor="#12302A" android:pathData="M0,0h1024v1024h-1024z"/>
-    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd" android:pathData="M354 627 L346 630 L339 636 L334 645 L333 655 L336 666 L344 675 L352 679 L362 680 L374 676 L381 669 L385 661 L386 650 L382 639 L374 631 L364 627 Z M626 441 L579 441 L579 584 L577 602 L571 618 L560 629 L547 634 L526 635 L530 680 L563 677 L587 668 L606 652 L619 630 L625 608 L627 588 Z M503 441 L455 441 L454 553 L276 553 L264 550 L251 540 L246 529 L245 511 L251 475 L209 470 L204 472 L198 510 L198 533 L202 552 L209 566 L220 579 L236 589 L258 595 L503 596 Z M760 420 L723 451 L747 480 L767 509 L777 533 L776 546 L771 551 L765 553 L669 553 L669 596 L778 596 L801 589 L819 571 L825 551 L825 530 L819 506 L803 474 L782 445 Z M784 349 L778 349 L695 372 L694 390 L784 366 Z M591 344 L580 350 L574 357 L570 366 L570 383 L575 394 L585 403 L594 406 L608 406 L619 401 L627 393 L632 379 L631 366 L626 355 L617 347 L605 343 Z M599 359 L608 361 L614 367 L616 373 L613 384 L604 390 L591 387 L585 377 L587 367 L593 361 Z"/>
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <!-- Deep forest emerald background -->
+    <path
+        android:fillColor="#102B26"
+        android:pathData="M0,0h1024v1024h-1024z" />
+
+    <!-- Subtle ambient center glow -->
+    <path
+        android:fillColor="#153830"
+        android:fillAlpha="0.85"
+        android:pathData="M512,512 m-410,0 a410,410 0 1,0 820,0 a410,410 0 1,0 -820,0 z" />
+
+    <!-- Minimalist sage geometric street map grid -->
+    <path
+        android:strokeColor="#224B40"
+        android:strokeAlpha="0.52"
+        android:strokeWidth="10"
+        android:strokeLineCap="round"
+        android:pathData="M0,272 L1024,272 M0,752 L1024,752 M272,0 L272,1024 M752,0 L752,1024 M0,432 L416,164 L1024,164 M0,860 L608,860 L1024,592" />
+
+    <!-- Subtle locator compass ring -->
+    <path
+        android:strokeColor="#B9E4D2"
+        android:strokeAlpha="0.14"
+        android:strokeWidth="6"
+        android:pathData="M512,512 m-308,0 a308,308 0 1,0 616,0 a308,308 0 1,0 -616,0 z" />
+
+    <!-- Glowing mint curved S-route outer bloom -->
+    <path
+        android:strokeColor="#B9E4D2"
+        android:strokeAlpha="0.14"
+        android:strokeWidth="92"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M344,660 C282,390 462,434 512,512 C562,590 742,634 680,364" />
+
+    <!-- Glowing mint curved S-route mid halo -->
+    <path
+        android:strokeColor="#B9E4D2"
+        android:strokeAlpha="0.28"
+        android:strokeWidth="62"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M344,660 C282,390 462,434 512,512 C562,590 742,634 680,364" />
+
+    <!-- Primary mint route ribbon -->
+    <path
+        android:strokeColor="#B9E4D2"
+        android:strokeWidth="40"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M344,660 C282,390 462,434 512,512 C562,590 742,634 680,364" />
+
+    <!-- Crisp luminous inner route highlight -->
+    <path
+        android:strokeColor="#EAFFF6"
+        android:strokeAlpha="0.65"
+        android:strokeWidth="12"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M344,660 C282,390 462,434 512,512 C562,590 742,634 680,364" />
+
+    <!-- Origin store beacon (bottom-left) -->
+    <path
+        android:fillColor="#B9E4D2"
+        android:fillAlpha="0.18"
+        android:pathData="M344,660 m-80,0 a80,80 0 1,0 160,0 a80,80 0 1,0 -160,0 z" />
+    <path
+        android:fillColor="#102B26"
+        android:strokeColor="#B9E4D2"
+        android:strokeWidth="16"
+        android:pathData="M344,660 m-52,0 a52,52 0 1,0 104,0 a52,52 0 1,0 -104,0 z" />
+    <path
+        android:fillColor="#F1F5F1"
+        android:pathData="M344,660 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0 z" />
+
+    <!-- Destination beacon with lime accent (top-right) -->
+    <path
+        android:fillColor="#C8F169"
+        android:fillAlpha="0.20"
+        android:pathData="M680,364 m-90,0 a90,90 0 1,0 180,0 a90,90 0 1,0 -180,0 z" />
+    <path
+        android:fillColor="#C8F169"
+        android:fillAlpha="0.34"
+        android:pathData="M680,364 m-64,0 a64,64 0 1,0 128,0 a64,64 0 1,0 -128,0 z" />
+    <path
+        android:fillColor="#C8F169"
+        android:pathData="M680,364 m-48,0 a48,48 0 1,0 96,0 a48,48 0 1,0 -96,0 z" />
+    <path
+        android:fillColor="#102B26"
+        android:pathData="M680,364 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0 z" />
 </vector>

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
@@ -8,6 +10,7 @@ import '../../core/services/notifications_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 import '../auth/login_screen.dart';
 import '../customer/addresses_screen.dart';
 import 'ai_role_assistant_screen.dart';
@@ -27,6 +30,24 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  bool _preferenceSaved = false;
+  Timer? _savedTimer;
+
+  @override
+  void dispose() {
+    _savedTimer?.cancel();
+    super.dispose();
+  }
+
+  void _notifyPreferenceSaved() {
+    DarbHaptics.selection();
+    _savedTimer?.cancel();
+    setState(() => _preferenceSaved = true);
+    _savedTimer = Timer(const Duration(milliseconds: 1400), () {
+      if (mounted) setState(() => _preferenceSaved = false);
+    });
+  }
+
   Future<void> _editName() async {
     final ctrl = TextEditingController(text: widget.user['name']?.toString() ?? '');
     final saved = await showDialog<String>(
@@ -83,6 +104,7 @@ class _AccountScreenState extends State<AccountScreen> {
       ),
     );
     if (selected == null || selected == current) return;
+    DarbHaptics.selection();
     darbLocale.value = Locale(selected);
     try {
       await Api.instance.patch('/auth/me', {'locale': selected});
@@ -271,6 +293,7 @@ class _AccountScreenState extends State<AccountScreen> {
       ),
     );
     if (confirmed != true) return;
+    DarbHaptics.warning();
     DriverLocationReporter.stop();
     await DarbNotifications.unregister();
     await Api.instance.clear();
@@ -344,9 +367,59 @@ class _AccountScreenState extends State<AccountScreen> {
             builder: (context, _) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  dt('نمط الواجهة'),
-                  style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w900, fontSize: 15),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        dt('نمط الواجهة'),
+                        style: TextStyle(
+                          color: DarbColors.inkOf(context),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    AnimatedSwitcher(
+                      duration: DarbMotion.effectiveDuration(
+                        context,
+                        DarbMotion.fast,
+                      ),
+                      child: !_preferenceSaved
+                          ? const SizedBox.shrink(key: ValueKey('no_save'))
+                          : Container(
+                              key: const ValueKey('saved'),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: DarbColors.successOf(context)
+                                    .withValues(alpha: 0.14),
+                                borderRadius:
+                                    BorderRadius.circular(DarbRadius.pill),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 14,
+                                    color: DarbColors.successOf(context),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    dt('تم الحفظ'),
+                                    style: TextStyle(
+                                      color: DarbColors.successOf(context),
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 SegmentedButton<DarbVisualStyle>(
@@ -355,7 +428,10 @@ class _AccountScreenState extends State<AccountScreen> {
                     ButtonSegment(value: DarbVisualStyle.standard, label: Text(dt('كلاسيكي (Standard)'))),
                   ],
                   selected: {appearance.visualStyle},
-                  onSelectionChanged: (s) => appearance.setVisualStyle(s.first),
+                  onSelectionChanged: (s) {
+                    appearance.setVisualStyle(s.first);
+                    _notifyPreferenceSaved();
+                  },
                 ),
                 const SizedBox(height: 14),
                 Text(
@@ -370,7 +446,10 @@ class _AccountScreenState extends State<AccountScreen> {
                     ButtonSegment(value: ThemeMode.dark, label: Text(dt('ليلي'))),
                   ],
                   selected: {appearance.themeMode},
-                  onSelectionChanged: (s) => appearance.setThemeMode(s.first),
+                  onSelectionChanged: (s) {
+                    appearance.setThemeMode(s.first);
+                    _notifyPreferenceSaved();
+                  },
                 ),
               ],
             ),

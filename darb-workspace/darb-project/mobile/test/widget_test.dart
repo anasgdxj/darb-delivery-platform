@@ -2,6 +2,9 @@ import 'package:darb/core/l10n/app_localizations.dart';
 import 'package:darb/core/theme/darb_design_system.dart';
 import 'package:darb/core/widgets/darb_components.dart';
 import 'package:darb/core/widgets/darb_glass.dart';
+import 'package:darb/core/widgets/darb_motion_components.dart';
+import 'package:darb/features/auth/login_hero_map.dart';
+import 'package:darb/features/auth/login_screen.dart';
 import 'package:darb/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -58,6 +61,8 @@ void main() {
 
       expect(DarbMotion.press.inMilliseconds, 120);
       expect(DarbMotion.fast.inMilliseconds, 160);
+      expect(DarbMotion.interactive.inMilliseconds, 220);
+      expect(DarbMotion.tab.inMilliseconds, 240);
       expect(DarbMotion.standard.inMilliseconds, 260);
       expect(DarbMotion.route.inMilliseconds, 340);
       expect(DarbMotion.expressive.inMilliseconds, 420);
@@ -180,5 +185,183 @@ void main() {
       );
       expect(reduced, isTrue);
     });
+
+    testWidgets('renders LoginScreen with dark vector map hero and untouched bottom card',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(initialScreen: LoginScreen()),
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(DarbLoginVectorMap), findsOneWidget);
+      expect(find.text('دَرْب • DARB'), findsOneWidget);
+      expect(find.text('أهلاً بك في دَرْب'), findsOneWidget);
+      expect(find.text('طريقك الأسهل لاكتشاف المتاجر وطلب ما تحتاجه'), findsOneWidget);
+      expect(find.text('سجّل الدخول برقم هاتفك'), findsOneWidget);
+      expect(find.text('AR'), findsOneWidget);
+    });
   });
+
+  group('Phase 1 Motion & Global Navigation Components', () {
+    testWidgets('DarbActionButton transitions idle -> loading -> success -> error',
+        (tester) async {
+      var tapCount = 0;
+      var state = DarbActionState.idle;
+      var errorTrigger = 0;
+
+      late StateSetter outerSetState;
+      await tester.pumpWidget(
+        DarbApp(
+          initialScreen: Scaffold(
+            body: Center(
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  outerSetState = setState;
+                  return DarbActionButton(
+                    label: 'متابعة',
+                    successLabel: 'تم بنجاح',
+                    state: state,
+                    errorTrigger: errorTrigger,
+                    onPressed: () => tapCount++,
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('متابعة'), findsOneWidget);
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+      expect(tapCount, 1);
+
+      outerSetState(() => state = DarbActionState.loading);
+      await tester.pump(const Duration(milliseconds: 220));
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      await tester.tap(find.byType(DarbActionButton));
+      await tester.pump();
+      expect(tapCount, 1);
+
+      outerSetState(() => state = DarbActionState.success);
+      await tester.pump(const Duration(milliseconds: 240));
+      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      expect(find.text('تم بنجاح'), findsOneWidget);
+
+      outerSetState(() {
+        state = DarbActionState.error;
+        errorTrigger++;
+      });
+      await tester.pump(const Duration(milliseconds: 160));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('متابعة'), findsOneWidget);
+
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+      expect(tapCount, 2);
+    });
+
+    testWidgets('DarbGlassBottomNav selects destinations and renders badges',
+        (tester) async {
+      var selected = 0;
+      await tester.pumpWidget(
+        DarbApp(
+          initialScreen: StatefulBuilder(
+            builder: (context, setState) => Scaffold(
+              body: const SizedBox.shrink(),
+              bottomNavigationBar: DarbGlassBottomNav(
+                selectedIndex: selected,
+                onSelect: (index) => setState(() => selected = index),
+                destinations: const [
+                  DarbNavDestination(
+                    label: 'الرئيسية',
+                    icon: Icons.explore_outlined,
+                    selectedIcon: Icons.explore_rounded,
+                  ),
+                  DarbNavDestination(
+                    label: 'طلباتي',
+                    icon: Icons.receipt_long_outlined,
+                    selectedIcon: Icons.receipt_long_rounded,
+                    badgeCount: 4,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('الرئيسية'), findsOneWidget);
+      expect(find.text('طلباتي'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
+
+      await tester.tap(find.text('طلباتي'));
+      await tester.pump(const Duration(milliseconds: 260));
+      expect(selected, 1);
+    });
+
+    testWidgets('DarbTabViewStack preserves tab child state across switches',
+        (tester) async {
+      var tabIndex = 0;
+      late StateSetter outerSetState;
+
+      await tester.pumpWidget(
+        DarbApp(
+          initialScreen: StatefulBuilder(
+            builder: (context, setState) {
+              outerSetState = setState;
+              return Scaffold(
+                body: DarbTabViewStack(
+                  index: tabIndex,
+                  children: const [
+                    _CounterTestTab(label: 'تبويب 1'),
+                    _CounterTestTab(label: 'تبويب 2'),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('تبويب 1: 0'));
+      await tester.pump();
+      expect(find.text('تبويب 1: 1'), findsOneWidget);
+
+      outerSetState(() => tabIndex = 1);
+      await tester.pump(const Duration(milliseconds: 260));
+
+      outerSetState(() => tabIndex = 0);
+      await tester.pump(const Duration(milliseconds: 260));
+      expect(find.text('تبويب 1: 1'), findsOneWidget);
+    });
+  });
+}
+
+class _CounterTestTab extends StatefulWidget {
+  const _CounterTestTab({required this.label});
+  final String label;
+
+  @override
+  State<_CounterTestTab> createState() => _CounterTestTabState();
+}
+
+class _CounterTestTabState extends State<_CounterTestTab> {
+  int _count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: TextButton(
+        onPressed: () => setState(() => _count++),
+        child: Text('${widget.label}: $_count'),
+      ),
+    );
+  }
 }
