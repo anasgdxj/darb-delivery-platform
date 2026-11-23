@@ -137,24 +137,23 @@ void main() {
         (tester) async {
       await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
       await tester.pumpWidget(
-        DarbApp(
-          initialScreen: Scaffold(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: Scaffold(
             appBar: const DarbGlassAppBar(title: 'دَرْب', subtitle: 'تجربة'),
-            body: DarbAmbientBackground(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: const [
-                  DarbMetricCard(
-                    label: 'الرحلات المكتملة',
-                    value: '42',
-                    icon: Icons.route_rounded,
-                  ),
-                  SizedBox(height: 12),
-                  DarbStatusBadge(status: 'DELIVERED'),
-                  SizedBox(height: 8),
-                  DarbStatusBadge(status: 'WITHDRAWN'),
-                ],
-              ),
+            body: ListView(
+              padding: const EdgeInsets.all(16),
+              children: const [
+                DarbMetricCard(
+                  label: 'الرحلات المكتملة',
+                  value: '42',
+                  icon: Icons.route_rounded,
+                ),
+                SizedBox(height: 12),
+                DarbStatusBadge(status: 'DELIVERED'),
+                SizedBox(height: 8),
+                DarbStatusBadge(status: 'WITHDRAWN'),
+              ],
             ),
           ),
         ),
@@ -214,8 +213,9 @@ void main() {
 
       late StateSetter outerSetState;
       await tester.pumpWidget(
-        DarbApp(
-          initialScreen: Scaffold(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: Scaffold(
             body: Center(
               child: StatefulBuilder(
                 builder: (context, setState) {
@@ -225,6 +225,7 @@ void main() {
                     successLabel: 'تم بنجاح',
                     state: state,
                     errorTrigger: errorTrigger,
+                    enableHaptics: false,
                     onPressed: () => tapCount++,
                   );
                 },
