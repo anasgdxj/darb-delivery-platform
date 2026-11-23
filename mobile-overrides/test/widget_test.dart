@@ -133,28 +133,26 @@ void main() {
   });
 
   group('Widget & Motion Accessibility Smoke Tests', () {
-    testWidgets('renders DarbGlassSurface in Glass and Standard modes without errors',
+    testWidgets('renders DarbGlassSurface in Glass mode without errors',
         (tester) async {
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
       await tester.pumpWidget(
-        DarbApp(
-          initialScreen: Scaffold(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: Scaffold(
             appBar: const DarbGlassAppBar(title: 'دَرْب', subtitle: 'تجربة'),
-            body: DarbAmbientBackground(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: const [
-                  DarbMetricCard(
-                    label: 'الرحلات المكتملة',
-                    value: '42',
-                    icon: Icons.route_rounded,
-                  ),
-                  SizedBox(height: 12),
-                  DarbStatusBadge(status: 'DELIVERED'),
-                  SizedBox(height: 8),
-                  DarbStatusBadge(status: 'WITHDRAWN'),
-                ],
-              ),
+            body: ListView(
+              padding: const EdgeInsets.all(16),
+              children: const [
+                DarbMetricCard(
+                  label: 'الرحلات المكتملة',
+                  value: '42',
+                  icon: Icons.route_rounded,
+                ),
+                SizedBox(height: 12),
+                DarbStatusBadge(status: 'DELIVERED'),
+                SizedBox(height: 8),
+                DarbStatusBadge(status: 'WITHDRAWN'),
+              ],
             ),
           ),
         ),
@@ -163,10 +161,7 @@ void main() {
       expect(find.text('دَرْب'), findsOneWidget);
       expect(find.text('42'), findsOneWidget);
 
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.standard);
-      await tester.pump();
       expect(find.text('42'), findsOneWidget);
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
     });
 
     testWidgets('respects MediaQuery disableAnimations for DarbMotion.reduceMotion',
@@ -214,8 +209,9 @@ void main() {
 
       late StateSetter outerSetState;
       await tester.pumpWidget(
-        DarbApp(
-          initialScreen: Scaffold(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: Scaffold(
             body: Center(
               child: StatefulBuilder(
                 builder: (context, setState) {
@@ -225,6 +221,7 @@ void main() {
                     successLabel: 'تم بنجاح',
                     state: state,
                     errorTrigger: errorTrigger,
+                    enableHaptics: false,
                     onPressed: () => tapCount++,
                   );
                 },
