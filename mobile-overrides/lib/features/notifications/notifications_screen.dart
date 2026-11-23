@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
@@ -18,6 +19,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   int _unreadCount = 0;
   bool _loading = true;
   bool _markingAll = false;
+  final Set<String> _markingIds = <String>{};
   String? _error;
 
   @override
@@ -54,6 +56,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     setState(() => _markingAll = true);
     try {
       await Api.instance.patch('/notifications/read-all', {});
+      if (mounted) HapticFeedback.selectionClick();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -68,10 +71,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> _markOneRead(Map<String, dynamic> item) async {
     if (item['readAt'] != null) return;
     final id = item['id']?.toString();
-    if (id == null) return;
+    if (id == null || !_markingIds.add(id)) return;
     try {
       await Api.instance.patch('/notifications/$id/read', {});
       if (!mounted) return;
+      HapticFeedback.selectionClick();
       setState(() {
         _items = _items
             .map((e) => e['id'] == id
@@ -80,7 +84,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             .toList();
         _unreadCount = _unreadCount > 0 ? _unreadCount - 1 : 0;
       });
-    } catch (_) {}
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('تعذر تحديث الإشعار'))),
+        );
+      }
+    } finally {
+      _markingIds.remove(id);
+    }
   }
 
   IconData _iconForType(String? type) => switch (type) {
