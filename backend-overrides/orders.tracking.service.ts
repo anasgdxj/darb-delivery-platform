@@ -24,7 +24,9 @@ export class OrderTrackingService {
       updatedAt: Date;
     }>>`SELECT ST_Y("point"::geometry) AS latitude, ST_X("point"::geometry) AS longitude, "updatedAt"
        FROM "DriverLocation"
-       WHERE "driverId" = ${order.driverId} AND "point" IS NOT NULL`;
+       WHERE "driverId" = ${order.driverId} AND "point" IS NOT NULL
+       ORDER BY "updatedAt" DESC
+       LIMIT 1`;
 
     const latest = rows[0];
     if (!latest) return { available: false };
