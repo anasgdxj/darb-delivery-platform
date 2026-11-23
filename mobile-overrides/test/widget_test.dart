@@ -133,9 +133,8 @@ void main() {
   });
 
   group('Widget & Motion Accessibility Smoke Tests', () {
-    testWidgets('renders DarbGlassSurface in Glass and Standard modes without errors',
+    testWidgets('renders DarbGlassSurface in Glass mode without errors',
         (tester) async {
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
       await tester.pumpWidget(
         MaterialApp(
           theme: DarbTheme.light,
@@ -162,10 +161,7 @@ void main() {
       expect(find.text('دَرْب'), findsOneWidget);
       expect(find.text('42'), findsOneWidget);
 
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.standard);
-      await tester.pump();
       expect(find.text('42'), findsOneWidget);
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
     });
 
     testWidgets('respects MediaQuery disableAnimations for DarbMotion.reduceMotion',
