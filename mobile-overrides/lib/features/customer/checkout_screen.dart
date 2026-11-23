@@ -95,7 +95,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Future<void> _refreshEstimate() async {
     final addrId = _selectedAddressId;
     if (addrId == null || widget.items.isEmpty) {
+      _estimateGeneration++;
       setState(() {
+        _estimating = false;
         _estimate = null;
         _estimateError = null;
       });
