@@ -45,7 +45,9 @@ class MainActivity : FlutterActivity() {
                                 .setDescription("جارٍ تنزيل الإصدار $version")
                                 .setAllowedOverMetered(true)
                                 .setAllowedOverRoaming(true)
-                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
+                                // VISIBILITY_HIDDEN requires the privileged DOWNLOAD_WITHOUT_NOTIFICATION permission.
+                                // Use a normal system notification so downloads work on standard Android devices.
+                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                                 .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "darb-update-$version.apk")
                             val id = (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
                             prefs.edit().putLong(DarbUpdateDownloadReceiver.KEY_DOWNLOAD_ID, id)
