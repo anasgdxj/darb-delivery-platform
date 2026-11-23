@@ -503,34 +503,39 @@ class _DarbTabViewStackState extends State<DarbTabViewStack> {
   @override
   void didUpdateWidget(covariant DarbTabViewStack oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.index != widget.index) {
-      _previousIndex = oldWidget.index;
+    if (oldWidget.children.isNotEmpty && oldWidget.index != widget.index) {
+      _previousIndex = oldWidget.index.clamp(0, oldWidget.children.length - 1);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.children.isEmpty) return const SizedBox.shrink();
+
+    final activeIndex = widget.index.clamp(0, widget.children.length - 1);
+    final prevIndex = _previousIndex.clamp(0, widget.children.length - 1);
     final reduced = DarbMotion.reduceMotion(context);
     final duration = DarbMotion.effectiveDuration(context, DarbMotion.tab);
-    final movingForward = widget.index >= _previousIndex;
+    final movingForward = activeIndex >= prevIndex;
 
     // Stack paints later children above earlier ones. Always paint the
     // selected tab last so it remains the foreground page regardless of
-    // whether the user moves to a lower or higher tab index. The previous
-    // page stays underneath during its exit fade, while inactive tabs remain inert.
+    // whether the user moves to a lower or higher tab index. Fixed ValueKey(i)
+    // preserves each tab's Element/State across paint-order updates.
     final paintOrder = List<int>.generate(widget.children.length, (i) => i)
-      ..remove(widget.index)
-      ..add(widget.index);
+      ..remove(activeIndex)
+      ..add(activeIndex);
 
     return ClipRect(
       child: Stack(
         fit: StackFit.expand,
         children: paintOrder.map((i) {
-          final active = i == widget.index;
+          final active = i == activeIndex;
           final inactiveOffset =
               movingForward ? const Offset(-0.025, 0) : const Offset(0.025, 0);
 
           return Positioned.fill(
+            key: ValueKey<int>(i),
             child: IgnorePointer(
               ignoring: !active,
               child: ExcludeSemantics(

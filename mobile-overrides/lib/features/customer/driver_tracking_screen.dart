@@ -11,9 +11,20 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_glass.dart';
 
 class DriverTrackingScreen extends StatefulWidget {
-  const DriverTrackingScreen({super.key, required this.orderId});
+  const DriverTrackingScreen({
+    super.key,
+    required this.orderId,
+    this.pickupLatitude,
+    this.pickupLongitude,
+    this.dropoffLatitude,
+    this.dropoffLongitude,
+  });
 
   final String orderId;
+  final double? pickupLatitude;
+  final double? pickupLongitude;
+  final double? dropoffLatitude;
+  final double? dropoffLongitude;
 
   @override
   State<DriverTrackingScreen> createState() => _DriverTrackingScreenState();
@@ -23,6 +34,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
     with WidgetsBindingObserver {
   static const LatLng _syriaCenter = LatLng(35.0, 38.5);
 
+  final MapController _mapController = MapController();
   Timer? _refreshTimer;
   LatLng? _driverPoint;
   DateTime? _lastUpdatedAt;
@@ -30,9 +42,16 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
   bool _requesting = false;
   bool _stale = false;
   bool _mapTilesUnavailable = false;
+  bool _mapReady = false;
+  bool _followDriver = true;
   String? _message;
   String? _error;
-  int _mapRevision = 0;
+
+  LatLng? _validPoint(double? lat, double? lng) {
+    if (lat == null || lng == null) return null;
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+    return LatLng(lat, lng);
+  }
 
   @override
   void initState() {
@@ -69,6 +88,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _stopPolling();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -91,19 +111,15 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
       if (response is Map && response['available'] == true) {
         final latitude = (response['latitude'] as num?)?.toDouble();
         final longitude = (response['longitude'] as num?)?.toDouble();
-        if (latitude == null ||
-            longitude == null ||
-            latitude < -90 ||
-            latitude > 90 ||
-            longitude < -180 ||
-            longitude > 180) {
+        final nextPoint = _validPoint(latitude, longitude);
+        if (nextPoint == null) {
           setState(() => _error = dt('إحداثيات موقع المندوب غير صالحة'));
           return;
         }
 
+        final hadPoint = _driverPoint != null;
         setState(() {
-          if (_driverPoint == null) _mapRevision++;
-          _driverPoint = LatLng(latitude, longitude);
+          _driverPoint = nextPoint;
           _lastUpdatedAt = DateTime.tryParse(
             response['updatedAt']?.toString() ?? '',
           );
@@ -111,6 +127,12 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
           _message = null;
           _error = null;
         });
+        if (_mapReady && _followDriver) {
+          _mapController.move(
+            nextPoint,
+            hadPoint ? _mapController.camera.zoom : 15.5,
+          );
+        }
       } else {
         setState(() {
           _error = null;
@@ -143,7 +165,100 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
   @override
   Widget build(BuildContext context) {
     final point = _driverPoint;
+    final pickupPoint =
+        _validPoint(widget.pickupLatitude, widget.pickupLongitude);
+    final dropoffPoint =
+        _validPoint(widget.dropoffLatitude, widget.dropoffLongitude);
+    final fallbackCenter = dropoffPoint ?? pickupPoint ?? _syriaCenter;
     final isDark = DarbColors.isDark(context);
+
+    final markers = <Marker>[
+      if (pickupPoint != null)
+        Marker(
+          point: pickupPoint,
+          width: 44,
+          height: 44,
+          child: Container(
+            decoration: BoxDecoration(
+              color: DarbColors.infoOf(context),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2.5),
+              boxShadow: DarbElevation.card(isDark),
+            ),
+            child: const Icon(
+              Icons.storefront_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+        ),
+      if (dropoffPoint != null)
+        Marker(
+          point: dropoffPoint,
+          width: 44,
+          height: 44,
+          child: Container(
+            decoration: BoxDecoration(
+              color: DarbColors.successOf(context),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2.5),
+              boxShadow: DarbElevation.card(isDark),
+            ),
+            child: const Icon(
+              Icons.home_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+        ),
+      if (point != null)
+        Marker(
+          point: point,
+          width: 84,
+          height: 78,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: DarbColors.primaryOf(context),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 3,
+                  ),
+                  boxShadow: DarbElevation.floating(isDark),
+                ),
+                child: Icon(
+                  Icons.delivery_dining_rounded,
+                  color: DarbColors.onPrimaryOf(context),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: DarbColors.surfaceElevatedOf(context)
+                      .withValues(alpha: 0.94),
+                  borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  border: Border.all(color: DarbColors.borderOf(context)),
+                ),
+                child: Text(
+                  dt('المندوب'),
+                  style: TextStyle(
+                    color: DarbColors.inkOf(context),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+    ];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -286,12 +401,27 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                     child: Stack(
                       children: [
                         FlutterMap(
-                          key: ValueKey('driver-map-$_mapRevision'),
+                          mapController: _mapController,
                           options: MapOptions(
-                            initialCenter: point ?? _syriaCenter,
-                            initialZoom: point == null ? 6.2 : 15,
+                            initialCenter: point ?? fallbackCenter,
+                            initialZoom: point != null
+                                ? 15.5
+                                : (dropoffPoint != null || pickupPoint != null
+                                    ? 14
+                                    : 6.2),
                             minZoom: 4,
                             maxZoom: 19,
+                            onMapReady: () {
+                              _mapReady = true;
+                              if (_driverPoint != null && _followDriver) {
+                                _mapController.move(_driverPoint!, 15.5);
+                              }
+                            },
+                            onPositionChanged: (_, hasGesture) {
+                              if (hasGesture && _followDriver) {
+                                setState(() => _followDriver = false);
+                              }
+                            },
                           ),
                           children: [
                             TileLayer(
@@ -307,56 +437,8 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                                 }
                               },
                             ),
-                            if (point != null)
-                              MarkerLayer(
-                                markers: [
-                                  Marker(
-                                    point: point,
-                                    width: 70,
-                                    height: 76,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 42,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color: DarbColors.primaryOf(context),
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.white,
-                                              width: 3,
-                                            ),
-                                            boxShadow: DarbElevation.floating(
-                                              isDark,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons.delivery_dining_rounded,
-                                            color: DarbColors.onPrimaryOf(context),
-                                            size: 24,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          dt('المندوب'),
-                                          style: TextStyle(
-                                            color: DarbColors.inkOf(context),
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w900,
-                                            shadows: const [
-                                              Shadow(
-                                                color: Colors.white,
-                                                blurRadius: 5,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            if (markers.isNotEmpty)
+                              MarkerLayer(markers: markers),
                             RichAttributionWidget(
                               alignment: AttributionAlignment.bottomRight,
                               attributions: [
@@ -414,7 +496,10 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                                 FloatingActionButton.small(
                                   heroTag: 'center-driver-location',
                                   onPressed: () {
-                                    setState(() => _mapRevision++);
+                                    setState(() => _followDriver = true);
+                                    if (_mapReady) {
+                                      _mapController.move(point, 15.5);
+                                    }
                                   },
                                   tooltip: dt('توسيط على المندوب'),
                                   child: const Icon(Icons.my_location_rounded),

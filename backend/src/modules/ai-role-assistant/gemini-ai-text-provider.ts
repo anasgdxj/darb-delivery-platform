@@ -22,9 +22,18 @@ export class GeminiAiTextProvider extends AiTextProvider {
       throw new ServiceUnavailableException('مساعد دَرْب الذكي غير مهيأ حالياً');
     }
 
-    const model = this.config.get<string>('GEMINI_MODEL') ?? 'gemini-4-hydrogen';
+    const configuredModel = this.config.get<string>('GEMINI_MODEL')?.trim();
+    const model =
+      configuredModel && configuredModel.length > 0
+        ? configuredModel
+        : 'gemini-2.5-flash';
     if (!/^[a-zA-Z0-9.-]+$/.test(model)) {
       throw new ServiceUnavailableException('إعداد نموذج الذكاء الاصطناعي غير صالح');
+    }
+
+    const generationConfig: Record<string, number> = { maxOutputTokens: 800 };
+    if (!model.startsWith('gemini-4-')) {
+      generationConfig.temperature = 0.2;
     }
 
     let response: Response;
@@ -48,7 +57,7 @@ export class GeminiAiTextProvider extends AiTextProvider {
               }],
             },
             contents: [{ role: 'user', parts: [{ text: request.message }] }],
-            generationConfig: { temperature: 0.2, maxOutputTokens: 800 },
+            generationConfig,
           }),
           signal: AbortSignal.timeout(25000),
         },

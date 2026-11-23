@@ -42,6 +42,10 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
       if (mounted) {
         setState(() => _messages.add(_ChatTurn(isUser: false, text: e.message, isError: true)));
       }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _messages.add(_ChatTurn(isUser: false, text: dt('حدث خطأ غير متوقع، حاول مجدداً'), isError: true)));
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -90,14 +94,14 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                             constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.82),
                             child: DarbGlassSurface(
                               tintColor: msg.isError
-                                  ? DarbColors.dangerSoft
+                                  ? DarbColors.dangerSoftOf(context)
                                   : (msg.isUser ? DarbColors.forest : null),
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                               child: Text(
                                 msg.text,
                                 style: TextStyle(
                                   color: msg.isError
-                                      ? DarbColors.danger
+                                      ? DarbColors.dangerOf(context)
                                       : (msg.isUser ? Colors.white : DarbColors.inkOf(context)),
                                   fontWeight: FontWeight.w600,
                                   height: 1.45,
@@ -135,12 +139,15 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                         style: IconButton.styleFrom(backgroundColor: DarbColors.primaryOf(context)),
                         onPressed: _sending ? null : _send,
                         icon: _sending
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: DarbColors.onPrimaryOf(context),
+                                ),
                               )
-                            : const Icon(Icons.send_rounded, color: Colors.white),
+                            : Icon(Icons.send_rounded, color: DarbColors.onPrimaryOf(context)),
                       ),
                     ],
                   ),

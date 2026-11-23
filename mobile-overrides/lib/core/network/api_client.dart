@@ -103,6 +103,8 @@ class Api {
     }
   }
 
+  static const Duration _coldStartTimeout = Duration(seconds: 55);
+
   Future<bool> _performRefresh() async {
     final refreshToken = await _storage.read(key: 'refreshToken');
     if (refreshToken == null || refreshToken.isEmpty) {
@@ -116,7 +118,7 @@ class Api {
             headers: const {'Content-Type': 'application/json', 'Accept': 'application/json'},
             body: jsonEncode({'refreshToken': refreshToken}),
           )
-          .timeout(const Duration(seconds: 20));
+          .timeout(_coldStartTimeout);
 
       if (response.statusCode == 401 || response.statusCode == 403) {
         _sessionInvalidated = true;
@@ -144,8 +146,8 @@ class Api {
     if (_accessToken != null) headers['Authorization'] = 'Bearer $_accessToken';
     final request = http.Request(method, uri)..headers.addAll(headers);
     if (body != null) request.body = jsonEncode(body);
-    final streamed = await request.send().timeout(const Duration(seconds: 20));
-    return http.Response.fromStream(streamed);
+    final streamed = await request.send().timeout(_coldStartTimeout);
+    return http.Response.fromStream(streamed).timeout(_coldStartTimeout);
   }
 
   Future<dynamic> _request(
@@ -156,7 +158,7 @@ class Api {
   }) async {
     final uri = Uri.parse('$baseUrl$path');
     late http.Response response;
-    final maxAttempts = retryOnTransient ? 2 : 1;
+    final maxAttempts = retryOnTransient ? 3 : 1;
 
     for (var attempt = 0; attempt < maxAttempts; attempt++) {
       try {
@@ -170,13 +172,17 @@ class Api {
         if (retryOnTransient &&
             response.statusCode >= 500 &&
             attempt + 1 < maxAttempts) {
-          await Future<void>.delayed(Duration(milliseconds: 450 * (attempt + 1)));
+          await Future<void>.delayed(
+            Duration(milliseconds: 1500 * (1 << attempt)),
+          );
           continue;
         }
         break;
       } catch (_) {
-        if (attempt + 1 < maxAttempts) {
-          await Future<void>.delayed(Duration(milliseconds: 450 * (attempt + 1)));
+        if (retryOnTransient && attempt + 1 < maxAttempts) {
+          await Future<void>.delayed(
+            Duration(milliseconds: 1500 * (1 << attempt)),
+          );
           continue;
         }
         throw const ApiException(

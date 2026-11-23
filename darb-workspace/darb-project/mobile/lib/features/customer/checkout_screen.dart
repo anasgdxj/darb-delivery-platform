@@ -49,6 +49,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _loadingAddresses = true;
   bool _estimating = false;
   bool _submitting = false;
+  int _estimateGeneration = 0;
+  String? _estimateError;
   String? _error;
 
   @override
@@ -85,6 +87,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loadingAddresses = false);
     }
@@ -92,8 +96,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _refreshEstimate() async {
     final addrId = _selectedAddressId;
-    if (addrId == null || widget.items.isEmpty) return;
-    setState(() => _estimating = true);
+    if (addrId == null || widget.items.isEmpty) {
+      _estimateGeneration++;
+      setState(() {
+        _estimating = false;
+        _estimate = null;
+        _estimateError = null;
+      });
+      return;
+    }
+    final generation = ++_estimateGeneration;
+    setState(() {
+      _estimating = true;
+      _estimate = null;
+      _estimateError = null;
+    });
     try {
       final res = await Api.instance.post('/orders/estimate', {
         'cityId': widget.cityId,
@@ -103,17 +120,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             .map((e) => {'productId': e.productId, 'quantity': e.quantity})
             .toList(),
       }) as Map<String, dynamic>;
-      if (mounted) setState(() => _estimate = res);
+      if (mounted && generation == _estimateGeneration) {
+        setState(() {
+          _estimate = res;
+          if (res['vendorOpen'] == false) {
+            _estimateError = dt('المتجر مغلق حالياً ولا يستقبل طلبات جديدة');
+          }
+        });
+      }
+    } on ApiException catch (e) {
+      if (mounted && generation == _estimateGeneration) {
+        setState(() => _estimateError = e.message);
+      }
     } catch (_) {
-      if (mounted) setState(() => _estimate = null);
+      if (mounted && generation == _estimateGeneration) {
+        setState(() => _estimateError = dt('تعذر حساب تكلفة التوصيل. تحقق من الاتصال وحاول مجدداً.'));
+      }
     } finally {
-      if (mounted) setState(() => _estimating = false);
+      if (mounted && generation == _estimateGeneration) {
+        setState(() => _estimating = false);
+      }
     }
   }
 
   Future<void> _placeOrder() async {
     if (_selectedAddressId == null) {
       setState(() => _error = dt('اختر عنوان توصيل صالحاً أو أضف عنواناً جديداً'));
+      return;
+    }
+    if (_estimating || _estimate == null || _estimateError != null) {
+      setState(() => _error = _estimateError ?? dt('يجب حساب تكلفة الطلب بنجاح قبل الإرسال'));
+      return;
+    }
+    if (_estimate?['vendorOpen'] == false) {
+      setState(() => _error = dt('المتجر مغلق حالياً ولا يستقبل طلبات جديدة'));
+      return;
+    }
+    if (widget.items.isEmpty) {
+      setState(() => _error = dt('السلة فارغة'));
       return;
     }
     setState(() {
@@ -166,6 +210,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -289,6 +335,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       child: LinearProgressIndicator(borderRadius: BorderRadius.circular(DarbRadius.pill)),
                     )
+                  else if (_estimateError != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          _estimateError!,
+                          style: TextStyle(
+                            color: DarbColors.dangerOf(context),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            onPressed: _selectedAddressId == null ? null : _refreshEstimate,
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: Text(dt('إعادة حساب التكلفة')),
+                          ),
+                        ),
+                      ],
+                    )
                   else ...[
                     if (estDistance != null)
                       _feeRow(dt('مسافة التوصيل: $estDistance كم'), ''),
@@ -329,17 +396,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             if (_error != null) ...[
               const SizedBox(height: 12),
               DarbGlassSurface(
-                tintColor: DarbColors.dangerSoft,
+                tintColor: DarbColors.dangerSoftOf(context),
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: DarbColors.danger, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w700),
                 ),
               ),
             ],
             const SizedBox(height: 18),
             FilledButton(
-              onPressed: (_submitting || _loadingAddresses) ? null : _placeOrder,
+              onPressed: (_submitting || _loadingAddresses || _estimating || _estimate == null || _estimateError != null || _estimate?['vendorOpen'] == false) ? null : _placeOrder,
               child: Text(
                 _submitting ? dt('جارٍ الحفظ') : dt('إرسال الطلب — الدفع عند الاستلام'),
               ),

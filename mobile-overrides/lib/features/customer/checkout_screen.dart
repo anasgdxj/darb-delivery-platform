@@ -87,6 +87,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loadingAddresses = false);
     }
@@ -208,6 +210,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -392,11 +396,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             if (_error != null) ...[
               const SizedBox(height: 12),
               DarbGlassSurface(
-                tintColor: DarbColors.dangerSoft,
+                tintColor: DarbColors.dangerSoftOf(context),
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: DarbColors.danger, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w700),
                 ),
               ),
             ],

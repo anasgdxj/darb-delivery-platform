@@ -13,6 +13,8 @@ import '../l10n/app_localizations.dart';
 import '../theme/darb_design_system.dart';
 import '../widgets/darb_glass.dart';
 
+const bool kDarbPlayStoreBuild = bool.fromEnvironment('DARB_PLAY_STORE');
+
 class DarbUpdateInfo {
   final int versionCode;
   final String versionName;
@@ -53,6 +55,11 @@ class DarbUpdater {
   bool checkFailed = false;
 
   Future<void> checkForUpdate({bool force = false}) async {
+    if (kDarbPlayStoreBuild) {
+      availableUpdate.value = null;
+      checkFailed = false;
+      return;
+    }
     if (_checking) return;
     _checking = true;
     checkFailed = false;
@@ -118,6 +125,9 @@ class DarbUpdater {
   }
 
   Future<String> downloadUpdate(DarbUpdateInfo info) async {
+    if (kDarbPlayStoreBuild) {
+      throw StateError('APK self-update is disabled for Google Play builds');
+    }
     downloadProgress.value = 0;
     final client = http.Client();
     try {
@@ -204,6 +214,9 @@ class DarbUpdater {
   }
 
   Future<String> installDownloadedApk() async {
+    if (kDarbPlayStoreBuild) {
+      throw StateError('APK self-update is disabled for Google Play builds');
+    }
     final path = downloadedApkPath;
     if (path == null || !await File(path).exists()) {
       throw StateError('No downloaded update');
@@ -212,6 +225,9 @@ class DarbUpdater {
   }
 
   Future<void> startBackgroundDownload(DarbUpdateInfo info) async {
+    if (kDarbPlayStoreBuild) {
+      throw StateError('APK self-update is disabled for Google Play builds');
+    }
     await _channel.invokeMethod<int>('startBackgroundDownload', {
       'url': info.apkUrl,
       'sha256': info.sha256,

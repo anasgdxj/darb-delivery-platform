@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/l10n/app_localizations.dart';
@@ -19,6 +20,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
   String _filter = 'ALL';
   bool _loading = true;
   String? _error;
+  final Set<String> _updatingOrders = <String>{};
 
   @override
   void initState() {
@@ -38,20 +40,34 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
       if (mounted) setState(() => _orders = list);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _advanceStatus(String orderId, String nextStatus) async {
+    if (!_updatingOrders.add(orderId)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.patch('/orders/$orderId/status', {'status': nextStatus});
+      if (mounted) HapticFeedback.selectionClick();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } finally {
+      _updatingOrders.remove(orderId);
+      if (mounted) setState(() {});
     }
   }
 
@@ -231,15 +247,25 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                   icon: const Icon(Icons.place_outlined, size: 17),
                   label: Text(dt('موقع التسليم')),
                 ),
-              if (status == 'ASSIGNED')
+              if (status == 'ASSIGNED' || status == 'PICKED_UP')
                 FilledButton(
-                  onPressed: () => _advanceStatus(id, 'PICKED_UP'),
-                  child: Text(dt('تم الاستلام')),
-                ),
-              if (status == 'PICKED_UP')
-                FilledButton(
-                  onPressed: () => _advanceStatus(id, 'DELIVERED'),
-                  child: Text(dt('تم التسليم')),
+                  onPressed: _updatingOrders.contains(id)
+                      ? null
+                      : () => _advanceStatus(
+                            id,
+                            status == 'ASSIGNED' ? 'PICKED_UP' : 'DELIVERED',
+                          ),
+                  child: _updatingOrders.contains(id)
+                      ? const SizedBox(
+                          width: 17,
+                          height: 17,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(
+                          status == 'ASSIGNED'
+                              ? dt('تم الاستلام')
+                              : dt('تم التسليم'),
+                        ),
                 ),
             ],
           ),

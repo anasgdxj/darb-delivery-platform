@@ -104,6 +104,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -129,6 +131,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }

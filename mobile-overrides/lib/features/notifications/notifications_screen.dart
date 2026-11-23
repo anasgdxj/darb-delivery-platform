@@ -47,6 +47,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -62,6 +64,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _markingAll = false);

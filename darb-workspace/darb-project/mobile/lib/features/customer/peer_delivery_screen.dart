@@ -6,6 +6,7 @@ import '../../core/services/location_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_map_picker.dart';
 import 'addresses_screen.dart';
 
 class PeerDeliveryScreen extends StatefulWidget {
@@ -35,6 +36,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   int _step = 0;
   double? _pickupLat;
   double? _pickupLng;
+  int _pickupMapRevision = 0;
   bool _locatingPickup = false;
   bool _loadingAddresses = true;
   bool _submitting = false;
@@ -74,7 +76,13 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
           _selectedAddressId = (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
         }
       });
-    } catch (_) {} finally {
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = dt('تعذر قراءة عناوين التوصيل'));
+      }
+    } finally {
       if (mounted) setState(() => _loadingAddresses = false);
     }
   }
@@ -90,9 +98,12 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
       setState(() {
         _pickupLat = coords.latitude;
         _pickupLng = coords.longitude;
+        _pickupMapRevision++;
       });
     } on DarbLocationException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('تعذر تحديد الموقع الحالي'));
     } finally {
       if (mounted) setState(() => _locatingPickup = false);
     }
@@ -170,6 +181,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -233,11 +246,11 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
             if (_error != null) ...[
               const SizedBox(height: 12),
               DarbGlassSurface(
-                tintColor: DarbColors.dangerSoft,
+                tintColor: DarbColors.dangerSoftOf(context),
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: DarbColors.danger, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -307,6 +320,20 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                   ? '${dt('تم تحديد موقع الاستلام')} (${_pickupLat!.toStringAsFixed(4)}, ${_pickupLng!.toStringAsFixed(4)})'
                   : dt('استخدام موقعي الحالي'),
             ),
+          ),
+          const SizedBox(height: 12),
+          DarbMapPicker(
+            key: ValueKey('pickup-map-$_pickupMapRevision'),
+            selectedLatitude: _pickupLat,
+            selectedLongitude: _pickupLng,
+            cityName: widget.cityName,
+            onPointSelected: (latitude, longitude) {
+              setState(() {
+                _pickupLat = latitude;
+                _pickupLng = longitude;
+                _error = null;
+              });
+            },
           ),
           const SizedBox(height: 18),
           Row(
@@ -378,9 +405,9 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
             children: [
               for (final chip in _quickTypes)
                 ChoiceChip(
-                  label: Text(chip),
-                  selected: _itemTypeController.text.trim() == chip,
-                  onSelected: (_) => setState(() => _itemTypeController.text = chip),
+                  label: Text(dt(chip)),
+                  selected: _itemTypeController.text.trim() == dt(chip),
+                  onSelected: (_) => setState(() => _itemTypeController.text = dt(chip)),
                 ),
             ],
           ),

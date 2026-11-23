@@ -26,6 +26,8 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   bool _togglingOnline = false;
   bool _sendingLocation = false;
   String? _error;
+  String? _availableError;
+  final Set<String> _busyOrderIds = <String>{};
 
   @override
   void initState() {
@@ -37,12 +39,14 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _availableError = null;
     });
     try {
       final driver =
           await Api.instance.get('/drivers/me') as Map<String, dynamic>;
       Map<String, dynamic>? stats;
       List<Map<String, dynamic>> available = const [];
+      String? availableError;
 
       try {
         stats = await Api.instance.get('/drivers/stats') as Map<String, dynamic>;
@@ -55,7 +59,11 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                       [])
                   .whereType<Map<String, dynamic>>()
                   .toList();
-        } catch (_) {}
+        } on ApiException catch (e) {
+          availableError = e.message;
+        } catch (_) {
+          availableError = dt('تعذر تحميل الطلبات المتاحة حالياً');
+        }
       }
 
       if (!mounted) return;
@@ -63,10 +71,13 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         _driver = driver;
         _stats = stats;
         _available = available;
+        _availableError = availableError;
       });
       DriverLocationReporter.start();
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -82,6 +93,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _togglingOnline = false);
@@ -111,6 +128,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _sendingLocation = false);
@@ -165,12 +188,21 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
     }
   }
 
   Future<void> _claimOrder(String id) async {
+    if (!_busyOrderIds.add(id)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.post('/orders/$id/claim', {});
+      if (mounted) HapticFeedback.selectionClick();
       await _load();
       widget.onClaimedOrAccepted?.call();
       if (mounted) {
@@ -182,13 +214,25 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } finally {
+      _busyOrderIds.remove(id);
+      if (mounted) setState(() {});
     }
   }
 
   Future<void> _dismissOrder(String id) async {
+    if (!_busyOrderIds.add(id)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.post('/orders/$id/dismiss', {});
       if (mounted) {
+        HapticFeedback.selectionClick();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(dt('تم استبعاد الطلب'))),
         );
@@ -199,13 +243,25 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } finally {
+      _busyOrderIds.remove(id);
+      if (mounted) setState(() {});
     }
   }
 
   Future<void> _withdrawOffer(String orderId) async {
+    if (!_busyOrderIds.add(orderId)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.post('/orders/$orderId/offers/withdraw', {});
       if (mounted) {
+        HapticFeedback.selectionClick();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(dt('تم سحب العرض'))),
         );
@@ -216,6 +272,15 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } finally {
+      _busyOrderIds.remove(orderId);
+      if (mounted) setState(() {});
     }
   }
 
@@ -254,10 +319,14 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     );
     controller.dispose();
     if (amount == null) return;
+    final orderId = order['id'].toString();
+    if (!_busyOrderIds.add(orderId)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance
-          .post('/orders/${order['id']}/offers', {'amount': amount});
+          .post('/orders/$orderId/offers', {'amount': amount});
       if (mounted) {
+        HapticFeedback.selectionClick();
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(dt('تم إرسال عرضك للعميل'))));
       }
@@ -267,6 +336,15 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } finally {
+      _busyOrderIds.remove(orderId);
+      if (mounted) setState(() {});
     }
   }
 
@@ -449,6 +527,11 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
               message: dt('فعّل الحالة لتظهر لك الطلبات الجاهزة'),
               icon: Icons.power_settings_new_rounded,
             )
+          else if (_availableError != null && _available.isEmpty)
+            DarbStateView.error(
+              message: _availableError,
+              onRetry: _load,
+            )
           else if (_available.isEmpty)
             DarbStateView.empty(
               message: dt('لا توجد طلبات متاحة حالياً'),
@@ -568,18 +651,34 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: DarbColors.dangerOf(context),
                         ),
-                        onPressed: () => _withdrawOffer(id),
-                        child: Text(dt('سحب العرض')),
+                        onPressed: _busyOrderIds.contains(id)
+                            ? null
+                            : () => _withdrawOffer(id),
+                        child: _busyOrderIds.contains(id)
+                            ? const SizedBox(
+                                width: 17,
+                                height: 17,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(dt('سحب العرض')),
                       )
                     : FilledButton(
-                        onPressed: () => isPeer
-                            ? _submitOffer(order)
-                            : _claimOrder(id),
-                        child: Text(
-                          isPeer
-                              ? dt('تقديم أجرة التوصيل')
-                              : dt('استلام الطلب'),
-                        ),
+                        onPressed: _busyOrderIds.contains(id)
+                            ? null
+                            : () => isPeer
+                                ? _submitOffer(order)
+                                : _claimOrder(id),
+                        child: _busyOrderIds.contains(id)
+                            ? const SizedBox(
+                                width: 17,
+                                height: 17,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                isPeer
+                                    ? dt('تقديم أجرة التوصيل')
+                                    : dt('استلام الطلب'),
+                              ),
                       ),
               ),
               const SizedBox(width: 8),
@@ -587,7 +686,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: DarbColors.mutedOf(context),
                 ),
-                onPressed: () => _dismissOrder(id),
+                onPressed: _busyOrderIds.contains(id)
+                    ? null
+                    : () => _dismissOrder(id),
                 child: Text(dt('استبعاد')),
               ),
             ],

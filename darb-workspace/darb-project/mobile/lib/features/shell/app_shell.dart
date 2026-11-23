@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
@@ -5,6 +8,7 @@ import '../../core/network/api_client.dart';
 import '../../core/services/app_update_service.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/notifications_service.dart';
+import '../../core/storage/local_cache.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
@@ -16,6 +20,7 @@ import '../admin/admin_operations_screens.dart';
 import '../auth/login_screen.dart';
 import '../customer/customer_home_screen.dart';
 import '../customer/customer_orders_screen.dart';
+import '../customer/driver_tracking_screen.dart';
 import '../driver/driver_dashboard_screen.dart';
 import '../driver/driver_orders_screen.dart';
 import '../notifications/notifications_screen.dart';
@@ -30,17 +35,298 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
+  static const _profileCacheKey = 'auth_me_profile';
+
   Map<String, dynamic>? _user;
   bool _loading = true;
+  bool _offline = false;
   String? _error;
   int _tabIndex = 0;
   int _unreadNotifications = 0;
+
+  StreamSubscription<RemoteMessage>? _fgSub;
+  StreamSubscription<RemoteMessage>? _openSub;
+  Timer? _bannerTimer;
+  ({String title, String body, Map<String, dynamic> data})? _bannerNotification;
+  Map<String, dynamic>? _pendingNotificationData;
+  bool _handlingNotification = false;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
-    DarbUpdater.instance.checkForUpdate();
+    _setupNotifications();
+    if (!kDarbPlayStoreBuild) {
+      DarbUpdater.instance.checkForUpdate();
+    }
+  }
+
+  @override
+  void dispose() {
+    _bannerTimer?.cancel();
+    _fgSub?.cancel();
+    _openSub?.cancel();
+    super.dispose();
+  }
+
+  void _setupNotifications() {
+    _fgSub = DarbNotifications.listenForeground((title, body, data) {
+      if (!mounted) return;
+      _refreshUnreadCount();
+      final resolvedTitle =
+          (title != null && title.trim().isNotEmpty) ? title.trim() : dt('إشعار جديد');
+      final resolvedBody = body?.trim() ?? '';
+      _bannerTimer?.cancel();
+      setState(() {
+        _bannerNotification = (
+          title: resolvedTitle,
+          body: resolvedBody,
+          data: Map<String, dynamic>.from(data),
+        );
+      });
+      _bannerTimer = Timer(const Duration(seconds: 6), () {
+        if (mounted) _dismissBanner();
+      });
+    });
+
+    _openSub = DarbNotifications.listenOpened((data) {
+      if (mounted) {
+        unawaited(_handleNotificationOpen(data));
+      }
+    });
+
+    unawaited(
+      DarbNotifications.initialMessageData().then((data) {
+        if (data != null && mounted) {
+          return _handleNotificationOpen(data);
+        }
+      }),
+    );
+  }
+
+  void _dismissBanner() {
+    _bannerTimer?.cancel();
+    _bannerTimer = null;
+    if (mounted && _bannerNotification != null) {
+      setState(() => _bannerNotification = null);
+    }
+  }
+
+  Future<void> _handleNotificationOpen(Map<String, dynamic> data) async {
+    _dismissBanner();
+    if (_user == null) {
+      _pendingNotificationData = Map<String, dynamic>.from(data);
+      return;
+    }
+    if (_handlingNotification) return;
+
+    final orderId = data['orderId']?.toString().trim();
+    unawaited(_refreshUnreadCount());
+
+    if (orderId == null || orderId.isEmpty) {
+      await _openNotifications();
+      return;
+    }
+
+    _handlingNotification = true;
+    try {
+      final role = _user?['role']?.toString().toUpperCase() ?? 'CUSTOMER';
+      Map<String, dynamic>? matchedOrder;
+      var targetTab = _tabIndex;
+
+      if (role == 'CUSTOMER') {
+        targetTab = 1;
+        final list = (await Api.instance.get('/orders/mine') as List? ?? [])
+            .whereType<Map<String, dynamic>>();
+        for (final item in list) {
+          if (item['id']?.toString() == orderId) {
+            matchedOrder = item;
+            break;
+          }
+        }
+      } else if (role == 'VENDOR') {
+        targetTab = 0;
+        final list = (await Api.instance.get('/orders/vendor') as List? ?? [])
+            .whereType<Map<String, dynamic>>();
+        for (final item in list) {
+          if (item['id']?.toString() == orderId) {
+            matchedOrder = item;
+            break;
+          }
+        }
+      } else if (role == 'ADMIN') {
+        targetTab = 1;
+        final res = await Api.instance.get('/admin/orders?limit=50');
+        final rawList =
+            res is Map ? (res['items'] as List? ?? []) : (res as List? ?? []);
+        for (final item in rawList.whereType<Map<String, dynamic>>()) {
+          if (item['id']?.toString() == orderId) {
+            matchedOrder = item;
+            break;
+          }
+        }
+      } else if (role == 'DRIVER') {
+        try {
+          final avail = (await Api.instance.get('/orders/driver/available')
+                  as List? ??
+              [])
+              .whereType<Map<String, dynamic>>();
+          for (final item in avail) {
+            if (item['id']?.toString() == orderId) {
+              matchedOrder = item;
+              targetTab = 0;
+              break;
+            }
+          }
+        } catch (_) {}
+
+        if (matchedOrder == null) {
+          final mine = (await Api.instance.get('/orders/driver/mine') as List? ??
+                  [])
+              .whereType<Map<String, dynamic>>();
+          for (final item in mine) {
+            if (item['id']?.toString() == orderId) {
+              matchedOrder = item;
+              targetTab = 1;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!mounted) return;
+      if (targetTab != _tabIndex) {
+        setState(() => _tabIndex = targetTab);
+      }
+
+      if (matchedOrder != null) {
+        await _showOrderQuickSheet(matchedOrder, role);
+      } else {
+        await _openNotifications();
+      }
+    } catch (_) {
+      if (mounted) {
+        await _openNotifications();
+      }
+    } finally {
+      _handlingNotification = false;
+    }
+  }
+
+  Future<void> _showOrderQuickSheet(
+    Map<String, dynamic> order,
+    String role,
+  ) async {
+    final orderId = order['id']?.toString() ?? '';
+    final status = order['status']?.toString() ?? 'PENDING';
+    final total = num.tryParse(order['total']?.toString() ?? '0') ?? 0;
+    final currency = order['currency']?.toString() ?? 'SYP';
+    final addr = order['address'] is Map ? order['address'] as Map : null;
+    final addrDetails = addr?['details']?.toString();
+    final pickupAddress = order['pickupAddress']?.toString();
+    final notes = order['notes']?.toString();
+    final pickupLat = (order['pickupLatitude'] as num?)?.toDouble();
+    final pickupLng = (order['pickupLongitude'] as num?)?.toDouble();
+    final dropoffLat = (addr?['latitude'] as num?)?.toDouble();
+    final dropoffLng = (addr?['longitude'] as num?)?.toDouble();
+    final canTrack = role == 'CUSTOMER' &&
+        (status == 'ASSIGNED' || status == 'PICKED_UP') &&
+        orderId.isNotEmpty;
+
+    await showDarbGlassModalSheet<void>(
+      context: context,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${dt('تفاصيل الطلب')} · ${order['orderNumber'] ?? ''}',
+                  style: TextStyle(
+                    color: DarbColors.inkOf(ctx),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              DarbStatusBadge(status: status),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (pickupAddress != null && pickupAddress.trim().isNotEmpty) ...[
+            Text(
+              '${dt('الاستلام')}: $pickupAddress',
+              style: TextStyle(color: DarbColors.mutedOf(ctx), fontSize: 13),
+            ),
+            const SizedBox(height: 6),
+          ],
+          if (addrDetails != null && addrDetails.trim().isNotEmpty) ...[
+            Text(
+              '${dt('عنوان التوصيل')}: $addrDetails',
+              style: TextStyle(color: DarbColors.mutedOf(ctx), fontSize: 13),
+            ),
+            const SizedBox(height: 6),
+          ],
+          if (notes != null && notes.trim().isNotEmpty) ...[
+            Text(
+              notes.trim(),
+              style: TextStyle(color: DarbColors.inkOf(ctx), fontSize: 13),
+            ),
+            const SizedBox(height: 6),
+          ],
+          if (total > 0) ...[
+            const Divider(height: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  dt('الإجمالي عند الاستلام'),
+                  style: TextStyle(
+                    color: DarbColors.inkOf(ctx),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  formatDarbMoney(total, currency),
+                  style: TextStyle(
+                    color: DarbColors.primaryOf(ctx),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 16),
+          if (canTrack) ...[
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => DriverTrackingScreen(
+                      orderId: orderId,
+                      pickupLatitude: pickupLat,
+                      pickupLongitude: pickupLng,
+                      dropoffLatitude: dropoffLat,
+                      dropoffLongitude: dropoffLng,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.map_outlined),
+              label: Text(dt('تتبع المندوب')),
+            ),
+            const SizedBox(height: 8),
+          ],
+          OutlinedButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(dt('إغلاق')),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _refreshUnreadCount() async {
@@ -64,6 +350,7 @@ class _AppShellState extends State<AppShell> {
       if (data is! Map<String, dynamic>) {
         throw const ApiException('بيانات الجلسة غير صالحة');
       }
+      await DarbLocalCache.instance.writeJson(_profileCacheKey, data);
       final localeCode = data['locale']?.toString();
       if (localeCode != null && ['ar', 'en', 'tr'].contains(localeCode)) {
         darbLocale.value = Locale(localeCode);
@@ -78,11 +365,19 @@ class _AppShellState extends State<AppShell> {
       if (!mounted) return;
       setState(() {
         _user = data;
+        _offline = false;
         _error = null;
       });
+      final pending = _pendingNotificationData;
+      if (pending != null) {
+        _pendingNotificationData = null;
+        unawaited(_handleNotificationOpen(pending));
+      }
     } on ApiException catch (e) {
       if (!mounted) return;
-      if (e.statusCode == 401 || Api.instance.sessionInvalidated) {
+      if (e.statusCode == 401 ||
+          e.statusCode == 403 ||
+          Api.instance.sessionInvalidated) {
         await Api.instance.clear();
         if (!mounted) return;
         Navigator.of(context).pushAndRemoveUntil(
@@ -90,6 +385,34 @@ class _AppShellState extends State<AppShell> {
           (_) => false,
         );
         return;
+      }
+      if (e.isNetworkError &&
+          e.statusCode == null &&
+          !Api.instance.sessionInvalidated) {
+        final cached = await DarbLocalCache.instance.readJson(_profileCacheKey);
+        if (cached is Map && mounted) {
+          final profile = Map<String, dynamic>.from(cached);
+          final localeCode = profile['locale']?.toString();
+          if (localeCode != null && ['ar', 'en', 'tr'].contains(localeCode)) {
+            darbLocale.value = Locale(localeCode);
+          }
+          if (profile['role']?.toString().toUpperCase() == 'DRIVER') {
+            DriverLocationReporter.start();
+          } else {
+            DriverLocationReporter.stop();
+          }
+          setState(() {
+            _user = profile;
+            _offline = true;
+            _error = null;
+          });
+          final pending = _pendingNotificationData;
+          if (pending != null) {
+            _pendingNotificationData = null;
+            unawaited(_handleNotificationOpen(pending));
+          }
+          return;
+        }
       }
       setState(() => _error = e.message);
     } catch (_) {
@@ -318,6 +641,8 @@ class _AppShellState extends State<AppShell> {
       _ => dt('حساب عميل'),
     };
 
+    final banner = _bannerNotification;
+
     return Scaffold(
       extendBody: true,
       appBar: DarbGlassAppBar(
@@ -328,26 +653,27 @@ class _AppShellState extends State<AppShell> {
         title: destinations[safeIndex].label,
         subtitle: roleSubtitle,
         actions: [
-          ValueListenableBuilder<DarbUpdateInfo?>(
-            valueListenable: DarbUpdater.instance.availableUpdate,
-            builder: (context, update, _) {
-              if (update == null) return const SizedBox.shrink();
-              return IconButton(
-                tooltip: dt('تحديث التطبيق'),
-                onPressed: () {
-                  DarbHaptics.light();
-                  showDialog<void>(
-                    context: context,
-                    builder: (_) => DarbUpdateDialog(info: update),
-                  );
-                },
-                icon: Icon(
-                  Icons.system_update_rounded,
-                  color: DarbColors.primaryOf(context),
-                ),
-              );
-            },
-          ),
+          if (!kDarbPlayStoreBuild)
+            ValueListenableBuilder<DarbUpdateInfo?>(
+              valueListenable: DarbUpdater.instance.availableUpdate,
+              builder: (context, update, _) {
+                if (update == null) return const SizedBox.shrink();
+                return IconButton(
+                  tooltip: dt('تحديث التطبيق'),
+                  onPressed: () {
+                    DarbHaptics.light();
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => DarbUpdateDialog(info: update),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.system_update_rounded,
+                    color: DarbColors.primaryOf(context),
+                  ),
+                );
+              },
+            ),
           IconButton(
             tooltip: dt('الإشعارات'),
             onPressed: _openNotifications,
@@ -391,9 +717,146 @@ class _AppShellState extends State<AppShell> {
         ],
       ),
       body: DarbAmbientBackground(
-        child: DarbTabViewStack(
-          index: safeIndex,
-          children: pages,
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                if (_offline)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    child: DarbGlassSurface(
+                      tintColor: DarbColors.warningSoftOf(context),
+                      borderColor:
+                          DarbColors.warningOf(context).withValues(alpha: 0.32),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.cloud_off_rounded,
+                            size: 16,
+                            color: DarbColors.warningOf(context),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'),
+                              style: TextStyle(
+                                color: DarbColors.warningOf(context),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(0, 28),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: _loadUser,
+                            child: Text(dt('تحديث')),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: DarbTabViewStack(
+                    index: safeIndex,
+                    children: pages,
+                  ),
+                ),
+              ],
+            ),
+            if (banner != null)
+              Positioned(
+                top: 8,
+                left: 12,
+                right: 12,
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: DarbPressScale(
+                    onTap: () => _handleNotificationOpen(banner.data),
+                    child: DarbGlassSurface(
+                      borderRadius: DarbRadius.lg,
+                      blurSigma: 22,
+                      borderColor:
+                          DarbColors.primaryOf(context).withValues(alpha: 0.35),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: DarbColors.primaryOf(context)
+                                  .withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(11),
+                            ),
+                            child: Icon(
+                              Icons.notifications_active_rounded,
+                              size: 19,
+                              color: DarbColors.primaryOf(context),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  banner.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: DarbColors.inkOf(context),
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                if (banner.body.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    banner.body,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: DarbColors.mutedOf(context),
+                                      fontSize: 12,
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            tooltip: dt('إغلاق'),
+                            onPressed: _dismissBanner,
+                            icon: Icon(
+                              Icons.close_rounded,
+                              size: 18,
+                              color: DarbColors.mutedOf(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
       bottomNavigationBar: DarbGlassBottomNav(

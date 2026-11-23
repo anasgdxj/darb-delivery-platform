@@ -120,15 +120,58 @@ void main() {
       darbLocale.value = const Locale('en');
       expect(dt('إلغاء الطلب'), 'Cancel order');
       expect(dt('الإشعارات'), 'Notifications');
+      expect(dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'), 'Offline mode — showing cached data');
+      expect(dt('حدد الموقع على خريطة دمشق'), 'Pin location on the map for دمشق');
       expect(dt('5 منتج متاح'), '5 products available');
       expect(formatDarbMoney(15000), '15,000 SYP');
 
       darbLocale.value = const Locale('tr');
       expect(dt('إلغاء الطلب'), 'Siparişi iptal et');
       expect(dt('الإشعارات'), 'Bildirimler');
+      expect(dt('تحديث التطبيق'), 'Uygulamayı güncelle');
       expect(dt('3 منتج متاح'), '3 ürün mevcut');
 
       darbLocale.value = const Locale('ar');
+    });
+
+    testWidgets('DarbColors soft tokens adapt between light and dark themes',
+        (tester) async {
+      late Color lightDangerSoft;
+      late Color darkDangerSoft;
+      late Color lightWarningSoft;
+      late Color darkWarningSoft;
+
+      await tester.pumpWidget(
+        Column(
+          children: [
+            Theme(
+              data: DarbTheme.light,
+              child: Builder(
+                builder: (ctx) {
+                  lightDangerSoft = DarbColors.dangerSoftOf(ctx);
+                  lightWarningSoft = DarbColors.warningSoftOf(ctx);
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+            Theme(
+              data: DarbTheme.dark,
+              child: Builder(
+                builder: (ctx) {
+                  darkDangerSoft = DarbColors.dangerSoftOf(ctx);
+                  darkWarningSoft = DarbColors.warningSoftOf(ctx);
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+
+      expect(lightDangerSoft, DarbColors.dangerSoft);
+      expect(darkDangerSoft, DarbColors.darkDangerSoft);
+      expect(lightWarningSoft, DarbColors.warningSoft);
+      expect(darkWarningSoft, DarbColors.darkWarningSoft);
     });
   });
 
@@ -302,7 +345,7 @@ void main() {
       expect(selected, 1);
     });
 
-    testWidgets('DarbTabViewStack preserves tab child state across switches',
+    testWidgets('DarbTabViewStack preserves tab child state across bidirectional jumps',
         (tester) async {
       var tabIndex = 0;
       late StateSetter outerSetState;
@@ -318,6 +361,7 @@ void main() {
                   children: const [
                     _CounterTestTab(label: 'تبويب 1'),
                     _CounterTestTab(label: 'تبويب 2'),
+                    _CounterTestTab(label: 'تبويب 3'),
                   ],
                 ),
               );
@@ -331,8 +375,17 @@ void main() {
       await tester.pump();
       expect(find.text('تبويب 1: 1'), findsOneWidget);
 
+      outerSetState(() => tabIndex = 2);
+      await tester.pump(const Duration(milliseconds: 260));
+      await tester.tap(find.text('تبويب 3: 0'));
+      await tester.pump();
+      expect(find.text('تبويب 3: 1'), findsOneWidget);
+
       outerSetState(() => tabIndex = 1);
       await tester.pump(const Duration(milliseconds: 260));
+      await tester.tap(find.text('تبويب 2: 0'));
+      await tester.pump();
+      expect(find.text('تبويب 2: 1'), findsOneWidget);
 
       outerSetState(() => tabIndex = 0);
       await tester.pump(const Duration(milliseconds: 260));

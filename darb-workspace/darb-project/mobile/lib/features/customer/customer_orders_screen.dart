@@ -44,6 +44,8 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -63,7 +65,10 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
             child: Text(dt('رجوع')),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: DarbColors.danger),
+            style: FilledButton.styleFrom(
+              backgroundColor: DarbColors.dangerOf(ctx),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(dt('إلغاء الطلب')),
           ),
@@ -82,6 +87,12 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     }
   }
@@ -177,6 +188,11 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                         setSheet(() {
                           submitting = false;
                           err = e.message;
+                        });
+                      } catch (_) {
+                        setSheet(() {
+                          submitting = false;
+                          err = dt('حدث خطأ غير متوقع، حاول مجدداً');
                         });
                       }
                     },
@@ -401,7 +417,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
             OutlinedButton.icon(
               onPressed: () {
                 Navigator.pop(ctx);
-                _openDriverLocation(id);
+                _openDriverLocation(order);
               },
               icon: const Icon(Icons.map_outlined),
               label: Text(dt('موقع السائق')),
@@ -412,10 +428,17 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     );
   }
 
-  Future<void> _openDriverLocation(String orderId) async {
+  Future<void> _openDriverLocation(Map<String, dynamic> order) async {
+    final addr = order['address'] is Map ? order['address'] as Map : null;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => DriverTrackingScreen(orderId: orderId),
+        builder: (_) => DriverTrackingScreen(
+          orderId: order['id'].toString(),
+          pickupLatitude: (order['pickupLatitude'] as num?)?.toDouble(),
+          pickupLongitude: (order['pickupLongitude'] as num?)?.toDouble(),
+          dropoffLatitude: (addr?['latitude'] as num?)?.toDouble(),
+          dropoffLongitude: (addr?['longitude'] as num?)?.toDouble(),
+        ),
       ),
     );
   }
@@ -615,7 +638,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                             style: OutlinedButton.styleFrom(
                               minimumSize: const Size(0, 38),
                             ),
-                            onPressed: () => _openDriverLocation(id),
+                            onPressed: () => _openDriverLocation(order),
                             icon: const Icon(Icons.map_outlined, size: 17),
                             label: Text(dt('موقع السائق')),
                           ),
@@ -689,6 +712,8 @@ class _DriverOffersSheetState extends State<_DriverOffersSheet> {
       if (mounted) setState(() => _offers = list);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -706,6 +731,8 @@ class _DriverOffersSheetState extends State<_DriverOffersSheet> {
       );
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     }
   }
 

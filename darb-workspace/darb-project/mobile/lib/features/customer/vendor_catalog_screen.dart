@@ -79,6 +79,8 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
       setState(() => _products = list);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -389,11 +391,22 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                           color: DarbColors.mint,
                           borderRadius: BorderRadius.circular(DarbRadius.pill),
                         ),
-                        child: Text(
-                          '$_cartCount',
-                          style: const TextStyle(
-                            color: DarbColors.forest,
-                            fontWeight: FontWeight.w900,
+                        child: AnimatedSwitcher(
+                          duration: DarbMotion.effectiveDuration(
+                            context,
+                            DarbMotion.fast,
+                          ),
+                          transitionBuilder: (child, animation) => ScaleTransition(
+                            scale: animation,
+                            child: FadeTransition(opacity: animation, child: child),
+                          ),
+                          child: Text(
+                            '$_cartCount',
+                            key: ValueKey(_cartCount),
+                            style: const TextStyle(
+                              color: DarbColors.forest,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
                       ),
@@ -558,11 +571,22 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                     onPressed: () => _decrement(id),
                     icon: const Icon(Icons.remove_rounded, size: 18),
                   ),
-                  Text(
-                    '$qty',
-                    style: TextStyle(
-                      color: DarbColors.inkOf(context),
-                      fontWeight: FontWeight.w900,
+                  AnimatedSwitcher(
+                    duration: DarbMotion.effectiveDuration(
+                      context,
+                      DarbMotion.fast,
+                    ),
+                    transitionBuilder: (child, animation) => ScaleTransition(
+                      scale: animation,
+                      child: FadeTransition(opacity: animation, child: child),
+                    ),
+                    child: Text(
+                      '$qty',
+                      key: ValueKey(qty),
+                      style: TextStyle(
+                        color: DarbColors.inkOf(context),
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -622,6 +646,8 @@ class _VendorReviewsSheetState extends State<_VendorReviewsSheet> {
       }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }

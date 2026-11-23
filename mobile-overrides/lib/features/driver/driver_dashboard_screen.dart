@@ -26,6 +26,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   bool _togglingOnline = false;
   bool _sendingLocation = false;
   String? _error;
+  String? _availableError;
   final Set<String> _busyOrderIds = <String>{};
 
   @override
@@ -38,12 +39,14 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _availableError = null;
     });
     try {
       final driver =
           await Api.instance.get('/drivers/me') as Map<String, dynamic>;
       Map<String, dynamic>? stats;
       List<Map<String, dynamic>> available = const [];
+      String? availableError;
 
       try {
         stats = await Api.instance.get('/drivers/stats') as Map<String, dynamic>;
@@ -56,7 +59,11 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                       [])
                   .whereType<Map<String, dynamic>>()
                   .toList();
-        } catch (_) {}
+        } on ApiException catch (e) {
+          availableError = e.message;
+        } catch (_) {
+          availableError = dt('تعذر تحميل الطلبات المتاحة حالياً');
+        }
       }
 
       if (!mounted) return;
@@ -64,10 +71,13 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         _driver = driver;
         _stats = stats;
         _available = available;
+        _availableError = availableError;
       });
       DriverLocationReporter.start();
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -83,6 +93,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _togglingOnline = false);
@@ -112,6 +128,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _sendingLocation = false);
@@ -166,6 +188,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
     }
   }
 
@@ -185,6 +213,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       _busyOrderIds.remove(id);
@@ -209,6 +243,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
     } finally {
       _busyOrderIds.remove(id);
       if (mounted) setState(() {});
@@ -231,6 +271,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       _busyOrderIds.remove(orderId);
@@ -289,6 +335,12 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       _busyOrderIds.remove(orderId);
@@ -474,6 +526,11 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             DarbStateView.empty(
               message: dt('فعّل الحالة لتظهر لك الطلبات الجاهزة'),
               icon: Icons.power_settings_new_rounded,
+            )
+          else if (_availableError != null && _available.isEmpty)
+            DarbStateView.error(
+              message: _availableError,
+              onRetry: _load,
             )
           else if (_available.isEmpty)
             DarbStateView.empty(

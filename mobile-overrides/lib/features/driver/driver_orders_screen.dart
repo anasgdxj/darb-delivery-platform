@@ -40,6 +40,8 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
       if (mounted) setState(() => _orders = list);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -56,6 +58,12 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       _updatingOrders.remove(orderId);

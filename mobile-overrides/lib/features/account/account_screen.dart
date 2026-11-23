@@ -10,6 +10,7 @@ import '../../core/services/notifications_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_map_picker.dart';
 import '../../core/widgets/darb_motion_components.dart';
 import '../auth/login_screen.dart';
 import '../customer/addresses_screen.dart';
@@ -74,6 +75,12 @@ class _AccountScreenState extends State<AccountScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
     }
   }
 
@@ -113,9 +120,24 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _applyDriver() async {
-    final cities = (await Api.instance.get('/cities') as List? ?? [])
-        .whereType<Map<String, dynamic>>()
-        .toList();
+    List<Map<String, dynamic>> cities = const [];
+    try {
+      cities = (await Api.instance.get('/cities') as List? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .toList();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+      return;
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+      return;
+    }
     if (!mounted || cities.isEmpty) return;
     String cityId = cities.first['id'].toString();
     String vehicleType = 'MOTORCYCLE';
@@ -178,6 +200,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   await widget.onRefreshUser();
                 } on ApiException catch (e) {
                   setSheet(() => err = e.message);
+                } catch (_) {
+                  setSheet(() => err = dt('حدث خطأ غير متوقع، حاول مجدداً'));
                 }
               },
               child: Text(dt('إرسال الطلب')),
@@ -189,9 +213,24 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _applyVendor() async {
-    final cities = (await Api.instance.get('/cities') as List? ?? [])
-        .whereType<Map<String, dynamic>>()
-        .toList();
+    List<Map<String, dynamic>> cities = const [];
+    try {
+      cities = (await Api.instance.get('/cities') as List? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .toList();
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+      return;
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+      return;
+    }
     if (!mounted || cities.isEmpty) return;
     String cityId = cities.first['id'].toString();
     final nameCtrl = TextEditingController();
@@ -204,71 +243,82 @@ class _AccountScreenState extends State<AccountScreen> {
     await showDarbGlassModalSheet<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(dt('طلب انضمام متجر'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 12),
-            TextField(controller: nameCtrl, decoration: InputDecoration(labelText: dt('اسم المتجر'))),
-            const SizedBox(height: 10),
-            TextField(controller: typeCtrl, decoration: InputDecoration(labelText: dt('نوع النشاط'))),
-            const SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              value: cityId,
-              decoration: InputDecoration(labelText: dt('المدينة')),
-              items: [
-                for (final c in cities)
-                  DropdownMenuItem(
-                    value: c['id'].toString(),
-                    child: Text(_cityName(c)),
-                  ),
+        builder: (ctx, setSheet) {
+          final selectedCity = cities.cast<Map<String, dynamic>?>().firstWhere(
+                (c) => c?['id']?.toString() == cityId,
+                orElse: () => null,
+              );
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(dt('طلب انضمام متجر'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 12),
+                TextField(controller: nameCtrl, decoration: InputDecoration(labelText: dt('اسم المتجر'))),
+                const SizedBox(height: 10),
+                TextField(controller: typeCtrl, decoration: InputDecoration(labelText: dt('نوع النشاط'))),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: cityId,
+                  decoration: InputDecoration(labelText: dt('المدينة')),
+                  items: [
+                    for (final c in cities)
+                      DropdownMenuItem(
+                        value: c['id'].toString(),
+                        child: Text(_cityName(c)),
+                      ),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) setSheet(() => cityId = v);
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextField(controller: addrCtrl, decoration: InputDecoration(labelText: dt('عنوان المتجر (اختياري)'))),
+                const SizedBox(height: 12),
+                DarbMapPicker(
+                  selectedLatitude: lat,
+                  selectedLongitude: lng,
+                  cityName: selectedCity != null ? _cityName(selectedCity) : null,
+                  onPointSelected: (pickedLat, pickedLng) => setSheet(() {
+                    lat = pickedLat;
+                    lng = pickedLng;
+                    err = null;
+                  }),
+                ),
+                if (err != null) ...[
+                  const SizedBox(height: 8),
+                  Text(err!, style: TextStyle(color: DarbColors.dangerOf(ctx))),
+                ],
+                const SizedBox(height: 14),
+                FilledButton(
+                  onPressed: () async {
+                    if (nameCtrl.text.trim().length < 2 || typeCtrl.text.trim().length < 2) {
+                      setSheet(() => err = dt('أدخل اسم المتجر ونوع النشاط'));
+                      return;
+                    }
+                    try {
+                      await Api.instance.post('/vendors/apply', {
+                        'name': nameCtrl.text.trim(),
+                        'type': typeCtrl.text.trim(),
+                        'cityId': cityId,
+                        if (addrCtrl.text.trim().isNotEmpty) 'address': addrCtrl.text.trim(),
+                        if (lat != null && lng != null) ...{'latitude': lat, 'longitude': lng},
+                      });
+                      if (ctx.mounted) Navigator.pop(ctx);
+                      await widget.onRefreshUser();
+                    } on ApiException catch (e) {
+                      setSheet(() => err = e.message);
+                    } catch (_) {
+                      setSheet(() => err = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+                    }
+                  },
+                  child: Text(dt('إرسال الطلب')),
+                ),
               ],
-              onChanged: (v) {
-                if (v != null) setSheet(() => cityId = v);
-              },
             ),
-            const SizedBox(height: 10),
-            TextField(controller: addrCtrl, decoration: InputDecoration(labelText: dt('عنوان المتجر (اختياري)'))),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () async {
-                try {
-                  final pos = await DarbLocationService.getCurrentPosition();
-                  setSheet(() {
-                    lat = pos.latitude;
-                    lng = pos.longitude;
-                  });
-                } catch (_) {}
-              },
-              icon: Icon(lat != null ? Icons.check_circle_rounded : Icons.my_location_rounded),
-              label: Text(lat != null ? dt('تم تحديد موقع المتجر') : dt('تحديد موقع المتجر')),
-            ),
-            if (err != null) ...[
-              const SizedBox(height: 8),
-              Text(err!, style: TextStyle(color: DarbColors.dangerOf(ctx))),
-            ],
-            const SizedBox(height: 14),
-            FilledButton(
-              onPressed: () async {
-                try {
-                  await Api.instance.post('/vendors/apply', {
-                    'name': nameCtrl.text.trim(),
-                    'type': typeCtrl.text.trim(),
-                    'cityId': cityId,
-                    if (addrCtrl.text.trim().isNotEmpty) 'address': addrCtrl.text.trim(),
-                    if (lat != null && lng != null) ...{'latitude': lat, 'longitude': lng},
-                  });
-                  if (ctx.mounted) Navigator.pop(ctx);
-                  await widget.onRefreshUser();
-                } on ApiException catch (e) {
-                  setSheet(() => err = e.message);
-                }
-              },
-              child: Text(dt('إرسال الطلب')),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
     nameCtrl.dispose();
@@ -285,7 +335,10 @@ class _AccountScreenState extends State<AccountScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dt('إلغاء'))),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: DarbColors.danger),
+            style: FilledButton.styleFrom(
+              backgroundColor: DarbColors.dangerOf(ctx),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(dt('تسجيل الخروج')),
           ),
@@ -500,28 +553,29 @@ class _AccountScreenState extends State<AccountScreen> {
                 trailing: Text(darbLocale.value.languageCode.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900)),
                 onTap: _pickLanguage,
               ),
-              ListTile(
-                leading: Icon(Icons.system_update_rounded, color: DarbColors.primaryOf(context)),
-                title: Text(dt('تحديث التطبيق'), style: const TextStyle(fontWeight: FontWeight.w800)),
-                onTap: () async {
-                  await DarbUpdater.instance.checkForUpdate(force: true);
-                  if (!context.mounted) return;
-                  final update = DarbUpdater.instance.availableUpdate.value;
-                  if (update != null) {
-                    showDialog<void>(context: context, builder: (_) => DarbUpdateDialog(info: update));
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          DarbUpdater.instance.checkFailed
-                              ? dt('تعذر التحقق من التحديث')
-                              : dt('تطبيقك محدّث إلى آخر إصدار'),
+              if (!kDarbPlayStoreBuild)
+                ListTile(
+                  leading: Icon(Icons.system_update_rounded, color: DarbColors.primaryOf(context)),
+                  title: Text(dt('تحديث التطبيق'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                  onTap: () async {
+                    await DarbUpdater.instance.checkForUpdate(force: true);
+                    if (!context.mounted) return;
+                    final update = DarbUpdater.instance.availableUpdate.value;
+                    if (update != null) {
+                      showDialog<void>(context: context, builder: (_) => DarbUpdateDialog(info: update));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            DarbUpdater.instance.checkFailed
+                                ? dt('تعذر التحقق من التحديث')
+                                : dt('تطبيقك محدّث إلى آخر إصدار'),
+                          ),
                         ),
-                      ),
-                    );
-                  }
-                },
-              ),
+                      );
+                    }
+                  },
+                ),
               ListTile(
                 leading: Icon(Icons.logout_rounded, color: DarbColors.dangerOf(context)),
                 title: Text(

@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/location_service.dart';
 import '../theme/darb_design_system.dart';
 
@@ -71,7 +72,11 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
       if (mounted) setState(() => _locationError = error.message);
     } catch (_) {
       if (mounted) {
-        setState(() => _locationError = 'تعذر تحديد موقعك الحالي. تحقق من إعدادات الموقع وحاول مجدداً.');
+        setState(
+          () => _locationError = dt(
+            'تعذر تحديد موقعك الحالي. تحقق من إعدادات الموقع وحاول مجدداً.',
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _locating = false);
@@ -158,7 +163,7 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                   child: Column(
                     children: [
                       IconButton(
-                        tooltip: 'تكبير الخريطة',
+                        tooltip: dt('تكبير الخريطة'),
                         visualDensity: VisualDensity.compact,
                         onPressed: _mapReady
                             ? () => _mapController.move(
@@ -170,7 +175,7 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                       ),
                       const Divider(height: 1),
                       IconButton(
-                        tooltip: 'تصغير الخريطة',
+                        tooltip: dt('تصغير الخريطة'),
                         visualDensity: VisualDensity.compact,
                         onPressed: _mapReady
                             ? () => _mapController.move(
@@ -195,12 +200,16 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                         color: Colors.black.withValues(alpha: 0.62),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         child: Text(
-                          'حرّك الخريطة واضغط لتحديد النقطة بدقة',
+                          dt('حرّك الخريطة واضغط لتحديد النقطة بدقة'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
@@ -217,8 +226,8 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                 hasSelection
                     ? '${point.latitude.toStringAsFixed(6)}, ${point.longitude.toStringAsFixed(6)}'
                     : (widget.cityName == null
-                        ? 'لم يتم تحديد نقطة بعد'
-                        : 'حدد الموقع على خريطة ${widget.cityName}'),
+                        ? dt('لم يتم تحديد نقطة بعد')
+                        : dt('حدد الموقع على خريطة ${widget.cityName}')),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -238,7 +247,7 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.my_location_rounded, size: 17),
-              label: Text(_locating ? 'جارٍ التحديد' : 'موقعي الحالي'),
+              label: Text(_locating ? dt('جارٍ التحديد') : dt('موقعي الحالي')),
             ),
           ],
         ),

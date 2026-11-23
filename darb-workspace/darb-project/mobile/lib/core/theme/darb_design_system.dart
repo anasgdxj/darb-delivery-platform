@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,9 +56,12 @@ class DarbColors {
   static const darkAccent = lime;
   static const darkScrim = Color(0xB3000000);
   static const darkDanger = Color(0xFFE56868);
+  static const darkDangerSoft = Color(0xFF3A1D20);
   static const darkSuccess = Color(0xFF4FB982);
   static const darkWarning = Color(0xFFE2A84B);
+  static const darkWarningSoft = Color(0xFF372914);
   static const darkInfo = Color(0xFF63A6DC);
+  static const darkInfoSoft = Color(0xFF172D3D);
 
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
@@ -100,14 +104,23 @@ class DarbColors {
   static Color dangerOf(BuildContext context) =>
       isDark(context) ? darkDanger : danger;
 
+  static Color dangerSoftOf(BuildContext context) =>
+      isDark(context) ? darkDangerSoft : dangerSoft;
+
   static Color successOf(BuildContext context) =>
       isDark(context) ? darkSuccess : success;
 
   static Color warningOf(BuildContext context) =>
       isDark(context) ? darkWarning : warning;
 
+  static Color warningSoftOf(BuildContext context) =>
+      isDark(context) ? darkWarningSoft : warningSoft;
+
   static Color infoOf(BuildContext context) =>
       isDark(context) ? darkInfo : info;
+
+  static Color infoSoftOf(BuildContext context) =>
+      isDark(context) ? darkInfoSoft : infoSoft;
 
   static Color scrimOf(BuildContext context) =>
       isDark(context) ? darkScrim : scrim;

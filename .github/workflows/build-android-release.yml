@@ -66,6 +66,7 @@ jobs:
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|' "$M/android/app/src/main/AndroidManifest.xml"
           python3 - "$M/pubspec.yaml" "$M/android/app/src/main/AndroidManifest.xml" <<'PY'
           from pathlib import Path
+          import re
           import sys
           pubspec, manifest = map(Path, sys.argv[1:])
           lines = pubspec.read_text().splitlines()
@@ -84,10 +85,15 @@ jobs:
               m = m.replace("<application", internet + "\n    <application", 1)
           if internet not in m:
               raise SystemExit("Could not add INTERNET permission to Android manifest")
-          for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "ACCESS_BACKGROUND_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
+          for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
               tag = f'<uses-permission android:name="android.permission.{p}" />'
               if tag not in m:
                   m = m.replace(internet, internet + "\n    " + tag, 1)
+          m = re.sub(r'\s*<uses-permission[^>]*ACCESS_BACKGROUND_LOCATION[^>]*/>\s*', "\n    ", m)
+          if 'android:usesCleartextTraffic' in m:
+              m = re.sub(r'android:usesCleartextTraffic="(?:true|false)"', 'android:usesCleartextTraffic="false"', m)
+          else:
+              m = m.replace("<application", '<application\n        android:usesCleartextTraffic="false"', 1)
           provider = """    <provider
                   android:name="androidx.core.content.FileProvider"
                   android:authorities="${applicationId}.fileprovider"
@@ -168,7 +174,35 @@ jobs:
           if 'signingConfig = signingConfigs.getByName("release")' not in s: raise SystemExit("Release signing config not applied")
           p.write_text(s)
           PY
-      - name: Build and test signed release APK
+          rm -rf "$GITHUB_WORKSPACE/extracted-play"
+          cp -a "$GITHUB_WORKSPACE/extracted" "$GITHUB_WORKSPACE/extracted-play"
+          PLAY_M="$GITHUB_WORKSPACE/extracted-play/darb-project/mobile"
+          rm -f "$PLAY_M/android/app/src/main/kotlin/com/darb/darb/DarbUpdateDownloadReceiver.kt" \
+                "$PLAY_M/android/app/src/main/res/xml/darb_file_paths.xml"
+          cat > "$PLAY_M/android/app/src/main/kotlin/com/darb/darb/MainActivity.kt" <<'KOTLIN'
+          package com.darb.darb
+
+          import io.flutter.embedding.android.FlutterActivity
+
+          class MainActivity : FlutterActivity()
+          KOTLIN
+          python3 - "$PLAY_M/android/app/src/main/AndroidManifest.xml" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+          manifest = Path(sys.argv[1])
+          m = manifest.read_text()
+          m = re.sub(r'\s*<uses-permission[^>]*REQUEST_INSTALL_PACKAGES[^>]*/>\s*', "\n    ", m)
+          m = re.sub(r'\s*<uses-permission[^>]*ACCESS_BACKGROUND_LOCATION[^>]*/>\s*', "\n    ", m)
+          m = re.sub(r'\s*<receiver[^>]*DarbUpdateDownloadReceiver[\s\S]*?</receiver>\s*', "\n    ", m)
+          m = re.sub(r'\s*<provider[^>]*androidx\.core\.content\.FileProvider[\s\S]*?</provider>\s*', "\n    ", m)
+          assert "REQUEST_INSTALL_PACKAGES" not in m, "Play Store manifest must not contain REQUEST_INSTALL_PACKAGES"
+          assert "ACCESS_BACKGROUND_LOCATION" not in m, "Play Store manifest must not contain ACCESS_BACKGROUND_LOCATION"
+          assert "DarbUpdateDownloadReceiver" not in m, "Play Store manifest must not reference DarbUpdateDownloadReceiver"
+          assert 'android:usesCleartextTraffic="false"' in m, "Play Store manifest must disable cleartext traffic"
+          manifest.write_text(m)
+          PY
+      - name: Build and test signed Direct APK & Play Store AAB
         working-directory: extracted/darb-project/mobile
         env:
           DARB_KEYSTORE_PATH: ${{ runner.temp }}/darb-release.jks
@@ -187,10 +221,10 @@ jobs:
           args=(--release --dart-define=GOOGLE_SERVER_CLIENT_ID="$GOOGLE_SERVER_CLIENT_ID")
           if [ -n "$FIREBASE_API_KEY" ] && [ -n "$FIREBASE_APP_ID" ] && [ -n "$FIREBASE_MESSAGING_SENDER_ID" ] && [ -n "$FIREBASE_PROJECT_ID" ]; then
             args+=(--dart-define=FIREBASE_API_KEY="$FIREBASE_API_KEY" --dart-define=FIREBASE_APP_ID="$FIREBASE_APP_ID" --dart-define=FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID")
-            echo "::notice::Firebase configuration secrets are present; FCM will be enabled in this APK."
+            echo "::notice::Firebase configuration secrets are present; FCM will be enabled in this build."
             echo "Firebase configuration: present" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "::warning::Firebase secrets incomplete; notifications will be disabled in this APK."
+            echo "::warning::Firebase secrets incomplete; notifications will be disabled in this build."
             echo "Firebase configuration: incomplete (notifications disabled)" >> "$GITHUB_STEP_SUMMARY"
           fi
           flutter analyze lib --no-pub --no-fatal-infos --no-fatal-warnings
@@ -223,10 +257,11 @@ jobs:
           BUILD_NAME="1.0.$BUILD_NUMBER"
           echo "- Android versionCode: $BUILD_NUMBER" >> "$GITHUB_STEP_SUMMARY"
           echo "- Android versionName: $BUILD_NAME" >> "$GITHUB_STEP_SUMMARY"
+
           build_succeeded=false
           for attempt in 1 2 3; do
             build_log="$RUNNER_TEMP/darb-android-build-$attempt.log"
-            if flutter build apk "${args[@]}" --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME" 2>&1 | tee "$build_log"; then
+            if flutter build apk "${args[@]}" --dart-define=DARB_PLAY_STORE=false --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME" 2>&1 | tee "$build_log"; then
               build_succeeded=true
               break
             fi
@@ -234,12 +269,12 @@ jobs:
               exit 1
             fi
             if [ "$attempt" -lt 3 ]; then
-              echo "::warning::Transient Maven/Gradle download failure; retrying Android build (attempt $((attempt + 1))/3)."
+              echo "::warning::Transient Maven/Gradle download failure; retrying Android APK build (attempt $((attempt + 1))/3)."
               sleep $((attempt * 30))
             fi
           done
           if [ "$build_succeeded" != true ]; then
-            echo "::error::Android release build failed after three retries."
+            echo "::error::Android direct APK build failed after three retries."
             exit 1
           fi
           APK="build/app/outputs/flutter-apk/app-release.apk"
@@ -266,12 +301,45 @@ jobs:
           test -n "$APKSIGNER"
           "$APKSIGNER" verify --verbose "$APK"
           "$APKSIGNER" verify --print-certs "$APK" | tee "$RUNNER_TEMP/apk-cert.txt"
-          echo "APK SHA-256: $(sha256sum "$APK" | cut -d' ' -f1)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Direct APK SHA-256: $APK_SHA256" >> "$GITHUB_STEP_SUMMARY"
+
+          cd "$GITHUB_WORKSPACE/extracted-play/darb-project/mobile"
+          aab_succeeded=false
+          for attempt in 1 2 3; do
+            aab_log="$RUNNER_TEMP/darb-play-aab-build-$attempt.log"
+            if flutter build appbundle "${args[@]}" --dart-define=DARB_PLAY_STORE=true --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME" 2>&1 | tee "$aab_log"; then
+              aab_succeeded=true
+              break
+            fi
+            if ! grep -Eiq '429|Too Many Requests|Could not GET|502|503|504|Connection reset|timed out' "$aab_log"; then
+              exit 1
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::Transient Maven/Gradle download failure; retrying Play Store AAB build (attempt $((attempt + 1))/3)."
+              sleep $((attempt * 30))
+            fi
+          done
+          if [ "$aab_succeeded" != true ]; then
+            echo "::error::Android Play Store AAB build failed after three retries."
+            exit 1
+          fi
+          AAB="build/app/outputs/bundle/release/app-release.aab"
+          test -s "$AAB"
+          jarsigner -verify -verbose -certs "$AAB" > "$RUNNER_TEMP/aab-cert.txt"
+          AAB_SHA256="$(sha256sum "$AAB" | cut -d' ' -f1)"
+          echo "Play Store AAB SHA-256: $AAB_SHA256" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload signed APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: darb-android-signed-release
           path: extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload signed Play Store AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darb-android-playstore-aab
+          path: extracted-play/darb-project/mobile/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 7
       - name: Publish signed APK as the latest public release

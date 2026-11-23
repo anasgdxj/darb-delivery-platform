@@ -119,6 +119,8 @@ class _AddressFormSheetState extends State<_AddressFormSheet> {
       Navigator.pop(context, saved as Map<String, dynamic>?);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -238,6 +240,8 @@ class _AddressesScreenState extends State<AddressesScreen> {
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -252,7 +256,10 @@ class _AddressesScreenState extends State<AddressesScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dt('إلغاء'))),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: DarbColors.danger),
+            style: FilledButton.styleFrom(
+              backgroundColor: DarbColors.dangerOf(ctx),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(dt('حذف العنوان')),
           ),
@@ -266,6 +273,12 @@ class _AddressesScreenState extends State<AddressesScreen> {
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     }
   }
@@ -312,12 +325,12 @@ class _AddressesScreenState extends State<AddressesScreen> {
                           itemBuilder: (context, index) {
                             if (_offline && index == 0) {
                               return DarbGlassSurface(
-                                tintColor: DarbColors.warningSoft,
+                                tintColor: DarbColors.warningSoftOf(context),
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                 child: Text(
                                   dt('بيانات مخزنة محلياً لضعف الاتصال'),
-                                  style: const TextStyle(
-                                    color: DarbColors.warning,
+                                  style: TextStyle(
+                                    color: DarbColors.warningOf(context),
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -402,7 +415,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: DarbColors.primaryOf(context),
-        foregroundColor: Colors.white,
+        foregroundColor: DarbColors.onPrimaryOf(context),
         onPressed: () async {
           final created = await showAddressFormSheet(context);
           if (created != null) _load();

@@ -3,10 +3,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
-import '../../core/services/location_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_map_picker.dart';
 
 class VendorOrdersScreen extends StatefulWidget {
   const VendorOrdersScreen({super.key});
@@ -55,6 +55,8 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -69,6 +71,12 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _togglingOpen = false);
@@ -88,91 +96,94 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
     final addrCtrl = TextEditingController(
       text: _vendor?['location']?['address']?.toString() ?? '',
     );
-    double? lat;
-    double? lng;
+    final loc = _vendor?['location'] is Map ? _vendor!['location'] as Map : null;
+    double? lat = (loc?['latitude'] as num?)?.toDouble();
+    double? lng = (loc?['longitude'] as num?)?.toDouble();
+    String? err;
 
     await showDarbGlassModalSheet<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              dt('تعديل بيانات المتجر'),
-              style: TextStyle(
-                color: DarbColors.inkOf(ctx),
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
+        builder: (ctx, setSheet) => SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                dt('تعديل بيانات المتجر'),
+                style: TextStyle(
+                  color: DarbColors.inkOf(ctx),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: nameCtrl,
-              decoration: InputDecoration(labelText: dt('اسم المتجر')),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: typeCtrl,
-              decoration: InputDecoration(labelText: dt('نوع النشاط')),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: descCtrl,
-              maxLines: 2,
-              decoration: InputDecoration(labelText: dt('الوصف')),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: addrCtrl,
-              decoration: InputDecoration(labelText: dt('عنوان المتجر (اختياري)')),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () async {
-                try {
-                  final pos = await DarbLocationService.getCurrentPosition();
-                  setSheet(() {
-                    lat = pos.latitude;
-                    lng = pos.longitude;
-                  });
-                } catch (_) {}
-              },
-              icon: Icon(
-                lat != null
-                    ? Icons.check_circle_rounded
-                    : Icons.my_location_rounded,
+              const SizedBox(height: 12),
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(labelText: dt('اسم المتجر')),
               ),
-              label: Text(
-                lat != null ? dt('تم تحديد موقع المتجر') : dt('تحديد موقع المتجر'),
+              const SizedBox(height: 10),
+              TextField(
+                controller: typeCtrl,
+                decoration: InputDecoration(labelText: dt('نوع النشاط')),
               ),
-            ),
-            const SizedBox(height: 14),
-            FilledButton(
-              onPressed: () async {
-                try {
-                  await Api.instance.patch('/vendors/mine', {
-                    if (nameCtrl.text.trim().isNotEmpty)
-                      'name': nameCtrl.text.trim(),
-                    if (typeCtrl.text.trim().isNotEmpty)
-                      'type': typeCtrl.text.trim(),
-                    'description': descCtrl.text.trim(),
-                    'address': addrCtrl.text.trim(),
-                    if (lat != null && lng != null)
-                      ...{'latitude': lat, 'longitude': lng},
-                  });
-                  if (ctx.mounted) Navigator.pop(ctx);
-                  await _load();
-                } on ApiException catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(e.message)));
+              const SizedBox(height: 10),
+              TextField(
+                controller: descCtrl,
+                maxLines: 2,
+                decoration: InputDecoration(labelText: dt('الوصف')),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: addrCtrl,
+                decoration: InputDecoration(labelText: dt('عنوان المتجر (اختياري)')),
+              ),
+              const SizedBox(height: 12),
+              DarbMapPicker(
+                selectedLatitude: lat,
+                selectedLongitude: lng,
+                onPointSelected: (pickedLat, pickedLng) => setSheet(() {
+                  lat = pickedLat;
+                  lng = pickedLng;
+                  err = null;
+                }),
+              ),
+              if (err != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  err!,
+                  style: TextStyle(
+                    color: DarbColors.dangerOf(ctx),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 14),
+              FilledButton(
+                onPressed: () async {
+                  try {
+                    await Api.instance.patch('/vendors/mine', {
+                      if (nameCtrl.text.trim().isNotEmpty)
+                        'name': nameCtrl.text.trim(),
+                      if (typeCtrl.text.trim().isNotEmpty)
+                        'type': typeCtrl.text.trim(),
+                      'description': descCtrl.text.trim(),
+                      'address': addrCtrl.text.trim(),
+                      if (lat != null && lng != null)
+                        ...{'latitude': lat, 'longitude': lng},
+                    });
+                    if (ctx.mounted) Navigator.pop(ctx);
+                    await _load();
+                  } on ApiException catch (e) {
+                    setSheet(() => err = e.message);
+                  } catch (_) {
+                    setSheet(() => err = dt('حدث خطأ غير متوقع، حاول مجدداً'));
                   }
-                }
-              },
-              child: Text(dt('حفظ التغييرات')),
-            ),
-          ],
+                },
+                child: Text(dt('حفظ التغييرات')),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -191,6 +202,12 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     }
   }

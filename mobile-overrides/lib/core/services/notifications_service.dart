@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 
 import '../network/api_client.dart';
 
@@ -12,6 +13,17 @@ class DarbNotifications {
   static bool _ready = false;
   static String? lastError;
   static StreamSubscription<String>? _tokenSubscription;
+
+  static String get _platform {
+    if (kIsWeb) return 'web';
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => 'ios',
+      TargetPlatform.macOS => 'macos',
+      TargetPlatform.windows => 'windows',
+      TargetPlatform.linux => 'linux',
+      TargetPlatform.android || TargetPlatform.fuchsia => 'android',
+    };
+  }
 
   static Future<void> initialize() async {
     const apiKey = String.fromEnvironment('FIREBASE_API_KEY');
@@ -45,10 +57,11 @@ class DarbNotifications {
   ) {
     if (!_ready) return null;
     return FirebaseMessaging.onMessage.listen((message) {
+      final data = Map<String, dynamic>.from(message.data);
       onMessage(
-        message.notification?.title,
-        message.notification?.body,
-        Map<String, dynamic>.from(message.data),
+        message.notification?.title ?? data['title']?.toString(),
+        message.notification?.body ?? data['body']?.toString(),
+        data,
       );
     });
   }
@@ -87,14 +100,14 @@ class DarbNotifications {
       }
       await Api.instance.post('/notifications/device', {
         'token': token,
-        'platform': 'android',
+        'platform': _platform,
       });
       lastError = null;
       _tokenSubscription ??= FirebaseMessaging.instance.onTokenRefresh.listen(
         (token) {
           Api.instance.post('/notifications/device', {
             'token': token,
-            'platform': 'android',
+            'platform': _platform,
           }).catchError((error) {
             lastError = 'تعذر تحديث رمز الإشعارات: $error';
           });
@@ -115,7 +128,7 @@ class DarbNotifications {
       if (token != null) {
         await Api.instance.delete('/notifications/device', {
           'token': token,
-          'platform': 'android',
+          'platform': _platform,
         });
       }
     } catch (error) {

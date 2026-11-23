@@ -39,6 +39,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
       if (mounted) setState(() => _orders = list);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -243,6 +245,8 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -344,6 +348,11 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                         setDlg(() {
                           saving = false;
                           dlgError = e.message;
+                        });
+                      } catch (_) {
+                        setDlg(() {
+                          saving = false;
+                          dlgError = dt('حدث خطأ غير متوقع، حاول مجدداً');
                         });
                       }
                     },
@@ -494,6 +503,11 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                           saving = false;
                           dlgError = e.message;
                         });
+                      } catch (_) {
+                        setDlg(() {
+                          saving = false;
+                          dlgError = dt('حدث خطأ غير متوقع، حاول مجدداً');
+                        });
                       }
                     },
               child: Text(dt('حفظ')),
@@ -519,7 +533,10 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
             child: Text(dt('إلغاء')),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: DarbColors.danger),
+            style: FilledButton.styleFrom(
+              backgroundColor: DarbColors.dangerOf(ctx),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(dt('حذف المنطقة')),
           ),
@@ -534,6 +551,12 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     }
   }
@@ -579,6 +602,12 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
     }
   }
 
@@ -590,6 +619,12 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     }
   }
@@ -603,6 +638,12 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     }
   }

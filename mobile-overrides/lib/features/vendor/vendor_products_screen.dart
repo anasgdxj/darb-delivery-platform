@@ -72,6 +72,8 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -241,6 +243,11 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                           saving = false;
                           err = e.message;
                         });
+                      } catch (_) {
+                        setSheet(() {
+                          saving = false;
+                          err = dt('حدث خطأ غير متوقع، حاول مجدداً');
+                        });
                       }
                     },
               child: Text(
@@ -275,7 +282,10 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
             child: Text(dt('إلغاء')),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: DarbColors.danger),
+            style: FilledButton.styleFrom(
+              backgroundColor: DarbColors.dangerOf(ctx),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(dt('حذف المنتج')),
           ),
@@ -291,6 +301,12 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
     }
   }
 
@@ -302,6 +318,12 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
       }
     }
   }

@@ -55,6 +55,8 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
       setState(() => _draft = result);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -188,7 +190,14 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                     FilledButton.icon(
                       onPressed: _submitting ? null : _analyze,
                       icon: _submitting
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          ? SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: DarbColors.onPrimaryOf(context),
+                              ),
+                            )
                           : const Icon(Icons.bolt_rounded),
                       label: Text(_submitting ? dt('جارٍ التحليل...') : dt('تحليل الطلب')),
                     ),
@@ -233,7 +242,9 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                               Icon(
                                 item['productId'] != null ? Icons.check_circle_rounded : Icons.help_outline_rounded,
                                 size: 17,
-                                color: item['productId'] != null ? DarbColors.primaryOf(context) : DarbColors.warning,
+                                color: item['productId'] != null
+                                    ? DarbColors.primaryOf(context)
+                                    : DarbColors.warningOf(context),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
@@ -250,7 +261,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: DarbColors.warningSoft,
+                            color: DarbColors.warningSoftOf(context),
                             borderRadius: BorderRadius.circular(DarbRadius.sm),
                           ),
                           child: Column(
@@ -261,7 +272,11 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                                   padding: const EdgeInsets.only(bottom: 4),
                                   child: Text(
                                     '• $w',
-                                    style: const TextStyle(color: DarbColors.warning, fontSize: 12.5, fontWeight: FontWeight.w700),
+                                    style: TextStyle(
+                                      color: DarbColors.warningOf(context),
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                             ],

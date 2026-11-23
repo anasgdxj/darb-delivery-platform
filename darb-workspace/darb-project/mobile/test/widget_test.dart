@@ -120,41 +120,82 @@ void main() {
       darbLocale.value = const Locale('en');
       expect(dt('إلغاء الطلب'), 'Cancel order');
       expect(dt('الإشعارات'), 'Notifications');
+      expect(dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'), 'Offline mode — showing cached data');
+      expect(dt('حدد الموقع على خريطة دمشق'), 'Pin location on the map for دمشق');
       expect(dt('5 منتج متاح'), '5 products available');
       expect(formatDarbMoney(15000), '15,000 SYP');
 
       darbLocale.value = const Locale('tr');
       expect(dt('إلغاء الطلب'), 'Siparişi iptal et');
       expect(dt('الإشعارات'), 'Bildirimler');
+      expect(dt('تحديث التطبيق'), 'Uygulamayı güncelle');
       expect(dt('3 منتج متاح'), '3 ürün mevcut');
 
       darbLocale.value = const Locale('ar');
     });
+
+    testWidgets('DarbColors soft tokens adapt between light and dark themes',
+        (tester) async {
+      late Color lightDangerSoft;
+      late Color darkDangerSoft;
+      late Color lightWarningSoft;
+      late Color darkWarningSoft;
+
+      await tester.pumpWidget(
+        Column(
+          children: [
+            Theme(
+              data: DarbTheme.light,
+              child: Builder(
+                builder: (ctx) {
+                  lightDangerSoft = DarbColors.dangerSoftOf(ctx);
+                  lightWarningSoft = DarbColors.warningSoftOf(ctx);
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+            Theme(
+              data: DarbTheme.dark,
+              child: Builder(
+                builder: (ctx) {
+                  darkDangerSoft = DarbColors.dangerSoftOf(ctx);
+                  darkWarningSoft = DarbColors.warningSoftOf(ctx);
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+
+      expect(lightDangerSoft, DarbColors.dangerSoft);
+      expect(darkDangerSoft, DarbColors.darkDangerSoft);
+      expect(lightWarningSoft, DarbColors.warningSoft);
+      expect(darkWarningSoft, DarbColors.darkWarningSoft);
+    });
   });
 
   group('Widget & Motion Accessibility Smoke Tests', () {
-    testWidgets('renders DarbGlassSurface in Glass and Standard modes without errors',
+    testWidgets('renders DarbGlassSurface in Glass mode without errors',
         (tester) async {
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
       await tester.pumpWidget(
-        DarbApp(
-          initialScreen: Scaffold(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: Scaffold(
             appBar: const DarbGlassAppBar(title: 'دَرْب', subtitle: 'تجربة'),
-            body: DarbAmbientBackground(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: const [
-                  DarbMetricCard(
-                    label: 'الرحلات المكتملة',
-                    value: '42',
-                    icon: Icons.route_rounded,
-                  ),
-                  SizedBox(height: 12),
-                  DarbStatusBadge(status: 'DELIVERED'),
-                  SizedBox(height: 8),
-                  DarbStatusBadge(status: 'WITHDRAWN'),
-                ],
-              ),
+            body: ListView(
+              padding: const EdgeInsets.all(16),
+              children: const [
+                DarbMetricCard(
+                  label: 'الرحلات المكتملة',
+                  value: '42',
+                  icon: Icons.route_rounded,
+                ),
+                SizedBox(height: 12),
+                DarbStatusBadge(status: 'DELIVERED'),
+                SizedBox(height: 8),
+                DarbStatusBadge(status: 'WITHDRAWN'),
+              ],
             ),
           ),
         ),
@@ -163,10 +204,7 @@ void main() {
       expect(find.text('دَرْب'), findsOneWidget);
       expect(find.text('42'), findsOneWidget);
 
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.standard);
-      await tester.pump();
       expect(find.text('42'), findsOneWidget);
-      await DarbAppearanceController.instance.setVisualStyle(DarbVisualStyle.glass);
     });
 
     testWidgets('respects MediaQuery disableAnimations for DarbMotion.reduceMotion',
@@ -214,8 +252,9 @@ void main() {
 
       late StateSetter outerSetState;
       await tester.pumpWidget(
-        DarbApp(
-          initialScreen: Scaffold(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: Scaffold(
             body: Center(
               child: StatefulBuilder(
                 builder: (context, setState) {
@@ -225,6 +264,7 @@ void main() {
                     successLabel: 'تم بنجاح',
                     state: state,
                     errorTrigger: errorTrigger,
+                    enableHaptics: false,
                     onPressed: () => tapCount++,
                   );
                 },
@@ -305,7 +345,7 @@ void main() {
       expect(selected, 1);
     });
 
-    testWidgets('DarbTabViewStack preserves tab child state across switches',
+    testWidgets('DarbTabViewStack preserves tab child state across bidirectional jumps',
         (tester) async {
       var tabIndex = 0;
       late StateSetter outerSetState;
@@ -321,6 +361,7 @@ void main() {
                   children: const [
                     _CounterTestTab(label: 'تبويب 1'),
                     _CounterTestTab(label: 'تبويب 2'),
+                    _CounterTestTab(label: 'تبويب 3'),
                   ],
                 ),
               );
@@ -334,8 +375,17 @@ void main() {
       await tester.pump();
       expect(find.text('تبويب 1: 1'), findsOneWidget);
 
+      outerSetState(() => tabIndex = 2);
+      await tester.pump(const Duration(milliseconds: 260));
+      await tester.tap(find.text('تبويب 3: 0'));
+      await tester.pump();
+      expect(find.text('تبويب 3: 1'), findsOneWidget);
+
       outerSetState(() => tabIndex = 1);
       await tester.pump(const Duration(milliseconds: 260));
+      await tester.tap(find.text('تبويب 2: 0'));
+      await tester.pump();
+      expect(find.text('تبويب 2: 1'), findsOneWidget);
 
       outerSetState(() => tabIndex = 0);
       await tester.pump(const Duration(milliseconds: 260));

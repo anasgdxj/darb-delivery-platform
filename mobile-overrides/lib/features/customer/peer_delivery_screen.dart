@@ -76,7 +76,13 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
           _selectedAddressId = (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
         }
       });
-    } catch (_) {} finally {
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = dt('تعذر قراءة عناوين التوصيل'));
+      }
+    } finally {
       if (mounted) setState(() => _loadingAddresses = false);
     }
   }
@@ -96,6 +102,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
       });
     } on DarbLocationException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('تعذر تحديد الموقع الحالي'));
     } finally {
       if (mounted) setState(() => _locatingPickup = false);
     }
@@ -173,6 +181,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -236,11 +246,11 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
             if (_error != null) ...[
               const SizedBox(height: 12),
               DarbGlassSurface(
-                tintColor: DarbColors.dangerSoft,
+                tintColor: DarbColors.dangerSoftOf(context),
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   _error!,
-                  style: const TextStyle(color: DarbColors.danger, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -395,9 +405,9 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
             children: [
               for (final chip in _quickTypes)
                 ChoiceChip(
-                  label: Text(chip),
-                  selected: _itemTypeController.text.trim() == chip,
-                  onSelected: (_) => setState(() => _itemTypeController.text = chip),
+                  label: Text(dt(chip)),
+                  selected: _itemTypeController.text.trim() == dt(chip),
+                  onSelected: (_) => setState(() => _itemTypeController.text = dt(chip)),
                 ),
             ],
           ),
