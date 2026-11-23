@@ -174,7 +174,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                             ),
                           ),
                           Text(
-                            dt('يتحدث الموقع تلقائياً كل 30 ثانية'),
+                            dt('يتحدث الموقع تلقائياً كل 25 ثانية'),
                             style: TextStyle(
                               color: DarbColors.mutedOf(context),
                               fontSize: 11.5,
@@ -237,14 +237,33 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                       ),
                       const SizedBox(width: 9),
                       Expanded(
-                        child: Text(
-                          _error ?? _message ?? _updatedAtLabel(),
-                          style: TextStyle(
-                            color: _error != null
-                                ? DarbColors.dangerOf(context)
-                                : DarbColors.inkOf(context),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                        child: AnimatedSwitcher(
+                          duration: DarbMotion.effectiveDuration(
+                            context,
+                            DarbMotion.standard,
+                          ),
+                          switchInCurve: DarbMotion.enter,
+                          switchOutCurve: DarbMotion.exit,
+                          transitionBuilder: (child, animation) => FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.12),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                          ),
+                          child: Text(
+                            _error ?? _message ?? _updatedAtLabel(),
+                            key: ValueKey(_error ?? _message ?? _updatedAtLabel()),
+                            style: TextStyle(
+                              color: _error != null
+                                  ? DarbColors.dangerOf(context)
+                                  : DarbColors.inkOf(context),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
