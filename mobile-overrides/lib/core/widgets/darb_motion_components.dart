@@ -514,10 +514,18 @@ class _DarbTabViewStackState extends State<DarbTabViewStack> {
     final duration = DarbMotion.effectiveDuration(context, DarbMotion.tab);
     final movingForward = widget.index >= _previousIndex;
 
+    // Stack paints later children above earlier ones. Always paint the
+    // selected tab last so it remains the foreground page regardless of
+    // whether the user moves to a lower or higher tab index. The previous
+    // page stays underneath during its exit fade, while inactive tabs remain inert.
+    final paintOrder = List<int>.generate(widget.children.length, (i) => i)
+      ..remove(widget.index)
+      ..add(widget.index);
+
     return ClipRect(
       child: Stack(
         fit: StackFit.expand,
-        children: List.generate(widget.children.length, (i) {
+        children: paintOrder.map((i) {
           final active = i == widget.index;
           final inactiveOffset =
               movingForward ? const Offset(-0.025, 0) : const Offset(0.025, 0);
@@ -550,7 +558,7 @@ class _DarbTabViewStackState extends State<DarbTabViewStack> {
               ),
             ),
           );
-        }),
+        }).toList(growable: false),
       ),
     );
   }
