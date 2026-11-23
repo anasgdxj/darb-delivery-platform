@@ -133,6 +133,14 @@ Reusable building blocks:
 
 Use motion for screen transitions, selected navigation, expanding details, order progression, and confirmation feedback. Stagger only small groups; avoid animating every row in long lists. Never delay a critical action for decorative animation. All motion must become immediate when reduced motion is enabled.
 
+## Global interaction feedback
+
+- Filled, outlined, and text buttons share the motion token timings and theme-aware pressed/focused overlays; disabled controls remain visually and functionally disabled.
+- Role navigation uses a short selected-state indicator, animated icon/label emphasis, and selection haptics only when the destination changes.
+- Re-selecting the current destination is a no-op and must not trigger duplicate work or haptics.
+- Interactive controls must retain Material semantics, keyboard/focus support, and adequate touch targets.
+- All shared interaction motion respects Reduce Motion and must never delay the underlying action.
+
 ## Components and interaction
 
 - Primary action: `FilledButton`, one clear primary action per view.
