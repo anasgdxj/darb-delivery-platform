@@ -98,6 +98,28 @@ describe('NotificationsService', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('sends large device audiences in Firebase multicast batches of at most 500', async () => {
+    const tokens = Array.from({ length: 501 }, (_, index) => `token-${index}`);
+    prisma.userDevice.findMany.mockResolvedValueOnce(tokens.map((token) => ({ token })));
+    const sendEachForMulticast = jest.fn()
+      .mockResolvedValueOnce({
+        responses: Array.from({ length: 500 }, () => ({ success: true })),
+      })
+      .mockResolvedValueOnce({
+        responses: [{ success: false, error: { code: 'messaging/invalid-registration-token' } }],
+      });
+    (service as any).messaging = { sendEachForMulticast };
+
+    await service.notifyCustomer('user-1', 'Order', 'Updated', { type: 'ORDER_STATUS' });
+
+    expect(sendEachForMulticast).toHaveBeenCalledTimes(2);
+    expect(sendEachForMulticast.mock.calls[0][0].tokens).toHaveLength(500);
+    expect(sendEachForMulticast.mock.calls[1][0].tokens).toEqual(['token-500']);
+    expect(prisma.userDevice.deleteMany).toHaveBeenCalledWith({
+      where: { token: { in: ['token-500'] } },
+    });
+  });
+
   it('keeps customer order updates successful when device lookup fails', async () => {
     (service as any).messaging = { sendEachForMulticast: jest.fn() };
     prisma.userDevice.findMany.mockRejectedValueOnce(new Error('database unavailable'));
