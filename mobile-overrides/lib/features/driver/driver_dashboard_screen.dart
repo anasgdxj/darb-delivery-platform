@@ -26,6 +26,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   bool _togglingOnline = false;
   bool _sendingLocation = false;
   String? _error;
+  final Set<String> _busyOrderIds = <String>{};
 
   @override
   void initState() {
@@ -169,8 +170,11 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   }
 
   Future<void> _claimOrder(String id) async {
+    if (!_busyOrderIds.add(id)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.post('/orders/$id/claim', {});
+      if (mounted) HapticFeedback.selectionClick();
       await _load();
       widget.onClaimedOrAccepted?.call();
       if (mounted) {
@@ -182,6 +186,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
       }
+    } finally {
+      _busyOrderIds.remove(id);
+      if (mounted) setState(() {});
     }
   }
 
@@ -572,14 +579,22 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                         child: Text(dt('سحب العرض')),
                       )
                     : FilledButton(
-                        onPressed: () => isPeer
-                            ? _submitOffer(order)
-                            : _claimOrder(id),
-                        child: Text(
-                          isPeer
-                              ? dt('تقديم أجرة التوصيل')
-                              : dt('استلام الطلب'),
-                        ),
+                        onPressed: _busyOrderIds.contains(id)
+                            ? null
+                            : () => isPeer
+                                ? _submitOffer(order)
+                                : _claimOrder(id),
+                        child: _busyOrderIds.contains(id)
+                            ? const SizedBox(
+                                width: 17,
+                                height: 17,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                isPeer
+                                    ? dt('تقديم أجرة التوصيل')
+                                    : dt('استلام الطلب'),
+                              ),
                       ),
               ),
               const SizedBox(width: 8),
