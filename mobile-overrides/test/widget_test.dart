@@ -788,7 +788,7 @@ void main() {
 
       expect(find.text('3 / 5'), findsOneWidget);
       await tester.pumpAndSettle();
-      final cityField = find.byType(DropdownButtonFormField);
+      final cityField = find.byWidgetPredicate((widget) => widget is DropdownButtonFormField);
       expect(cityField, findsOneWidget);
       await tester.tap(cityField);
       await tester.pumpAndSettle();
