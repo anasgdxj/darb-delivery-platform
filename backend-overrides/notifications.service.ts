@@ -144,6 +144,96 @@ export class NotificationsService {
     await this.notifyUser(customerId, title, body, data);
   }
 
+
+  async broadcastRelease(input: {
+    releaseTag: string;
+    versionCode: number;
+    versionName: string;
+    apkUrl: string;
+    releaseNotes?: string;
+  }) {
+    const devices = await this.prisma.userDevice.findMany({
+      select: { userId: true, token: true },
+    });
+    if (!devices.length) {
+      return { targetedUsers: 0, targetedDevices: 0, pushSent: 0, pushFailed: 0, pushSkipped: !this.messaging };
+    }
+
+    const releaseTag = input.releaseTag.slice(0, 80);
+    const title = 'تحديث جديد لتطبيق دَرْب';
+    const body = `الإصدار ${input.versionName} أصبح متاحاً. افتح دَرْب لتثبيته.`;
+    const data = {
+      type: 'APP_UPDATE',
+      releaseTag,
+      versionCode: String(input.versionCode),
+      versionName: input.versionName.slice(0, 40),
+      apkUrl: input.apkUrl,
+    };
+    const userIds = [...new Set(devices.map((device) => device.userId))];
+
+    await this.prisma.userNotification.createMany({
+      data: userIds.map((userId) => ({
+        userId,
+        title,
+        body,
+        type: 'APP_UPDATE',
+        data: { ...data, releaseNotes: (input.releaseNotes ?? '').slice(0, 1000) },
+      })),
+    });
+
+    if (!this.messaging) {
+      this.logger.warn(`Release ${releaseTag} was saved in inboxes, but FCM is not configured.`);
+      return {
+        targetedUsers: userIds.length,
+        targetedDevices: devices.length,
+        pushSent: 0,
+        pushFailed: 0,
+        pushSkipped: true,
+      };
+    }
+
+    let pushSent = 0;
+    let pushFailed = 0;
+    const invalidTokens: string[] = [];
+    const tokens = devices.map((device) => device.token);
+    for (let offset = 0; offset < tokens.length; offset += 500) {
+      const batch = tokens.slice(offset, offset + 500);
+      try {
+        const result = await this.messaging.sendEachForMulticast({
+          tokens: batch,
+          notification: { title, body },
+          data,
+          android: { priority: 'high', notification: { channelId: 'darb_updates' } },
+        });
+        pushSent += result.successCount;
+        pushFailed += result.failureCount;
+        result.responses.forEach((response, index) => {
+          const code = response.error?.code ?? '';
+          if (
+            !response.success &&
+            ['messaging/registration-token-not-registered', 'messaging/invalid-registration-token'].includes(code)
+          ) {
+            invalidTokens.push(batch[index]);
+          }
+        });
+      } catch (error) {
+        pushFailed += batch.length;
+        this.logger.error(`FCM release notification batch failed for ${releaseTag}.`);
+      }
+    }
+    if (invalidTokens.length) {
+      await this.prisma.userDevice.deleteMany({ where: { token: { in: invalidTokens } } });
+    }
+
+    return {
+      targetedUsers: userIds.length,
+      targetedDevices: devices.length,
+      pushSent,
+      pushFailed,
+      pushSkipped: false,
+    };
+  }
+
   private async notifyUser(userId: string, title: string, body: string, data: Record<string, string>) {
     try {
       await this.prisma.userNotification?.create?.({
