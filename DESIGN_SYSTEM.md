@@ -22,12 +22,12 @@ This document defines the shared visual, motion, and structural system for DARB.
 DARB feels like a live city logistics command network: deep Obsidian Emerald hero anchors (`#12302A`), asymmetric 6:5 Bento action splits, vertical pickup-to-dropoff route connectors (`DarbRouteConnector`), animated GPU shimmer wireframes (`DarbShimmer`), spatial map HUDs, and responsive motion.
 
 - **Visual hierarchy:** asymmetric Bento grids (`DarbBentoActionCard`), editorial storefront headers, and numbered step pills replace uniform stacked-box layouts; supporting details sit on layered semantic surfaces (`DarbColors.canvasOf`, `surfaceOf`, `surfaceAltOf`).
-- **Auth & Global Shell:** expanded `326px` `DarbLoginVectorMap` hero with localized capability pills (`featureStores`, `featureDelivery`, `featureNearby`), `1 / 2 -> 2 / 2` auth step pill, `_ShellActionWell` 38x38 app bar wells, and frosted floating `DarbGlassBottomNav`.
-- **Customer experience:** greeting hero, deterministic `DarbCitySceneCard`, asymmetric 6:5 Bento split (`DarbBentoActionCard` Peer Delivery + AI Order Assistant), live active-order banner with `DarbOrderTimeline`, storefront header with `DarbPulseDot` + active-in-cart mint tint, step-numbered checkout, `DarbRouteConnector` peer review/order cards, interactive map HUD legend + camera re-center in `DriverTrackingScreen`, and `DarbTypingDots` + quick-fill chips in AI Order Assistant.
+- **Auth & Global Shell:** redesigned `LoginScreen` featuring `DarbBrandMark`, abstract geometric `DarbLoginVectorMap` artwork (zero city photos), `1 / 2 -> 2 / 2` auth step pill, LTR phone/OTP inputs with validation & 60s resend countdown, custom multi-color `_GoogleEmblem` Google Sign-In action, `_ShellActionWell` 38x38 app bar wells, and frosted floating `DarbGlassBottomNav`.
+- **Customer experience:** greeting hero, bespoke abstract geometric `DarbCitySceneCard` (zero city photos), asymmetric 6:5 Bento split (`DarbBentoActionCard` Peer Delivery + AI Order Assistant), live active-order banner with `DarbOrderTimeline`, storefront header with `DarbPulseDot` + active-in-cart mint tint, step-numbered checkout, `DarbRouteConnector` peer review/order cards, interactive map HUD legend + camera re-center in `DriverTrackingScreen`, and `DarbTypingDots` + quick-fill chips in AI Order Assistant.
 - **Driver experience:** live Neo cockpit (`DarbPulseDot` + lime border glow when online), daily summary, `DarbRouteConnector` pickup/dropoff cards, highlighted earnings strip, and status actions with double-tap protection.
 - **Vendor experience:** storefront emblem command header with `DarbPulseDot`, double-tap-locked order progression (`Accept` / `Preparing` / `Ready`), compact `DarbOrderTimeline`, and product inventory rows with category/stock pills and tonal icon wells.
 - **Administration:** multi-accent operational KPIs, storefront/vehicle approval cards with tonal icon wells, order feed with `DarbOrderTimeline` + fee/total strips, zone/city/user/audit rows with icon wells, and protected single-flight mutations.
-- **Account & AI Role Assistant:** Obsidian Emerald hero profile card, `AccountActionTile` colored icon wells, segmented Glass/Standard & Light/Dark appearance switchers, starter prompt chips, asymmetrical chat bubbles, and live `DarbTypingDots`.
+- **Account, Profile & Onboarding:** Obsidian Emerald hero profile card, dedicated `EditProfileScreen` (`GET /auth/me` & `PATCH /auth/me` with editable name/locale and verified read-only contact info), 5-step `DriverApplicationScreen` and `VendorApplicationScreen` wizards with draft persistence (`DarbLocalCache`) and live status tracking (`PENDING` / `APPROVED` / `REJECTED` / `SUSPENDED`), `AccountActionTile` colored icon wells, segmented Glass/Standard & Light/Dark switchers, and AI Role Assistant.
 - **Map & tracking use:** animated map camera updates and real-coordinate route polylines (`DriverTrackingScreen`) and active map pickers (`DarbMapPicker`).
 
 ## Color system
@@ -115,7 +115,7 @@ Core components in `darb_motion_components.dart`, `darb_components.dart`, and `d
 - `DarbTabViewStack`: keyed `ValueKey<int>(i)` stack preserving child state, scroll positions, offscreen `TickerMode` pause, and `paintOrder` layering.
 - `DarbPageRoute`: unified fade + slide + micro-scale push transition across all feature navigation.
 - `DarbOrderTimeline`: step-by-step live order progression (store & peer tracks + cancelled banner).
-- `DarbCitySceneCard`: deterministic city photo hero + Ken Burns loop with Neo vector skyline fallback.
+- `DarbCitySceneCard`: abstract geometric Obsidian Emerald vector backdrop (`_AbstractCityNetworkPainter`) with zero city photos and Reduce Motion compliance.
 - `DarbSearchBar`: consistent themed search input with instant clear action.
 
 Every animated widget checks `DarbMotion.reduceMotion(context)` and collapses durations to `Duration.zero` / stops continuous loops automatically.

@@ -7,11 +7,9 @@ import '../theme/darb_design_system.dart';
 import 'darb_glass.dart';
 import 'darb_motion_components.dart';
 
-/// Deterministic animated visual scene for the currently selected city ONLY.
-/// Renders the local bundled scene asset matching [cityCode] (or a bespoke Neo
-/// geometric city skyline painter if no asset exists for that city), with a
-/// gentle Ken Burns motion loop that honors Reduce Motion and NEVER cycles
-/// randomly between different cities.
+/// Bespoke abstract geometric Neo backdrop card for the currently active city.
+/// Uses pure layered gradients, isometric grid lines, radar beacons, and a
+/// kinetic route curve — never displays city photographs.
 class DarbCitySceneCard extends StatefulWidget {
   const DarbCitySceneCard({
     super.key,
@@ -28,47 +26,20 @@ class DarbCitySceneCard extends StatefulWidget {
   final String? activeAddressLabel;
   final VoidCallback? onTapAddresses;
 
-  static String? resolveAssetPath(String cityCode, [String cityName = '']) {
-    final code = cityCode.trim().toLowerCase();
-    const known = {'damascus', 'aleppo', 'homs', 'hama', 'latakia'};
-    if (known.contains(code)) return 'assets/cities/$code.jpg';
-
-    final name = cityName.trim().toLowerCase();
-    if (name.contains('دمشق') || name.contains('damascus') || name.contains('şam')) {
-      return 'assets/cities/damascus.jpg';
-    }
-    if (name.contains('حلب') || name.contains('aleppo') || name.contains('halep')) {
-      return 'assets/cities/aleppo.jpg';
-    }
-    if (name.contains('حمص') || name.contains('homs') || name.contains('humus')) {
-      return 'assets/cities/homs.jpg';
-    }
-    if (name.contains('حماة') || name.contains('حماه') || name.contains('hama')) {
-      return 'assets/cities/hama.jpg';
-    }
-    if (name.contains('اللاذقية') ||
-        name.contains('لاذقية') ||
-        name.contains('latakia') ||
-        name.contains('lazkiye')) {
-      return 'assets/cities/latakia.jpg';
-    }
-    return null;
-  }
-
   @override
   State<DarbCitySceneCard> createState() => _DarbCitySceneCardState();
 }
 
 class _DarbCitySceneCardState extends State<DarbCitySceneCard>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _kenBurns;
+  late final AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
-    _kenBurns = AnimationController(
+    _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 14),
+      duration: const Duration(seconds: 8),
     );
   }
 
@@ -81,23 +52,21 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
   void _syncAnimation() {
     final reduced = DarbMotion.reduceMotion(context);
     if (reduced) {
-      if (_kenBurns.isAnimating) _kenBurns.stop();
-      _kenBurns.value = 0.0;
-    } else if (!_kenBurns.isAnimating) {
-      _kenBurns.repeat(reverse: true);
+      if (_pulseController.isAnimating) _pulseController.stop();
+      _pulseController.value = 0.35;
+    } else if (!_pulseController.isAnimating) {
+      _pulseController.repeat();
     }
   }
 
   @override
   void dispose() {
-    _kenBurns.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final assetPath =
-        DarbCitySceneCard.resolveAssetPath(widget.cityCode, widget.cityName);
     final reduced = DarbMotion.reduceMotion(context);
     final duration = DarbMotion.effectiveDuration(context, DarbMotion.expressive);
     final sceneKey = ValueKey('${widget.cityCode}_${widget.cityName}');
@@ -105,7 +74,7 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
     return ClipRRect(
       borderRadius: BorderRadius.circular(DarbRadius.xl),
       child: SizedBox(
-        height: 176,
+        height: 178,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -116,29 +85,15 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
               child: SizedBox.expand(
                 key: sceneKey,
                 child: AnimatedBuilder(
-                  animation: _kenBurns,
-                  builder: (context, child) {
-                    final t = reduced ? 0.0 : _kenBurns.value;
-                    final scale = 1.0 + (t * 0.075);
-                    final offsetX = math.sin(t * math.pi) * 8.0;
-                    final offsetY = -t * 5.0;
-                    return Transform.translate(
-                      offset: Offset(offsetX, offsetY),
-                      child: Transform.scale(
-                        scale: scale,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: assetPath != null
-                      ? Image.asset(
-                          assetPath,
-                          fit: BoxFit.cover,
-                          alignment: Alignment.center,
-                          errorBuilder: (_, __, ___) =>
-                              _NeoCityVectorBackdrop(cityCode: widget.cityCode),
-                        )
-                      : _NeoCityVectorBackdrop(cityCode: widget.cityCode),
+                  animation: _pulseController,
+                  builder: (context, _) => CustomPaint(
+                    painter: _AbstractCityNetworkPainter(
+                      seed: widget.cityCode.hashCode ^ widget.cityName.hashCode,
+                      progress: reduced ? 0.35 : _pulseController.value,
+                      reducedMotion: reduced,
+                    ),
+                    size: Size.infinite,
+                  ),
                 ),
               ),
             ),
@@ -148,11 +103,11 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x45091915),
-                    Color(0xA612302A),
-                    Color(0xEB12302A),
+                    Color(0x28081814),
+                    Color(0x8812302A),
+                    Color(0xE012302A),
                   ],
-                  stops: [0.0, 0.52, 1.0],
+                  stops: [0.0, 0.56, 1.0],
                 ),
               ),
             ),
@@ -234,7 +189,7 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                         children: [
                           const Icon(
                             Icons.location_on_rounded,
-                            size: 18,
+                            size: 19,
                             color: DarbColors.lime,
                           ),
                           const SizedBox(width: 6),
@@ -320,28 +275,23 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
   }
 }
 
-class _NeoCityVectorBackdrop extends StatelessWidget {
-  const _NeoCityVectorBackdrop({required this.cityCode});
-  final String cityCode;
+class _AbstractCityNetworkPainter extends CustomPainter {
+  const _AbstractCityNetworkPainter({
+    required this.seed,
+    required this.progress,
+    required this.reducedMotion,
+  });
 
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _NeoCitySkylinePainter(seed: cityCode.hashCode),
-      size: Size.infinite,
-    );
-  }
-}
-
-class _NeoCitySkylinePainter extends CustomPainter {
-  const _NeoCitySkylinePainter({required this.seed});
   final int seed;
+  final double progress;
+  final bool reducedMotion;
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
+    // 1. Deep Obsidian Emerald gradient canvas
     canvas.drawRect(
       Offset.zero & size,
       Paint()
@@ -349,15 +299,35 @@ class _NeoCitySkylinePainter extends CustomPainter {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
+            Color(0xFF0E2620),
             DarbColors.forest,
             DarbColors.forestSoft,
-            DarbColors.primaryGreen,
           ],
         ).createShader(Offset.zero & size),
     );
 
+    // 2. Ambient radial emerald bloom
+    final bloomX = w * (0.68 + math.sin(progress * math.pi * 2) * 0.04);
+    canvas.drawCircle(
+      Offset(bloomX, h * 0.34),
+      w * 0.42,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            DarbColors.primaryGreen.withValues(alpha: 0.36),
+            DarbColors.mint.withValues(alpha: 0.08),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.55, 1.0],
+        ).createShader(Rect.fromCircle(
+          center: Offset(bloomX, h * 0.34),
+          radius: w * 0.42,
+        )),
+    );
+
+    // 3. Subtle geometric topographic grid
     final gridPaint = Paint()
-      ..color = DarbColors.mint.withValues(alpha: 0.14)
+      ..color = DarbColors.mint.withValues(alpha: 0.10)
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
@@ -365,58 +335,106 @@ class _NeoCitySkylinePainter extends CustomPainter {
       final y = h * (i / 5);
       canvas.drawLine(Offset(0, y), Offset(w, y), gridPaint);
     }
-    for (var i = 1; i <= 6; i++) {
-      final x = w * (i / 7);
+    for (var i = 1; i <= 7; i++) {
+      final x = w * (i / 8);
       canvas.drawLine(Offset(x, 0), Offset(x, h), gridPaint);
     }
 
-    final barPaint = Paint()..color = const Color(0xFF0E2620).withValues(alpha: 0.55);
+    // 4. Abstract geometric prism facets & concentric orbital rings
     final rng = math.Random(seed);
-    final count = 10;
-    final barW = w / count;
-    for (var i = 0; i < count; i++) {
-      final barH = h * (0.28 + rng.nextDouble() * 0.38);
+    final facetPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.035)
+      ..style = PaintingStyle.fill;
+    for (var i = 0; i < 4; i++) {
+      final rx = w * (0.14 + rng.nextDouble() * 0.72);
+      final ry = h * (0.14 + rng.nextDouble() * 0.52);
+      final rw = 34.0 + rng.nextDouble() * 44.0;
+      final rh = 24.0 + rng.nextDouble() * 34.0;
       canvas.drawRRect(
-        RRect.fromRectAndCorners(
-          Rect.fromLTWH(i * barW + 3, h - barH, barW - 6, barH),
-          topLeft: const Radius.circular(6),
-          topRight: const Radius.circular(6),
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(center: Offset(rx, ry), width: rw, height: rh),
+          const Radius.circular(10),
         ),
-        barPaint,
+        facetPaint,
       );
     }
 
+    final ringCenter = Offset(w * 0.78, h * 0.34);
+    final ringPaint = Paint()
+      ..color = DarbColors.mint.withValues(alpha: 0.14)
+      ..strokeWidth = 1.1
+      ..style = PaintingStyle.stroke;
+    canvas.drawCircle(ringCenter, 36, ringPaint);
+    canvas.drawCircle(ringCenter, 62, ringPaint);
+    canvas.drawCircle(
+      ringCenter,
+      92,
+      Paint()
+        ..color = DarbColors.mint.withValues(alpha: 0.07)
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke,
+    );
+
+    // 5. Kinetic delivery arc & travelling pulse
+    final start = Offset(w * 0.14, h * 0.66);
+    final end = Offset(w * 0.86, h * 0.30);
     final route = Path()
-      ..moveTo(w * 0.12, h * 0.72)
+      ..moveTo(start.dx, start.dy)
       ..cubicTo(
         w * 0.34,
-        h * 0.32,
-        w * 0.66,
-        h * 0.68,
-        w * 0.88,
-        h * 0.30,
+        h * 0.24,
+        w * 0.62,
+        h * 0.70,
+        end.dx,
+        end.dy,
       );
+
     canvas.drawPath(
       route,
       Paint()
-        ..color = DarbColors.mint.withValues(alpha: 0.72)
-        ..strokeWidth = 2.4
+        ..color = DarbColors.mint.withValues(alpha: 0.20)
+        ..strokeWidth = 7.0
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
+    canvas.drawPath(
+      route,
+      Paint()
+        ..color = DarbColors.mint.withValues(alpha: 0.52)
+        ..strokeWidth = 2.0
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke,
     );
-    canvas.drawCircle(
-      Offset(w * 0.12, h * 0.72),
-      4.5,
-      Paint()..color = DarbColors.mint,
-    );
-    canvas.drawCircle(
-      Offset(w * 0.88, h * 0.30),
-      5.0,
-      Paint()..color = DarbColors.lime,
-    );
+
+    if (!reducedMotion) {
+      final metrics = route.computeMetrics().toList();
+      if (metrics.isNotEmpty) {
+        final metric = metrics.first;
+        final total = metric.length;
+        final segLen = total * 0.18;
+        final s = math.max(0.0, (progress * (total + segLen)) - segLen);
+        final e = math.min(total, s + segLen);
+        if (e > s) {
+          canvas.drawPath(
+            metric.extractPath(s, e),
+            Paint()
+              ..color = DarbColors.lime.withValues(alpha: 0.88)
+              ..strokeWidth = 2.6
+              ..strokeCap = StrokeCap.round
+              ..style = PaintingStyle.stroke,
+          );
+        }
+      }
+    }
+
+    canvas.drawCircle(start, 4.5, Paint()..color = DarbColors.mint);
+    canvas.drawCircle(end, 5.2, Paint()..color = DarbColors.lime);
   }
 
   @override
-  bool shouldRepaint(covariant _NeoCitySkylinePainter oldDelegate) =>
-      oldDelegate.seed != seed;
+  bool shouldRepaint(covariant _AbstractCityNetworkPainter oldDelegate) =>
+      oldDelegate.seed != seed ||
+      oldDelegate.progress != progress ||
+      oldDelegate.reducedMotion != reducedMotion;
 }

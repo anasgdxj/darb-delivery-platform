@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/darb_design_system.dart';
 
-/// Minimalist dark-green architectural vector map hero background with
-/// geometric sage-green street lines, two pulsing store location pins,
-/// and a glowing mint-green curved route path mimicking the DARB logo.
+/// Minimalist dark-emerald abstract geometric architectural background with
+/// subtle coordinate grid lines, glowing route vector path matching DARB's
+/// brand curve, and pulsing origin/destination nodes. Uses zero city photos.
 class DarbLoginVectorMap extends StatefulWidget {
   const DarbLoginVectorMap({super.key});
 
@@ -24,7 +24,7 @@ class _DarbLoginVectorMapState extends State<DarbLoginVectorMap>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2800),
+      duration: const Duration(milliseconds: 3200),
     );
   }
 
@@ -52,7 +52,7 @@ class _DarbLoginVectorMapState extends State<DarbLoginVectorMap>
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: const BoxDecoration(
-        color: Color(0xFF11221B),
+        color: Color(0xFF0E211A),
       ),
       child: AnimatedBuilder(
         animation: _controller,
@@ -79,13 +79,14 @@ class _DarbVectorMapPainter extends CustomPainter {
   final double progress;
   final bool reducedMotion;
 
-  static const _bgBase = Color(0xFF11221B);
-  static const _bgInnerGlow = Color(0xFF183227);
-  static const _sagePrimary = Color(0xFF2D4F40);
-  static const _sageSecondary = Color(0xFF213D31);
-  static const _sageBlock = Color(0xFF172D24);
+  static const _bgBase = Color(0xFF0E211A);
+  static const _bgInnerGlow = Color(0xFF1A3C2F);
+  static const _sagePrimary = Color(0xFF2D5544);
+  static const _sageSecondary = Color(0xFF1F3D31);
+  static const _sageBlock = Color(0xFF152D23);
   static const _mint = DarbColors.mint;
-  static const _pinCore = Color(0xFF0E1F18);
+  static const _lime = DarbColors.lime;
+  static const _pinCore = Color(0xFF0C1D16);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -93,60 +94,74 @@ class _DarbVectorMapPainter extends CustomPainter {
     final h = size.height;
     final rect = Offset.zero & size;
 
-    // 1. Deep minimalist dark-green canvas with soft center-ambient depth
+    // 1. Deep Obsidian Emerald canvas with warm radial depth
     canvas.drawRect(
       rect,
       Paint()
         ..shader = ui.Gradient.radial(
-          Offset(w * 0.5, h * 0.45),
-          math.max(w, h) * 0.72,
+          Offset(w * 0.5, h * 0.42),
+          math.max(w, h) * 0.78,
           [_bgInnerGlow, _bgBase],
         ),
     );
 
-    // 2. Subtle geometric urban parcel blocks
+    // Subtle secondary emerald ambient shimmer near top-end
+    canvas.drawCircle(
+      Offset(w * 0.82, h * 0.24),
+      w * 0.34,
+      Paint()
+        ..shader = ui.Gradient.radial(
+          Offset(w * 0.82, h * 0.24),
+          w * 0.34,
+          [
+            DarbColors.primaryGreen.withValues(alpha: 0.26),
+            Colors.transparent,
+          ],
+        ),
+    );
+
+    // 2. Abstract architectural geometric planes
     final blockPaint = Paint()
-      ..color = _sageBlock.withValues(alpha: 0.75)
+      ..color = _sageBlock.withValues(alpha: 0.78)
       ..style = PaintingStyle.fill;
     final blocks = [
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.05, h * 0.16, w * 0.16, h * 0.20),
-        const Radius.circular(8),
+        Rect.fromLTWH(w * 0.05, h * 0.16, w * 0.15, h * 0.19),
+        const Radius.circular(10),
       ),
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.26, h * 0.10, w * 0.20, h * 0.15),
-        const Radius.circular(8),
+        Rect.fromLTWH(w * 0.25, h * 0.10, w * 0.20, h * 0.14),
+        const Radius.circular(10),
       ),
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.56, h * 0.12, w * 0.18, h * 0.16),
-        const Radius.circular(8),
+        Rect.fromLTWH(w * 0.56, h * 0.12, w * 0.18, h * 0.15),
+        const Radius.circular(10),
       ),
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.77, h * 0.36, w * 0.18, h * 0.22),
-        const Radius.circular(8),
+        Rect.fromLTWH(w * 0.77, h * 0.35, w * 0.18, h * 0.22),
+        const Radius.circular(10),
       ),
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.06, h * 0.52, w * 0.15, h * 0.20),
-        const Radius.circular(8),
+        Rect.fromLTWH(w * 0.06, h * 0.52, w * 0.14, h * 0.19),
+        const Radius.circular(10),
       ),
       RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.58, h * 0.68, w * 0.20, h * 0.18),
-        const Radius.circular(8),
+        Rect.fromLTWH(w * 0.58, h * 0.68, w * 0.20, h * 0.17),
+        const Radius.circular(10),
       ),
     ];
     for (final block in blocks) {
       canvas.drawRRect(block, blockPaint);
     }
 
-    // 3. Secondary geometric street grid in muted sage green
+    // 3. Secondary coordinate grid lines
     final minorStreetPaint = Paint()
-      ..color = _sageSecondary.withValues(alpha: 0.55)
-      ..strokeWidth = 1.05
+      ..color = _sageSecondary.withValues(alpha: 0.58)
+      ..strokeWidth = 1.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
     final minorGrid = Path()
-      // Horizontal architectural streets
       ..moveTo(0, h * 0.22)
       ..lineTo(w, h * 0.22)
       ..moveTo(0, h * 0.44)
@@ -157,7 +172,6 @@ class _DarbVectorMapPainter extends CustomPainter {
       ..lineTo(w, h * 0.64)
       ..moveTo(0, h * 0.84)
       ..lineTo(w, h * 0.84)
-      // Vertical architectural streets
       ..moveTo(w * 0.12, 0)
       ..lineTo(w * 0.12, h)
       ..moveTo(w * 0.24, 0)
@@ -172,10 +186,10 @@ class _DarbVectorMapPainter extends CustomPainter {
       ..lineTo(w * 0.89, h);
     canvas.drawPath(minorGrid, minorStreetPaint);
 
-    // 4. Primary clean diagonal & arterial roads in muted sage green
+    // 4. Primary diagonal geometric vectors
     final majorStreetPaint = Paint()
-      ..color = _sagePrimary.withValues(alpha: 0.58)
-      ..strokeWidth = 1.85
+      ..color = _sagePrimary.withValues(alpha: 0.62)
+      ..strokeWidth = 1.75
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
@@ -188,23 +202,23 @@ class _DarbVectorMapPainter extends CustomPainter {
       ..lineTo(w * 0.26, h * 0.54)
       ..moveTo(w * 0.72, h * 0.58)
       ..lineTo(w * 1.02, h * 0.78)
-      ..moveTo(w * 0.32, h * 0.0)
-      ..lineTo(w * 0.18, h * 1.0)
-      ..moveTo(w * 0.82, h * 0.0)
-      ..lineTo(w * 0.66, h * 1.0);
+      ..moveTo(w * 0.32, 0.0)
+      ..lineTo(w * 0.18, h)
+      ..moveTo(w * 0.82, 0.0)
+      ..lineTo(w * 0.66, h);
     canvas.drawPath(majorRoads, majorStreetPaint);
 
-    // Subtle geometric roundabout rings at intersections
+    // Subtle geometric orbital junction rings
     final junctionPaint = Paint()
-      ..color = _sagePrimary.withValues(alpha: 0.55)
-      ..strokeWidth = 1.5
+      ..color = _sagePrimary.withValues(alpha: 0.58)
+      ..strokeWidth = 1.4
       ..style = PaintingStyle.stroke;
     canvas.drawCircle(Offset(w * 0.24, h * 0.22), 7.5, junctionPaint);
     canvas.drawCircle(Offset(w * 0.74, h * 0.64), 9.0, junctionPaint);
 
-    // 5. Glowing mint-green curved route path mimicking DARB's curved S-route
-    final startPin = Offset(w * 0.15, h * 0.73);
-    final endPin = Offset(w * 0.85, h * 0.27);
+    // 5. Glowing kinetic S-route path matching DARB brand identity
+    final startPin = Offset(w * 0.14, h * 0.74);
+    final endPin = Offset(w * 0.86, h * 0.26);
 
     final routePath = Path()
       ..moveTo(startPin.dx, startPin.dy)
@@ -225,29 +239,24 @@ class _DarbVectorMapPainter extends CustomPainter {
         endPin.dy,
       );
 
-    // Outer ambient bloom
     canvas.drawPath(
       routePath,
       Paint()
-        ..color = _mint.withValues(alpha: 0.24)
+        ..color = _mint.withValues(alpha: 0.22)
         ..strokeWidth = 13
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 9),
     );
-
-    // Mid luminous halo
     canvas.drawPath(
       routePath,
       Paint()
-        ..color = _mint.withValues(alpha: 0.46)
-        ..strokeWidth = 5.2
+        ..color = _mint.withValues(alpha: 0.45)
+        ..strokeWidth = 5.0
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.5),
     );
-
-    // Crisp mint route core
     canvas.drawPath(
       routePath,
       Paint()
@@ -255,9 +264,9 @@ class _DarbVectorMapPainter extends CustomPainter {
           startPin,
           endPin,
           [
-            _mint.withValues(alpha: 0.88),
-            const Color(0xFFE2FAEF),
-            _mint.withValues(alpha: 0.92),
+            _mint.withValues(alpha: 0.85),
+            const Color(0xFFE6FFF3),
+            _lime.withValues(alpha: 0.90),
           ],
           const [0.0, 0.5, 1.0],
         )
@@ -266,23 +275,22 @@ class _DarbVectorMapPainter extends CustomPainter {
         ..style = PaintingStyle.stroke,
     );
 
-    // Traveling light pulse along the curved path when motion is enabled
+    // Travelling light packet along curve
     if (!reducedMotion) {
       final metrics = routePath.computeMetrics().toList();
       if (metrics.isNotEmpty) {
         final metric = metrics.first;
         final total = metric.length;
-        final segLen = total * 0.16;
+        final segLen = total * 0.17;
         final startDist = (progress * (total + segLen)) - segLen;
         final s = math.max(0.0, startDist);
         final e = math.min(total, startDist + segLen);
         if (e > s) {
-          final pulseSegment = metric.extractPath(s, e);
           canvas.drawPath(
-            pulseSegment,
+            metric.extractPath(s, e),
             Paint()
-              ..color = const Color(0xFFF1FFF8).withValues(alpha: 0.92)
-              ..strokeWidth = 3.2
+              ..color = const Color(0xFFF6FFFA).withValues(alpha: 0.95)
+              ..strokeWidth = 3.4
               ..strokeCap = StrokeCap.round
               ..style = PaintingStyle.stroke
               ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
@@ -291,75 +299,70 @@ class _DarbVectorMapPainter extends CustomPainter {
       }
     }
 
-    // 6. Soft center vignette so centered logo, white headline, and light-gray
-    // subtitle maintain crisp contrast over the vector lines & curve.
+    // 6. Center contrast vignette for crisp typography
     canvas.drawRect(
       rect,
       Paint()
         ..shader = ui.Gradient.radial(
-          Offset(w * 0.5, h * 0.52),
-          w * 0.44,
+          Offset(w * 0.5, h * 0.50),
+          w * 0.46,
           [
-            _bgBase.withValues(alpha: 0.72),
-            _bgBase.withValues(alpha: 0.30),
+            _bgBase.withValues(alpha: 0.74),
+            _bgBase.withValues(alpha: 0.34),
             Colors.transparent,
           ],
-          const [0.0, 0.55, 1.0],
+          const [0.0, 0.56, 1.0],
         ),
     );
 
-    // 7. Two pulsing store location pins at start & end of the curved route
-    _drawPulsingStorePin(canvas, startPin, progress);
-    _drawPulsingStorePin(canvas, endPin, (progress + 0.5) % 1.0);
+    // 7. Pulsing start & destination pins
+    _drawPulsingNode(canvas, startPin, progress, _mint);
+    _drawPulsingNode(canvas, endPin, (progress + 0.5) % 1.0, _lime);
   }
 
-  void _drawPulsingStorePin(Canvas canvas, Offset center, double phase) {
+  void _drawPulsingNode(
+    Canvas canvas,
+    Offset center,
+    double phase,
+    Color tone,
+  ) {
     final pulse = reducedMotion ? 0.45 : phase;
     final outerRadius = 10.0 + (pulse * 16.0);
-    final outerAlpha = (1.0 - pulse).clamp(0.0, 1.0) * 0.45;
+    final outerAlpha = (1.0 - pulse).clamp(0.0, 1.0) * 0.42;
 
-    // Expanding pulse ring
     canvas.drawCircle(
       center,
       outerRadius,
-      Paint()
-        ..color = _mint.withValues(alpha: outerAlpha)
-        ..style = PaintingStyle.fill,
+      Paint()..color = tone.withValues(alpha: outerAlpha),
     );
     canvas.drawCircle(
       center,
       outerRadius,
       Paint()
-        ..color = _mint.withValues(alpha: outerAlpha * 1.15)
+        ..color = tone.withValues(alpha: outerAlpha * 1.15)
         ..strokeWidth = 1.2
         ..style = PaintingStyle.stroke,
     );
-
-    // Secondary soft inner glow
     canvas.drawCircle(
       center,
-      11.5,
+      11.0,
       Paint()
-        ..color = _mint.withValues(alpha: 0.25)
+        ..color = tone.withValues(alpha: 0.24)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
     );
-
-    // Store pin circular badge
-    canvas.drawCircle(center, 8.5, Paint()..color = _pinCore);
+    canvas.drawCircle(center, 8.2, Paint()..color = _pinCore);
     canvas.drawCircle(
       center,
-      8.5,
+      8.2,
       Paint()
-        ..color = _mint
+        ..color = tone
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke,
     );
-
-    // Inner bright mint beacon
     canvas.drawCircle(
       center,
-      3.4,
-      Paint()..color = const Color(0xFFE6FFF4),
+      3.3,
+      Paint()..color = const Color(0xFFF0FFF7),
     );
   }
 

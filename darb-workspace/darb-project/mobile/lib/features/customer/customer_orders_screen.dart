@@ -217,7 +217,6 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   }
 
   Future<void> _openOrderDetails(Map<String, dynamic> order) async {
-    final id = order['id'].toString();
     final status = order['status']?.toString() ?? 'PENDING';
     final isPeer = order['type'] == 'PEER_DELIVERY';
     final currency = order['currency']?.toString() ?? 'SYP';

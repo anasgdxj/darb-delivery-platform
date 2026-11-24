@@ -10,11 +10,13 @@ import '../../core/services/notifications_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
-import '../../core/widgets/darb_map_picker.dart';
 import '../../core/widgets/darb_motion_components.dart';
 import '../auth/login_screen.dart';
 import '../customer/addresses_screen.dart';
 import 'ai_role_assistant_screen.dart';
+import 'driver_application_screen.dart';
+import 'edit_profile_screen.dart';
+import 'vendor_application_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({
@@ -49,39 +51,17 @@ class _AccountScreenState extends State<AccountScreen> {
     });
   }
 
-  Future<void> _editName() async {
-    final ctrl = TextEditingController(text: widget.user['name']?.toString() ?? '');
-    final saved = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(dt('تعديل الملف الشخصي')),
-        content: TextField(controller: ctrl, decoration: InputDecoration(labelText: dt('الاسم'))),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(dt('إلغاء'))),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: Text(dt('حفظ التغييرات')),
-          ),
-        ],
+  Future<void> _openEditProfile() async {
+    DarbHaptics.selection();
+    await Navigator.push<void>(
+      context,
+      DarbPageRoute(
+        builder: (_) => EditProfileScreen(
+          user: widget.user,
+          onRefreshUser: widget.onRefreshUser,
+        ),
       ),
     );
-    ctrl.dispose();
-    if (saved == null || saved.isEmpty) return;
-    try {
-      await Api.instance.patch('/auth/me', {'name': saved});
-      await widget.onRefreshUser();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(dt('تم تحديث بيانات حسابك'))));
-      }
-    } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
-        );
-      }
-    }
   }
 
   Future<void> _pickLanguage() async {
@@ -119,211 +99,30 @@ class _AccountScreenState extends State<AccountScreen> {
     } catch (_) {}
   }
 
-  Future<void> _applyDriver() async {
-    List<Map<String, dynamic>> cities = const [];
-    try {
-      cities = (await Api.instance.get('/cities') as List? ?? [])
-          .whereType<Map<String, dynamic>>()
-          .toList();
-    } on ApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-      }
-      return;
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
-        );
-      }
-      return;
-    }
-    if (!mounted || cities.isEmpty) return;
-    String cityId = cities.first['id'].toString();
-    String vehicleType = 'MOTORCYCLE';
-    String? err;
-
-    await showDarbGlassModalSheet<void>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(dt('طلب انضمام سائق'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: cityId,
-              decoration: InputDecoration(labelText: dt('المدينة')),
-              items: [
-                for (final c in cities)
-                  DropdownMenuItem(
-                    value: c['id'].toString(),
-                    child: Text(_cityName(c)),
-                  ),
-              ],
-              onChanged: (v) {
-                if (v != null) setSheet(() => cityId = v);
-              },
-            ),
-            const SizedBox(height: 14),
-            Text(dt('نوع المركبة'), style: const TextStyle(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final v in [
-                  ('BICYCLE', dt('دراجة هوائية')),
-                  ('MOTORCYCLE', dt('دراجة نارية')),
-                  ('CAR', dt('سيارة')),
-                ])
-                  ChoiceChip(
-                    label: Text(v.$2),
-                    selected: vehicleType == v.$1,
-                    onSelected: (_) => setSheet(() => vehicleType = v.$1),
-                  ),
-              ],
-            ),
-            if (err != null) ...[
-              const SizedBox(height: 10),
-              Text(err!, style: TextStyle(color: DarbColors.dangerOf(ctx))),
-            ],
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () async {
-                try {
-                  await Api.instance.post('/drivers/apply', {
-                    'cityId': cityId,
-                    'vehicleType': vehicleType,
-                  });
-                  if (ctx.mounted) Navigator.pop(ctx);
-                  await widget.onRefreshUser();
-                } on ApiException catch (e) {
-                  setSheet(() => err = e.message);
-                } catch (_) {
-                  setSheet(() => err = dt('حدث خطأ غير متوقع، حاول مجدداً'));
-                }
-              },
-              child: Text(dt('إرسال الطلب')),
-            ),
-          ],
+  Future<void> _openDriverApplication() async {
+    DarbHaptics.selection();
+    await Navigator.push<void>(
+      context,
+      DarbPageRoute(
+        builder: (_) => DriverApplicationScreen(
+          user: widget.user,
+          onRefreshUser: widget.onRefreshUser,
         ),
       ),
     );
   }
 
-  Future<void> _applyVendor() async {
-    List<Map<String, dynamic>> cities = const [];
-    try {
-      cities = (await Api.instance.get('/cities') as List? ?? [])
-          .whereType<Map<String, dynamic>>()
-          .toList();
-    } on ApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-      }
-      return;
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
-        );
-      }
-      return;
-    }
-    if (!mounted || cities.isEmpty) return;
-    String cityId = cities.first['id'].toString();
-    final nameCtrl = TextEditingController();
-    final typeCtrl = TextEditingController();
-    final addrCtrl = TextEditingController();
-    double? lat;
-    double? lng;
-    String? err;
-
-    await showDarbGlassModalSheet<void>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) {
-          final selectedCity = cities.cast<Map<String, dynamic>?>().firstWhere(
-                (c) => c?['id']?.toString() == cityId,
-                orElse: () => null,
-              );
-          return SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(dt('طلب انضمام متجر'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-                const SizedBox(height: 12),
-                TextField(controller: nameCtrl, decoration: InputDecoration(labelText: dt('اسم المتجر'))),
-                const SizedBox(height: 10),
-                TextField(controller: typeCtrl, decoration: InputDecoration(labelText: dt('نوع النشاط'))),
-                const SizedBox(height: 10),
-                DropdownButtonFormField<String>(
-                  value: cityId,
-                  decoration: InputDecoration(labelText: dt('المدينة')),
-                  items: [
-                    for (final c in cities)
-                      DropdownMenuItem(
-                        value: c['id'].toString(),
-                        child: Text(_cityName(c)),
-                      ),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) setSheet(() => cityId = v);
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextField(controller: addrCtrl, decoration: InputDecoration(labelText: dt('عنوان المتجر (اختياري)'))),
-                const SizedBox(height: 12),
-                DarbMapPicker(
-                  selectedLatitude: lat,
-                  selectedLongitude: lng,
-                  cityName: selectedCity != null ? _cityName(selectedCity) : null,
-                  onPointSelected: (pickedLat, pickedLng) => setSheet(() {
-                    lat = pickedLat;
-                    lng = pickedLng;
-                    err = null;
-                  }),
-                ),
-                if (err != null) ...[
-                  const SizedBox(height: 8),
-                  Text(err!, style: TextStyle(color: DarbColors.dangerOf(ctx))),
-                ],
-                const SizedBox(height: 14),
-                FilledButton(
-                  onPressed: () async {
-                    if (nameCtrl.text.trim().length < 2 || typeCtrl.text.trim().length < 2) {
-                      setSheet(() => err = dt('أدخل اسم المتجر ونوع النشاط'));
-                      return;
-                    }
-                    try {
-                      await Api.instance.post('/vendors/apply', {
-                        'name': nameCtrl.text.trim(),
-                        'type': typeCtrl.text.trim(),
-                        'cityId': cityId,
-                        if (addrCtrl.text.trim().isNotEmpty) 'address': addrCtrl.text.trim(),
-                        if (lat != null && lng != null) ...{'latitude': lat, 'longitude': lng},
-                      });
-                      if (ctx.mounted) Navigator.pop(ctx);
-                      await widget.onRefreshUser();
-                    } on ApiException catch (e) {
-                      setSheet(() => err = e.message);
-                    } catch (_) {
-                      setSheet(() => err = dt('حدث خطأ غير متوقع، حاول مجدداً'));
-                    }
-                  },
-                  child: Text(dt('إرسال الطلب')),
-                ),
-              ],
-            ),
-          );
-        },
+  Future<void> _openVendorApplication() async {
+    DarbHaptics.selection();
+    await Navigator.push<void>(
+      context,
+      DarbPageRoute(
+        builder: (_) => VendorApplicationScreen(
+          user: widget.user,
+          onRefreshUser: widget.onRefreshUser,
+        ),
       ),
     );
-    nameCtrl.dispose();
-    typeCtrl.dispose();
-    addrCtrl.dispose();
   }
 
   Future<void> _logout() async {
@@ -357,21 +156,12 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  String _cityName(Map<String, dynamic> city) {
-    final code = darbLocale.value.languageCode;
-    final names = (city['names'] as List? ?? []).whereType<Map<String, dynamic>>().toList();
-    for (final n in names) {
-      if (n['locale'] == code) return n['name']?.toString() ?? '';
-    }
-    return names.isNotEmpty
-        ? names.first['name']?.toString() ?? city['code']?.toString() ?? ''
-        : city['code']?.toString() ?? '';
-  }
-
   @override
   Widget build(BuildContext context) {
     final appearance = DarbAppearanceController.instance;
     final role = widget.user['role']?.toString() ?? 'CUSTOMER';
+    final driverApplication = widget.user['driverApplication']?.toString();
+    final vendorApplication = widget.user['vendorApplication']?.toString();
     final roleLabel = switch (role) {
       'ADMIN' => dt('إدارة دَرْب'),
       'DRIVER' => dt('حساب سائق'),
@@ -439,7 +229,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   backgroundColor: Colors.white.withValues(alpha: 0.14),
                   foregroundColor: Colors.white,
                 ),
-                onPressed: _editName,
+                onPressed: _openEditProfile,
                 icon: const Icon(Icons.edit_outlined, size: 20),
               ),
             ],
@@ -566,6 +356,13 @@ class _AccountScreenState extends State<AccountScreen> {
           child: Column(
             children: [
               _AccountActionTile(
+                icon: Icons.manage_accounts_outlined,
+                accentColor: DarbColors.primaryOf(context),
+                title: dt('تعديل الملف الشخصي'),
+                subtitle: dt('تحديث الاسم ولغة الواجهة ومراجعة بيانات التوثيق'),
+                onTap: _openEditProfile,
+              ),
+              _AccountActionTile(
                 icon: Icons.auto_awesome_rounded,
                 accentColor: DarbColors.primaryOf(context),
                 title: dt('مساعد دَرْب الشخصي'),
@@ -588,15 +385,25 @@ class _AccountScreenState extends State<AccountScreen> {
                   icon: Icons.delivery_dining_outlined,
                   accentColor: DarbColors.successOf(context),
                   title: dt('كن سائقاً في دَرْب'),
-                  subtitle: dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء'),
-                  onTap: _applyDriver,
+                  subtitle: driverApplication != null
+                      ? dt('متابعة حالة طلب السائق المسجّل')
+                      : dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء'),
+                  trailing: driverApplication != null
+                      ? DarbStatusBadge(status: driverApplication)
+                      : null,
+                  onTap: _openDriverApplication,
                 ),
                 _AccountActionTile(
                   icon: Icons.storefront_outlined,
                   accentColor: DarbColors.warningOf(context),
                   title: dt('انضم بمتجرك'),
-                  subtitle: dt('اعرض منتجات متجرك واستقبل طلبات العملاء'),
-                  onTap: _applyVendor,
+                  subtitle: vendorApplication != null
+                      ? dt('متابعة حالة طلب المتجر المسجّل')
+                      : dt('اعرض منتجات متجرك واستقبل طلبات العملاء'),
+                  trailing: vendorApplication != null
+                      ? DarbStatusBadge(status: vendorApplication)
+                      : null,
+                  onTap: _openVendorApplication,
                 ),
               ],
               _AccountActionTile(

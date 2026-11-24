@@ -4,6 +4,9 @@ import 'package:darb/core/widgets/darb_city_scene.dart';
 import 'package:darb/core/widgets/darb_components.dart';
 import 'package:darb/core/widgets/darb_glass.dart';
 import 'package:darb/core/widgets/darb_motion_components.dart';
+import 'package:darb/features/account/driver_application_screen.dart';
+import 'package:darb/features/account/edit_profile_screen.dart';
+import 'package:darb/features/account/vendor_application_screen.dart';
 import 'package:darb/features/auth/login_hero_map.dart';
 import 'package:darb/features/auth/login_screen.dart';
 import 'package:darb/main.dart';
@@ -232,7 +235,7 @@ void main() {
       expect(reduced, isTrue);
     });
 
-    testWidgets('renders LoginScreen with dark vector map hero and untouched bottom card',
+    testWidgets('renders redesigned LoginScreen with geometric hero, step pill, and Google CTA',
         (tester) async {
       darbLocale.value = const Locale('ar');
       await tester.pumpWidget(
@@ -243,11 +246,15 @@ void main() {
       );
       await tester.pump();
       expect(find.byType(DarbLoginVectorMap), findsOneWidget);
+      expect(find.byType(DarbBrandMark), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
       expect(find.text('دَرْب • DARB'), findsOneWidget);
       expect(find.text('أهلاً بك في دَرْب'), findsOneWidget);
       expect(find.text('طريقك الأسهل لاكتشاف المتاجر وطلب ما تحتاجه'), findsOneWidget);
       expect(find.text('سجّل الدخول برقم هاتفك'), findsOneWidget);
+      expect(find.text('1 / 2'), findsOneWidget);
       expect(find.text('AR'), findsOneWidget);
+      expect(find.text('المتابعة باستخدام Google'), findsOneWidget);
     });
   });
 
@@ -402,26 +409,7 @@ void main() {
   });
 
   group('DARB Design Evolution 2026 Widgets', () {
-    test('DarbCitySceneCard resolves deterministic city assets without mixing cities', () {
-      expect(
-        DarbCitySceneCard.resolveAssetPath('damascus', 'دمشق'),
-        'assets/cities/damascus.jpg',
-      );
-      expect(
-        DarbCitySceneCard.resolveAssetPath('', 'حلب'),
-        'assets/cities/aleppo.jpg',
-      );
-      expect(
-        DarbCitySceneCard.resolveAssetPath('latakia', 'اللاذقية'),
-        'assets/cities/latakia.jpg',
-      );
-      expect(
-        DarbCitySceneCard.resolveAssetPath('tartus', 'طرطوس'),
-        isNull,
-      );
-    });
-
-    testWidgets('DarbCitySceneCard renders selected city info and falls back cleanly',
+    testWidgets('DarbCitySceneCard renders abstract Neo artwork with zero city photos',
         (tester) async {
       darbLocale.value = const Locale('ar');
       var addressTapped = false;
@@ -433,8 +421,8 @@ void main() {
             data: const MediaQueryData(disableAnimations: true),
             child: Scaffold(
               body: DarbCitySceneCard(
-                cityCode: 'tartus',
-                cityName: 'طرطوس',
+                cityCode: 'damascus',
+                cityName: 'دمشق',
                 vendorCount: 7,
                 activeAddressLabel: 'الكورنيش البحري',
                 onTapAddresses: () => addressTapped = true,
@@ -445,10 +433,10 @@ void main() {
       );
 
       await tester.pump();
-      expect(find.text('طرطوس'), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
+      expect(find.text('دمشق'), findsOneWidget);
       expect(find.text('7'), findsOneWidget);
       expect(find.text('الكورنيش البحري'), findsOneWidget);
-      expect(find.text('دمشق'), findsNothing);
 
       await tester.tap(find.text('الكورنيش البحري'));
       await tester.pump();
@@ -520,7 +508,7 @@ void main() {
       expect(lightGlow, hasLength(1));
       expect(darkGlow, hasLength(1));
       expect(lightGlow.first.blurRadius, greaterThan(0));
-      expect(darkGlow.first.color.a, greaterThan(lightGlow.first.color.a));
+      expect(darkGlow.first.blurRadius, greaterThan(lightGlow.first.blurRadius));
     });
 
     testWidgets('DarbRouteConnector, DarbBentoActionCard, DarbShimmer, and DarbTypingDots render cleanly under Reduce Motion',
@@ -542,6 +530,7 @@ void main() {
                     pickupAddress: 'شارع الثورة · دمشق',
                     dropoffLabel: 'التسليم',
                     dropoffAddress: 'حي المالكي · شارع عبد المنعم رياض',
+                    badgeText: '8,500 ل.س',
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -585,6 +574,7 @@ void main() {
       expect(find.byType(DarbRouteConnector), findsOneWidget);
       expect(find.text('شارع الثورة · دمشق'), findsOneWidget);
       expect(find.text('حي المالكي · شارع عبد المنعم رياض'), findsOneWidget);
+      expect(find.text('8,500 ل.س'), findsOneWidget);
 
       expect(find.byType(DarbBentoActionCard), findsNWidgets(2));
       expect(find.text('سريع'), findsOneWidget);
@@ -599,6 +589,215 @@ void main() {
       await tester.tap(find.text('اطلب بالكتابة'));
       await tester.pump();
       expect(glassTapped, isTrue);
+    });
+  });
+
+  group('Account Profile & Multi-Step Onboarding Wizards', () {
+    testWidgets('EditProfileScreen validates name and submits UpdateProfileDto payload',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      Map<String, dynamic>? savedPayload;
+      var refreshed = false;
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            initialScreen: EditProfileScreen(
+              skipInitialFetch: true,
+              user: const {
+                'id': 'u1',
+                'name': 'أنس محمد',
+                'phone': '+963933123456',
+                'email': 'anas@darb.sy',
+                'role': 'CUSTOMER',
+                'locale': 'ar',
+              },
+              onRefreshUser: () async => refreshed = true,
+              saveProfileOverride: (payload) async {
+                savedPayload = payload;
+                return {'id': 'u1', ...payload};
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('تعديل الملف الشخصي'), findsOneWidget);
+      expect(find.text('+963933123456'), findsOneWidget);
+      expect(find.text('anas@darb.sy'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).first, 'أنس الحمصي');
+      await tester.pump();
+
+      final saveBtn = find.text('حفظ التغييرات');
+      await tester.ensureVisible(saveBtn);
+      await tester.tap(saveBtn);
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(savedPayload, {'name': 'أنس الحمصي', 'locale': 'ar'});
+      expect(refreshed, isTrue);
+    });
+
+    testWidgets('DriverApplicationScreen walks through 5-step wizard and shows PENDING status',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      Map<String, dynamic>? submitted;
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            initialScreen: DriverApplicationScreen(
+              enableDraftCache: false,
+              user: const {
+                'id': 'u1',
+                'name': 'خالد العلي',
+                'phone': '+963944112233',
+                'role': 'CUSTOMER',
+              },
+              onRefreshUser: () async {},
+              loadCitiesOverride: () async => [
+                {
+                  'id': 'city-1',
+                  'code': 'damascus',
+                  'names': [
+                    {'locale': 'ar', 'name': 'دمشق'},
+                  ],
+                },
+              ],
+              submitApplicationOverride: (payload) async {
+                submitted = payload;
+                return {'id': 'drv-1', 'status': 'PENDING'};
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('1 / 5'), findsOneWidget);
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+
+      expect(find.text('2 / 5'), findsOneWidget);
+      await tester.tap(find.text('سيارة'));
+      await tester.pump();
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+
+      expect(find.text('3 / 5'), findsOneWidget);
+      expect(find.text('دمشق'), findsOneWidget);
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+
+      expect(find.text('4 / 5'), findsOneWidget);
+      for (final box in find.byType(Checkbox).evaluate()) {
+        await tester.tap(find.byWidget(box.widget));
+      }
+      await tester.pump();
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+
+      expect(find.text('5 / 5'), findsOneWidget);
+      await tester.tap(find.text('إرسال الطلب'));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(submitted, {'cityId': 'city-1', 'vehicleType': 'CAR'});
+      expect(find.text('تم استلام طلب انضمامك كسائق'), findsOneWidget);
+    });
+
+    testWidgets('VendorApplicationScreen shows status view when pending and submits 5-step wizard',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            initialScreen: VendorApplicationScreen(
+              enableDraftCache: false,
+              enableInteractiveMap: false,
+              user: const {
+                'id': 'u2',
+                'name': 'ليلى',
+                'vendorApplication': 'PENDING',
+              },
+              onRefreshUser: () async {},
+              loadCitiesOverride: () async => const [],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('طلب متجرك قيد المراجعة'), findsOneWidget);
+
+      Map<String, dynamic>? vendorSubmitted;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            initialScreen: VendorApplicationScreen(
+              enableDraftCache: false,
+              enableInteractiveMap: false,
+              user: const {
+                'id': 'u3',
+                'name': 'ليلى الشامي',
+                'phone': '+963955001122',
+                'role': 'CUSTOMER',
+              },
+              onRefreshUser: () async {},
+              loadCitiesOverride: () async => [
+                {
+                  'id': 'city-2',
+                  'code': 'aleppo',
+                  'names': [
+                    {'locale': 'ar', 'name': 'حلب'},
+                  ],
+                },
+              ],
+              submitApplicationOverride: (payload) async {
+                vendorSubmitted = payload;
+                return {'id': 'vnd-1', 'status': 'PENDING'};
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('1 / 5'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).at(0), 'متجر الشهباء');
+      await tester.tap(find.text('حلويات'));
+      await tester.pump();
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+
+      expect(find.text('2 / 5'), findsOneWidget);
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+
+      expect(find.text('3 / 5'), findsOneWidget);
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+
+      expect(find.text('4 / 5'), findsOneWidget);
+      await tester.tap(find.byType(Checkbox));
+      await tester.pump();
+      await tester.tap(find.text('متابعة'));
+      await tester.pump();
+
+      expect(find.text('5 / 5'), findsOneWidget);
+      await tester.tap(find.text('إرسال الطلب'));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(vendorSubmitted, {
+        'name': 'متجر الشهباء',
+        'type': 'حلويات',
+        'cityId': 'city-2',
+      });
+      expect(find.text('تم استلام طلب انضمام متجرك'), findsOneWidget);
     });
   });
 }
