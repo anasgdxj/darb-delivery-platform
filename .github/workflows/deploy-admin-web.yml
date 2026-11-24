@@ -56,7 +56,9 @@ jobs:
           cp index.html .pages/index.html
           cp admin-web/index.html .pages/admin/index.html
           cp -R assets .pages/assets
+          rm -rf .pages/assets/cities
           cp robots.txt sitemap.xml site.webmanifest .pages/
+          test ! -d .pages/assets/cities
           for section in en tr faq drivers merchants privacy terms; do
             test -s "$section/index.html"
             mkdir -p ".pages/$section"
