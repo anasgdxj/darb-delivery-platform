@@ -69,6 +69,8 @@ jobs:
                   raise SystemExit(f"City photography or unsupported imagery found: {name}")
               if "Content-Security-Policy" not in html:
                   raise SystemExit(f"Missing CSP meta policy: {name}")
+              if html.count('class="language-links"') != 1:
+                  raise SystemExit(f"Expected exactly one language switcher: {name}")
           home = Path("index.html").read_text(encoding="utf-8")
           required_home = [
               'lang="ar" dir="rtl"', 'rel="canonical"', 'application/ld+json',
@@ -84,6 +86,14 @@ jobs:
                        "assets/favicon.svg", "robots.txt", "sitemap.xml", "site.webmanifest"]:
               if not Path(path).is_file():
                   raise SystemExit(f"Missing website asset: {path}")
+          site_css = Path("assets/css/site.css").read_text()
+          pages_css = Path("assets/css/pages.css").read_text()
+          for rule in ["overflow-x:clip", "@media(max-width:860px)", "@media(max-width:380px)"]:
+              if rule not in site_css:
+                  raise SystemExit(f"Missing responsive homepage rule: {rule}")
+          for rule in ["grid-template-columns:minmax(0,1fr) auto", "@media(max-width:360px)"]:
+              if rule not in pages_css:
+                  raise SystemExit(f"Missing responsive content-page rule: {rule}")
           robots = Path("robots.txt").read_text()
           if "Sitemap: https://anasgdxj.github.io/darb-delivery-platform/sitemap.xml" not in robots:
               raise SystemExit("robots.txt must point to the canonical sitemap.")
