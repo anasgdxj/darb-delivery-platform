@@ -3,20 +3,36 @@ on:
   pull_request:
     paths:
       - "index.html"
+      - "en/**"
+      - "tr/**"
+      - "faq/**"
+      - "drivers/**"
+      - "merchants/**"
+      - "privacy/**"
+      - "terms/**"
       - "assets/**"
       - "robots.txt"
       - "sitemap.xml"
       - "site.webmanifest"
       - ".github/workflows/validate-public-web.yml"
+      - ".github/workflows/deploy-admin-web.yml"
   push:
     branches: [main]
     paths:
       - "index.html"
+      - "en/**"
+      - "tr/**"
+      - "faq/**"
+      - "drivers/**"
+      - "merchants/**"
+      - "privacy/**"
+      - "terms/**"
       - "assets/**"
       - "robots.txt"
       - "sitemap.xml"
       - "site.webmanifest"
       - ".github/workflows/validate-public-web.yml"
+      - ".github/workflows/deploy-admin-web.yml"
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,49 +41,74 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate external JavaScript
+      - name: Validate shared JavaScript
         run: node --check assets/js/site.js
-      - name: Validate SEO, security, and public website assets
+      - name: Validate public pages, metadata, and deployment assets
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import json
           import re
-          html = Path("index.html").read_text()
-          required = [
-              'lang="ar" dir="rtl"',
-              'name="description"',
-              'name="robots" content="index,follow',
-              'rel="canonical"',
-              'property="og:title"',
-              'application/ld+json',
-              'Content-Security-Policy',
-              'href="./assets/css/site.css"',
-              'src="./assets/js/site.js"',
-              'rel="manifest"',
-              'rel="icon"',
-              'id="services"',
-              'id="coverage"',
-              'id="how"',
-              'id="download"',
-              'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+          import xml.etree.ElementTree as ET
+
+          required_pages = [
+              "index.html", "en/index.html", "tr/index.html", "faq/index.html",
+              "drivers/index.html", "merchants/index.html", "privacy/index.html",
+              "terms/index.html"
           ]
-          missing = [item for item in required if item not in html]
+          for name in required_pages:
+              path = Path(name)
+              if not path.is_file() or path.stat().st_size < 700:
+                  raise SystemExit(f"Missing or incomplete public page: {name}")
+              html = path.read_text(encoding="utf-8")
+              if "<html" not in html or "<title>" not in html or 'name="description"' not in html:
+                  raise SystemExit(f"Missing document metadata: {name}")
+              if "app-debug.apk" in html or "/admin/" in html or "بوابة الإدارة" in html:
+                  raise SystemExit(f"Private or debug resource leaked into public page: {name}")
+              if "<img" in html or "assets/cities/" in html or "heroCityImg" in html:
+                  raise SystemExit(f"City photography or unsupported imagery found: {name}")
+              if "Content-Security-Policy" not in html:
+                  raise SystemExit(f"Missing CSP meta policy: {name}")
+          home = Path("index.html").read_text(encoding="utf-8")
+          required_home = [
+              'lang="ar" dir="rtl"', 'rel="canonical"', 'application/ld+json',
+              'hreflang="en"', 'hreflang="tr"', 'href="./faq/"',
+              'href="./drivers/"', 'href="./merchants/"', 'href="./privacy/"',
+              'href="./terms/"',
+              'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk'
+          ]
+          missing = [item for item in required_home if item not in home]
           if missing:
-              raise SystemExit("Missing website requirements: " + ", ".join(missing))
-          for path in ["assets/css/site.css", "assets/js/site.js", "assets/favicon.svg", "robots.txt", "sitemap.xml", "site.webmanifest"]:
+              raise SystemExit("Missing homepage requirements: " + ", ".join(missing))
+          for path in ["assets/css/site.css", "assets/css/pages.css", "assets/js/site.js",
+                       "assets/favicon.svg", "robots.txt", "sitemap.xml", "site.webmanifest"]:
               if not Path(path).is_file():
-                  raise SystemExit(f"Missing public website asset: {path}")
-          if "<img" in html or "assets/cities/" in html or "heroCityImg" in html:
-              raise SystemExit("City photographs must not be used on the public website.")
-          if "app-debug.apk" in html:
-              raise SystemExit("Debug APK must never be exposed as an official download.")
-          if "admin/" in html or "بوابة الإدارة" in html or "دخول الإدارة" in html:
-              raise SystemExit("Admin portal links must not appear on the public website.")
+                  raise SystemExit(f"Missing website asset: {path}")
           robots = Path("robots.txt").read_text()
-          sitemap = Path("sitemap.xml").read_text()
-          if "Sitemap:" not in robots or "https://" not in sitemap or "<loc>" not in sitemap:
-              raise SystemExit("robots.txt and sitemap.xml must include the canonical sitemap URL.")
-          manifest = Path("site.webmanifest").read_text()
-          if '"start_url": "./"' not in manifest:
-              raise SystemExit("Web manifest start_url must remain relative for GitHub Pages project hosting.")
+          if "Sitemap: https://anasgdxj.github.io/darb-delivery-platform/sitemap.xml" not in robots:
+              raise SystemExit("robots.txt must point to the canonical sitemap.")
+          sitemap = ET.parse("sitemap.xml").getroot()
+          ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+          urls = {node.text for node in sitemap.findall("sm:url/sm:loc", ns)}
+          expected = {
+              "https://anasgdxj.github.io/darb-delivery-platform/",
+              "https://anasgdxj.github.io/darb-delivery-platform/en/",
+              "https://anasgdxj.github.io/darb-delivery-platform/tr/",
+              "https://anasgdxj.github.io/darb-delivery-platform/faq/",
+              "https://anasgdxj.github.io/darb-delivery-platform/drivers/",
+              "https://anasgdxj.github.io/darb-delivery-platform/merchants/",
+              "https://anasgdxj.github.io/darb-delivery-platform/privacy/",
+              "https://anasgdxj.github.io/darb-delivery-platform/terms/"
+          }
+          if not expected.issubset(urls):
+              raise SystemExit("Sitemap is missing one or more public pages.")
+          manifest = json.loads(Path("site.webmanifest").read_text())
+          if manifest.get("start_url") != "./":
+              raise SystemExit("Manifest start_url must remain relative for GitHub Pages.")
+          for name in ["en/index.html", "tr/index.html"]:
+              html = Path(name).read_text(encoding="utf-8")
+              for locale in ['hreflang="ar-SY"', 'hreflang="en"', 'hreflang="tr"', 'hreflang="x-default"']:
+                  if locale not in html:
+                      raise SystemExit(f"Missing multilingual alternate {locale} in {name}")
+          print(f"Validated {len(required_pages)} public pages and SEO assets.")
           PY
