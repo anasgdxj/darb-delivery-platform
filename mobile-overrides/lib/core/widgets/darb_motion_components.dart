@@ -547,16 +547,21 @@ class _DarbTabViewStackState extends State<DarbTabViewStack> {
                     // Keep inactive tabs mounted but completely outside the
                     // paint tree. Cross-fading two full pages caused their
                     // contents to show through each other during navigation.
-                    child: active && !reduced
-                        ? AnimatedSlide(
-                            offset: Offset.zero,
+                    child: reduced
+                        ? widget.children[i]
+                        : AnimatedOpacity(
+                            opacity: active ? 1.0 : 0.0,
                             duration: duration,
-                            curve: movingForward
-                                ? DarbMotion.enter
-                                : DarbMotion.emphasis,
-                            child: widget.children[i],
-                          )
-                        : widget.children[i],
+                            curve: DarbMotion.enter,
+                            child: AnimatedSlide(
+                              offset: active ? Offset.zero : inactiveOffset,
+                              duration: duration,
+                              curve: movingForward
+                                  ? DarbMotion.enter
+                                  : DarbMotion.emphasis,
+                              child: widget.children[i],
+                            ),
+                          ),
                   ),
                 ),
               ),
