@@ -76,7 +76,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
     _addressCtrl = TextEditingController();
     _descriptionCtrl = TextEditingController();
     _restoreDraft();
-    debugPrint('DARB_VENDOR_INIT status=$_hasApplicationStatus override=${widget.loadCitiesOverride != null}');
     if (!_hasApplicationStatus) _loadCities();
   }
 
@@ -86,7 +85,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
     final oldHadStatus =
         _normalizeStatus(oldWidget.user['vendorApplication']) != null ||
         _normalizeStatus(oldWidget.user['driverApplication']) != null;
-    debugPrint('DARB_VENDOR_UPDATE old=$oldHadStatus new=$_hasApplicationStatus');
     if (oldHadStatus && !_hasApplicationStatus) {
       _loadCities();
     }
@@ -167,7 +165,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
   }
 
   Future<void> _loadCities() async {
-    debugPrint('DARB_VENDOR_LOAD start override=${widget.loadCitiesOverride != null}');
     setState(() {
       _loadingCities = true;
       _citiesError = null;
@@ -178,7 +175,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
           : (await Api.instance.get('/cities') as List? ?? [])
               .whereType<Map<String, dynamic>>()
               .toList();
-      debugPrint('DARB_VENDOR_LOAD result count=${list.length}');
       if (!mounted) return;
       setState(() {
         _cities = list;
@@ -1015,7 +1011,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
   }
 
   Widget _buildStepLocation(BuildContext context) {
-    debugPrint('DARB_VENDOR_LOCATION loading=$_loadingCities count=${_cities.length}');
     if (_loadingCities) {
       return const DarbStateView.loading();
     }
