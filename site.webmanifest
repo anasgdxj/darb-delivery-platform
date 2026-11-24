@@ -1,0 +1,20 @@
+{
+  "name": "دَرْب | Darb",
+  "short_name": "دَرْب",
+  "description": "منصة توصيل وطلبات المتاجر في سوريا",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F6F1",
+  "theme_color": "#12302A",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
