@@ -4,11 +4,18 @@ on:
     paths:
       - "index.html"
       - "assets/**"
+      - "robots.txt"
+      - "sitemap.xml"
+      - "site.webmanifest"
       - ".github/workflows/validate-public-web.yml"
   push:
     branches: [main]
     paths:
       - "index.html"
+      - "assets/**"
+      - "robots.txt"
+      - "sitemap.xml"
+      - "site.webmanifest"
       - ".github/workflows/validate-public-web.yml"
   workflow_dispatch:
 permissions:
@@ -18,47 +25,49 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate inline JavaScript
+      - name: Validate external JavaScript
+        run: node --check assets/js/site.js
+      - name: Validate SEO, security, and public website assets
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
           html = Path("index.html").read_text()
-          scripts = re.findall(r"<script>(.*?)</script>", html, re.S)
-          if len(scripts) != 1:
-              raise SystemExit(f"Expected exactly one inline script, found {len(scripts)}")
-          Path("/tmp/public.js").write_text(scripts[0])
-          PY
-          node --check /tmp/public.js
-      - name: Validate page structure, visual assets, and official download
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          html = Path("index.html").read_text()
           required = [
               'lang="ar" dir="rtl"',
+              'name="description"',
+              'name="robots" content="index,follow',
+              'rel="canonical"',
+              'property="og:title"',
+              'application/ld+json',
+              'Content-Security-Policy',
+              'href="./assets/css/site.css"',
+              'src="./assets/js/site.js"',
+              'rel="manifest"',
+              'rel="icon"',
               'id="services"',
               'id="coverage"',
               'id="how"',
               'id="download"',
-              'id="themeToggle"',
-              'id="menuToggle"',
-              'id="mobilePanel"',
               'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
-              'تنزيل تطبيق أندرويد',
-              'دمشق',
-              'حلب',
-              'حمص',
-              'حماة',
-              'اللاذقية',
           ]
           missing = [item for item in required if item not in html]
           if missing:
-              raise SystemExit("Missing public website requirements: " + ", ".join(missing))
+              raise SystemExit("Missing website requirements: " + ", ".join(missing))
+          for path in ["assets/css/site.css", "assets/js/site.js", "assets/favicon.svg", "robots.txt", "sitemap.xml", "site.webmanifest"]:
+              if not Path(path).is_file():
+                  raise SystemExit(f"Missing public website asset: {path}")
           if "<img" in html or "assets/cities/" in html or "heroCityImg" in html:
-              raise SystemExit("Public website must use the original vector/CSS artwork and must not display city photographs.")
+              raise SystemExit("City photographs must not be used on the public website.")
           if "app-debug.apk" in html:
-              raise SystemExit("Debug APK must never be exposed as an official download")
+              raise SystemExit("Debug APK must never be exposed as an official download.")
           if "admin/" in html or "بوابة الإدارة" in html or "دخول الإدارة" in html:
-              raise SystemExit("Admin portal links must not appear on the public website")
+              raise SystemExit("Admin portal links must not appear on the public website.")
+          robots = Path("robots.txt").read_text()
+          sitemap = Path("sitemap.xml").read_text()
+          if "Sitemap:" not in robots or "https://" not in sitemap or "<loc>" not in sitemap:
+              raise SystemExit("robots.txt and sitemap.xml must include the canonical sitemap URL.")
+          manifest = Path("site.webmanifest").read_text()
+          if '"start_url": "./"' not in manifest:
+              raise SystemExit("Web manifest start_url must remain relative for GitHub Pages project hosting.")
           PY
