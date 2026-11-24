@@ -146,6 +146,7 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
   }
 
   Future<void> _loadCities() async {
+    debugPrint('DARB_VENDOR_CITIES start override=${widget.loadCitiesOverride != null}');
     setState(() {
       _loadingCities = true;
       _citiesError = null;
@@ -156,6 +157,7 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
           : (await Api.instance.get('/cities') as List? ?? [])
               .whereType<Map<String, dynamic>>()
               .toList();
+      debugPrint('DARB_VENDOR_CITIES loaded count=${list.length}');
       if (!mounted) return;
       setState(() {
         _cities = list;
@@ -167,12 +169,14 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
         _loadingCities = false;
       });
     } on ApiException catch (e) {
+      debugPrint('DARB_VENDOR_CITIES api error=${e.message}');
       if (!mounted) return;
       setState(() {
         _loadingCities = false;
         _citiesError = e.message;
       });
-    } catch (_) {
+    } catch (error) {
+      debugPrint('DARB_VENDOR_CITIES unexpected error=$error');
       if (!mounted) return;
       setState(() {
         _loadingCities = false;
@@ -992,6 +996,7 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
   }
 
   Widget _buildStepLocation(BuildContext context) {
+    debugPrint('DARB_VENDOR_LOCATION loading=$_loadingCities count=${_cities.length} error=$_citiesError');
     if (_loadingCities) {
       return const DarbStateView.loading();
     }
