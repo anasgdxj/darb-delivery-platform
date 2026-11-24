@@ -245,12 +245,11 @@ jobs:
               }
           }
           GRADLE
-          if find test -type f -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
-            flutter test --no-pub
-          else
-            echo "::notice::No Flutter test files are present in this source archive; test execution skipped."
-            echo "Flutter tests: skipped (no test files supplied)" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          echo "Discovered Flutter test files:"
+          find test -type f -name '*_test.dart' -print
+          test -s test/widget_test.dart || { echo "::error::Required test/widget_test.dart was not assembled from mobile-overrides."; exit 1; }
+          flutter test --no-pub
+          echo "Flutter tests: passed" >> "$GITHUB_STEP_SUMMARY"
           COMMIT_COUNT="$(git rev-list --count HEAD)"
           # Installed customer baseline is versionCode 1300; every new build must be higher.
           BUILD_NUMBER=$((1301 + COMMIT_COUNT))
