@@ -44,7 +44,7 @@ describe('GeminiAiTextProvider', () => {
     const userMessage = requestBody.contents[0].parts[0].text as string;
     expect(systemInstruction).toContain('"activeOrders":2');
     expect(userMessage).toBe('كم طلباً لدي؟');
-    expect(requestBody.generationConfig.temperature).toBe(0.2);
+    expect(requestBody.generationConfig.temperature).toBeUndefined();
   });
 
   it('defaults to gemini-3.8-flash when GEMINI_MODEL is empty or unset', async () => {
