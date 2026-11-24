@@ -366,9 +366,9 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${DARB_RELEASE_WEBHOOK_TOKEN:-}" ]; then
-            echo "::warning::DARB_RELEASE_WEBHOOK_TOKEN is not configured; release was published but push announcements were skipped."
-            echo "Release push announcement: skipped (missing GitHub secret)" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            echo "::error::DARB_RELEASE_WEBHOOK_TOKEN is required; refusing to mark a published release as fully delivered."
+            echo "Release push announcement: failed (missing GitHub secret)" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi
           MANIFEST="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json"
           jq --arg releaseTag "latest" '. + {releaseTag: $releaseTag}' "$MANIFEST" > "$RUNNER_TEMP/darb-release-notification.json"
