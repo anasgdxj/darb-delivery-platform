@@ -538,10 +538,11 @@ void main() {
                 padding: const EdgeInsets.all(16),
                 children: [
                   const DarbRouteConnector(
-                    pickupText: 'شارع الثورة · دمشق',
-                    dropoffText: 'حي المالكي · شارع عبد المنعم رياض',
-                    distanceKm: 4.2,
-                    deliveryFee: '8,500 ل.س',
+                    pickupLabel: 'الاستلام',
+                    pickupAddress: 'شارع الثورة · دمشق',
+                    dropoffLabel: 'التسليم',
+                    dropoffAddress: 'حي المالكي · شارع عبد المنعم رياض',
+                    badgeText: 'سريع',
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -551,7 +552,7 @@ void main() {
                           icon: Icons.local_shipping_rounded,
                           title: 'توصيل خاص',
                           subtitle: 'أرسل غرضاً سريعاً',
-                          badgeText: 'سريع',
+                          badge: 'سريع',
                           isHeroDark: true,
                           onTap: () => heroTapped = true,
                         ),
