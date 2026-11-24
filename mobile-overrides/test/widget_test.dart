@@ -744,6 +744,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: DarbApp(
+            key: const ValueKey('vendor-form-app'),
             initialScreen: VendorApplicationScreen(
               enableDraftCache: false,
               enableInteractiveMap: false,
