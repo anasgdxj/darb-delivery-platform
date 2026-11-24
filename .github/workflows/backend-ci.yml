@@ -94,6 +94,7 @@ jobs:
           cp backend-overrides/notifications.service.ts extracted/darb-project/backend/src/modules/notifications/notifications.service.ts
           cp backend-overrides/notifications.controller.ts extracted/darb-project/backend/src/modules/notifications/notifications.controller.ts
           cp backend-overrides/notifications.module.ts extracted/darb-project/backend/src/modules/notifications/notifications.module.ts
+          cp backend-overrides/release-notifications.controller.ts extracted/darb-project/backend/src/modules/notifications/release-notifications.controller.ts
           cp backend-overrides/app.module.ts extracted/darb-project/backend/src/app.module.ts
           cp backend-overrides/schema.prisma extracted/darb-project/backend/prisma/schema.prisma
           mkdir -p extracted/darb-project/backend/prisma/migrations/20261118195000_peer_delivery_pickup_coordinates
