@@ -378,11 +378,16 @@ jobs:
             -H "Content-Type: application/json" \
             --data-binary @"$RUNNER_TEMP/darb-release-notification.json" \
             --output "$RUNNER_TEMP/darb-release-notification-result.json"
-          if ! jq -e '.pushSkipped == false' "$RUNNER_TEMP/darb-release-notification-result.json" >/dev/null; then
-            echo "::error::Backend accepted the release event but FCM is not configured; push delivery was not confirmed."
+          if ! jq -e '.pushSkipped == false and (.pushFailed // 0) == 0 and ((.targetedDevices // 0) == 0 or (.pushSent // 0) > 0)' "$RUNNER_TEMP/darb-release-notification-result.json" >/dev/null; then
+            echo "::error::FCM delivery was not confirmed for the registered DARB devices."
             cat "$RUNNER_TEMP/darb-release-notification-result.json"
             exit 1
           fi
           TARGETED="$(jq -r '.targetedDevices // 0' "$RUNNER_TEMP/darb-release-notification-result.json")"
           SENT="$(jq -r '.pushSent // 0' "$RUNNER_TEMP/darb-release-notification-result.json")"
-          echo "Release push announcement: FCM accepted $SENT notifications for $TARGETED registered devices." >> "$GITHUB_STEP_SUMMARY"
+          FAILED="$(jq -r '.pushFailed // 0' "$RUNNER_TEMP/darb-release-notification-result.json")"
+          if [ "$TARGETED" -eq 0 ]; then
+            echo "Release push announcement: no registered devices; no push was sent." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Release push announcement: FCM accepted $SENT notifications for $TARGETED registered devices; actionable failures: $FAILED." >> "$GITHUB_STEP_SUMMARY"
+          fi
