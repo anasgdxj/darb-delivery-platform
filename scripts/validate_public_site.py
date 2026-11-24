@@ -106,6 +106,13 @@ for page in PAGES:
         fail(f"{page}: missing meta description")
     if not any(tag == "link" and attrs.get("rel") == "canonical" for tag, attrs in parser.tags):
         fail(f"{page}: missing canonical URL")
+    if not any(tag == "meta" and attrs.get("property") == "og:title" for tag, attrs in parser.tags):
+        fail(f"{page}: missing Open Graph title")
+    if not any(tag == "meta" and attrs.get("name") == "twitter:card" for tag, attrs in parser.tags):
+        fail(f"{page}: missing Twitter card metadata")
+    if page in {"privacy/index.html", "terms/index.html"}:
+        if not any(tag == "meta" and attrs.get("name") == "robots" and attrs.get("content") == "noindex,follow" for tag, attrs in parser.tags):
+            fail(f"{page}: draft legal page must be noindex until reviewed")
     if not any(tag == "meta" and attrs.get("http-equiv", "").lower() == "content-security-policy" for tag, attrs in parser.tags):
         fail(f"{page}: missing Content-Security-Policy")
     if parser.title_count != 1 or not parser.title_text.strip():
@@ -176,10 +183,14 @@ try:
     }
     expected_urls = {
         BASE_URL,
-        *(BASE_URL + page.rsplit("/", 1)[0] + "/" for page in PAGES if "/" in page),
+        *(BASE_URL + page.rsplit("/", 1)[0] + "/" for page in PAGES if "/" in page and page not in {"privacy/index.html", "terms/index.html"}),
     }
     if not expected_urls.issubset(sitemap_urls):
-        fail("sitemap.xml is missing one or more public page URLs")
+        fail("sitemap.xml is missing one or more indexable public page URLs")
+    for legal_path in ("privacy/index.html", "terms/index.html"):
+        legal_url = BASE_URL + legal_path.rsplit("/", 1)[0] + "/"
+        if legal_url in sitemap_urls:
+            fail(f"Draft legal page must not appear in sitemap: {legal_path}")
 except (ET.ParseError, OSError) as exc:
     fail(f"Invalid sitemap.xml: {exc}")
 
