@@ -1,4 +1,4 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AiTextProvider, AiTextRequest } from './ai-text-provider';
 
@@ -12,6 +12,8 @@ type GeminiResponse = {
 
 @Injectable()
 export class GeminiAiTextProvider extends AiTextProvider {
+  private readonly logger = new Logger(GeminiAiTextProvider.name);
+
   constructor(private readonly config: ConfigService) {
     super();
   }
@@ -67,7 +69,8 @@ export class GeminiAiTextProvider extends AiTextProvider {
     }
 
     if (!response.ok) {
-      // Do not expose provider response bodies, which may contain request metadata.
+      // Log only non-sensitive diagnostics. Never log the API key or provider response body.
+      this.logger.error(`Gemini request failed: HTTP ${response.status} ${response.statusText}; model=${model}`);
       throw new ServiceUnavailableException('مساعد دَرْب غير متاح حالياً');
     }
 
