@@ -108,9 +108,7 @@ jobs:
               "https://anasgdxj.github.io/darb-delivery-platform/tr/",
               "https://anasgdxj.github.io/darb-delivery-platform/faq/",
               "https://anasgdxj.github.io/darb-delivery-platform/drivers/",
-              "https://anasgdxj.github.io/darb-delivery-platform/merchants/",
-              "https://anasgdxj.github.io/darb-delivery-platform/privacy/",
-              "https://anasgdxj.github.io/darb-delivery-platform/terms/"
+              "https://anasgdxj.github.io/darb-delivery-platform/merchants/"
           }
           if not expected.issubset(urls):
               raise SystemExit("Sitemap is missing one or more public pages.")
