@@ -47,6 +47,7 @@ services:
       cp backend-overrides/notifications.service.ts .render-build/darb-project/backend/src/modules/notifications/notifications.service.ts &&
       cp backend-overrides/notifications.controller.ts .render-build/darb-project/backend/src/modules/notifications/notifications.controller.ts &&
       cp backend-overrides/notifications.module.ts .render-build/darb-project/backend/src/modules/notifications/notifications.module.ts &&
+      cp backend-overrides/release-notifications.controller.ts .render-build/darb-project/backend/src/modules/notifications/release-notifications.controller.ts &&
       cp backend-overrides/app.module.ts .render-build/darb-project/backend/src/app.module.ts &&
       mkdir -p .render-build/darb-project/backend/prisma/migrations/20261117170000_firebase_devices &&
       cp backend-overrides/firebase-devices.migration.sql .render-build/darb-project/backend/prisma/migrations/20261117170000_firebase_devices/migration.sql &&
@@ -93,6 +94,8 @@ services:
       - key: ADMIN_EMAILS
         sync: false
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: DARB_RELEASE_WEBHOOK_TOKEN
         sync: false
       - key: OPENAI_API_KEY
         sync: false
