@@ -32,9 +32,6 @@ export class GeminiAiTextProvider extends AiTextProvider {
     }
 
     const generationConfig: Record<string, number> = { maxOutputTokens: 800 };
-    if (!model.startsWith('gemini-4-')) {
-      generationConfig.temperature = 0.2;
-    }
 
     let response: Response;
     try {
