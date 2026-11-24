@@ -13,44 +13,55 @@ export class NotificationsService {
     const raw = config.get<string>('FIREBASE_SERVICE_ACCOUNT_JSON');
     if (!raw) return;
     try {
-      let parsed: unknown = JSON.parse(raw.trim());
+      const source = raw.trim();
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(source);
+      } catch {
+        const encoded = source.startsWith('base64:') ? source.slice(7) : source;
+        parsed = JSON.parse(Buffer.from(encoded, 'base64').toString('utf8'));
+      }
       if (typeof parsed === 'string') parsed = JSON.parse(parsed);
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        throw new Error('Service-account value must be a JSON object.');
+        throw new Error('Service-account value must be a JSON object or base64-encoded JSON.');
       }
 
       const credentials = parsed as {
-        type?: string;
         project_id?: string;
         client_email?: string;
         private_key?: string;
+        projectId?: string;
+        clientEmail?: string;
+        privateKey?: string;
       };
-
-      if (
-        credentials.type !== 'service_account' ||
-        !credentials.project_id ||
-        !credentials.client_email ||
-        !credentials.private_key
-      ) {
-        throw new Error('Service-account JSON is missing required fields.');
+      const projectId = credentials.project_id ?? credentials.projectId;
+      const clientEmail = credentials.client_email ?? credentials.clientEmail;
+      const privateKey = credentials.private_key ?? credentials.privateKey;
+      const missing = [
+        !projectId ? 'project_id' : null,
+        !clientEmail ? 'client_email' : null,
+        !privateKey ? 'private_key' : null,
+      ].filter((field): field is string => field !== null);
+      if (missing.length) {
+        throw new Error(`Service-account JSON is missing required fields: ${missing.join(', ')}.`);
       }
 
-      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+      const normalizedPrivateKey = privateKey.replace(/\\n/g, '\n');
       const app: App =
         getApps().find((x) => x.name === 'darb-notifications') ??
         initializeApp(
           {
             credential: cert({
-              projectId: credentials.project_id,
-              clientEmail: credentials.client_email,
-              privateKey: credentials.private_key,
+              projectId,
+              clientEmail,
+              privateKey: normalizedPrivateKey,
             }),
-            projectId: credentials.project_id,
+            projectId,
           },
           'darb-notifications',
         );
       this.messaging = getMessaging(app);
-      this.logger.log(`Firebase Admin initialized for project ${credentials.project_id}.`);
+      this.logger.log(`Firebase Admin initialized for project ${projectId}.`);
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown initialization error';
       this.logger.error(`Firebase Admin initialization failed: ${reason}. Push delivery is disabled.`);
