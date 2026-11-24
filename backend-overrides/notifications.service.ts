@@ -206,15 +206,16 @@ export class NotificationsService {
           android: { priority: 'high' },
         });
         pushSent += result.successCount;
-        pushFailed += result.failureCount;
         result.responses.forEach((response, index) => {
+          if (response.success) return;
           const code = response.error?.code ?? '';
           if (
-            !response.success &&
             ['messaging/registration-token-not-registered', 'messaging/invalid-registration-token'].includes(code)
           ) {
             invalidTokens.push(batch[index]);
+            return;
           }
+          pushFailed += 1;
         });
       } catch (error) {
         pushFailed += batch.length;
