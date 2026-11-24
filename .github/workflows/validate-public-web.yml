@@ -14,6 +14,8 @@ on:
       - "robots.txt"
       - "sitemap.xml"
       - "site.webmanifest"
+      - "google3dcfcc43ffdf1742.html"
+      - "scripts/validate_public_site.py"
       - ".github/workflows/validate-public-web.yml"
       - ".github/workflows/deploy-admin-web.yml"
   push:
@@ -122,3 +124,5 @@ jobs:
                       raise SystemExit(f"Missing multilingual alternate {locale} in {name}")
           print(f"Validated {len(required_pages)} public pages and SEO assets.")
           PY
+      - name: Validate internal links, accessibility, and verification file
+        run: python3 scripts/validate_public_site.py
