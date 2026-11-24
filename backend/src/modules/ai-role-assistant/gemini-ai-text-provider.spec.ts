@@ -12,7 +12,7 @@ describe('GeminiAiTextProvider', () => {
     provider = new GeminiAiTextProvider(config);
     config.get = jest.fn((key: string) => {
       if (key === 'GEMINI_API_KEY') return 'test-gemini-key';
-      if (key === 'GEMINI_MODEL') return 'gemini-2.5-flash';
+      if (key === 'GEMINI_MODEL') return 'gemini-3.8-flash';
       return undefined;
     }) as unknown as ConfigService['get'];
   });
@@ -37,17 +37,17 @@ describe('GeminiAiTextProvider', () => {
     expect(answer).toBe('إجابة تجريبية');
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toContain('/v1beta/models/gemini-2.5-flash:generateContent');
+    expect(url).toContain('/v1beta/models/gemini-3.8-flash:generateContent');
     expect(options.headers['x-goog-api-key']).toBe('test-gemini-key');
     const requestBody = JSON.parse(options.body);
     const systemInstruction = requestBody.systemInstruction.parts[0].text as string;
     const userMessage = requestBody.contents[0].parts[0].text as string;
     expect(systemInstruction).toContain('"activeOrders":2');
     expect(userMessage).toBe('كم طلباً لدي؟');
-    expect(requestBody.generationConfig.temperature).toBe(0.2);
+    expect(requestBody.generationConfig.temperature).toBeUndefined();
   });
 
-  it('defaults to gemini-2.5-flash when GEMINI_MODEL is empty or unset', async () => {
+  it('defaults to gemini-3.8-flash when GEMINI_MODEL is empty or unset', async () => {
     config.get = jest.fn((key: string) => {
       if (key === 'GEMINI_API_KEY') return 'test-gemini-key';
       if (key === 'GEMINI_MODEL') return '  ';
@@ -66,7 +66,7 @@ describe('GeminiAiTextProvider', () => {
     });
 
     const [url] = fetchMock.mock.calls[0];
-    expect(url).toContain('/v1beta/models/gemini-2.5-flash:generateContent');
+    expect(url).toContain('/v1beta/models/gemini-3.8-flash:generateContent');
   });
 
   it('fails closed when the API key is missing', async () => {
