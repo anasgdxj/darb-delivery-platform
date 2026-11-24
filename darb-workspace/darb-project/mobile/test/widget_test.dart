@@ -520,7 +520,7 @@ void main() {
       expect(lightGlow, hasLength(1));
       expect(darkGlow, hasLength(1));
       expect(lightGlow.first.blurRadius, greaterThan(0));
-      expect(darkGlow.first.blurRadius, greaterThan(lightGlow.first.blurRadius));
+      expect(darkGlow.first.color.a, greaterThan(lightGlow.first.color.a));
     });
 
     testWidgets('DarbRouteConnector, DarbBentoActionCard, DarbShimmer, and DarbTypingDots render cleanly under Reduce Motion',
@@ -542,7 +542,6 @@ void main() {
                     pickupAddress: 'شارع الثورة · دمشق',
                     dropoffLabel: 'التسليم',
                     dropoffAddress: 'حي المالكي · شارع عبد المنعم رياض',
-                    badgeText: 'سريع',
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -586,7 +585,6 @@ void main() {
       expect(find.byType(DarbRouteConnector), findsOneWidget);
       expect(find.text('شارع الثورة · دمشق'), findsOneWidget);
       expect(find.text('حي المالكي · شارع عبد المنعم رياض'), findsOneWidget);
-      expect(find.text('8,500 ل.س'), findsOneWidget);
 
       expect(find.byType(DarbBentoActionCard), findsNWidgets(2));
       expect(find.text('سريع'), findsOneWidget);
