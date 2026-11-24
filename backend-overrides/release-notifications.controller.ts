@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Headers,
@@ -46,6 +47,11 @@ export class ReleaseNotificationsController {
       !timingSafeEqual(suppliedBuffer, expectedBuffer)
     ) {
       throw new UnauthorizedException();
+    }
+
+    const officialApkUrl = 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk';
+    if (body.apkUrl !== officialApkUrl) {
+      throw new BadRequestException('APK URL must point to the official DARB latest release asset.');
     }
 
     return this.notifications.broadcastRelease(body);
