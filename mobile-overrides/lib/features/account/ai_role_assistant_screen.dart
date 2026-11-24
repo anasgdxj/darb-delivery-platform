@@ -151,7 +151,7 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                                   bottomEnd: Radius.circular(18),
                                 ),
                                 border: Border.all(
-                                  color: DarbColors.lineOf(context),
+                                  color: DarbColors.borderOf(context),
                                 ),
                               ),
                               child: const DarbTypingDots(),
@@ -199,7 +199,7 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                                       : (msg.isUser
                                           ? DarbColors.mint
                                               .withValues(alpha: 0.25)
-                                          : DarbColors.lineOf(context)),
+                                          : DarbColors.borderOf(context)),
                                 ),
                               ),
                               child: Text(
