@@ -138,11 +138,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if find test -type f -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
-            flutter test --no-pub
-          else
-            echo "::notice::No Flutter test files supplied by the source archive."
-          fi
+          echo "Discovered Flutter test files:"
+          find test -type f -name '*_test.dart' -print
+          test -s test/widget_test.dart || { echo "::error::Required test/widget_test.dart was not assembled from mobile-overrides."; exit 1; }
+          flutter test --no-pub
 
       - name: Upload Android debug APK for device testing
         uses: actions/upload-artifact@v4
