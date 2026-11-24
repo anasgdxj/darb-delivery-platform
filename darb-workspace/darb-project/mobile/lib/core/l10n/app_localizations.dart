@@ -603,6 +603,11 @@ class AppLocalizations {
     'كيف أتابع التوصيل المباشر؟': 'How do I track live delivery?|Canlı teslimatı nasıl takip edebilirim?',
     'لخّص مهامي الحالية': 'Summarize my current tasks|Mevcut görevlerimi özetle',
     'ما حالة طلباتي اليوم؟': "What is today's order status?|Bugünkü siparişlerimin durumu nedir?",
+    'أرباح اليوم': "Today's earnings|Bugünkü kazanç",
+    'رحلات اليوم': "Today's trips|Bugünkü teslimatlar",
+    'طلبات اليوم': "Today's orders|Bugünkü siparişler",
+    'ما الجديد في هذا التحديث؟': "What's new in this update?|Yenilikler neler?",
+    'مبيعات اليوم': "Today's sales|Bugünkü satışlar",
   };
 
   static const Map<String, Map<String, String>> _values = {
