@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -22,6 +23,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _directoryMode = 0; // 0: Pending queues, 1: All stores, 2: All drivers
   bool _loading = true;
   String? _error;
+  final Set<String> _busyIds = <String>{};
 
   @override
   void initState() {
@@ -85,8 +87,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Future<void> _setVendorStatus(String id, String status) async {
+    final key = 'v_$id';
+    if (!_busyIds.add(key)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.patch('/admin/vendors/$id/status', {'status': status});
+      if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -99,12 +105,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyIds.remove(key);
+      if (mounted) setState(() {});
     }
   }
 
   Future<void> _setDriverStatus(String id, String status) async {
+    final key = 'd_$id';
+    if (!_busyIds.add(key)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.patch('/admin/drivers/$id/status', {'status': status});
+      if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -117,6 +130,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyIds.remove(key);
+      if (mounted) setState(() {});
     }
   }
 
@@ -275,7 +291,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ? tr.first['name']?.toString() ?? dt('متجر')
         : dt('متجر');
     final status = v['status']?.toString() ?? 'PENDING';
-    return DarbGlassSurface(
+    final id = v['id'].toString();
+    final isBusy = _busyIds.contains('v_$id');
+    return DarbInteractiveCard(
       padding: const EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -305,9 +323,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               if (status != 'APPROVED')
                 Expanded(
                   child: FilledButton(
-                    onPressed: () =>
-                        _setVendorStatus(v['id'].toString(), 'APPROVED'),
-                    child: Text(dt('اعتماد')),
+                    onPressed:
+                        isBusy ? null : () => _setVendorStatus(id, 'APPROVED'),
+                    child: isBusy
+                        ? const SizedBox(
+                            width: 17,
+                            height: 17,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(dt('اعتماد')),
                   ),
                 ),
               if (status != 'APPROVED' && status != 'SUSPENDED')
@@ -317,10 +341,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: DarbColors.dangerOf(context),
                   ),
-                  onPressed: () => _setVendorStatus(
-                    v['id'].toString(),
-                    status == 'PENDING' ? 'REJECTED' : 'SUSPENDED',
-                  ),
+                  onPressed: isBusy
+                      ? null
+                      : () => _setVendorStatus(
+                            id,
+                            status == 'PENDING' ? 'REJECTED' : 'SUSPENDED',
+                          ),
                   child: Text(status == 'PENDING' ? dt('رفض') : dt('تعليق')),
                 ),
             ],
@@ -332,7 +358,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildDriverCard(Map<String, dynamic> d) {
     final status = d['status']?.toString() ?? 'PENDING';
-    return DarbGlassSurface(
+    final id = d['id'].toString();
+    final isBusy = _busyIds.contains('d_$id');
+    return DarbInteractiveCard(
       padding: const EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -362,9 +390,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               if (status != 'APPROVED')
                 Expanded(
                   child: FilledButton(
-                    onPressed: () =>
-                        _setDriverStatus(d['id'].toString(), 'APPROVED'),
-                    child: Text(dt('اعتماد')),
+                    onPressed:
+                        isBusy ? null : () => _setDriverStatus(id, 'APPROVED'),
+                    child: isBusy
+                        ? const SizedBox(
+                            width: 17,
+                            height: 17,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(dt('اعتماد')),
                   ),
                 ),
               if (status != 'APPROVED' && status != 'SUSPENDED')
@@ -374,8 +408,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: DarbColors.dangerOf(context),
                   ),
-                  onPressed: () =>
-                      _setDriverStatus(d['id'].toString(), 'SUSPENDED'),
+                  onPressed: isBusy
+                      ? null
+                      : () => _setDriverStatus(id, 'SUSPENDED'),
                   child: Text(dt('تعليق')),
                 ),
             ],

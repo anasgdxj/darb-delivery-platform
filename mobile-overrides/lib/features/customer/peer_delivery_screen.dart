@@ -7,6 +7,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_map_picker.dart';
+import '../../core/widgets/darb_motion_components.dart';
 import 'addresses_screen.dart';
 
 class PeerDeliveryScreen extends StatefulWidget {
@@ -40,6 +41,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   bool _locatingPickup = false;
   bool _loadingAddresses = true;
   bool _submitting = false;
+  DarbActionState _submitState = DarbActionState.idle;
+  int _errorTrigger = 0;
   List<Map<String, dynamic>> _addresses = const [];
   String? _selectedAddressId;
   String? _error;
@@ -49,7 +52,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   @override
   void initState() {
     super.initState();
-    _itemDescriptionController = TextEditingController(text: widget.initialDescription ?? '');
+    _itemDescriptionController =
+        TextEditingController(text: widget.initialDescription ?? '');
     _loadAddresses();
   }
 
@@ -73,7 +77,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         _addresses = list;
         if (_selectedAddressId == null && list.isNotEmpty) {
           final withLoc = list.where((a) => a['hasLocation'] == true).toList();
-          _selectedAddressId = (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
+          _selectedAddressId =
+              (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
         }
       });
     } on ApiException catch (e) {
@@ -95,6 +100,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
     try {
       final coords = await DarbLocationService.getCurrentPosition();
       if (!mounted) return;
+      DarbHaptics.success();
       setState(() {
         _pickupLat = coords.latitude;
         _pickupLng = coords.longitude;
@@ -110,32 +116,63 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   }
 
   void _nextStep() {
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _submitState = DarbActionState.idle;
+    });
     if (_step == 0) {
       if (_pickupAddressController.text.trim().length < 5) {
-        setState(() => _error = dt('اكتب وصفاً واضحاً لمكان الاستلام'));
+        DarbHaptics.warning();
+        setState(() {
+          _error = dt('اكتب وصفاً واضحاً لمكان الاستلام');
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
         return;
       }
       if (_pickupLat == null || _pickupLng == null) {
-        setState(() => _error = dt('حدد موقع الاستلام أولاً'));
+        DarbHaptics.warning();
+        setState(() {
+          _error = dt('حدد موقع الاستلام أولاً');
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
         return;
       }
       if (_selectedAddressId == null) {
-        setState(() => _error = dt('اختر عنوان تسليم محفوظاً مع موقع جغرافي أو أضف عنواناً جديداً'));
+        DarbHaptics.warning();
+        setState(() {
+          _error =
+              dt('اختر عنوان تسليم محفوظاً مع موقع جغرافي أو أضف عنواناً جديداً');
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
         return;
       }
+      DarbHaptics.selection();
       setState(() => _step = 1);
       return;
     }
     if (_step == 1) {
       if (_itemTypeController.text.trim().isEmpty) {
-        setState(() => _error = dt('اكتب نوع الغرض الذي تريد إرساله'));
+        DarbHaptics.warning();
+        setState(() {
+          _error = dt('اكتب نوع الغرض الذي تريد إرساله');
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
         return;
       }
       if (_itemDescriptionController.text.trim().isEmpty) {
-        setState(() => _error = dt('أضف وصفاً مختصراً للغرض'));
+        DarbHaptics.warning();
+        setState(() {
+          _error = dt('أضف وصفاً مختصراً للغرض');
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
         return;
       }
+      DarbHaptics.selection();
       setState(() => _step = 2);
     }
   }
@@ -144,6 +181,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
     if (_submitting) return;
     setState(() {
       _submitting = true;
+      _submitState = DarbActionState.loading;
       _error = null;
     });
     final notesParts = <String>[
@@ -162,7 +200,13 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         'notes': notesParts.join('\n'),
       });
       if (!mounted) return;
+      setState(() => _submitState = DarbActionState.success);
       widget.onCreated?.call();
+      await Future<void>.delayed(DarbMotion.effectiveDuration(
+        context,
+        const Duration(milliseconds: 350),
+      ));
+      if (!mounted) return;
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -180,11 +224,30 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
       );
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
-      if (mounted) setState(() => _error = e.message);
+      if (mounted) {
+        setState(() {
+          _error = e.message;
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+      if (mounted) {
+        setState(() {
+          _error = dt('حدث خطأ غير متوقع، حاول مجدداً');
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
+      }
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+          if (_submitState == DarbActionState.loading) {
+            _submitState = DarbActionState.idle;
+          }
+        });
+      }
     }
   }
 
@@ -212,13 +275,17 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           AnimatedContainer(
-                            duration: DarbMotion.fast,
+                            duration: DarbMotion.effectiveDuration(
+                              context,
+                              DarbMotion.fast,
+                            ),
                             height: 5,
                             decoration: BoxDecoration(
                               color: active
                                   ? DarbColors.primaryOf(context)
                                   : DarbColors.borderOf(context),
-                              borderRadius: BorderRadius.circular(DarbRadius.pill),
+                              borderRadius:
+                                  BorderRadius.circular(DarbRadius.pill),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -228,8 +295,11 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 11.5,
-                              fontWeight: active ? FontWeight.w800 : FontWeight.w600,
-                              color: active ? DarbColors.inkOf(context) : DarbColors.mutedOf(context),
+                              fontWeight:
+                                  active ? FontWeight.w800 : FontWeight.w600,
+                              color: active
+                                  ? DarbColors.inkOf(context)
+                                  : DarbColors.mutedOf(context),
                             ),
                           ),
                         ],
@@ -240,9 +310,22 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
               ),
             ),
             const SizedBox(height: 14),
-            if (_step == 0) _buildLocationsStep(),
-            if (_step == 1) _buildDetailsStep(),
-            if (_step == 2) _buildReviewStep(),
+            AnimatedSwitcher(
+              duration: DarbMotion.effectiveDuration(
+                context,
+                DarbMotion.standard,
+              ),
+              switchInCurve: DarbMotion.enter,
+              switchOutCurve: DarbMotion.exit,
+              child: KeyedSubtree(
+                key: ValueKey(_step),
+                child: _step == 0
+                    ? _buildLocationsStep()
+                    : (_step == 1
+                        ? _buildDetailsStep()
+                        : _buildReviewStep()),
+              ),
+            ),
             if (_error != null) ...[
               const SizedBox(height: 12),
               DarbGlassSurface(
@@ -250,7 +333,10 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   _error!,
-                  style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: DarbColors.dangerOf(context),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -260,7 +346,13 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                 if (_step > 0) ...[
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _submitting ? null : () => setState(() => _step--),
+                      onPressed: _submitting
+                          ? null
+                          : () => setState(() {
+                                _step--;
+                                _error = null;
+                                _submitState = DarbActionState.idle;
+                              }),
                       child: Text(dt('السابق')),
                     ),
                   ),
@@ -268,13 +360,17 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                 ],
                 Expanded(
                   flex: 2,
-                  child: FilledButton(
-                    onPressed: _submitting ? null : (_step < 2 ? _nextStep : _submit),
-                    child: Text(
-                      _step < 2
-                          ? dt('متابعة')
-                          : (_submitting ? dt('جارٍ الحفظ') : dt('تأكيد وإرسال الطلب')),
-                    ),
+                  child: DarbActionButton(
+                    label: _step < 2 ? dt('متابعة') : dt('تأكيد وإرسال الطلب'),
+                    loadingLabel: dt('جارٍ الحفظ'),
+                    successLabel: dt('تم إرسال طلبك'),
+                    state: _submitState,
+                    errorTrigger: _errorTrigger,
+                    icon: _step < 2
+                        ? Icons.arrow_forward_rounded
+                        : Icons.send_rounded,
+                    onPressed:
+                        _submitting ? null : (_step < 2 ? _nextStep : _submit),
                   ),
                 ),
               ],

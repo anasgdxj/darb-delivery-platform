@@ -6,6 +6,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 import 'driver_tracking_screen.dart';
 
 class CustomerOrdersScreen extends StatefulWidget {
@@ -17,9 +18,11 @@ class CustomerOrdersScreen extends StatefulWidget {
 
 class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   List<Map<String, dynamic>> _orders = const [];
+  String _filter = 'ALL';
   bool _loading = true;
   bool _offline = false;
   String? _error;
+  final Set<String> _busyOrderIds = <String>{};
 
   @override
   void initState() {
@@ -76,8 +79,11 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
       ),
     );
     if (confirmed != true) return;
+    if (!_busyOrderIds.add(orderId)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.post('/orders/$orderId/cancel', {});
+      DarbHaptics.success();
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -94,6 +100,9 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyOrderIds.remove(orderId);
+      if (mounted) setState(() {});
     }
   }
 
@@ -249,6 +258,8 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
               DarbStatusBadge(status: status),
             ],
           ),
+          const SizedBox(height: 12),
+          DarbOrderTimeline(status: status, isPeer: isPeer),
           const SizedBox(height: 12),
           if (!isPeer && vendorName.isNotEmpty) ...[
             Text(
@@ -431,7 +442,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   Future<void> _openDriverLocation(Map<String, dynamic> order) async {
     final addr = order['address'] is Map ? order['address'] as Map : null;
     await Navigator.of(context).push(
-      MaterialPageRoute(
+      DarbPageRoute(
         builder: (_) => DriverTrackingScreen(
           orderId: order['id'].toString(),
           pickupLatitude: (order['pickupLatitude'] as num?)?.toDouble(),
@@ -443,12 +454,29 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     );
   }
 
+  List<Map<String, dynamic>> get _filteredOrders {
+    if (_filter == 'ACTIVE') {
+      return _orders
+          .where((o) =>
+              o['status'] != 'DELIVERED' && o['status'] != 'CANCELLED')
+          .toList();
+    }
+    if (_filter == 'COMPLETED') {
+      return _orders
+          .where((o) =>
+              o['status'] == 'DELIVERED' || o['status'] == 'CANCELLED')
+          .toList();
+    }
+    return _orders;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return const DarbStateView.loading();
     if (_error != null) return DarbStateView.error(message: _error, onRetry: _load);
 
     final isDark = DarbColors.isDark(context);
+    final filtered = _filteredOrders;
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -461,31 +489,68 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                 ),
               ],
             )
-          : ListView.separated(
+          : ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 98),
-              itemCount: _orders.length + (_offline ? 1 : 0),
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                if (_offline && index == 0) {
-                  return DarbGlassSurface(
-                    tintColor: DarbColors.warningOf(context)
-                        .withValues(alpha: isDark ? 0.18 : 0.12),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    child: Text(
-                      dt('بيانات مخزنة محلياً لضعف الاتصال'),
-                      style: TextStyle(
-                        color: DarbColors.warningOf(context),
-                        fontWeight: FontWeight.w700,
+              children: [
+                if (_offline)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: DarbGlassSurface(
+                      tintColor: DarbColors.warningOf(context)
+                          .withValues(alpha: isDark ? 0.18 : 0.12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      child: Text(
+                        dt('بيانات مخزنة محلياً لضعف الاتصال'),
+                        style: TextStyle(
+                          color: DarbColors.warningOf(context),
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  );
-                }
-                final order = _orders[_offline ? index - 1 : index];
-                return _buildOrderCard(order);
-              },
+                  ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final f in [
+                        ('ALL', dt('الكل')),
+                        ('ACTIVE', dt('نشطة')),
+                        ('COMPLETED', dt('مكتملة')),
+                      ]) ...[
+                        ChoiceChip(
+                          label: Text(f.$2),
+                          selected: _filter == f.$1,
+                          onSelected: (_) {
+                            DarbHaptics.selection();
+                            setState(() => _filter = f.$1);
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (filtered.isEmpty)
+                  DarbStateView.empty(
+                    message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+                    icon: Icons.filter_list_off_rounded,
+                  )
+                else
+                  for (var i = 0; i < filtered.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: i < 6
+                          ? DarbFadeSlide(
+                              delay: DarbMotion.staggerDelay(i),
+                              child: _buildOrderCard(filtered[i]),
+                            )
+                          : _buildOrderCard(filtered[i]),
+                    ),
+              ],
             ),
     );
   }
@@ -505,174 +570,176 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
         : null;
     final canTrack = status == 'ASSIGNED' || status == 'PICKED_UP';
     final canReview = status == 'DELIVERED' && myReview == null;
+    final isActive = status != 'DELIVERED' && status != 'CANCELLED';
+    final isBusy = _busyOrderIds.contains(id);
 
-    return DarbFadeSlide(
-      child: DarbPressScale(
-        onTap: () => _openOrderDetails(order),
-        child: DarbGlassSurface(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    return DarbInteractiveCard(
+      onTap: () => _openOrderDetails(order),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${isPeer ? dt('توصيل مستقل') : dt('طلب')} · $number',
-                          style: TextStyle(
-                            color: DarbColors.inkOf(context),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        if (order['address'] is Map)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text(
-                              (order['address'] as Map)['details']?.toString() ??
-                                  '',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: DarbColors.mutedOf(context),
-                                fontSize: 12.5,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  DarbStatusBadge(status: status),
-                ],
-              ),
-              if (items.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                for (final item in items.take(3))
-                  Text(
-                    '• ${item['nameSnapshot']} × ${item['quantity']}',
-                    style: TextStyle(
-                      color: DarbColors.mutedOf(context),
-                      fontSize: 13,
-                    ),
-                  ),
-              ],
-              if (isPeer && order['pickupAddress'] != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '${dt('الاستلام')}: ${order['pickupAddress']}',
-                  style: TextStyle(
-                    color: DarbColors.mutedOf(context),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-              if (myReview != null) ...[
-                const SizedBox(height: 8),
-                Row(
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${dt('تقييمك')}: ',
-                      style: TextStyle(
-                        color: DarbColors.mutedOf(context),
-                        fontSize: 12.5,
-                      ),
-                    ),
-                    Icon(
-                      Icons.star_rounded,
-                      size: 16,
-                      color: DarbColors.warningOf(context),
-                    ),
-                    Text(
-                      '${myReview['rating']}',
+                      '${isPeer ? dt('توصيل مستقل') : dt('طلب')} · $number',
                       style: TextStyle(
                         color: DarbColors.inkOf(context),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12.5,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
+                    if (order['address'] is Map)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          (order['address'] as Map)['details']?.toString() ??
+                              '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: DarbColors.mutedOf(context),
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
+              ),
+              const SizedBox(width: 8),
+              DarbStatusBadge(status: status),
+            ],
+          ),
+          if (isActive) ...[
+            const SizedBox(height: 12),
+            DarbOrderTimeline(status: status, isPeer: isPeer),
+          ],
+          if (items.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            for (final item in items.take(3))
+              Text(
+                '• ${item['nameSnapshot']} × ${item['quantity']}',
+                style: TextStyle(
+                  color: DarbColors.mutedOf(context),
+                  fontSize: 13,
+                ),
+              ),
+          ],
+          if (isPeer && order['pickupAddress'] != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              '${dt('الاستلام')}: ${order['pickupAddress']}',
+              style: TextStyle(
+                color: DarbColors.mutedOf(context),
+                fontSize: 13,
+              ),
+            ),
+          ],
+          if (myReview != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Text(
+                  '${dt('تقييمك')}: ',
+                  style: TextStyle(
+                    color: DarbColors.mutedOf(context),
+                    fontSize: 12.5,
+                  ),
+                ),
+                Icon(
+                  Icons.star_rounded,
+                  size: 16,
+                  color: DarbColors.warningOf(context),
+                ),
+                Text(
+                  '${myReview['rating']}',
+                  style: TextStyle(
+                    color: DarbColors.inkOf(context),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.5,
+                  ),
+                ),
               ],
-              const Divider(height: 20),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                alignment: WrapAlignment.spaceBetween,
+            ),
+          ],
+          const Divider(height: 20),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            alignment: WrapAlignment.spaceBetween,
+            children: [
+              Text(
+                total > 0
+                    ? formatDarbMoney(total, currency)
+                    : dt('بانتظار العروض'),
+                style: TextStyle(
+                  color: DarbColors.primaryOf(context),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 15,
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    total > 0
-                        ? formatDarbMoney(total, currency)
-                        : dt('بانتظار العروض'),
-                    style: TextStyle(
-                      color: DarbColors.primaryOf(context),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 15,
+                  if (isPeer && status == 'PENDING')
+                    FilledButton.tonal(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: DarbColors.isDark(context)
+                            ? DarbColors.forestSoft
+                            : DarbColors.mintTint,
+                        foregroundColor: DarbColors.isDark(context)
+                            ? DarbColors.mint
+                            : DarbColors.forest,
+                        minimumSize: const Size(0, 38),
+                      ),
+                      onPressed: isBusy ? null : () => _openOffersSheet(id),
+                      child: Text(dt('عروض السائقين')),
                     ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isPeer && status == 'PENDING')
-                        FilledButton.tonal(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: DarbColors.isDark(context)
-                                ? DarbColors.forestSoft
-                                : DarbColors.mintTint,
-                            foregroundColor: DarbColors.isDark(context)
-                                ? DarbColors.mint
-                                : DarbColors.forest,
-                            minimumSize: const Size(0, 38),
-                          ),
-                          onPressed: () => _openOffersSheet(id),
-                          child: Text(dt('عروض السائقين')),
+                  if (canTrack)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 8),
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 38),
                         ),
-                      if (canTrack)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 8),
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(0, 38),
-                            ),
-                            onPressed: () => _openDriverLocation(order),
-                            icon: const Icon(Icons.map_outlined, size: 17),
-                            label: Text(dt('موقع السائق')),
-                          ),
+                        onPressed: () => _openDriverLocation(order),
+                        icon: const Icon(Icons.map_outlined, size: 17),
+                        label: Text(dt('موقع السائق')),
+                      ),
+                    ),
+                  if (canReview)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 8),
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 38),
                         ),
-                      if (canReview)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 8),
-                          child: FilledButton.icon(
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(0, 38),
-                            ),
-                            onPressed: () => _openReviewSheet(id),
-                            icon: const Icon(Icons.star_outline_rounded, size: 17),
-                            label: Text(dt('تقييم الطلب')),
-                          ),
+                        onPressed: () => _openReviewSheet(id),
+                        icon: const Icon(Icons.star_outline_rounded, size: 17),
+                        label: Text(dt('تقييم الطلب')),
+                      ),
+                    ),
+                  if (status == 'PENDING')
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 8),
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: DarbColors.dangerOf(context),
                         ),
-                      if (status == 'PENDING')
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 8),
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              foregroundColor: DarbColors.dangerOf(context),
-                            ),
-                            onPressed: () => _cancelPendingOrder(id),
-                            child: Text(dt('إلغاء الطلب')),
-                          ),
-                        ),
-                    ],
-                  ),
+                        onPressed:
+                            isBusy ? null : () => _cancelPendingOrder(id),
+                        child: Text(dt('إلغاء الطلب')),
+                      ),
+                    ),
                 ],
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
@@ -690,6 +757,7 @@ class _DriverOffersSheet extends StatefulWidget {
 class _DriverOffersSheetState extends State<_DriverOffersSheet> {
   List<Map<String, dynamic>> _offers = const [];
   bool _loading = true;
+  String? _selectingOfferId;
   String? _error;
 
   @override
@@ -720,9 +788,15 @@ class _DriverOffersSheetState extends State<_DriverOffersSheet> {
   }
 
   Future<void> _select(String offerId) async {
+    if (_selectingOfferId != null) return;
+    setState(() {
+      _selectingOfferId = offerId;
+      _error = null;
+    });
     try {
       await Api.instance
           .post('/orders/${widget.orderId}/offers/$offerId/select', {});
+      DarbHaptics.success();
       if (!mounted) return;
       widget.onSelected();
       Navigator.pop(context);
@@ -733,6 +807,8 @@ class _DriverOffersSheetState extends State<_DriverOffersSheet> {
       if (mounted) setState(() => _error = e.message);
     } catch (_) {
       if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+    } finally {
+      if (mounted) setState(() => _selectingOfferId = null);
     }
   }
 
@@ -824,8 +900,16 @@ class _DriverOffersSheetState extends State<_DriverOffersSheet> {
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(0, 38),
                       ),
-                      onPressed: () => _select(offer['id'].toString()),
-                      child: Text(dt('اختيار')),
+                      onPressed: _selectingOfferId != null
+                          ? null
+                          : () => _select(offer['id'].toString()),
+                      child: _selectingOfferId == offer['id']?.toString()
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(dt('اختيار')),
                     ),
                   ],
                 ),

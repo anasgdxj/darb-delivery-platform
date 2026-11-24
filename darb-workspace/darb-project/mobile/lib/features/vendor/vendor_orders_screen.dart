@@ -7,6 +7,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_map_picker.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class VendorOrdersScreen extends StatefulWidget {
   const VendorOrdersScreen({super.key});
@@ -23,6 +24,7 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
   bool _loading = true;
   bool _togglingOpen = false;
   String? _error;
+  final Set<String> _busyOrderIds = <String>{};
 
   @override
   void initState() {
@@ -195,8 +197,11 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
   }
 
   Future<void> _updateStatus(String orderId, String nextStatus) async {
+    if (!_busyOrderIds.add(orderId)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.patch('/orders/$orderId/status', {'status': nextStatus});
+      if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -209,6 +214,9 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyOrderIds.remove(orderId);
+      if (mounted) setState(() {});
     }
   }
 
@@ -386,7 +394,19 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      DarbStatusBadge(status: isOpen ? 'OPEN' : 'CLOSED'),
+                      Row(
+                        children: [
+                          DarbPulseDot(
+                            active: isOpen,
+                            color: isOpen
+                                ? DarbColors.successOf(context)
+                                : DarbColors.dangerOf(context),
+                            size: 7.5,
+                          ),
+                          const SizedBox(width: 6),
+                          DarbStatusBadge(status: isOpen ? 'OPEN' : 'CLOSED'),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -492,84 +512,111 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
     final subtotal = num.tryParse(o['subtotal']?.toString() ?? '0') ?? 0;
     final currency = o['currency']?.toString() ?? 'SYP';
 
-    return DarbPressScale(
+    final isBusy = _busyOrderIds.contains(id);
+
+    return DarbInteractiveCard(
       onTap: () => _openOrderDetail(o),
-      child: DarbGlassSurface(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '${o['orderNumber']} · ${o['customer']?['name'] ?? ''}',
-                    style: TextStyle(
-                      color: DarbColors.inkOf(context),
-                      fontWeight: FontWeight.w900,
-                    ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${o['orderNumber']} · ${o['customer']?['name'] ?? ''}',
+                  style: TextStyle(
+                    color: DarbColors.inkOf(context),
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
-                DarbStatusBadge(status: status),
+              ),
+              DarbStatusBadge(status: status),
+            ],
+          ),
+          const SizedBox(height: 10),
+          DarbOrderTimeline(status: status, compact: true),
+          const SizedBox(height: 8),
+          for (final item in items.take(3))
+            Text(
+              '• ${item['nameSnapshot']} × ${item['quantity']}',
+              style: TextStyle(
+                color: DarbColors.mutedOf(context),
+                fontSize: 13,
+              ),
+            ),
+          const SizedBox(height: 8),
+          Text(
+            formatDarbMoney(subtotal, currency),
+            style: TextStyle(
+              color: DarbColors.primaryOf(context),
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          if (status == 'PENDING' ||
+              status == 'ACCEPTED' ||
+              status == 'PREPARING') ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                if (status == 'PENDING') ...[
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: isBusy
+                          ? null
+                          : () => _updateStatus(id, 'ACCEPTED'),
+                      child: isBusy
+                          ? const SizedBox(
+                              width: 17,
+                              height: 17,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(dt('قبول')),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: DarbColors.dangerOf(context),
+                    ),
+                    onPressed: isBusy
+                        ? null
+                        : () => _updateStatus(id, 'CANCELLED'),
+                    child: Text(dt('رفض')),
+                  ),
+                ] else if (status == 'ACCEPTED')
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: isBusy
+                          ? null
+                          : () => _updateStatus(id, 'PREPARING'),
+                      child: isBusy
+                          ? const SizedBox(
+                              width: 17,
+                              height: 17,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(dt('بدء التحضير')),
+                    ),
+                  )
+                else if (status == 'PREPARING')
+                  Expanded(
+                    child: FilledButton(
+                      onPressed:
+                          isBusy ? null : () => _updateStatus(id, 'READY'),
+                      child: isBusy
+                          ? const SizedBox(
+                              width: 17,
+                              height: 17,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(dt('جاهز للاستلام')),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 8),
-            for (final item in items.take(3))
-              Text(
-                '• ${item['nameSnapshot']} × ${item['quantity']}',
-                style: TextStyle(
-                  color: DarbColors.mutedOf(context),
-                  fontSize: 13,
-                ),
-              ),
-            const SizedBox(height: 8),
-            Text(
-              formatDarbMoney(subtotal, currency),
-              style: TextStyle(
-                color: DarbColors.primaryOf(context),
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            if (status == 'PENDING' ||
-                status == 'ACCEPTED' ||
-                status == 'PREPARING') ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  if (status == 'PENDING') ...[
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => _updateStatus(id, 'ACCEPTED'),
-                        child: Text(dt('قبول')),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: DarbColors.dangerOf(context),
-                      ),
-                      onPressed: () => _updateStatus(id, 'CANCELLED'),
-                      child: Text(dt('رفض')),
-                    ),
-                  ] else if (status == 'ACCEPTED')
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => _updateStatus(id, 'PREPARING'),
-                        child: Text(dt('بدء التحضير')),
-                      ),
-                    )
-                  else if (status == 'PREPARING')
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => _updateStatus(id, 'READY'),
-                        child: Text(dt('جاهز للاستلام')),
-                      ),
-                    ),
-                ],
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }

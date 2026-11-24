@@ -1,5 +1,6 @@
 import 'package:darb/core/l10n/app_localizations.dart';
 import 'package:darb/core/theme/darb_design_system.dart';
+import 'package:darb/core/widgets/darb_city_scene.dart';
 import 'package:darb/core/widgets/darb_components.dart';
 import 'package:darb/core/widgets/darb_glass.dart';
 import 'package:darb/core/widgets/darb_motion_components.dart';
@@ -12,37 +13,41 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('DARB Design System 2.0 & Brand Integrity', () {
-    test('enforces exact DESIGN_SYSTEM.md 2.0 light and dark semantic tokens', () {
-      expect(DarbColors.forest, const Color(0xFF102B26));
-      expect(DarbColors.forestSoft, const Color(0xFF1C443B));
+  group('DARB Design System 2026 & Brand Integrity', () {
+    test('enforces exact DESIGN_SYSTEM.md 2026 light and dark semantic tokens', () {
+      expect(DarbColors.forest, const Color(0xFF12302A));
+      expect(DarbColors.primaryGreen, const Color(0xFF167A5A));
+      expect(DarbColors.forestSoft, const Color(0xFF1C4B3F));
       expect(DarbColors.mint, const Color(0xFFB9E4D2));
       expect(DarbColors.lime, const Color(0xFFC8F169));
-      expect(DarbColors.danger, const Color(0xFFB94747));
-      expect(DarbColors.success, const Color(0xFF287A50));
-      expect(DarbColors.warning, const Color(0xFFB7791F));
-      expect(DarbColors.info, const Color(0xFF356D9A));
+      expect(DarbColors.danger, const Color(0xFFD64545));
+      expect(DarbColors.success, const Color(0xFF2E7D32));
+      expect(DarbColors.warning, const Color(0xFFC47B19));
+      expect(DarbColors.info, const Color(0xFF2B6EA3));
 
-      expect(DarbColors.canvas, const Color(0xFFF5F6F2));
+      expect(DarbColors.canvas, const Color(0xFFF6F6F3));
       expect(DarbColors.surface, const Color(0xFFFFFFFF));
-      expect(DarbColors.ink, const Color(0xFF17231F));
-      expect(DarbColors.muted, const Color(0xFF77837D));
-      expect(DarbColors.line, const Color(0xFFE4E9E3));
-      expect(DarbColors.borderStrong, const Color(0xFFCBD5CE));
+      expect(DarbColors.surfaceAlt, const Color(0xFFECEEE9));
+      expect(DarbColors.ink, const Color(0xFF1A2E29));
+      expect(DarbColors.muted, const Color(0xFF687A75));
+      expect(DarbColors.line, const Color(0xFFD0D7D4));
+      expect(DarbColors.borderStrong, const Color(0xFFB8C3BF));
 
       expect(DarbColors.darkCanvas, const Color(0xFF0B1512));
-      expect(DarbColors.darkSurface, const Color(0xFF13221D));
-      expect(DarbColors.darkSurfaceElevated, const Color(0xFF1A2D26));
-      expect(DarbColors.darkInk, const Color(0xFFF1F5F1));
-      expect(DarbColors.darkMuted, const Color(0xFFA4B2AA));
-      expect(DarbColors.darkLine, const Color(0xFF2A3B33));
-      expect(DarbColors.darkPrimary, const Color(0xFFB9E4D2));
-      expect(DarbColors.darkOnPrimary, const Color(0xFF102B26));
+      expect(DarbColors.darkSurface, const Color(0xFF12201B));
+      expect(DarbColors.darkSurfaceElevated, const Color(0xFF182A24));
+      expect(DarbColors.darkSurfaceAlt, const Color(0xFF1D322B));
+      expect(DarbColors.darkInk, const Color(0xFFEEF5F1));
+      expect(DarbColors.darkMuted, const Color(0xFF9CB0A7));
+      expect(DarbColors.darkLine, const Color(0xFF263B33));
+      expect(DarbColors.darkBorderStrong, const Color(0xFF3A544A));
+      expect(DarbColors.darkPrimary, const Color(0xFF6FE0B7));
+      expect(DarbColors.darkOnPrimary, const Color(0xFF0B1F1A));
 
       final themeLight = DarbTheme.light;
       final themeDark = DarbTheme.dark;
 
-      expect(themeLight.colorScheme.primary, DarbColors.forest);
+      expect(themeLight.colorScheme.primary, DarbColors.primaryGreen);
       expect(themeLight.colorScheme.onPrimary, Colors.white);
       expect(themeLight.scaffoldBackgroundColor, DarbColors.canvas);
 
@@ -390,6 +395,120 @@ void main() {
       outerSetState(() => tabIndex = 0);
       await tester.pump(const Duration(milliseconds: 260));
       expect(find.text('تبويب 1: 1'), findsOneWidget);
+    });
+  });
+
+  group('DARB Design Evolution 2026 Widgets', () {
+    test('DarbCitySceneCard resolves deterministic city assets without mixing cities', () {
+      expect(
+        DarbCitySceneCard.resolveAssetPath('damascus', 'دمشق'),
+        'assets/cities/damascus.jpg',
+      );
+      expect(
+        DarbCitySceneCard.resolveAssetPath('', 'حلب'),
+        'assets/cities/aleppo.jpg',
+      );
+      expect(
+        DarbCitySceneCard.resolveAssetPath('latakia', 'اللاذقية'),
+        'assets/cities/latakia.jpg',
+      );
+      expect(
+        DarbCitySceneCard.resolveAssetPath('tartus', 'طرطوس'),
+        isNull,
+      );
+    });
+
+    testWidgets('DarbCitySceneCard renders selected city info and falls back cleanly',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      var addressTapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: Scaffold(
+              body: DarbCitySceneCard(
+                cityCode: 'tartus',
+                cityName: 'طرطوس',
+                vendorCount: 7,
+                activeAddressLabel: 'الكورنيش البحري',
+                onTapAddresses: () => addressTapped = true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('طرطوس'), findsOneWidget);
+      expect(find.text('7'), findsOneWidget);
+      expect(find.text('الكورنيش البحري'), findsOneWidget);
+      expect(find.text('دمشق'), findsNothing);
+
+      await tester.tap(find.text('الكورنيش البحري'));
+      await tester.pump();
+      expect(addressTapped, isTrue);
+    });
+
+    testWidgets('DarbOrderTimeline renders store, peer, and cancelled timelines',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DarbTheme.dark,
+          home: Scaffold(
+            body: Column(
+              children: const [
+                DarbOrderTimeline(status: 'PREPARING'),
+                SizedBox(height: 12),
+                DarbOrderTimeline(status: 'PICKED_UP', isPeer: true),
+                SizedBox(height: 12),
+                DarbOrderTimeline(status: 'CANCELLED'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('التحضير'), findsOneWidget);
+      expect(find.text('في الطريق'), findsOneWidget);
+      expect(find.text('تم إلغاء هذا الطلب'), findsOneWidget);
+    });
+
+    testWidgets('DarbInteractiveCard and DarbPulseDot honor Reduce Motion and taps',
+        (tester) async {
+      var cardTapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: Scaffold(
+              body: DarbInteractiveCard(
+                onTap: () => cardTapped = true,
+                child: const Row(
+                  children: [
+                    DarbPulseDot(active: true),
+                    SizedBox(width: 8),
+                    Text('بطاقة تفاعلية'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.byType(DarbPulseDot), findsOneWidget);
+      await tester.tap(find.text('بطاقة تفاعلية'));
+      await tester.pump();
+      expect(cardTapped, isTrue);
     });
   });
 }

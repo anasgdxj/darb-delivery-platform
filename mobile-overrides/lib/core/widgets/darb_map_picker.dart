@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../services/location_service.dart';
 import '../theme/darb_design_system.dart';
+import 'darb_motion_components.dart';
 
 typedef DarbMapPointCallback = void Function(double latitude, double longitude);
 
@@ -93,13 +94,17 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
+        AnimatedContainer(
+          duration: DarbMotion.effectiveDuration(context, DarbMotion.fast),
           height: 250,
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: DarbColors.softSurfaceOf(context),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: DarbColors.borderOf(context)),
+            border: Border.all(
+              color: hasSelection ? accent : DarbColors.borderOf(context),
+              width: hasSelection ? 1.5 : 1.0,
+            ),
           ),
           child: Stack(
             children: [
@@ -221,6 +226,10 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
         const SizedBox(height: 10),
         Row(
           children: [
+            if (hasSelection) ...[
+              DarbPulseDot(color: accent, size: 7.5),
+              const SizedBox(width: 6),
+            ],
             Expanded(
               child: Text(
                 hasSelection

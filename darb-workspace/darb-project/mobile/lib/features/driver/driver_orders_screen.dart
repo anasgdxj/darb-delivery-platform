@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
-import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class DriverOrdersScreen extends StatefulWidget {
   const DriverOrdersScreen({super.key});
@@ -52,7 +51,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
     if (mounted) setState(() {});
     try {
       await Api.instance.patch('/orders/$orderId/status', {'status': nextStatus});
-      if (mounted) HapticFeedback.selectionClick();
+      if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -155,7 +154,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
     final dropLat = addr?['latitude'] as num?;
     final dropLng = addr?['longitude'] as num?;
 
-    return DarbGlassSurface(
+    return DarbInteractiveCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -174,6 +173,12 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
               ),
               DarbStatusBadge(status: status),
             ],
+          ),
+          const SizedBox(height: 10),
+          DarbOrderTimeline(
+            status: status,
+            isPeer: o['type'] == 'PEER_DELIVERY',
+            compact: true,
           ),
           if (customerName != null && customerName.isNotEmpty) ...[
             const SizedBox(height: 6),

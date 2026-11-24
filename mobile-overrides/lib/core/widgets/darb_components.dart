@@ -558,3 +558,207 @@ class DarbRadioOptionTile extends StatelessWidget {
     );
   }
 }
+
+/// Visual order progression timeline used across Customer, Driver, and Vendor
+/// order views. Automatically adapts steps for store vs peer-delivery orders.
+class DarbOrderTimeline extends StatelessWidget {
+  const DarbOrderTimeline({
+    super.key,
+    required this.status,
+    this.isPeer = false,
+    this.compact = false,
+  });
+
+  final String status;
+  final bool isPeer;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalized = status.toUpperCase();
+    final isCancelled = normalized == 'CANCELLED' || normalized == 'REJECTED';
+    if (isCancelled) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: DarbColors.dangerSoftOf(context),
+          borderRadius: BorderRadius.circular(DarbRadius.sm),
+          border: Border.all(
+            color: DarbColors.dangerOf(context).withValues(alpha: 0.28),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.cancel_outlined,
+              size: 16,
+              color: DarbColors.dangerOf(context),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                dt('تم إلغاء هذا الطلب'),
+                style: TextStyle(
+                  color: DarbColors.dangerOf(context),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final steps = isPeer
+        ? <(String, String, IconData)>[
+            ('PENDING', dt('قيد الانتظار'), Icons.schedule_rounded),
+            ('ASSIGNED', dt('تم التعيين'), Icons.person_pin_circle_outlined),
+            ('PICKED_UP', dt('في الطريق'), Icons.delivery_dining_rounded),
+            ('DELIVERED', dt('تم التسليم'), Icons.verified_rounded),
+          ]
+        : <(String, String, IconData)>[
+            ('PENDING', dt('جديد'), Icons.receipt_outlined),
+            ('PREPARING', dt('التحضير'), Icons.storefront_rounded),
+            ('ASSIGNED', dt('المندوب'), Icons.delivery_dining_rounded),
+            ('DELIVERED', dt('التسليم'), Icons.verified_rounded),
+          ];
+
+    final activeIndex = switch (normalized) {
+      'PENDING' => 0,
+      'ACCEPTED' || 'PREPARING' || 'READY' => isPeer ? 0 : 1,
+      'ASSIGNED' => isPeer ? 1 : 2,
+      'PICKED_UP' => isPeer ? 2 : 2,
+      'DELIVERED' => steps.length - 1,
+      _ => 0,
+    };
+
+    final primary = DarbColors.primaryOf(context);
+    final success = DarbColors.successOf(context);
+    final muted = DarbColors.mutedOf(context);
+    final border = DarbColors.borderOf(context);
+    final isDone = normalized == 'DELIVERED';
+    final activeTone = isDone ? success : primary;
+    final duration = DarbMotion.effectiveDuration(context, DarbMotion.standard);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: List.generate(steps.length * 2 - 1, (idx) {
+            if (idx.isOdd) {
+              final stepIdx = idx ~/ 2;
+              final filled = stepIdx < activeIndex || isDone;
+              return Expanded(
+                child: AnimatedContainer(
+                  duration: duration,
+                  curve: DarbMotion.enter,
+                  height: 3,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: filled ? activeTone : border,
+                    borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  ),
+                ),
+              );
+            }
+            final stepIdx = idx ~/ 2;
+            final reached = stepIdx <= activeIndex;
+            final current = stepIdx == activeIndex && !isDone;
+            return AnimatedContainer(
+              duration: duration,
+              curve: DarbMotion.enter,
+              width: compact ? 24 : 28,
+              height: compact ? 24 : 28,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: reached
+                    ? (current
+                        ? activeTone
+                        : activeTone.withValues(alpha: 0.16))
+                    : DarbColors.softSurfaceOf(context),
+                border: Border.all(
+                  color: reached ? activeTone : border,
+                  width: current ? 0 : 1.3,
+                ),
+              ),
+              child: Icon(
+                steps[stepIdx].$3,
+                size: compact ? 13 : 15,
+                color: current
+                    ? DarbColors.onPrimaryOf(context)
+                    : (reached ? activeTone : muted),
+              ),
+            );
+          }),
+        ),
+        if (!compact) ...[
+          const SizedBox(height: 6),
+          Row(
+            children: List.generate(steps.length, (i) {
+              final reached = i <= activeIndex;
+              return Expanded(
+                child: Text(
+                  steps[i].$2,
+                  textAlign: i == 0
+                      ? TextAlign.start
+                      : (i == steps.length - 1
+                          ? TextAlign.end
+                          : TextAlign.center),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: i == activeIndex ? FontWeight.w900 : FontWeight.w600,
+                    color: reached ? DarbColors.inkOf(context) : muted,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class DarbSearchBar extends StatelessWidget {
+  const DarbSearchBar({
+    super.key,
+    required this.controller,
+    required this.hintText,
+    required this.onChanged,
+    this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final String hintText;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: Icon(
+          Icons.search_rounded,
+          color: DarbColors.primaryOf(context),
+        ),
+        suffixIcon: controller.text.isNotEmpty
+            ? IconButton(
+                onPressed: () {
+                  controller.clear();
+                  onChanged('');
+                },
+                icon: const Icon(Icons.close_rounded, size: 19),
+              )
+            : null,
+      ),
+    );
+  }
+}

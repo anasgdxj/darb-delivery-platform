@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class VendorProductsScreen extends StatefulWidget {
   const VendorProductsScreen({super.key});
@@ -20,6 +21,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
   String? _vendorStatus;
   bool _loading = true;
   String? _error;
+  final Set<String> _busyProductIds = <String>{};
 
   @override
   void initState() {
@@ -293,8 +295,11 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
       ),
     );
     if (confirmed != true) return;
+    if (!_busyProductIds.add(id)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.delete('/vendor/products/$id');
+      if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -307,12 +312,18 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyProductIds.remove(id);
+      if (mounted) setState(() {});
     }
   }
 
   Future<void> _toggleAvailable(String id, bool nextVal) async {
+    if (!_busyProductIds.add(id)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.patch('/vendor/products/$id', {'isAvailable': nextVal});
+      if (mounted) DarbHaptics.selection();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -325,6 +336,9 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyProductIds.remove(id);
+      if (mounted) setState(() {});
     }
   }
 
@@ -363,13 +377,10 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: DarbSearchBar(
                     controller: _searchCtrl,
+                    hintText: dt('ابحث عن منتج...'),
                     onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      hintText: dt('ابحث عن منتج...'),
-                      prefixIcon: const Icon(Icons.search_rounded),
-                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -433,7 +444,9 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
     final available = p['isAvailable'] != false;
     final stock = p['stockQty'];
 
-    return DarbGlassSurface(
+    final isBusy = _busyProductIds.contains(id);
+
+    return DarbInteractiveCard(
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -466,7 +479,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
               ),
               Switch(
                 value: available,
-                onChanged: (v) => _toggleAvailable(id, v),
+                onChanged: isBusy ? null : (v) => _toggleAvailable(id, v),
               ),
             ],
           ),
@@ -474,7 +487,8 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
           Row(
             children: [
               TextButton.icon(
-                onPressed: () => _openProductSheet(existing: p),
+                onPressed:
+                    isBusy ? null : () => _openProductSheet(existing: p),
                 icon: const Icon(Icons.edit_outlined, size: 17),
                 label: Text(dt('تعديل المنتج')),
               ),
@@ -482,7 +496,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                 style: TextButton.styleFrom(
                   foregroundColor: DarbColors.dangerOf(context),
                 ),
-                onPressed: () => _deleteProduct(id),
+                onPressed: isBusy ? null : () => _deleteProduct(id),
                 icon: const Icon(Icons.delete_outline_rounded, size: 17),
                 label: Text(dt('حذف المنتج')),
               ),

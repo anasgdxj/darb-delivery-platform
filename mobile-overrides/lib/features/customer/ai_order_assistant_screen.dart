@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 import 'peer_delivery_screen.dart';
 import 'vendor_catalog_screen.dart';
 
@@ -27,6 +28,8 @@ class AiOrderAssistantScreen extends StatefulWidget {
 class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
   final _textController = TextEditingController();
   bool _submitting = false;
+  DarbActionState _analyzeState = DarbActionState.idle;
+  int _errorTrigger = 0;
   String? _error;
   Map<String, dynamic>? _draft;
 
@@ -39,11 +42,17 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
   Future<void> _analyze() async {
     final text = _textController.text.trim();
     if (text.length < 5) {
-      setState(() => _error = dt('اكتب تفاصيل طلبك بشكل أوضح (5 أحرف على الأقل)'));
+      DarbHaptics.warning();
+      setState(() {
+        _error = dt('اكتب تفاصيل طلبك بشكل أوضح (5 أحرف على الأقل)');
+        _analyzeState = DarbActionState.error;
+        _errorTrigger++;
+      });
       return;
     }
     setState(() {
       _submitting = true;
+      _analyzeState = DarbActionState.loading;
       _error = null;
     });
     try {
@@ -52,13 +61,36 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
         'text': text,
       }) as Map<String, dynamic>;
       if (!mounted) return;
-      setState(() => _draft = result);
+      DarbHaptics.success();
+      setState(() {
+        _draft = result;
+        _analyzeState = DarbActionState.idle;
+      });
     } on ApiException catch (e) {
-      if (mounted) setState(() => _error = e.message);
+      if (mounted) {
+        setState(() {
+          _error = e.message;
+          _analyzeState = DarbActionState.error;
+          _errorTrigger++;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+      if (mounted) {
+        setState(() {
+          _error = dt('حدث خطأ غير متوقع، حاول مجدداً');
+          _analyzeState = DarbActionState.error;
+          _errorTrigger++;
+        });
+      }
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+          if (_analyzeState == DarbActionState.loading) {
+            _analyzeState = DarbActionState.idle;
+          }
+        });
+      }
     }
   }
 
@@ -70,7 +102,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
           : draft['originalText']?.toString();
       Navigator.push(
         context,
-        MaterialPageRoute(
+        DarbPageRoute(
           builder: (_) => PeerDeliveryScreen(
             cityId: widget.cityId,
             cityName: widget.cityName,
@@ -82,37 +114,47 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
       return;
     }
 
-    final items = (draft['items'] as List? ?? []).whereType<Map<String, dynamic>>().toList();
+    final items =
+        (draft['items'] as List? ?? []).whereType<Map<String, dynamic>>().toList();
     String? vendorId = draft['vendorId']?.toString();
     String vendorName = dt('متجر');
     final prefilledCart = <String, int>{};
 
     for (final item in items) {
       final productId = item['productId']?.toString();
-      final candidates = (item['candidates'] as List? ?? []).whereType<Map<String, dynamic>>().toList();
+      final candidates = (item['candidates'] as List? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .toList();
       if (productId != null && candidates.isNotEmpty) {
         final match = candidates.firstWhere(
           (c) => c['productId'] == productId,
           orElse: () => candidates.first,
         );
         vendorId ??= match['vendorId']?.toString();
-        if (match['vendorName'] != null) vendorName = match['vendorName'].toString();
+        if (match['vendorName'] != null) {
+          vendorName = match['vendorName'].toString();
+        }
         if (match['vendorId']?.toString() == vendorId) {
-          prefilledCart[productId] = ((item['quantity'] as num?)?.toInt() ?? 1).clamp(1, 50);
+          prefilledCart[productId] =
+              ((item['quantity'] as num?)?.toInt() ?? 1).clamp(1, 50);
         }
       }
     }
 
     if (vendorId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(dt('اختر المتجر من القائمة الرئيسية لإكمال المنتجات المقترحة'))),
+        SnackBar(
+          content: Text(
+            dt('اختر المتجر من القائمة الرئيسية لإكمال المنتجات المقترحة'),
+          ),
+        ),
       );
       return;
     }
 
     Navigator.push(
       context,
-      MaterialPageRoute(
+      DarbPageRoute(
         builder: (_) => VendorCatalogScreen(
           vendor: {
             'id': vendorId,
@@ -152,10 +194,14 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: DarbColors.primaryOf(context).withValues(alpha: 0.14),
+                            color: DarbColors.primaryOf(context)
+                                .withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(13),
                           ),
-                          child: Icon(Icons.auto_awesome_rounded, color: DarbColors.primaryOf(context)),
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            color: DarbColors.primaryOf(context),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -174,32 +220,36 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                     TextField(
                       controller: _textController,
                       maxLines: 4,
+                      onChanged: (_) {
+                        if (_analyzeState == DarbActionState.error) {
+                          setState(() => _analyzeState = DarbActionState.idle);
+                        }
+                      },
                       decoration: InputDecoration(
                         labelText: dt('اكتب طلبك هنا'),
-                        hintText: dt('مثال: أريد عبوتين زيت وخبز إلى حي الشهباء، أو إرسال مفاتيح من المزة إلى المالكي'),
+                        hintText: dt(
+                          'مثال: أريد عبوتين زيت وخبز إلى حي الشهباء، أو إرسال مفاتيح من المزة إلى المالكي',
+                        ),
                       ),
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 10),
                       Text(
                         _error!,
-                        style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w700),
+                        style: TextStyle(
+                          color: DarbColors.dangerOf(context),
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 14),
-                    FilledButton.icon(
+                    DarbActionButton(
+                      label: dt('تحليل الطلب'),
+                      loadingLabel: dt('جارٍ التحليل...'),
+                      state: _analyzeState,
+                      errorTrigger: _errorTrigger,
+                      icon: Icons.bolt_rounded,
                       onPressed: _submitting ? null : _analyze,
-                      icon: _submitting
-                          ? SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: DarbColors.onPrimaryOf(context),
-                              ),
-                            )
-                          : const Icon(Icons.bolt_rounded),
-                      label: Text(_submitting ? dt('جارٍ التحليل...') : dt('تحليل الطلب')),
                     ),
                   ],
                 ),
@@ -225,22 +275,30 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                               ),
                             ),
                           ),
-                          DarbStatusBadge(status: draft['status']?.toString() ?? 'NEEDS_REVIEW'),
+                          DarbStatusBadge(
+                            status: draft['status']?.toString() ?? 'NEEDS_REVIEW',
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Text(
                         '${dt('النوع')}: ${draft['intent'] == 'PEER_DELIVERY' ? dt('توصيل مستقل') : dt('الطلب من المتاجر')}',
-                        style: TextStyle(color: DarbColors.primaryOf(context), fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                          color: DarbColors.primaryOf(context),
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       const SizedBox(height: 10),
-                      for (final item in (draft['items'] as List? ?? []).whereType<Map<String, dynamic>>())
+                      for (final item in (draft['items'] as List? ?? [])
+                          .whereType<Map<String, dynamic>>())
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: Row(
                             children: [
                               Icon(
-                                item['productId'] != null ? Icons.check_circle_rounded : Icons.help_outline_rounded,
+                                item['productId'] != null
+                                    ? Icons.check_circle_rounded
+                                    : Icons.help_outline_rounded,
                                 size: 17,
                                 color: item['productId'] != null
                                     ? DarbColors.primaryOf(context)
@@ -250,7 +308,10 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                               Expanded(
                                 child: Text(
                                   '${item['rawName']} × ${item['quantity'] ?? 1}',
-                                  style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w700),
+                                  style: TextStyle(
+                                    color: DarbColors.inkOf(context),
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ],
@@ -284,10 +345,10 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                         ),
                       ],
                       const SizedBox(height: 16),
-                      FilledButton.icon(
+                      DarbActionButton(
+                        label: dt('متابعة لمراجعة وإرسال الطلب'),
+                        icon: Icons.arrow_forward_rounded,
                         onPressed: () => _proceedWithDraft(draft),
-                        icon: const Icon(Icons.arrow_forward_rounded),
-                        label: Text(dt('متابعة لمراجعة وإرسال الطلب')),
                       ),
                     ],
                   ),

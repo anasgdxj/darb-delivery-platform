@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await _pauseForConfirmation();
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const AppShell()),
+        DarbPageRoute(builder: (_) => const AppShell()),
       );
     } on ApiException catch (e) {
       if (mounted) {
@@ -205,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await _pauseForConfirmation();
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const AppShell()),
+        DarbPageRoute(builder: (_) => const AppShell()),
       );
     } on ApiException catch (e) {
       if (mounted) {

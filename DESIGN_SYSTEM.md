@@ -1,36 +1,32 @@
 # DARB Design System
 
-Version: 2.0  
+Version: 2026.1 (DARB — DESIGN EVOLUTION 2026)  
 Scope: Flutter mobile app (customer, driver, vendor, administration)  
-Source of truth: `mobile-overrides/design_system.dart`
+Source of truth: `mobile-overrides/lib/core/theme/darb_design_system.dart`
 
-This document defines the shared visual and interaction language for DARB. It does not authorize changing product behavior or backend contracts.
+This document defines the shared visual, motion, and structural system for DARB. It guides UI and motion architecture without altering authentication, package identity, signing, or backend API contracts.
 
 ## Product principles
 
-- Arabic-first experience with correct RTL layout; English and Turkish remain supported.
-- Clear primary action on every screen. Avoid competing calls to action.
-- Use real API data. Never fill empty screens with invented stores, orders, prices, ratings, or driver offers.
-- Every network-driven screen must represent loading, success, empty, and recoverable error states.
-- Keep forms short, validate before sending, and preserve entered data after recoverable failures.
-- Maintain accessible contrast, readable touch targets, and responsive layouts for small Android devices.
-- Separate API/business logic from presentation when adding or restructuring screens.
-- Preserve authentication, package identity, release signing, and existing API contracts unless a separately reviewed change requires otherwise.
+- Arabic-first experience with native RTL layout; English and Turkish remain fully supported (`LTR`).
+- Clear primary action on every screen (`DarbActionButton` or themed `FilledButton`). Avoid competing calls to action.
+- Real API data only. Never populate screens with fabricated stores, orders, fees, ratings, or driver availability.
+- Represent loading, empty, recoverable error, and live state explicitly on network-driven screens.
+- Preserve entered form state across recoverable errors and provide haptic + shake validation feedback (`DarbShakeBox` + `DarbHaptics`).
+- Maintain accessible contrast, clear touch targets (`>= 48dp`), and responsive layouts across small Android viewports.
+- Separate UI widgets from API/session logic cleanly.
+- Preserve Google Sign-In, MsgPlus SMS OTP, Firebase/FCM notifications, `com.darb.darb` package identity, release signing, and dual-track APK / Play Store builds.
 
-## Approved visual direction: DARB PULSE 2026
+## Approved visual direction: Premium + Dynamic + Neo (Rich Motion)
 
-DARB should feel like a live logistics network: confident, clear, fast, and premium. The interface is map-aware and task-first, not a generic shopping template.
+DARB feels like a live city logistics network: confident, spatial, dark-emerald neo surfaces, crisp borders, and responsive motion.
 
-- **Visual hierarchy:** one dominant task per screen; supporting actions remain secondary.
-- **Customer experience:** make the two service paths unmistakable—ordering from stores and independent parcel delivery. Do not hide independent delivery when stores are unavailable.
-- **Driver experience:** prioritize availability, nearby eligible requests, active delivery progress, and the next required action.
-- **Vendor experience:** prioritize incoming orders and the preparation/hand-off sequence.
-- **Administration:** prioritize operational queues, approvals, exceptions, and delivery-zone controls.
-- **Navigation:** role-specific destinations remain stable and predictable. Do not add tabs merely for decoration.
-- **Map use:** show maps only where location materially helps a task. A map must not displace the primary action or make weak-network startup heavier.
-- **Motion:** dynamic and rich, but purposeful. Motion explains state, hierarchy, and transitions; it never delays critical actions.
-- **Surface language:** layered surfaces, deliberate negative space, restrained borders, and a small number of high-contrast accents. Avoid excessive gradients, glass effects, and decorative cards.
-- **Content integrity:** no fake live data, placeholder ratings, fabricated availability, or invented delivery prices.
+- **Visual hierarchy:** one dominant task per view; supporting details sit on layered surfaces (`DarbColors.canvasOf`, `surfaceOf`, `surfaceAltOf`).
+- **Customer experience:** greeting hero, deterministic `DarbCitySceneCard` matched strictly to the active city (no cross-city swapping), clear split between Stores and Peer Delivery, active-order live banner with `DarbOrderTimeline`, and real-time map tracking.
+- **Driver experience:** live Neo cockpit (`DarbPulseDot` when online), daily summary, pickup/dropoff route cards (`DarbInteractiveCard`), and status actions with double-tap protection.
+- **Vendor experience:** store status beacon, double-tap-locked order progression (`Accept` / `Preparing` / `Ready`), compact `DarbOrderTimeline`, and searchable product management.
+- **Administration:** operational KPIs, pending approvals, user/role search (`DarbSearchBar`), city & delivery-zone pricing controls, and protected single-flight mutations.
+- **Map & tracking use:** animated map camera updates and real-coordinate route polylines (`DriverTrackingScreen`) and active map pickers (`DarbMapPicker`).
 
 ## Color system
 
@@ -38,155 +34,88 @@ DARB should feel like a live logistics network: confident, clear, fast, and prem
 
 | Token | Hex | Usage |
 |---|---|---|
-| forest | #102B26 | Primary brand and high-emphasis actions |
-| forestSoft | #1C443B | Secondary brand surfaces |
-| mint | #B9E4D2 | Selected and supportive states |
-| lime | #C8F169 | High-emphasis accent on dark brand surfaces |
-| danger | #B94747 | Destructive actions and errors |
-| success | #287A50 | Confirmed/success states |
-| warning | #B7791F | Pending/attention states |
-| info | #356D9A | Informational states |
+| `forest` | `#12302A` | Deep emerald brand anchor and hero dark canvas |
+| `primaryGreen` | `#167A5A` | Primary brand interactive green in Light mode |
+| `forestSoft` | `#1C4B3F` | Secondary deep emerald containers |
+| `mint` | `#B9E4D2` | Supportive highlight, selected states, brand route |
+| `lime` | `#C8F169` | High-emphasis live neo beacon (`DarbPulseDot`, badges) |
+| `danger` | `#D64545` | Destructive actions and error states |
+| `success` | `#2E7D32` | Confirmed and delivered states |
+| `warning` | `#C47B19` | Pending and attention states |
+| `info` | `#2B6EA3` | Informational alerts and status |
 
 ### Light semantic surfaces
 
 | Token | Hex | Usage |
 |---|---|---|
-| canvas | #F5F6F2 | Main application background |
-| surface | #FFFFFF | Cards, sheets, and fields |
-| ink | #17231F | Main text |
-| muted | #77837D | Secondary text and hints |
-| line | #E4E9E3 | Dividers and subtle borders |
-| borderStrong | #CBD5CE | Stronger boundaries |
-| scrim | #990B1713 | Modal backdrops |
+| `canvas` | `#F6F6F3` | Main light screen background |
+| `surface` | `#FFFFFF` | Primary cards, sheets, and inputs |
+| `surfaceAlt` | `#ECEEE9` | Soft secondary containers and icon wells |
+| `ink` | `#1A2E29` | Primary text |
+| `muted` | `#687A75` | Secondary labels and hints |
+| `line` | `#D0D7D4` | Hairline borders and dividers |
+| `borderStrong` | `#B8C3BF` | Stronger interactive borders |
+| `scrim` | `#990D1C18` | Modal backdrops |
 
 ### Dark semantic surfaces
 
-The dark theme must use a separate semantic palette; do not invert the light palette mechanically.
+Dark mode uses a dedicated Deep Emerald Neo palette (not mechanically inverted):
 
-| Semantic role | Target color | Usage |
+| Semantic role | Hex | Usage |
 |---|---|---|
-| canvas | #0B1512 | App background |
-| surface | #13221D | Main cards and navigation surfaces |
-| surfaceElevated | #1A2D26 | Sheets, dialogs, elevated cards |
-| ink | #F1F5F1 | Primary text |
-| muted | #A4B2AA | Secondary text and hints |
-| line | #2A3B33 | Dividers and subtle borders |
-| borderStrong | #40564A | Stronger boundaries |
-| primary | #B9E4D2 | Main interactive emphasis on dark surfaces |
-| onPrimary | #102B26 | Text/icons on primary |
-| accent | #C8F169 | Rare high-priority accent |
-| scrim | #B3000000 | Modal backdrops |
+| `darkCanvas` | `#0B1512` | App dark canvas background |
+| `darkSurface` | `#12201B` | Cards and navigation containers |
+| `darkSurfaceElevated` | `#182A24` | Dialogs, sheets, and elevated surfaces |
+| `darkSurfaceAlt` | `#1D322B` | Soft containers and inactive pills |
+| `darkInk` | `#EEF5F1` | Primary text on dark |
+| `darkMuted` | `#9CB0A7` | Secondary text on dark |
+| `darkLine` | `#263B33` | Subtle dark borders |
+| `darkBorderStrong` | `#3A544A` | Stronger boundaries on dark |
+| `darkPrimary` | `#6FE0B7` | Primary interactive emerald-mint on dark |
+| `darkOnPrimary` | `#0B1F1A` | Foreground text/icons on `darkPrimary` |
+| `darkAccent` | `#C8F169` | High-priority neo live indicator (`lime`) |
+| `darkDanger` | `#EB6B6B` | Destructive/error foreground on dark |
+| `darkSuccess` | `#54C977` | Confirmed/delivered foreground on dark |
+| `darkWarning` | `#E8B04A` | Attention/warning foreground on dark |
+| `darkInfo` | `#64ADE8` | Informational foreground on dark |
+| `darkScrim` | `#B8000000` | Modal backdrop on dark |
 
-Dark palette values are implemented through adaptive `DarbColors` semantic tokens. The app defaults to the operating-system appearance and supports persisted System / Light / Dark selection. `surfaceAlt` is the adaptive soft-surface token for icon wells and secondary containers. Brand anchors remain stable; semantic foregrounds, backgrounds, borders, and status colors adapt to the active brightness. Contrast and component states must be verified in implementation before this theme is considered complete.
+All screen colors resolve through `DarbColors.*Of(context)` and `Theme.of(context)`. Hard-coded screen colors are forbidden outside brand emblems (`DarbBrandMark`) and dedicated city/login hero vector artwork.
 
-Do not introduce near-duplicate brand colors in individual screens. Add genuinely new semantic colors centrally and document their use. All screen colors must resolve through the active theme; screen-specific hard-coded palette values are not permitted except for intentional brand artwork and media.
+## Spacing & Shape
 
-## Spacing
+`DarbSpace`: `xxs: 4`, `xs: 8`, `sm: 12`, `md: 16`, `lg: 20`, `xl: 24`, `xxl: 32`, `section: 40`.  
+`DarbRadius`: `sm: 12`, `md: 16`, `lg: 22`, `xl: 28`, `hero: 36`, `pill: 999`.  
+`DarbElevation`: `none`, `card(isDark)`, `floating(isDark)`.
 
-Use the `DarbSpace` scale:
-- xxs: 4
-- xs: 8
-- sm: 12
-- md: 16
-- lg: 20
-- xl: 24
-- xxl: 32
-- section: 40
+## Motion & Haptics (`DarbMotion` + `DarbHaptics`)
 
-Prefer 16–20 px screen gutters, 12–16 px internal card spacing, and 24–40 px between major sections. Avoid arbitrary spacing values unless a specific visual alignment requires them.
+| Token | Value | Curve / Purpose |
+|---|---|---|
+| `press` | `120 ms` | Tactile scale-down (`DarbPressScale`, `DarbInteractiveCard`) |
+| `fast` | `160 ms` | Micro-state & border highlight (`AnimatedContainer`) |
+| `interactive` | `220 ms` | Release spring-back & button state swap |
+| `tab` | `240 ms` | Bottom navigation tab crossfade + directional slide (`DarbTabViewStack`) |
+| `standard` | `260 ms` | Content reveal (`DarbFadeSlide`) and timeline progress |
+| `route` | `340 ms` | Push navigation (`DarbPageRoute` / `DarbPageTransitionsBuilder`) |
+| `expressive` | `420 ms` | City hero transitions & badge celebrations |
+| `staggerStep` | `55 ms` | Bounded stagger delay (`DarbMotion.staggerDelay`) |
+| `enter` / `exit` / `emphasis` | `easeOutCubic` / `easeInCubic` / `easeOutBack` | Standard motion curves |
 
-## Shape and elevation
+Core components in `darb_motion_components.dart`, `darb_components.dart`, and `darb_city_scene.dart`:
+- `DarbActionButton`: animated state machine (`idle -> loading -> success -> error`), press scale, shake on validation/API failure, haptics.
+- `DarbInteractiveCard`: press shrink, highlighted border feedback, selection haptic.
+- `DarbPulseDot`: live ambient halo pulse on online/active indicators; stops cleanly when inactive or `reduceMotion` is enabled.
+- `DarbTabViewStack`: keyed `ValueKey<int>(i)` stack preserving child state, scroll positions, offscreen `TickerMode` pause, and `paintOrder` layering.
+- `DarbPageRoute`: unified fade + slide + micro-scale push transition across all feature navigation.
+- `DarbOrderTimeline`: step-by-step live order progression (store & peer tracks + cancelled banner).
+- `DarbCitySceneCard`: deterministic city photo hero + Ken Burns loop with Neo vector skyline fallback.
+- `DarbSearchBar`: consistent themed search input with instant clear action.
 
-Use `DarbRadius`:
-- sm: 12
-- md: 16
-- lg: 22
-- xl: 28
-- hero: 36
-- pill: 999
+Every animated widget checks `DarbMotion.reduceMotion(context)` and collapses durations to `Duration.zero` / stops continuous loops automatically.
 
-Use `DarbElevation.card` for ordinary cards and `DarbElevation.floating` for floating/high-priority surfaces. Do not stack heavy shadows on every element. Prefer borders and tonal separation.
+## RTL, Localization & Security
 
-## Typography
-
-Use the shared theme text styles. Maintain readable Arabic typography and consistent hierarchy across Arabic, English, and Turkish. Keep titles concise, body copy comfortably readable, and secondary labels visually subordinate. Avoid long all-bold paragraphs. Use localized strings through the existing localization helpers.
-
-## Motion
-
-Use the shared primitives and tokens in `mobile-overrides/design_system.dart`:
-- press feedback: 120 ms
-- fast: 160 ms
-- standard: 260 ms
-- route: 340 ms
-- expressive: 420 ms
-- stagger step: 55 ms
-- enter: easeOutCubic
-- exit: easeInCubic
-- expressive emphasis: easeOutBack
-
-Reusable building blocks:
-- `DarbFadeSlide` for staggered content entrances; use `DarbMotion.staggerDelay(index)` for list items.
-- `DarbPressScale` for tactile press feedback on custom interactive surfaces.
-- `DarbMotion.effectiveDuration(context, duration)` and `DarbMotion.reduceMotion(context)` to honor the operating-system accessibility preference.
-- `DarbPageTransitionsBuilder` supplies the same short fade/slide/scale route transition in light and dark themes.
-- `DarbCityCarousel` rotates locally bundled, attributed Syrian city photography on the login hero; transitions respect Reduce Motion and do not require network access.
-
-Use motion for screen transitions, selected navigation, expanding details, order progression, and confirmation feedback. Stagger only small groups; avoid animating every row in long lists. Never delay a critical action for decorative animation. All motion must become immediate when reduced motion is enabled.
-
-## Global interaction feedback
-
-- Filled, outlined, and text buttons share the motion token timings and theme-aware pressed/focused overlays; disabled controls remain visually and functionally disabled.
-- Role navigation uses a short selected-state indicator, animated icon/label emphasis, and selection haptics only when the destination changes.
-- Re-selecting the current destination is a no-op and must not trigger duplicate work or haptics.
-- Interactive controls must retain Material semantics, keyboard/focus support, and adequate touch targets.
-- All shared interaction motion respects Reduce Motion and must never delay the underlying action.
-
-## Components and interaction
-
-- Primary action: `FilledButton`, one clear primary action per view.
-- Secondary action: `OutlinedButton` or `TextButton`.
-- Destructive action: use the active theme's error color and require confirmation when consequential.
-- Cards: semantic surface, clear grouping, restrained elevation.
-- Inputs: shared `InputDecorationTheme`; show validation beside the relevant field.
-- Navigation: shared Material 3 navigation; preserve role-specific destinations.
-- Dialogs and sheets: shared theme shapes and surfaces.
-- Loading: use a clear progress indicator or skeleton that matches the final content footprint.
-- Empty: explain what is absent and offer a relevant next action where possible.
-- Error: explain the failure in user language and provide retry without discarding user input.
-- Success: confirm the completed action and make the next step clear.
-
-## Role-specific information architecture
-
-### Customer
-Home, store discovery, store catalog, cart/checkout, independent parcel delivery, active orders, order history, saved addresses, account and support.
-
-### Driver
-Availability and online status, available delivery requests, fare/offer flow where supported by the API, active deliveries, pickup/drop-off progression, delivery history, account.
-
-### Vendor
-Store status, incoming orders, order detail and status progression, product catalog, account.
-
-### Administration
-Pending vendor/driver approvals, delivery-zone and fee configuration, operational order visibility, account. Do not expose administrative capabilities to non-admin roles.
-
-## RTL and localization
-
-- Use the app's existing locale state and localization helper.
-- Let directional layout follow the active locale; do not hard-code left/right for semantic navigation.
-- Phone numbers, email addresses, URLs, and numeric identifiers should retain appropriate LTR direction.
-- Do not remove Arabic, English, or Turkish support while redesigning screens.
-
-## Architecture and quality gates
-
-- Keep widgets focused on rendering and interaction.
-- Move API orchestration, validation, and state transitions into dedicated controllers/services when refactoring.
-- Do not duplicate endpoint strings or business rules across screens.
-- Preserve current endpoint payloads until backend compatibility is verified.
-- Run `flutter analyze` and the available tests before publishing.
-- A UI phase is not complete until tested on a real device for RTL, small screens, loading, empty, error, and success states.
-- Preserve authentication, package identity, release signing, and installed-app update compatibility.
-- Do not merge or publish a release before review and explicit approval.
-
-## Current implementation notes
-
-The token implementation lives in `mobile-overrides/design_system.dart`. Keep this document aligned with the code. A theme is incomplete until all customer, driver, vendor, and administration screens use semantic colors and all key components are legible in both modes.
+- Locale switcher (`ar` / `en` / `tr`) wired to `app_localizations.dart` (`dt(...)` and `t(...)`).
+- Phone numbers, OTP inputs, coordinates, and technical identifiers stay wrapped in `Directionality(textDirection: TextDirection.ltr)`.
+- Release verification gates: run `flutter analyze lib` and `flutter test` via CI (`.github/workflows/build-android-release.yml`) before merging or publishing.

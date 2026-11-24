@@ -572,3 +572,223 @@ class _DarbTabViewStackState extends State<DarbTabViewStack> {
     );
   }
 }
+
+/// Interactive Neo card wrapper with press shrink, soft highlight border, and
+/// optional haptic feedback. Honors Reduce Motion automatically.
+class DarbInteractiveCard extends StatefulWidget {
+  const DarbInteractiveCard({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.borderRadius = DarbRadius.lg,
+    this.padding = const EdgeInsets.all(16),
+    this.borderColor,
+    this.tintColor,
+    this.elevated = true,
+  });
+
+  final Widget child;
+  final VoidCallback? onTap;
+  final double borderRadius;
+  final EdgeInsetsGeometry padding;
+  final Color? borderColor;
+  final Color? tintColor;
+  final bool elevated;
+
+  @override
+  State<DarbInteractiveCard> createState() => _DarbInteractiveCardState();
+}
+
+class _DarbInteractiveCardState extends State<DarbInteractiveCard> {
+  bool _pressed = false;
+
+  void _handleTap() {
+    if (widget.onTap == null) return;
+    DarbHaptics.selection();
+    widget.onTap!.call();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = DarbColors.isDark(context);
+    final reduced = DarbMotion.reduceMotion(context);
+    final primary = DarbColors.primaryOf(context);
+    final radius = BorderRadius.circular(widget.borderRadius);
+
+    final baseBorder = widget.borderColor ??
+        (isDark
+            ? DarbColors.mint.withValues(alpha: 0.16)
+            : DarbColors.borderOf(context));
+    final activeBorder = _pressed
+        ? primary.withValues(alpha: isDark ? 0.65 : 0.45)
+        : baseBorder;
+
+    final cardBody = AnimatedContainer(
+      duration: DarbMotion.effectiveDuration(context, DarbMotion.fast),
+      curve: DarbMotion.enter,
+      padding: widget.padding,
+      decoration: BoxDecoration(
+        color: widget.tintColor ??
+            (DarbAppearanceController.instance.isGlass
+                ? (isDark
+                    ? DarbColors.darkSurface.withValues(alpha: 0.84)
+                    : Colors.white.withValues(alpha: 0.88))
+                : DarbColors.surfaceOf(context)),
+        borderRadius: radius,
+        border: Border.all(
+          color: activeBorder,
+          width: _pressed ? 1.4 : 1.05,
+        ),
+        boxShadow: widget.elevated
+            ? DarbElevation.card(isDark)
+            : DarbElevation.none,
+      ),
+      child: widget.child,
+    );
+
+    if (widget.onTap == null) return cardBody;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: _handleTap,
+      child: AnimatedScale(
+        scale: (!reduced && _pressed) ? 0.982 : 1.0,
+        duration: DarbMotion.effectiveDuration(
+          context,
+          _pressed ? DarbMotion.press : DarbMotion.interactive,
+        ),
+        curve: (!reduced && !_pressed)
+            ? DarbMotion.emphasis
+            : DarbMotion.enter,
+        child: cardBody,
+      ),
+    );
+  }
+}
+
+/// Live Neo status pulse beacon used for active drivers, open live trackers,
+/// and online status cards. Freezes cleanly under Reduce Motion.
+class DarbPulseDot extends StatefulWidget {
+  const DarbPulseDot({
+    super.key,
+    this.color,
+    this.size = 9,
+    this.active = true,
+  });
+
+  final Color? color;
+  final double size;
+  final bool active;
+
+  @override
+  State<DarbPulseDot> createState() => _DarbPulseDotState();
+}
+
+class _DarbPulseDotState extends State<DarbPulseDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncTicker();
+  }
+
+  @override
+  void didUpdateWidget(covariant DarbPulseDot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.active != widget.active) {
+      _syncTicker();
+    }
+  }
+
+  void _syncTicker() {
+    final reduced = DarbMotion.reduceMotion(context);
+    if (!widget.active || reduced) {
+      if (_controller.isAnimating) _controller.stop();
+      _controller.value = 0.25;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = widget.color ?? DarbColors.successOf(context);
+    final reduced = DarbMotion.reduceMotion(context);
+    final boxSize = widget.size * 2.2;
+
+    if (!widget.active || reduced) {
+      return SizedBox(
+        width: boxSize,
+        height: boxSize,
+        child: Center(
+          child: Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              color: tone,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: boxSize,
+      height: boxSize,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          final p = _controller.value;
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.scale(
+                scale: 1.0 + (p * 1.1),
+                child: Opacity(
+                  opacity: (1.0 - p).clamp(0.0, 1.0) * 0.45,
+                  child: Container(
+                    width: widget.size,
+                    height: widget.size,
+                    decoration: BoxDecoration(
+                      color: tone,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: widget.size,
+                height: widget.size,
+                decoration: BoxDecoration(
+                  color: tone,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}

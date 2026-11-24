@@ -304,7 +304,7 @@ class _AppShellState extends State<AppShell> {
               onPressed: () {
                 Navigator.pop(ctx);
                 Navigator.of(context).push(
-                  MaterialPageRoute(
+                  DarbPageRoute(
                     builder: (_) => DriverTrackingScreen(
                       orderId: orderId,
                       pickupLatitude: pickupLat,
@@ -381,7 +381,7 @@ class _AppShellState extends State<AppShell> {
         await Api.instance.clear();
         if (!mounted) return;
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          DarbPageRoute(builder: (_) => const LoginScreen()),
           (_) => false,
         );
         return;
@@ -430,7 +430,7 @@ class _AppShellState extends State<AppShell> {
     await Api.instance.clear();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      DarbPageRoute(builder: (_) => const LoginScreen()),
       (_) => false,
     );
   }
@@ -439,7 +439,7 @@ class _AppShellState extends State<AppShell> {
     DarbHaptics.light();
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+      DarbPageRoute(builder: (_) => const NotificationsScreen()),
     );
     await _refreshUnreadCount();
   }
@@ -625,7 +625,11 @@ class _AppShellState extends State<AppShell> {
         ],
       _ => [
           CustomerHomeScreen(
+            user: user,
             onOrderCreated: () {
+              if (mounted) setState(() => _tabIndex = 1);
+            },
+            onOpenOrders: () {
               if (mounted) setState(() => _tabIndex = 1);
             },
           ),
@@ -706,7 +710,7 @@ class _AppShellState extends State<AppShell> {
               DarbHaptics.light();
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const AiRoleAssistantScreen()),
+                DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
               );
             },
             icon: Icon(

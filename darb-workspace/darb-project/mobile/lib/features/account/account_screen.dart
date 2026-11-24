@@ -352,7 +352,7 @@ class _AccountScreenState extends State<AccountScreen> {
     await Api.instance.clear();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      DarbPageRoute(builder: (_) => const LoginScreen()),
       (_) => false,
     );
   }
@@ -519,7 +519,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AiRoleAssistantScreen()),
+                  DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
                 ),
               ),
               if (role == 'CUSTOMER') ...[
@@ -529,7 +529,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const AddressesScreen()),
+                    DarbPageRoute(builder: (_) => const AddressesScreen()),
                   ),
                 ),
                 ListTile(

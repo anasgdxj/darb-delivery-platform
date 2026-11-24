@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -58,7 +58,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     setState(() => _markingAll = true);
     try {
       await Api.instance.patch('/notifications/read-all', {});
-      if (mounted) HapticFeedback.selectionClick();
+      if (mounted) DarbHaptics.selection();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -83,7 +83,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     try {
       await Api.instance.patch('/notifications/$id/read', {});
       if (!mounted) return;
-      HapticFeedback.selectionClick();
+      DarbHaptics.selection();
       setState(() {
         _items = _items
             .map((e) => e['id'] == id
@@ -165,98 +165,89 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
                               return DarbFadeSlide(
                                 delay: DarbMotion.staggerDelay(index),
-                                child: DarbPressScale(
+                                child: DarbInteractiveCard(
                                   onTap: () => _markOneRead(item),
-                                  child: DarbGlassSurface(
-                                    padding: const EdgeInsets.all(14),
-                                    borderColor: unread
-                                        ? primary.withValues(alpha: 0.45)
-                                        : null,
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: unread
-                                                ? primary.withValues(
-                                                    alpha: 0.16)
-                                                : DarbColors.softSurfaceOf(
-                                                    context),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: Icon(
-                                            _iconForType(
-                                                item['type']?.toString()),
-                                            color: unread
-                                                ? primary
-                                                : DarbColors.mutedOf(context),
-                                            size: 20,
-                                          ),
+                                  padding: const EdgeInsets.all(14),
+                                  borderColor: unread
+                                      ? primary.withValues(alpha: 0.45)
+                                      : null,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: unread
+                                              ? primary.withValues(alpha: 0.16)
+                                              : DarbColors.softSurfaceOf(
+                                                  context),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      item['title']
-                                                              ?.toString() ??
-                                                          '',
-                                                      style: TextStyle(
-                                                        color:
-                                                            DarbColors.inkOf(
-                                                                context),
-                                                        fontWeight: unread
-                                                            ? FontWeight.w900
-                                                            : FontWeight.w700,
-                                                        fontSize: 14.5,
-                                                      ),
+                                        child: Icon(
+                                          _iconForType(
+                                              item['type']?.toString()),
+                                          color: unread
+                                              ? primary
+                                              : DarbColors.mutedOf(context),
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    item['title']?.toString() ??
+                                                        '',
+                                                    style: TextStyle(
+                                                      color: DarbColors.inkOf(
+                                                          context),
+                                                      fontWeight: unread
+                                                          ? FontWeight.w900
+                                                          : FontWeight.w700,
+                                                      fontSize: 14.5,
                                                     ),
                                                   ),
-                                                  if (unread)
-                                                    Container(
-                                                      width: 8,
-                                                      height: 8,
-                                                      decoration: BoxDecoration(
-                                                        color: primary,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                item['body']?.toString() ?? '',
-                                                style: TextStyle(
-                                                  color: DarbColors.mutedOf(
-                                                      context),
-                                                  fontSize: 13,
-                                                  height: 1.4,
                                                 ),
+                                                if (unread)
+                                                  DarbPulseDot(
+                                                    color: primary,
+                                                    size: 7.5,
+                                                  ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              item['body']?.toString() ?? '',
+                                              style: TextStyle(
+                                                color: DarbColors.mutedOf(
+                                                    context),
+                                                fontSize: 13,
+                                                height: 1.4,
                                               ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                _formatDate(item['createdAt']
-                                                    ?.toString()),
-                                                style: TextStyle(
-                                                  color: DarbColors.mutedOf(
-                                                      context),
-                                                  fontSize: 11,
-                                                ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              _formatDate(item['createdAt']
+                                                  ?.toString()),
+                                              style: TextStyle(
+                                                color: DarbColors.mutedOf(
+                                                    context),
+                                                fontSize: 11,
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               );

@@ -7,6 +7,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_map_picker.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 Future<Map<String, dynamic>?> showAddressFormSheet(
   BuildContext context, {
@@ -218,6 +219,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
   bool _loading = true;
   bool _offline = false;
   String? _error;
+  final Set<String> _busyAddressIds = <String>{};
 
   @override
   void initState() {
@@ -267,8 +269,11 @@ class _AddressesScreenState extends State<AddressesScreen> {
       ),
     );
     if (confirmed != true) return;
+    if (!_busyAddressIds.add(id)) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.delete('/addresses/$id');
+      if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -280,6 +285,9 @@ class _AddressesScreenState extends State<AddressesScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyAddressIds.remove(id);
+      if (mounted) setState(() {});
     }
   }
 
@@ -337,8 +345,10 @@ class _AddressesScreenState extends State<AddressesScreen> {
                               );
                             }
                             final addr = _addresses[_offline ? index - 1 : index];
+                            final id = addr['id'].toString();
                             final hasLocation = addr['hasLocation'] == true;
-                            return DarbGlassSurface(
+                            final isBusy = _busyAddressIds.contains(id);
+                            return DarbInteractiveCard(
                               padding: const EdgeInsets.all(16),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,10 +396,12 @@ class _AddressesScreenState extends State<AddressesScreen> {
                                         Row(
                                           children: [
                                             TextButton.icon(
-                                              onPressed: () async {
-                                                final updated = await showAddressFormSheet(context, existing: addr);
-                                                if (updated != null) _load();
-                                              },
+                                              onPressed: isBusy
+                                                  ? null
+                                                  : () async {
+                                                      final updated = await showAddressFormSheet(context, existing: addr);
+                                                      if (updated != null) _load();
+                                                    },
                                               icon: const Icon(Icons.edit_outlined, size: 17),
                                               label: Text(dt('تعديل')),
                                             ),
@@ -397,7 +409,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                                               style: TextButton.styleFrom(
                                                 foregroundColor: DarbColors.dangerOf(context),
                                               ),
-                                              onPressed: () => _deleteAddress(addr['id'].toString()),
+                                              onPressed: isBusy ? null : () => _deleteAddress(id),
                                               icon: const Icon(Icons.delete_outline_rounded, size: 17),
                                               label: Text(dt('حذف العنوان')),
                                             ),

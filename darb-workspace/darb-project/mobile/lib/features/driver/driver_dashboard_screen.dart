@@ -9,6 +9,7 @@ import '../../core/services/location_service.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class DriverDashboardScreen extends StatefulWidget {
   const DriverDashboardScreen({super.key, this.onClaimedOrAccepted});
@@ -202,7 +203,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     if (mounted) setState(() {});
     try {
       await Api.instance.post('/orders/$id/claim', {});
-      if (mounted) HapticFeedback.selectionClick();
+      if (mounted) DarbHaptics.success();
       await _load();
       widget.onClaimedOrAccepted?.call();
       if (mounted) {
@@ -378,6 +379,16 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
               children: [
                 Row(
                   children: [
+                    if (isApproved) ...[
+                      DarbPulseDot(
+                        active: isOnline,
+                        color: isOnline
+                            ? DarbColors.lime
+                            : DarbColors.mutedOf(context),
+                        size: 9,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -567,51 +578,125 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     final offerAmount =
         num.tryParse(activeOffer?['amount']?.toString() ?? '0') ?? 0;
 
-    return DarbGlassSurface(
+    final totalAmount = num.tryParse(order['total']?.toString() ?? '');
+    final orderCurrency = order['currency']?.toString() ?? 'SYP';
+
+    return DarbInteractiveCard(
       padding: const EdgeInsets.all(16),
+      borderColor: activeOffer != null
+          ? DarbColors.primaryOf(context).withValues(alpha: 0.45)
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: DarbColors.primaryOf(context).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(
                   isPeer
-                      ? dt('طلب توصيل مستقل')
-                      : (storeName ?? dt('متجر')),
-                  style: TextStyle(
-                    color: DarbColors.inkOf(context),
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w900,
-                  ),
+                      ? Icons.local_shipping_outlined
+                      : Icons.storefront_outlined,
+                  color: DarbColors.primaryOf(context),
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isPeer
+                          ? dt('طلب توصيل مستقل')
+                          : (storeName ?? dt('متجر')),
+                      style: TextStyle(
+                        color: DarbColors.inkOf(context),
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    if (totalAmount != null && totalAmount > 0)
+                      Text(
+                        formatDarbMoney(totalAmount, orderCurrency),
+                        style: TextStyle(
+                          color: DarbColors.mutedOf(context),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                  ],
                 ),
               ),
               if (distLabel != null)
-                Text(
-                  distLabel,
-                  style: TextStyle(
-                    color: DarbColors.primaryOf(context),
-                    fontWeight: FontWeight.w900,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: DarbColors.primaryOf(context).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  ),
+                  child: Text(
+                    distLabel,
+                    style: TextStyle(
+                      color: DarbColors.primaryOf(context),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           if (isPeer && order['pickupAddress'] != null)
-            Text(
-              '${dt('الاستلام')}: ${order['pickupAddress']}',
-              style: TextStyle(
-                color: DarbColors.mutedOf(context),
-                fontSize: 13,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.radio_button_checked_rounded,
+                    size: 15,
+                    color: DarbColors.infoOf(context),
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Text(
+                      '${dt('الاستلام')}: ${order['pickupAddress']}',
+                      style: TextStyle(
+                        color: DarbColors.mutedOf(context),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           if (order['address']?['details'] != null)
-            Text(
-              '${dt('التسليم')}: ${order['address']['details']}',
-              style: TextStyle(
-                color: DarbColors.mutedOf(context),
-                fontSize: 13,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.place_rounded,
+                  size: 16,
+                  color: DarbColors.successOf(context),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    '${dt('التسليم')}: ${order['address']['details']}',
+                    style: TextStyle(
+                      color: DarbColors.mutedOf(context),
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
             ),
           if (order['notes'] != null &&
               order['notes'].toString().trim().isNotEmpty)

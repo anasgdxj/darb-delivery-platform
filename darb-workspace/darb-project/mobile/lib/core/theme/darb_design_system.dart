@@ -11,57 +11,58 @@ enum DarbVisualStyle { glass, standard }
 class DarbColors {
   DarbColors._();
 
-  // Shared Brand Anchors (DESIGN_SYSTEM.md 2.0 — DARB PULSE 2026)
-  static const forest = Color(0xFF102B26);
-  static const forestSoft = Color(0xFF1C443B);
+  // Shared Brand Anchors (DARB DESIGN SYSTEM 2026 — Premium + Dynamic + Neo)
+  static const forest = Color(0xFF12302A); // Dark Green
+  static const primaryGreen = Color(0xFF167A5A); // Primary Green
+  static const forestSoft = Color(0xFF1C4B3F);
   static const mint = Color(0xFFB9E4D2);
   static const lime = Color(0xFFC8F169);
-  static const danger = Color(0xFFB94747);
-  static const success = Color(0xFF287A50);
-  static const warning = Color(0xFFB7791F);
-  static const info = Color(0xFF356D9A);
+  static const danger = Color(0xFFD64545); // Error
+  static const success = Color(0xFF2E7D32); // Success
+  static const warning = Color(0xFFC47B19);
+  static const info = Color(0xFF2B6EA3);
 
   // Light Semantic Surfaces
-  static const canvas = Color(0xFFF5F6F2);
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceAlt = Color(0xFFECF0EA);
-  static const ink = Color(0xFF17231F);
-  static const muted = Color(0xFF77837D);
-  static const line = Color(0xFFE4E9E3);
-  static const borderStrong = Color(0xFFCBD5CE);
-  static const scrim = Color(0x990B1713);
+  static const canvas = Color(0xFFF6F6F3); // Background Light
+  static const surface = Color(0xFFFFFFFF); // Surface Light
+  static const surfaceAlt = Color(0xFFECEEE9);
+  static const ink = Color(0xFF1A2E29); // Primary Text
+  static const muted = Color(0xFF687A75); // Secondary Text
+  static const line = Color(0xFFD0D7D4); // Border
+  static const borderStrong = Color(0xFFB8C3BF);
+  static const scrim = Color(0x990D1C18);
 
   // Compatibility aliases & soft semantic tints
-  static const primary = forest;
+  static const primary = primaryGreen;
   static const surfaceSoft = surfaceAlt;
   static const border = line;
-  static const mintTint = Color(0xFFE7F5EE);
-  static const dangerSoft = Color(0xFFFBEBEB);
-  static const warningSoft = Color(0xFFFCF3E6);
-  static const infoSoft = Color(0xFFE9F4F8);
+  static const mintTint = Color(0xFFE5F4ED);
+  static const dangerSoft = Color(0xFFFDECEC);
+  static const warningSoft = Color(0xFFFCF3E3);
+  static const infoSoft = Color(0xFFEAF4FB);
 
-  // Dark Semantic Surfaces (Separate semantic palette; not mechanically inverted)
+  // Dark Semantic Surfaces (Deep Emerald Neo Dark Palette; not mechanically inverted)
   static const darkCanvas = Color(0xFF0B1512);
-  static const darkSurface = Color(0xFF13221D);
-  static const darkSurfaceElevated = Color(0xFF1A2D26);
+  static const darkSurface = Color(0xFF12201B);
+  static const darkSurfaceElevated = Color(0xFF182A24);
   static const darkSurfaceHigh = darkSurfaceElevated;
-  static const darkSurfaceAlt = Color(0xFF172B24);
-  static const darkInk = Color(0xFFF1F5F1);
-  static const darkMuted = Color(0xFFA4B2AA);
-  static const darkLine = Color(0xFF2A3B33);
+  static const darkSurfaceAlt = Color(0xFF1D322B);
+  static const darkInk = Color(0xFFEEF5F1);
+  static const darkMuted = Color(0xFF9CB0A7);
+  static const darkLine = Color(0xFF263B33);
   static const darkBorder = darkLine;
-  static const darkBorderStrong = Color(0xFF40564A);
-  static const darkPrimary = mint;
-  static const darkOnPrimary = forest;
+  static const darkBorderStrong = Color(0xFF3A544A);
+  static const darkPrimary = Color(0xFF6FE0B7);
+  static const darkOnPrimary = Color(0xFF0B1F1A);
   static const darkAccent = lime;
-  static const darkScrim = Color(0xB3000000);
-  static const darkDanger = Color(0xFFE56868);
-  static const darkDangerSoft = Color(0xFF3A1D20);
-  static const darkSuccess = Color(0xFF4FB982);
-  static const darkWarning = Color(0xFFE2A84B);
-  static const darkWarningSoft = Color(0xFF372914);
-  static const darkInfo = Color(0xFF63A6DC);
-  static const darkInfoSoft = Color(0xFF172D3D);
+  static const darkScrim = Color(0xB8000000);
+  static const darkDanger = Color(0xFFEB6B6B);
+  static const darkDangerSoft = Color(0xFF3B1E21);
+  static const darkSuccess = Color(0xFF54C977);
+  static const darkWarning = Color(0xFFE8B04A);
+  static const darkWarningSoft = Color(0xFF382914);
+  static const darkInfo = Color(0xFF64ADE8);
+  static const darkInfoSoft = Color(0xFF162C3D);
 
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
@@ -93,13 +94,13 @@ class DarbColors {
       isDark(context) ? darkMuted : muted;
 
   static Color primaryOf(BuildContext context) =>
-      isDark(context) ? darkPrimary : forest;
+      isDark(context) ? darkPrimary : primaryGreen;
 
   static Color onPrimaryOf(BuildContext context) =>
       isDark(context) ? darkOnPrimary : Colors.white;
 
   static Color accentOf(BuildContext context) =>
-      isDark(context) ? darkAccent : forestSoft;
+      isDark(context) ? darkAccent : forest;
 
   static Color dangerOf(BuildContext context) =>
       isDark(context) ? darkDanger : danger;
@@ -168,7 +169,7 @@ class DarbElevation {
   static List<BoxShadow> card(bool isDark) => [
         BoxShadow(
           color: (isDark ? Colors.black : DarbColors.forest)
-              .withValues(alpha: isDark ? 0.28 : 0.05),
+              .withValues(alpha: isDark ? 0.30 : 0.055),
           blurRadius: isDark ? 18 : 14,
           offset: const Offset(0, 6),
         ),
@@ -177,7 +178,7 @@ class DarbElevation {
   static List<BoxShadow> floating(bool isDark) => [
         BoxShadow(
           color: (isDark ? Colors.black : DarbColors.forest)
-              .withValues(alpha: isDark ? 0.42 : 0.10),
+              .withValues(alpha: isDark ? 0.44 : 0.11),
           blurRadius: 26,
           offset: const Offset(0, 10),
         ),
@@ -266,6 +267,37 @@ class DarbMotion {
 
   static Duration effectiveDuration(BuildContext context, Duration target) =>
       reduceMotion(context) ? Duration.zero : target;
+}
+
+class DarbPageRoute<T> extends PageRouteBuilder<T> {
+  DarbPageRoute({required WidgetBuilder builder, super.settings})
+      : super(
+          transitionDuration: DarbMotion.route,
+          reverseTransitionDuration: DarbMotion.interactive,
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              builder(context),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            if (DarbMotion.reduceMotion(context)) return child;
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: DarbMotion.enter,
+              reverseCurve: DarbMotion.exit,
+            );
+            return FadeTransition(
+              opacity: curved,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.03),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.984, end: 1.0).animate(curved),
+                  child: child,
+                ),
+              ),
+            );
+          },
+        );
 }
 
 class DarbPageTransitionsBuilder extends PageTransitionsBuilder {
@@ -451,7 +483,7 @@ class DarbTheme {
         isDark ? DarbColors.darkSurfaceAlt : DarbColors.surfaceAlt;
     final ink = isDark ? DarbColors.darkInk : DarbColors.ink;
     final muted = isDark ? DarbColors.darkMuted : DarbColors.muted;
-    final primary = isDark ? DarbColors.darkPrimary : DarbColors.forest;
+    final primary = isDark ? DarbColors.darkPrimary : DarbColors.primaryGreen;
     final onPrimary = isDark ? DarbColors.darkOnPrimary : Colors.white;
     final border = isDark ? DarbColors.darkLine : DarbColors.line;
     final borderStrong =
@@ -464,7 +496,7 @@ class DarbTheme {
       onPrimary: onPrimary,
       primaryContainer: isDark ? DarbColors.forestSoft : DarbColors.mintTint,
       onPrimaryContainer: isDark ? DarbColors.mint : DarbColors.forest,
-      secondary: isDark ? DarbColors.lime : DarbColors.forestSoft,
+      secondary: isDark ? DarbColors.lime : DarbColors.forest,
       onSecondary: isDark ? DarbColors.forest : Colors.white,
       secondaryContainer: softSurf,
       onSecondaryContainer: ink,
@@ -498,6 +530,42 @@ class DarbTheme {
       canvasColor: bg,
       pageTransitionsTheme: transitions,
       dividerColor: border,
+      textTheme: TextTheme(
+        headlineMedium: TextStyle(
+          color: ink,
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.3,
+        ),
+        titleLarge: TextStyle(
+          color: ink,
+          fontSize: 19,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.2,
+        ),
+        titleMedium: TextStyle(
+          color: ink,
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+        ),
+        bodyLarge: TextStyle(
+          color: ink,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          height: 1.45,
+        ),
+        bodyMedium: TextStyle(
+          color: ink,
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+          height: 1.42,
+        ),
+        bodySmall: TextStyle(
+          color: muted,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: ink,
@@ -507,7 +575,7 @@ class DarbTheme {
         titleTextStyle: TextStyle(
           color: ink,
           fontSize: 18,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w900,
           letterSpacing: -0.2,
         ),
       ),
@@ -577,8 +645,8 @@ class DarbTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isDark
-            ? DarbColors.darkSurfaceElevated.withValues(alpha: 0.88)
-            : Colors.white.withValues(alpha: 0.92),
+            ? DarbColors.darkSurfaceElevated.withValues(alpha: 0.90)
+            : Colors.white.withValues(alpha: 0.95),
         hintStyle: TextStyle(color: muted, fontSize: 14),
         labelStyle: TextStyle(color: muted, fontWeight: FontWeight.w600),
         contentPadding:
@@ -593,7 +661,7 @@ class DarbTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DarbRadius.md),
-          borderSide: BorderSide(color: primary, width: 1.6),
+          borderSide: BorderSide(color: primary, width: 1.7),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DarbRadius.md),

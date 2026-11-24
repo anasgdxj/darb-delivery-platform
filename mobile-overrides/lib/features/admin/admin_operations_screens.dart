@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class AdminOrdersScreen extends StatefulWidget {
   const AdminOrdersScreen({super.key});
@@ -94,7 +95,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
             for (final o in _orders)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: DarbGlassSurface(
+                child: DarbInteractiveCard(
                   padding: const EdgeInsets.all(15),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +116,13 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 10),
+                      DarbOrderTimeline(
+                        status: o['status']?.toString() ?? 'PENDING',
+                        isPeer: o['type'] == 'PEER_DELIVERY',
+                        compact: true,
+                      ),
+                      const SizedBox(height: 8),
                       Text(
                         '${o['customer']?['name'] ?? ''} · ${o['customer']?['phone'] ?? o['customer']?['email'] ?? ''}',
                         style: TextStyle(
@@ -162,8 +169,10 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
   Map<String, dynamic> _settings = const {};
   bool _hasExtendedSettings = false;
   bool _loading = true;
+  bool _savingSettings = false;
   String? _error;
   int _section = 0; // 0: zones & cities, 1: users, 2: settings & audit
+  final Set<String> _busyIds = <String>{};
 
   @override
   void initState() {
@@ -544,8 +553,11 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
       ),
     );
     if (confirmed != true) return;
+    if (!_busyIds.add('zone_$id')) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.delete('/admin/delivery-zones/$id');
+      if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -558,6 +570,9 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyIds.remove('zone_$id');
+      if (mounted) setState(() {});
     }
   }
 
@@ -593,9 +608,13 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
       ),
     );
     if (selected == null || selected == currentRole) return;
+    final uid = user['id'].toString();
+    if (!_busyIds.add('user_$uid')) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance
-          .patch('/admin/users/${user['id']}/role', {'role': selected});
+          .patch('/admin/users/$uid/role', {'role': selected});
+      if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -608,12 +627,18 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyIds.remove('user_$uid');
+      if (mounted) setState(() {});
     }
   }
 
   Future<void> _toggleCityActive(String id, bool isActive) async {
+    if (!_busyIds.add('city_$id')) return;
+    if (mounted) setState(() {});
     try {
       await Api.instance.patch('/admin/cities/$id', {'isActive': isActive});
+      if (mounted) DarbHaptics.selection();
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -626,14 +651,22 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      _busyIds.remove('city_$id');
+      if (mounted) setState(() {});
     }
   }
 
   Future<void> _updatePlatformSetting(Map<String, dynamic> patch) async {
+    if (_savingSettings) return;
+    setState(() => _savingSettings = true);
     try {
       final updated = await Api.instance.patch('/admin/settings', patch)
           as Map<String, dynamic>;
-      if (mounted) setState(() => _settings = updated);
+      if (mounted) {
+        DarbHaptics.success();
+        setState(() => _settings = updated);
+      }
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -645,6 +678,8 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
           SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
         );
       }
+    } finally {
+      if (mounted) setState(() => _savingSettings = false);
     }
   }
 
@@ -778,12 +813,10 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: DarbSearchBar(
                     controller: _userSearchCtrl,
-                    decoration: InputDecoration(
-                      hintText: dt('ابحث بالاسم أو الهاتف...'),
-                      prefixIcon: const Icon(Icons.search_rounded),
-                    ),
+                    hintText: dt('ابحث بالاسم أو الهاتف...'),
+                    onChanged: (_) => setState(() {}),
                     onSubmitted: (_) => _load(),
                   ),
                 ),
@@ -804,45 +837,45 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
               for (final u in _users)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: DarbPressScale(
-                    onTap: () => _changeUserRole(u),
-                    child: DarbGlassSurface(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  u['name']?.toString() ?? dt('مستخدم'),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                  child: DarbInteractiveCard(
+                    onTap: _busyIds.contains('user_${u['id']}')
+                        ? null
+                        : () => _changeUserRole(u),
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                u['name']?.toString() ?? dt('مستخدم'),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
                                 ),
-                                Text(
-                                  u['phone']?.toString() ??
-                                      u['email']?.toString() ??
-                                      '',
-                                  style: TextStyle(
-                                    color: DarbColors.mutedOf(context),
-                                    fontSize: 12.5,
-                                  ),
+                              ),
+                              Text(
+                                u['phone']?.toString() ??
+                                    u['email']?.toString() ??
+                                    '',
+                                style: TextStyle(
+                                  color: DarbColors.mutedOf(context),
+                                  fontSize: 12.5,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          DarbStatusBadge(
-                            status: u['role']?.toString() ?? 'CUSTOMER',
-                          ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.edit_outlined,
-                            size: 18,
-                            color: DarbColors.mutedOf(context),
-                          ),
-                        ],
-                      ),
+                        ),
+                        DarbStatusBadge(
+                          status: u['role']?.toString() ?? 'CUSTOMER',
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: DarbColors.mutedOf(context),
+                        ),
+                      ],
                     ),
                   ),
                 ),

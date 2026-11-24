@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 import 'addresses_screen.dart';
 
 class CartCheckoutItem {
@@ -49,6 +50,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _loadingAddresses = true;
   bool _estimating = false;
   bool _submitting = false;
+  DarbActionState _submitState = DarbActionState.idle;
+  int _errorTrigger = 0;
   int _estimateGeneration = 0;
   String? _estimateError;
   String? _error;
@@ -79,7 +82,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _addresses = list;
         if (_selectedAddressId == null && list.isNotEmpty) {
           final withLoc = list.where((a) => a['hasLocation'] == true).toList();
-          _selectedAddressId = (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
+          _selectedAddressId =
+              (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
         }
       });
       if (_selectedAddressId != null) {
@@ -134,7 +138,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
     } catch (_) {
       if (mounted && generation == _estimateGeneration) {
-        setState(() => _estimateError = dt('تعذر حساب تكلفة التوصيل. تحقق من الاتصال وحاول مجدداً.'));
+        setState(() => _estimateError =
+            dt('تعذر حساب تكلفة التوصيل. تحقق من الاتصال وحاول مجدداً.'));
       }
     } finally {
       if (mounted && generation == _estimateGeneration) {
@@ -144,24 +149,46 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _placeOrder() async {
+    if (_submitting) return;
     if (_selectedAddressId == null) {
-      setState(() => _error = dt('اختر عنوان توصيل صالحاً أو أضف عنواناً جديداً'));
+      DarbHaptics.warning();
+      setState(() {
+        _error = dt('اختر عنوان توصيل صالحاً أو أضف عنواناً جديداً');
+        _submitState = DarbActionState.error;
+        _errorTrigger++;
+      });
       return;
     }
     if (_estimating || _estimate == null || _estimateError != null) {
-      setState(() => _error = _estimateError ?? dt('يجب حساب تكلفة الطلب بنجاح قبل الإرسال'));
+      DarbHaptics.warning();
+      setState(() {
+        _error = _estimateError ?? dt('يجب حساب تكلفة الطلب بنجاح قبل الإرسال');
+        _submitState = DarbActionState.error;
+        _errorTrigger++;
+      });
       return;
     }
     if (_estimate?['vendorOpen'] == false) {
-      setState(() => _error = dt('المتجر مغلق حالياً ولا يستقبل طلبات جديدة'));
+      DarbHaptics.warning();
+      setState(() {
+        _error = dt('المتجر مغلق حالياً ولا يستقبل طلبات جديدة');
+        _submitState = DarbActionState.error;
+        _errorTrigger++;
+      });
       return;
     }
     if (widget.items.isEmpty) {
-      setState(() => _error = dt('السلة فارغة'));
+      DarbHaptics.warning();
+      setState(() {
+        _error = dt('السلة فارغة');
+        _submitState = DarbActionState.error;
+        _errorTrigger++;
+      });
       return;
     }
     setState(() {
       _submitting = true;
+      _submitState = DarbActionState.loading;
       _error = null;
     });
     try {
@@ -176,6 +203,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           'notes': _notesController.text.trim(),
       }) as Map<String, dynamic>;
 
+      if (!mounted) return;
+      setState(() => _submitState = DarbActionState.success);
+      await Future<void>.delayed(DarbMotion.effectiveDuration(
+        context,
+        const Duration(milliseconds: 380),
+      ));
       if (!mounted) return;
       await showDialog<void>(
         context: context,
@@ -195,7 +228,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               const SizedBox(height: 4),
               Text(
                 '${dt('الإجمالي عند الاستلام')}: ${formatDarbMoney(num.tryParse(order['total']?.toString() ?? '0') ?? 0, order['currency']?.toString() ?? 'SYP')}',
-                style: TextStyle(color: DarbColors.primaryOf(ctx), fontWeight: FontWeight.w900),
+                style: TextStyle(
+                  color: DarbColors.primaryOf(ctx),
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ],
           ),
@@ -209,11 +245,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
-      if (mounted) setState(() => _error = e.message);
+      if (mounted) {
+        setState(() {
+          _error = e.message;
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+      if (mounted) {
+        setState(() {
+          _error = dt('حدث خطأ غير متوقع، حاول مجدداً');
+          _submitState = DarbActionState.error;
+          _errorTrigger++;
+        });
+      }
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+          if (_submitState == DarbActionState.loading) {
+            _submitState = DarbActionState.idle;
+          }
+        });
+      }
     }
   }
 
@@ -405,11 +460,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ],
             const SizedBox(height: 18),
-            FilledButton(
-              onPressed: (_submitting || _loadingAddresses || _estimating || _estimate == null || _estimateError != null || _estimate?['vendorOpen'] == false) ? null : _placeOrder,
-              child: Text(
-                _submitting ? dt('جارٍ الحفظ') : dt('إرسال الطلب — الدفع عند الاستلام'),
-              ),
+            DarbActionButton(
+              label: dt('إرسال الطلب — الدفع عند الاستلام'),
+              loadingLabel: dt('جارٍ الحفظ'),
+              successLabel: dt('تم استلام طلبك'),
+              state: _submitState,
+              errorTrigger: _errorTrigger,
+              icon: Icons.check_circle_outline_rounded,
+              onPressed: (_submitting ||
+                      _loadingAddresses ||
+                      _estimating ||
+                      _estimate == null ||
+                      _estimateError != null ||
+                      _estimate?['vendorOpen'] == false)
+                  ? null
+                  : _placeOrder,
             ),
           ],
         ),

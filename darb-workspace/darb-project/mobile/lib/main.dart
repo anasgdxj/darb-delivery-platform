@@ -67,24 +67,34 @@ class _DarbSplashGate extends StatefulWidget {
 
 class _DarbSplashGateState extends State<_DarbSplashGate>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController;
+  late final AnimationController _introController;
   late final Animation<double> _fadeIn;
+  late final Animation<double> _emblemScale;
   bool _navigated = false;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
+    _introController = AnimationController(
       vsync: this,
-      duration: DarbMotion.slow,
+      duration: DarbMotion.expressive,
     )..forward();
-    _fadeIn = CurvedAnimation(parent: _pulseController, curve: DarbMotion.enter);
+    _fadeIn = CurvedAnimation(
+      parent: _introController,
+      curve: DarbMotion.enter,
+    );
+    _emblemScale = Tween<double>(begin: 0.86, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _introController,
+        curve: DarbMotion.emphasis,
+      ),
+    );
     _restoreSession();
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
+    _introController.dispose();
     super.dispose();
   }
 
@@ -97,32 +107,44 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
         ? const AppShell()
         : const LoginScreen();
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => destination),
+      DarbPageRoute(builder: (_) => destination),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final reduce = DarbMotion.reduceMotion(context);
+    final emblem = Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(DarbRadius.xl),
+        color: Colors.white.withValues(alpha: 0.10),
+        border: Border.all(
+          color: DarbColors.mint.withValues(alpha: 0.34),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: DarbColors.mint.withValues(alpha: 0.16),
+            blurRadius: 32,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: const DarbBrandMark(size: 78),
+    );
+
     final content = Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              color: const Color(0x22FFFFFF),
-              border: Border.all(color: const Color(0x33FFFFFF)),
-            ),
-            child: const DarbBrandMark(size: 76),
-          ),
-          const SizedBox(height: 20),
+          reduce ? emblem : ScaleTransition(scale: _emblemScale, child: emblem),
+          const SizedBox(height: 22),
           Text(
             dt('دَرْب'),
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 32,
+              fontSize: 34,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.4,
             ),
@@ -131,9 +153,9 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
           Text(
             dt('كل طريق يبدأ بخطوة'),
             style: TextStyle(
-              color: DarbColors.mint.withValues(alpha: 0.92),
+              color: DarbColors.mint.withValues(alpha: 0.94),
               fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 28),
@@ -157,8 +179,8 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
             end: Alignment.bottomRight,
             colors: [
               DarbColors.forest,
-              Color(0xFF15473A),
-              DarbColors.primary,
+              DarbColors.forestSoft,
+              DarbColors.primaryGreen,
             ],
           ),
         ),

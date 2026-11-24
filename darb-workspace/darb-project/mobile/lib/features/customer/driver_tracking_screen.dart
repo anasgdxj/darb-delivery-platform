@@ -9,6 +9,7 @@ import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class DriverTrackingScreen extends StatefulWidget {
   const DriverTrackingScreen({
@@ -31,10 +32,11 @@ class DriverTrackingScreen extends StatefulWidget {
 }
 
 class _DriverTrackingScreenState extends State<DriverTrackingScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   static const LatLng _syriaCenter = LatLng(35.0, 38.5);
 
   final MapController _mapController = MapController();
+  AnimationController? _panController;
   Timer? _refreshTimer;
   LatLng? _driverPoint;
   DateTime? _lastUpdatedAt;
@@ -84,10 +86,55 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
     }
   }
 
+  void _animateMapTo(LatLng destLocation, double destZoom) {
+    if (!_mapReady) return;
+    if (DarbMotion.reduceMotion(context)) {
+      _mapController.move(destLocation, destZoom);
+      return;
+    }
+    _panController?.stop();
+    _panController?.dispose();
+    final startCenter = _mapController.camera.center;
+    final startZoom = _mapController.camera.zoom;
+    final controller = AnimationController(
+      vsync: this,
+      duration: DarbMotion.expressive,
+    );
+    _panController = controller;
+    final curve = CurvedAnimation(parent: controller, curve: DarbMotion.enter);
+    final latTween = Tween<double>(
+      begin: startCenter.latitude,
+      end: destLocation.latitude,
+    );
+    final lngTween = Tween<double>(
+      begin: startCenter.longitude,
+      end: destLocation.longitude,
+    );
+    final zoomTween = Tween<double>(begin: startZoom, end: destZoom);
+    controller.addListener(() {
+      if (!mounted) return;
+      _mapController.move(
+        LatLng(latTween.evaluate(curve), lngTween.evaluate(curve)),
+        zoomTween.evaluate(curve),
+      );
+    });
+    controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        if (_panController == controller) {
+          _panController = null;
+        }
+        controller.dispose();
+      }
+    });
+    controller.forward();
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _stopPolling();
+    _panController?.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -128,7 +175,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
           _error = null;
         });
         if (_mapReady && _followDriver) {
-          _mapController.move(
+          _animateMapTo(
             nextPoint,
             hadPoint ? _mapController.camera.zoom : 15.5,
           );
@@ -337,19 +384,21 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                   elevated: false,
                   child: Row(
                     children: [
-                      Icon(
-                        _stale
-                            ? Icons.location_disabled_rounded
-                            : point == null
-                                ? Icons.location_searching_rounded
-                                : Icons.my_location_rounded,
-                        color: _stale
-                            ? DarbColors.warningOf(context)
-                            : point == null
-                                ? DarbColors.mutedOf(context)
-                                : DarbColors.successOf(context),
-                        size: 18,
-                      ),
+                      if (point != null && !_stale && _error == null)
+                        DarbPulseDot(
+                          color: DarbColors.successOf(context),
+                          size: 8.5,
+                        )
+                      else
+                        Icon(
+                          _stale
+                              ? Icons.location_disabled_rounded
+                              : Icons.location_searching_rounded,
+                          color: _stale
+                              ? DarbColors.warningOf(context)
+                              : DarbColors.mutedOf(context),
+                          size: 18,
+                        ),
                       const SizedBox(width: 9),
                       Expanded(
                         child: AnimatedSwitcher(
@@ -437,6 +486,33 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                                 }
                               },
                             ),
+                            if (pickupPoint != null || dropoffPoint != null)
+                              PolylineLayer(
+                                polylines: [
+                                  if (pickupPoint != null && point != null)
+                                    Polyline(
+                                      points: [pickupPoint, point],
+                                      color: DarbColors.infoOf(context)
+                                          .withValues(alpha: 0.72),
+                                      strokeWidth: 3.5,
+                                    ),
+                                  if (point != null && dropoffPoint != null)
+                                    Polyline(
+                                      points: [point, dropoffPoint],
+                                      color: DarbColors.primaryOf(context),
+                                      strokeWidth: 4.5,
+                                    ),
+                                  if (point == null &&
+                                      pickupPoint != null &&
+                                      dropoffPoint != null)
+                                    Polyline(
+                                      points: [pickupPoint, dropoffPoint],
+                                      color: DarbColors.primaryOf(context)
+                                          .withValues(alpha: 0.55),
+                                      strokeWidth: 3.5,
+                                    ),
+                                ],
+                              ),
                             if (markers.isNotEmpty)
                               MarkerLayer(markers: markers),
                             RichAttributionWidget(
@@ -498,7 +574,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                                   onPressed: () {
                                     setState(() => _followDriver = true);
                                     if (_mapReady) {
-                                      _mapController.move(point, 15.5);
+                                      _animateMapTo(point, 15.5);
                                     }
                                   },
                                   tooltip: dt('توسيط على المندوب'),

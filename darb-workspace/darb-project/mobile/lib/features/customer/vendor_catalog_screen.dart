@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 import 'checkout_screen.dart';
 
 class VendorCatalogScreen extends StatefulWidget {
@@ -148,11 +149,13 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
       );
       return;
     }
+    DarbHaptics.selection();
     setState(() => _cart[id] = current + 1);
   }
 
   void _decrement(String id) {
     final current = _cart[id] ?? 0;
+    DarbHaptics.selection();
     if (current <= 1) {
       setState(() => _cart.remove(id));
     } else {
@@ -186,7 +189,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
 
     final submitted = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
+      DarbPageRoute(
         builder: (_) => CheckoutScreen(
           cityId: widget.cityId,
           vendorId: _vendorId,
@@ -310,20 +313,10 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextField(
+                  DarbSearchBar(
                     controller: _searchController,
+                    hintText: dt('ابحث عن منتج...'),
                     onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      hintText: dt('ابحث عن منتج...'),
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              onPressed: () =>
-                                  setState(() => _searchController.clear()),
-                              icon: const Icon(Icons.close_rounded),
-                            )
-                          : null,
-                    ),
                   ),
                   if (categories.isNotEmpty) ...[
                     const SizedBox(height: 10),
@@ -466,8 +459,11 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
     final outOfStock = stock != null && stock <= 0;
     final qty = _cart[id] ?? 0;
 
-    return DarbGlassSurface(
+    return DarbInteractiveCard(
       padding: const EdgeInsets.all(14),
+      borderColor: qty > 0
+          ? DarbColors.primaryOf(context).withValues(alpha: 0.45)
+          : null,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
