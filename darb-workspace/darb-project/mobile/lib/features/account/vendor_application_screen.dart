@@ -76,7 +76,18 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
     _addressCtrl = TextEditingController();
     _descriptionCtrl = TextEditingController();
     _restoreDraft();
-    _loadCities();
+    if (!_hasApplicationStatus) _loadCities();
+  }
+
+  @override
+  void didUpdateWidget(covariant VendorApplicationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldHadStatus =
+        _normalizeStatus(oldWidget.user['vendorApplication']) != null ||
+        _normalizeStatus(oldWidget.user['driverApplication']) != null;
+    if (oldHadStatus && !_hasApplicationStatus) {
+      _loadCities();
+    }
   }
 
   @override
@@ -89,10 +100,18 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
     super.dispose();
   }
 
+  String? _normalizeStatus(dynamic value) {
+    final status = value?.toString().trim().toUpperCase();
+    return status == null || status.isEmpty ? null : status;
+  }
+
   String? get _vendorStatus =>
-      widget.user['vendorApplication']?.toString().toUpperCase();
+      _normalizeStatus(widget.user['vendorApplication']);
   String? get _driverStatus =>
-      widget.user['driverApplication']?.toString().toUpperCase();
+      _normalizeStatus(widget.user['driverApplication']);
+
+  bool get _hasApplicationStatus =>
+      _vendorStatus != null || _driverStatus != null;
 
   Future<void> _restoreDraft() async {
     if (!widget.enableDraftCache) return;
@@ -146,7 +165,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
   }
 
   Future<void> _loadCities() async {
-    debugPrint('DARB_VENDOR_CITIES start override=${widget.loadCitiesOverride != null}');
     setState(() {
       _loadingCities = true;
       _citiesError = null;
@@ -157,7 +175,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
           : (await Api.instance.get('/cities') as List? ?? [])
               .whereType<Map<String, dynamic>>()
               .toList();
-      debugPrint('DARB_VENDOR_CITIES loaded count=${list.length}');
       if (!mounted) return;
       setState(() {
         _cities = list;
@@ -169,14 +186,12 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
         _loadingCities = false;
       });
     } on ApiException catch (e) {
-      debugPrint('DARB_VENDOR_CITIES api error=${e.message}');
       if (!mounted) return;
       setState(() {
         _loadingCities = false;
         _citiesError = e.message;
       });
-    } catch (error) {
-      debugPrint('DARB_VENDOR_CITIES unexpected error=$error');
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         _loadingCities = false;
@@ -996,7 +1011,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
   }
 
   Widget _buildStepLocation(BuildContext context) {
-    debugPrint('DARB_VENDOR_LOCATION loading=$_loadingCities count=${_cities.length} error=$_citiesError');
     if (_loadingCities) {
       return const DarbStateView.loading();
     }
