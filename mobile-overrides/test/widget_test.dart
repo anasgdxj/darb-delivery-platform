@@ -625,9 +625,17 @@ void main() {
 
       await tester.pump();
       expect(find.text('تعديل الملف الشخصي'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('+963933123456'),
+        260,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pump();
       expect(find.text('+963933123456'), findsOneWidget);
       expect(find.text('anas@darb.sy'), findsOneWidget);
 
+      await tester.ensureVisible(find.byType(TextField).first);
+      await tester.pump();
       await tester.enterText(find.byType(TextField).first, 'أنس الحمصي');
       await tester.pump();
 
@@ -779,6 +787,13 @@ void main() {
       await tester.pump();
 
       expect(find.text('3 / 5'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 80));
+      final cityField = find.byType(DropdownButtonFormField<String>);
+      expect(cityField, findsOneWidget);
+      await tester.tap(cityField);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('حلب').last);
+      await tester.pump();
       await tester.tap(find.text('متابعة'));
       await tester.pump();
 
