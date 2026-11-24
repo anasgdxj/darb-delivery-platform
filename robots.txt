@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /admin-web/
 
 Sitemap: https://anasgdxj.github.io/darb-delivery-platform/sitemap.xml
