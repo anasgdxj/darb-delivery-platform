@@ -625,6 +625,9 @@ void main() {
 
       await tester.pump();
       expect(find.text('تعديل الملف الشخصي'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).first, 'أنس الحمصي');
+      await tester.pump();
+
       await tester.scrollUntilVisible(
         find.text('+963933123456'),
         260,
@@ -633,11 +636,6 @@ void main() {
       await tester.pump();
       expect(find.text('+963933123456'), findsOneWidget);
       expect(find.text('anas@darb.sy'), findsOneWidget);
-
-      await tester.ensureVisible(find.byType(TextField).first);
-      await tester.pump();
-      await tester.enterText(find.byType(TextField).first, 'أنس الحمصي');
-      await tester.pump();
 
       final saveBtn = find.text('حفظ التغييرات');
       await tester.ensureVisible(saveBtn);
@@ -775,6 +773,7 @@ void main() {
       );
 
       await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('1 / 5'), findsOneWidget);
       await tester.enterText(find.byType(TextField).at(0), 'متجر الشهباء');
       await tester.tap(find.text('حلويات'));
@@ -787,7 +786,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('3 / 5'), findsOneWidget);
-      await tester.pump(const Duration(milliseconds: 80));
+      await tester.pumpAndSettle();
       final cityField = find.byType(DropdownButtonFormField<String>);
       expect(cityField, findsOneWidget);
       await tester.tap(cityField);
