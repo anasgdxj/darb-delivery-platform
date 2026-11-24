@@ -203,7 +203,7 @@ export class NotificationsService {
           tokens: batch,
           notification: { title, body },
           data,
-          android: { priority: 'high', notification: { channelId: 'darb_updates' } },
+          android: { priority: 'high' },
         });
         pushSent += result.successCount;
         pushFailed += result.failureCount;
