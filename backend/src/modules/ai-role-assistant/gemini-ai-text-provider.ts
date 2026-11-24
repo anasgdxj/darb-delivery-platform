@@ -26,7 +26,7 @@ export class GeminiAiTextProvider extends AiTextProvider {
     const model =
       configuredModel && configuredModel.length > 0
         ? configuredModel
-        : 'gemini-2.5-flash';
+        : 'gemini-3.8-flash';
     if (!/^[a-zA-Z0-9.-]+$/.test(model)) {
       throw new ServiceUnavailableException('إعداد نموذج الذكاء الاصطناعي غير صالح');
     }
