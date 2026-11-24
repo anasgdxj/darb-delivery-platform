@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
@@ -42,6 +44,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _savedSuccess = false;
   DarbActionState _saveState = DarbActionState.idle;
   int _shakeTrigger = 0;
+  Timer? _successTimer;
 
   @override
   void initState() {
@@ -63,12 +66,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   void dispose() {
+    _successTimer?.cancel();
     _nameCtrl.removeListener(_onFormEdited);
     _nameCtrl.dispose();
     super.dispose();
   }
 
   void _onFormEdited() {
+    _successTimer?.cancel();
     if (!mounted) return;
     setState(() {
       _nameError = null;
@@ -203,7 +208,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
       DarbHaptics.success();
 
-      Future<void>.delayed(const Duration(milliseconds: 1400), () {
+      _successTimer?.cancel();
+      _successTimer = Timer(const Duration(milliseconds: 1400), () {
         if (mounted && _saveState == DarbActionState.success) {
           setState(() => _saveState = DarbActionState.idle);
         }

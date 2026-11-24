@@ -76,7 +76,18 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
     _addressCtrl = TextEditingController();
     _descriptionCtrl = TextEditingController();
     _restoreDraft();
-    _loadCities();
+    if (!_hasApplicationStatus) _loadCities();
+  }
+
+  @override
+  void didUpdateWidget(covariant VendorApplicationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldHadStatus =
+        _normalizeStatus(oldWidget.user['vendorApplication']) != null ||
+        _normalizeStatus(oldWidget.user['driverApplication']) != null;
+    if (oldHadStatus && !_hasApplicationStatus) {
+      _loadCities();
+    }
   }
 
   @override
@@ -89,10 +100,18 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
     super.dispose();
   }
 
+  String? _normalizeStatus(dynamic value) {
+    final status = value?.toString().trim().toUpperCase();
+    return status == null || status.isEmpty ? null : status;
+  }
+
   String? get _vendorStatus =>
-      widget.user['vendorApplication']?.toString().toUpperCase();
+      _normalizeStatus(widget.user['vendorApplication']);
   String? get _driverStatus =>
-      widget.user['driverApplication']?.toString().toUpperCase();
+      _normalizeStatus(widget.user['driverApplication']);
+
+  bool get _hasApplicationStatus =>
+      _vendorStatus != null || _driverStatus != null;
 
   Future<void> _restoreDraft() async {
     if (!widget.enableDraftCache) return;

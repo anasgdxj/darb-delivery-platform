@@ -187,7 +187,7 @@ class DarbElevation {
   static List<BoxShadow> glow(Color color, {bool isDark = false}) => [
         BoxShadow(
           color: color.withValues(alpha: isDark ? 0.28 : 0.18),
-          blurRadius: 20,
+          blurRadius: isDark ? 24 : 20,
           offset: const Offset(0, 6),
         ),
       ];

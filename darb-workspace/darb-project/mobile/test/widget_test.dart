@@ -625,11 +625,17 @@ void main() {
 
       await tester.pump();
       expect(find.text('تعديل الملف الشخصي'), findsOneWidget);
-      expect(find.text('+963933123456'), findsOneWidget);
-      expect(find.text('anas@darb.sy'), findsOneWidget);
-
       await tester.enterText(find.byType(TextField).first, 'أنس الحمصي');
       await tester.pump();
+
+      await tester.scrollUntilVisible(
+        find.text('+963933123456'),
+        260,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pump();
+      expect(find.text('+963933123456'), findsOneWidget);
+      expect(find.text('anas@darb.sy'), findsOneWidget);
 
       final saveBtn = find.text('حفظ التغييرات');
       await tester.ensureVisible(saveBtn);
@@ -738,6 +744,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: DarbApp(
+            key: const ValueKey('vendor-form-app'),
             initialScreen: VendorApplicationScreen(
               enableDraftCache: false,
               enableInteractiveMap: false,
@@ -767,6 +774,7 @@ void main() {
       );
 
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('1 / 5'), findsOneWidget);
       await tester.enterText(find.byType(TextField).at(0), 'متجر الشهباء');
       await tester.tap(find.text('حلويات'));
@@ -779,6 +787,13 @@ void main() {
       await tester.pump();
 
       expect(find.text('3 / 5'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      final cityField = find.byWidgetPredicate((widget) => widget is DropdownButtonFormField);
+      expect(cityField, findsOneWidget);
+      await tester.tap(cityField);
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.text('حلب').last);
+      await tester.pump();
       await tester.tap(find.text('متابعة'));
       await tester.pump();
 
