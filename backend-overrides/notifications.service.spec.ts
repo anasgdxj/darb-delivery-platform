@@ -9,6 +9,7 @@ describe('NotificationsService', () => {
       findMany: jest.fn().mockResolvedValue([]),
     },
     userNotification: {
+      createMany: jest.fn().mockResolvedValue({ count: 0 }),
       create: jest.fn().mockResolvedValue({ id: 'notif-1' }),
       findMany: jest.fn().mockResolvedValue([{ id: 'notif-1', title: 'Order', body: 'Updated', type: 'ORDER_STATUS', readAt: null }]),
       count: jest.fn().mockResolvedValue(1),
@@ -124,6 +125,90 @@ describe('NotificationsService', () => {
     (service as any).messaging = { sendEachForMulticast: jest.fn() };
     prisma.userDevice.findMany.mockRejectedValueOnce(new Error('database unavailable'));
     await expect(service.notifyCustomer('user-1', 'Order', 'Updated', { type: 'ORDER_STATUS' })).resolves.toBeUndefined();
+  });
+
+
+  it('stores and broadcasts a published release to every registered device', async () => {
+    prisma.userDevice.findMany.mockResolvedValueOnce([
+      { userId: 'user-1', token: 'token-1' },
+      { userId: 'user-1', token: 'token-2' },
+      { userId: 'user-2', token: 'token-3' },
+    ]);
+
+    const result = await service.broadcastRelease({
+      releaseTag: 'latest',
+      versionCode: 1400,
+      versionName: '1.0.1400',
+      apkUrl: 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+      releaseNotes: 'تحسينات وإصلاحات',
+    });
+
+    expect(prisma.userNotification.createMany).toHaveBeenCalledWith({
+      data: expect.arrayContaining([
+        expect.objectContaining({ userId: 'user-1', type: 'APP_UPDATE' }),
+        expect.objectContaining({ userId: 'user-2', type: 'APP_UPDATE' }),
+      ]),
+    });
+    expect(result).toEqual({
+      targetedUsers: 2,
+      targetedDevices: 3,
+      pushSent: 0,
+      pushFailed: 0,
+      pushSkipped: true,
+    });
+  });
+
+  it('sends release announcements to devices in FCM-safe batches', async () => {
+    prisma.userDevice.findMany.mockResolvedValueOnce(
+      Array.from({ length: 501 }, (_, index) => ({ userId: `user-${index}`, token: `token-${index}` })),
+    );
+    const sendEachForMulticast = jest.fn()
+      .mockResolvedValueOnce({ successCount: 500, failureCount: 0, responses: Array.from({ length: 500 }, () => ({ success: true })) })
+      .mockResolvedValueOnce({ successCount: 1, failureCount: 0, responses: [{ success: true }] });
+    (service as any).messaging = { sendEachForMulticast };
+
+    const result = await service.broadcastRelease({
+      releaseTag: 'latest',
+      versionCode: 1401,
+      versionName: '1.0.1401',
+      apkUrl: 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+    });
+
+    expect(sendEachForMulticast).toHaveBeenCalledTimes(2);
+    expect(sendEachForMulticast.mock.calls[0][0].tokens).toHaveLength(500);
+    expect(sendEachForMulticast.mock.calls[1][0].tokens).toHaveLength(1);
+    expect(result.pushSent).toBe(501);
+  });
+
+  it('prunes invalid release tokens and reports other FCM delivery failures', async () => {
+    prisma.userDevice.findMany.mockResolvedValueOnce([
+      { userId: 'user-1', token: 'token-valid' },
+      { userId: 'user-2', token: 'token-invalid' },
+      { userId: 'user-3', token: 'token-temporary-failure' },
+    ]);
+    const sendEachForMulticast = jest.fn().mockResolvedValueOnce({
+      successCount: 1,
+      failureCount: 2,
+      responses: [
+        { success: true },
+        { success: false, error: { code: 'messaging/registration-token-not-registered' } },
+        { success: false, error: { code: 'messaging/internal-error' } },
+      ],
+    });
+    (service as any).messaging = { sendEachForMulticast };
+
+    const result = await service.broadcastRelease({
+      releaseTag: 'latest',
+      versionCode: 1402,
+      versionName: '1.0.1402',
+      apkUrl: 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+    });
+
+    expect(result.pushSent).toBe(1);
+    expect(result.pushFailed).toBe(1);
+    expect(prisma.userDevice.deleteMany).toHaveBeenCalledWith({
+      where: { token: { in: ['token-invalid'] } },
+    });
   });
 
   it('keeps vendor order creation successful when vendor notification lookup fails', async () => {
