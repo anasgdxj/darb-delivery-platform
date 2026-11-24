@@ -383,3 +383,37 @@ jobs:
           else
             gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دَرْب — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دَرْب."
           fi
+
+      - name: Notify DARB users about the published release
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        env:
+          DARB_RELEASE_WEBHOOK_TOKEN: ${{ secrets.DARB_RELEASE_WEBHOOK_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${DARB_RELEASE_WEBHOOK_TOKEN:-}" ]; then
+            echo "::error::DARB_RELEASE_WEBHOOK_TOKEN is required; refusing to mark a published release as fully delivered."
+            echo "Release push announcement: failed (missing GitHub secret)" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          MANIFEST="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json"
+          jq --arg releaseTag "latest" '. + {releaseTag: $releaseTag}' "$MANIFEST" > "$RUNNER_TEMP/darb-release-notification.json"
+          curl --fail-with-body --silent --show-error --retry 3 --retry-all-errors \
+            -X POST "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/publish" \
+            -H "Authorization: Bearer $DARB_RELEASE_WEBHOOK_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @"$RUNNER_TEMP/darb-release-notification.json" \
+            --output "$RUNNER_TEMP/darb-release-notification-result.json"
+          if ! jq -e '.pushSkipped == false and (.pushFailed // 0) == 0 and ((.targetedDevices // 0) == 0 or (.pushSent // 0) > 0)' "$RUNNER_TEMP/darb-release-notification-result.json" >/dev/null; then
+            echo "::error::FCM delivery was not confirmed for the registered DARB devices."
+            cat "$RUNNER_TEMP/darb-release-notification-result.json"
+            exit 1
+          fi
+          TARGETED="$(jq -r '.targetedDevices // 0' "$RUNNER_TEMP/darb-release-notification-result.json")"
+          SENT="$(jq -r '.pushSent // 0' "$RUNNER_TEMP/darb-release-notification-result.json")"
+          FAILED="$(jq -r '.pushFailed // 0' "$RUNNER_TEMP/darb-release-notification-result.json")"
+          if [ "$TARGETED" -eq 0 ]; then
+            echo "Release push announcement: no registered devices; no push was sent." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Release push announcement: FCM accepted $SENT notifications for $TARGETED registered devices; actionable failures: $FAILED." >> "$GITHUB_STEP_SUMMARY"
+          fi
