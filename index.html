@@ -4,857 +4,241 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#12302A">
-<meta name="description" content="دَرْب — منصة توصيل متعددة الأدوار في سوريا: طلبات المتاجر، التوصيل المستقل، السائقين، ولوحة تحكم الإدارة.">
-<meta property="og:title" content="دَرْب | طريقك الأقرب للتوصيل">
-<meta property="og:description" content="منصة توصيل متعددة الأدوار في سوريا: طلبات المتاجر، التوصيل المستقل بعروض الأسعار، وتتبع مباشر.">
-<title>دَرْب | Darb Delivery Platform</title>
+<meta name="description" content="دَرْب — طريق أبسط لطلباتك وتوصيلاتك. منصة تجمع المتاجر المحلية والسائقين المستقلين في تجربة واحدة.">
+<meta property="og:title" content="دَرْب — كل مشوار إله طريق">
+<meta property="og:description" content="اطلب من المتاجر القريبة، أو أرسل طردك مع سائق مستقل.">
+<title>دَرْب — كل مشوار إله طريق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap');
-
-:root {
-  --forest: #12302A;
-  --primary: #167A5A;
-  --primary-hover: #116248;
-  --mint: #B9E4D2;
-  --mint-tint: #E7F5EE;
-  --canvas: #F6F6F3;
-  --surface: #FFFFFF;
-  --surface-glass: rgba(255, 255, 255, 0.74);
-  --surface-soft: #EDF2EE;
-  --ink: #1A2E29;
-  --muted: #687A75;
-  --border: #DCE4DF;
-  --glass-border: rgba(255, 255, 255, 0.85);
-  --shadow: 0 20px 50px rgba(18, 48, 42, 0.08);
-  --danger: #D64545;
-  --blur: 22px;
-}
-
-html.dark {
-  --canvas: #0A1916;
-  --surface: #112621;
-  --surface-glass: rgba(17, 38, 33, 0.76);
-  --surface-soft: #17332C;
-  --ink: #F1F5F3;
-  --muted: #9DB2AC;
-  --primary: #28A47C;
-  --primary-hover: #218B69;
-  --mint-tint: #14352C;
-  --border: #23473E;
-  --glass-border: rgba(185, 228, 210, 0.16);
-  --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  background: var(--canvas);
-  color: var(--ink);
-  font-family: 'Cairo', Tahoma, Arial, sans-serif;
-  line-height: 1.65;
-  transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms cubic-bezier(0.16, 1, 0.3, 1);
-  overflow-x: hidden;
-}
-a { color: inherit; text-decoration: none; }
-button { font: inherit; cursor: pointer; }
-.tabular { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
-.wrap { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
-
-/* Ambient Glass Mesh */
-.ambient-field {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  overflow: hidden;
-  transition: opacity 200ms ease;
-}
-html[data-style="standard"] .ambient-field { opacity: 0; }
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-}
-.orb-a {
-  width: 460px; height: 460px;
-  top: -140px; right: -100px;
-  background: radial-gradient(circle, rgba(185, 228, 210, 0.55), transparent 70%);
-}
-.orb-b {
-  width: 420px; height: 420px;
-  top: 420px; left: -140px;
-  background: radial-gradient(circle, rgba(22, 122, 90, 0.16), transparent 70%);
-}
-html.dark .orb-a { background: radial-gradient(circle, rgba(185, 228, 210, 0.14), transparent 70%); }
-html.dark .orb-b { background: radial-gradient(circle, rgba(40, 164, 124, 0.18), transparent 70%); }
-
-/* Surface Mode: Glass vs Standard */
-.surface {
-  background: var(--surface-glass);
-  backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow);
-  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 180ms ease, border-color 180ms ease;
-}
-html[data-style="standard"] .surface {
-  background: var(--surface);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: 1px solid var(--border);
-  box-shadow: 0 6px 20px rgba(18, 48, 42, 0.04);
-}
-
-/* Strictly 3-Zone Top Bar Contract */
-header {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  background: var(--surface-glass);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  border-bottom: 1px solid var(--border);
-}
-html[data-style="standard"] header {
-  background: var(--surface);
-  backdrop-filter: none;
-}
-.topbar {
-  height: 74px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
-}
-.brand-wordmark {
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-}
-.nav-links a {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--muted);
-  white-space: nowrap;
-  flex-shrink: 0;
-  padding-block: 4px;
-  border-bottom: 2px solid transparent;
-  transition: color 160ms ease, border-color 160ms ease;
-}
-.nav-links a:hover, .nav-links a:focus-visible {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-  outline: none;
-}
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 10px 22px;
-  border-radius: 14px;
-  border: 1px solid transparent;
-  font-size: 14px;
-  font-weight: 800;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease, border-color 160ms ease;
-}
-.btn:hover { transform: translateY(-1px); }
-.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.btn-primary { background: var(--primary); color: #FFFFFF; }
-.btn-primary:hover { background: var(--primary-hover); }
-.btn-outline { background: transparent; border-color: var(--border); color: var(--ink); }
-.btn-outline:hover { background: var(--surface-soft); }
-
-/* Hero */
-.hero {
-  padding: 44px 0 68px;
-}
-.workspace-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 32px;
-  padding: 10px 14px;
-  border-radius: 18px;
-}
-.meta-inline {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-}
-.controls-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.segmented {
-  display: inline-flex;
-  padding: 4px;
-  border-radius: 12px;
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  gap: 4px;
-}
-.segmented button {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  padding: 6px 12px;
-  border-radius: 9px;
-  font-size: 12.5px;
-  font-weight: 800;
-  white-space: nowrap;
-  min-height: 34px;
-  transition: background-color 150ms ease, color 150ms ease;
-}
-.segmented button[aria-pressed="true"] {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 0 2px 6px rgba(18, 48, 42, 0.08);
-}
-
-.hero-grid {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  align-items: stretch;
-  gap: 40px;
-}
-.hero-copy {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.hero-kicker {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--primary);
-  margin-bottom: 10px;
-}
-.hero-copy h1 {
-  margin: 0 0 18px;
-  font-size: clamp(2.2rem, 4vw, 3.6rem);
-  line-height: 1.24;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-.hero-copy h1 span { color: var(--primary); }
-.hero-copy p {
-  margin: 0 0 28px;
-  font-size: 16px;
-  color: var(--muted);
-  max-width: 58ch;
-  line-height: 1.8;
-}
-.hero-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.hero-proof {
-  margin-top: 26px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-.proof-item strong {
-  display: block;
-  font-size: 20px;
-  font-weight: 900;
-  color: var(--ink);
-}
-.proof-item span {
-  font-size: 12.5px;
-  color: var(--muted);
-  font-weight: 700;
-}
-
-/* Interactive City Visual Showcase in Hero */
-.hero-visual {
-  border-radius: 28px;
-  overflow: hidden;
-  position: relative;
-  min-height: 440px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-.hero-visual img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: opacity 220ms ease;
-}
-.hero-scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(18, 48, 42, 0.12) 0%, rgba(18, 48, 42, 0.55) 55%, rgba(12, 34, 29, 0.92) 100%);
-}
-.hero-visual-overlay {
-  position: relative;
-  z-index: 2;
-  padding: 24px;
-  color: #FFFFFF;
-}
-.hero-visual-meta {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--mint);
-  margin-bottom: 6px;
-}
-.hero-visual-title {
-  margin: 0 0 14px;
-  font-size: 22px;
-  font-weight: 900;
-}
-.city-switcher {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.city-switcher button {
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(18, 48, 42, 0.58);
-  backdrop-filter: blur(12px);
-  color: #FFFFFF;
-  padding: 7px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  min-height: 36px;
-  white-space: nowrap;
-  transition: background-color 160ms ease, border-color 160ms ease;
-}
-.city-switcher button[aria-selected="true"] {
-  background: var(--primary);
-  border-color: var(--mint);
-}
-
-/* Sections */
-section.band { padding: 76px 0; }
-section.band.alt { background: var(--surface-soft); border-block: 1px solid var(--border); }
-.section-head {
-  max-width: 680px;
-  margin-bottom: 36px;
-}
-.section-kicker {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--primary);
-  margin-bottom: 6px;
-}
-.section-head h2 {
-  margin: 0 0 10px;
-  font-size: clamp(1.65rem, 2.8vw, 2.35rem);
-  font-weight: 900;
-  text-wrap: balance;
-}
-.section-head p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 15px;
-}
-
-/* Asymmetric Bento Services Grid */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-}
-.bento-card {
-  border-radius: 24px;
-  padding: 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.bento-card.wide { grid-column: span 2; }
-.bento-card:hover { transform: translateY(-2px); }
-.bento-num {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--primary);
-}
-.bento-card h3 {
-  margin: 0;
-  font-size: 19px;
-  font-weight: 900;
-}
-.bento-card p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-/* Syrian Cities Gallery */
-.cities-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 14px;
-}
-.city-tile {
-  border-radius: 20px;
-  overflow: hidden;
-  position: relative;
-  min-height: 240px;
-  background: var(--forest);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: flex-end;
-}
-.city-tile img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.city-tile .tile-scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 35%, rgba(18, 48, 42, 0.88) 100%);
-}
-.city-tile .tile-body {
-  position: relative;
-  z-index: 2;
-  padding: 16px;
-  color: #FFFFFF;
-}
-.city-tile strong { display: block; font-size: 16px; font-weight: 900; }
-.city-tile span { font-size: 12px; color: var(--mint); font-weight: 700; }
-
-/* Steps */
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-}
-.step-card {
-  border-radius: 22px;
-  padding: 26px;
-}
-.step-index {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--primary);
-  margin-bottom: 10px;
-}
-.step-card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 900; }
-.step-card p { margin: 0; font-size: 14px; color: var(--muted); }
-
-/* Download Panel */
-.download-box {
-  border-radius: 28px;
-  background: linear-gradient(135deg, var(--forest) 0%, #15473A 55%, var(--primary) 100%);
-  color: #FFFFFF;
-  padding: 48px;
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  align-items: center;
-  gap: 32px;
-  box-shadow: 0 28px 64px rgba(18, 48, 42, 0.22);
-}
-.download-box h2 { margin: 0 0 10px; font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 900; }
-.download-box p { margin: 0; color: rgba(255, 255, 255, 0.86); font-size: 15px; max-width: 54ch; }
-.download-kicker { color: var(--mint); font-size: 13px; font-weight: 800; margin-bottom: 8px; }
-.download-cta {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-}
-.btn-mint {
-  background: var(--mint);
-  color: var(--forest);
-  min-height: 52px;
-  font-size: 15px;
-}
-.btn-mint:hover { background: #CBECE0; }
-.download-meta {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.86);
-  text-align: center;
-  font-weight: 600;
-}
-
-/* Fallback Image Container */
-.img-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, var(--forest), var(--primary));
-  color: var(--mint);
-  font-weight: 900;
-  font-size: 22px;
-}
-
-footer {
-  border-top: 1px solid var(--border);
-  padding: 28px 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-.foot-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-.foot-links { display: flex; gap: 20px; font-weight: 700; }
-.foot-links a:hover { color: var(--primary); }
-
-@media (max-width: 960px) {
-  .hero-grid, .download-box { grid-template-columns: 1fr; }
-  .bento-grid { grid-template-columns: 1fr 1fr; }
-  .bento-card.wide { grid-column: span 2; }
-  .cities-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .steps-grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 640px) {
-  .nav-links { display: none; }
-  .topbar { height: 64px; gap: 12px; }
-  .bento-grid, .cities-grid, .hero-proof { grid-template-columns: 1fr; }
-  .bento-card.wide { grid-column: span 1; }
-  .download-box { padding: 28px 22px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { transition: none !important; animation: none !important; }
-}
+:root{color-scheme:light;--forest:#12302A;--green:#167A5A;--green2:#1D8A67;--mint:#B9E4D2;--lime:#D8EF8A;--paper:#F6F6F1;--white:#FFF;--ink:#172D27;--muted:#6D7C75;--line:#DCE3DC;--soft:#EAF0E9;--coral:#E77F62;--shadow:0 24px 70px rgba(18,48,42,.11);--radius:28px}
+html.dark{color-scheme:dark;--paper:#0B1713;--white:#12221C;--ink:#F0F5F1;--muted:#A0B1A8;--line:#294137;--soft:#172B23;--shadow:0 24px 70px rgba(0,0,0,.28)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans Arabic",Tahoma,sans-serif;line-height:1.75;overflow-x:hidden}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}
+.wrap{width:min(1160px,calc(100% - 44px));margin-inline:auto}
+.skip-link{position:absolute;top:-60px;right:16px;background:var(--green);color:#fff;padding:10px 16px;border-radius:12px;z-index:100}.skip-link:focus{top:12px}
+.site-header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(18px);border-bottom:1px solid color-mix(in srgb,var(--line) 72%,transparent)}
+.nav{height:78px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:11px;font-weight:800;font-size:25px;letter-spacing:-1px;white-space:nowrap}
+.brand-mark{width:42px;height:42px;display:grid;place-items:center;background:var(--forest);color:var(--lime);border-radius:15px;box-shadow:0 8px 20px rgba(18,48,42,.17)}
+.brand-mark svg{width:25px;height:25px}
+.nav-links{display:flex;align-items:center;gap:30px;color:var(--muted);font-size:14px;font-weight:700}
+.nav-links a{transition:color .2s}.nav-links a:hover{color:var(--green)}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.theme-toggle,.menu-toggle{width:43px;height:43px;border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:14px;display:grid;place-items:center}
+.theme-toggle svg,.menu-toggle svg{width:19px;height:19px}
+.btn{min-height:48px;padding:11px 21px;border-radius:15px;display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:800;font-size:14px;border:1px solid transparent;transition:transform .2s,background .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px)}.btn-primary{background:var(--green);color:#fff;box-shadow:0 10px 22px rgba(22,122,90,.2)}.btn-primary:hover{background:#11694D}.btn-quiet{border-color:var(--line);background:var(--white);color:var(--ink)}.btn-quiet:hover{border-color:var(--green)}
+.menu-toggle{display:none}
+.hero{padding:66px 0 84px;position:relative;isolation:isolate}
+.hero:before{content:"";position:absolute;z-index:-1;width:620px;height:620px;top:-260px;left:-180px;border-radius:50%;background:radial-gradient(circle,rgba(185,228,210,.5),transparent 68%);pointer-events:none}
+.hero-layout{display:grid;grid-template-columns:1fr .92fr;gap:58px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--green);font-size:13px;font-weight:800;margin-bottom:18px}
+.eyebrow:before{content:"";width:24px;height:2px;background:var(--coral);border-radius:2px}
+.hero h1{font-size:clamp(42px,5.2vw,68px);line-height:1.2;letter-spacing:-2.5px;margin:0 0 22px;font-weight:800;max-width:660px}
+.hero h1 em{font-style:normal;color:var(--green);position:relative;white-space:nowrap}
+.hero h1 em:after{content:"";position:absolute;right:0;left:0;bottom:-5px;height:9px;border-radius:50%;border-top:3px solid var(--coral);transform:rotate(-2deg)}
+.hero-copy>p{font-size:17px;color:var(--muted);max-width:570px;margin:0 0 28px;line-height:2}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.hero-note{display:flex;align-items:center;gap:12px;margin-top:30px;color:var(--muted);font-size:13px;font-weight:600}
+.note-avatars{display:flex;direction:ltr}.note-avatars span{width:31px;height:31px;margin-left:-8px;border:2px solid var(--paper);border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--forest);font-size:11px;font-weight:800}.note-avatars span:nth-child(2){background:#F4C5A9}.note-avatars span:nth-child(3){background:var(--lime)}
+.hero-art{min-height:480px;position:relative;border-radius:36px;background:var(--forest);overflow:hidden;box-shadow:var(--shadow);padding:28px;color:#fff}
+.art-grid{position:absolute;inset:0;opacity:.16;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(135deg,#000,transparent 85%)}
+.art-glow{position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(40,164,124,.5),transparent 70%);top:-130px;left:-80px}
+.route-art{position:absolute;inset:30px 22px 28px;width:calc(100% - 44px);height:calc(100% - 58px)}
+.route-path{fill:none;stroke:#B9E4D2;stroke-width:3;stroke-linecap:round;stroke-dasharray:8 12;animation:route-flow 18s linear infinite}
+.route-halo{fill:rgba(185,228,210,.12);stroke:rgba(185,228,210,.4);stroke-width:1.5}
+.route-pin{fill:#D8EF8A;stroke:#12302A;stroke-width:5}
+.route-pin.end{fill:#F1A78C}
+.parcel-card{position:absolute;top:45px;right:36px;background:#F6F6F1;color:#172D27;border-radius:20px;padding:14px 17px;display:flex;align-items:center;gap:12px;box-shadow:0 16px 36px rgba(0,0,0,.2);transform:rotate(3deg);animation:float 5s ease-in-out infinite}
+.parcel-icon{width:42px;height:42px;border-radius:14px;background:#DDEFE4;display:grid;place-items:center;color:#167A5A}.parcel-icon svg{width:24px;height:24px}
+.parcel-card strong{display:block;font-size:13px}.parcel-card small{display:block;color:#6D7C75;font-size:11px}
+.route-label{position:absolute;bottom:36px;right:34px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.17);backdrop-filter:blur(12px);border-radius:18px;padding:13px 17px;display:flex;align-items:center;gap:12px}
+.route-label .live-dot{width:9px;height:9px;border-radius:50%;background:#D8EF8A;box-shadow:0 0 0 6px rgba(216,239,138,.13)}
+.route-label strong{display:block;font-size:13px}.route-label small{color:#B9D4C7;font-size:11px}
+.art-index{position:absolute;bottom:37px;left:34px;color:#B9D4C7;font:700 11px Manrope,sans-serif;letter-spacing:2px}
+@keyframes route-flow{to{stroke-dashoffset:-160}}@keyframes float{0%,100%{transform:translateY(0) rotate(3deg)}50%{transform:translateY(-9px) rotate(1deg)}}
+.trust-strip{border-block:1px solid var(--line);background:var(--white)}
+.trust-inner{min-height:100px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-block:20px}
+.trust-lead{font-size:13px;color:var(--muted);font-weight:700}
+.trust-points{display:flex;gap:clamp(22px,4vw,58px);flex-wrap:wrap}
+.trust-point{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800}
+.trust-point svg{width:20px;height:20px;color:var(--green)}
+.section{padding:92px 0}
+.section-head{max-width:680px;margin-bottom:38px}
+.section-kicker{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.2px;margin-bottom:9px}
+.section-head h2{font-size:clamp(30px,3.4vw,44px);line-height:1.3;letter-spacing:-1.2px;margin:0 0 13px}
+.section-head p{margin:0;color:var(--muted);font-size:15px;line-height:1.9}
+.services-grid{display:grid;grid-template-columns:1.15fr .85fr .85fr;grid-template-rows:repeat(2,minmax(190px,auto));gap:16px}
+.service{border:1px solid var(--line);background:var(--white);border-radius:25px;padding:27px;position:relative;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}
+.service:hover{transform:translateY(-5px);border-color:color-mix(in srgb,var(--green) 42%,var(--line));box-shadow:var(--shadow)}
+.service.primary{grid-row:span 2;background:var(--forest);color:#fff;border-color:var(--forest);display:flex;flex-direction:column;justify-content:space-between;min-height:400px}
+.service-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.service-number{font:700 11px Manrope,sans-serif;color:var(--green);letter-spacing:1.5px}
+.service.primary .service-number{color:var(--lime)}
+.service-icon{width:47px;height:47px;border-radius:16px;background:var(--soft);display:grid;place-items:center;color:var(--green)}
+.service.primary .service-icon{background:rgba(255,255,255,.1);color:var(--lime)}
+.service-icon svg{width:24px;height:24px}
+.service h3{font-size:21px;line-height:1.45;margin:23px 0 9px}
+.service p{font-size:14px;line-height:1.9;color:var(--muted);margin:0}
+.service.primary p{color:#BBD0C5;max-width:340px}
+.service-foot{display:flex;align-items:center;gap:10px;color:var(--lime);font-size:12px;font-weight:700;margin-top:25px}
+.service-foot svg{width:18px;height:18px}
+.coverage{background:var(--soft);border-block:1px solid var(--line)}
+.coverage-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:70px;align-items:center}
+.coverage-note{border-right:3px solid var(--coral);padding-right:19px;color:var(--muted);font-size:14px;line-height:2}
+.city-board{background:var(--white);border:1px solid var(--line);border-radius:28px;padding:26px;box-shadow:0 16px 45px rgba(18,48,42,.05)}
+.city-board-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.city-board-head strong{font-size:15px}.coverage-badge{background:var(--mint);color:var(--forest);padding:5px 11px;border-radius:100px;font-size:11px;font-weight:800}
+.city-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.city-chip{border:1px solid var(--line);border-radius:16px;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--paper);transition:border-color .2s,background .2s}
+.city-chip[aria-pressed=true]{border-color:var(--green);background:color-mix(in srgb,var(--mint) 30%,var(--white))}
+.city-chip span{font-weight:800;font-size:14px}.city-chip small{color:var(--muted);font:700 10px Manrope,sans-serif;letter-spacing:1px}
+.city-chip i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(22,122,90,.1)}
+.city-detail{margin-top:17px;padding:15px 17px;border-radius:16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.city-detail p{margin:0;color:#C2D7CC;font-size:12px}.city-detail strong{font-size:14px}.city-detail .city-code{color:var(--lime);font:700 11px Manrope,sans-serif}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:step}
+.step{padding:25px 24px;border-top:1px solid var(--line);position:relative}
+.step:before{counter-increment:step;content:"0" counter(step);display:grid;place-items:center;width:43px;height:43px;border-radius:14px;background:var(--soft);color:var(--green);font:800 12px Manrope,sans-serif;margin-bottom:22px}
+.step h3{font-size:18px;margin:0 0 8px}.step p{font-size:14px;color:var(--muted);line-height:1.9;margin:0}
+.download-section{padding:20px 0 92px}
+.download-card{position:relative;overflow:hidden;border-radius:32px;background:var(--forest);color:#fff;padding:54px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:35px}
+.download-card:before,.download-card:after{content:"";position:absolute;border:1px solid rgba(185,228,210,.17);border-radius:50%;pointer-events:none}
+.download-card:before{width:430px;height:430px;left:-110px;top:-270px}.download-card:after{width:300px;height:300px;left:80px;top:-190px}
+.download-copy,.download-action{position:relative;z-index:1}
+.download-kicker{color:var(--lime);font-size:12px;font-weight:800;margin-bottom:9px}
+.download-card h2{font-size:clamp(28px,3.5vw,43px);line-height:1.35;margin:0 0 12px}
+.download-card p{margin:0;color:#C0D3C9;font-size:14px;max-width:590px}
+.download-action{min-width:230px}
+.download-action .btn{width:100%;background:var(--lime);color:var(--forest);min-height:56px;font-size:15px}
+.download-action small{display:block;text-align:center;color:#B9D4C7;font-size:11px;margin-top:10px}
+footer{border-top:1px solid var(--line);padding:27px 0;color:var(--muted);font-size:12px}
+.footer-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footer-brand{font-weight:800;color:var(--ink);font-size:15px}.footer-links{display:flex;gap:20px;flex-wrap:wrap;font-weight:700}
+.footer-links a:hover{color:var(--green)}
+.mobile-panel{display:none}
+:focus-visible{outline:3px solid var(--coral);outline-offset:3px}
+@media(max-width:900px){.hero-layout{grid-template-columns:1fr;gap:35px}.hero-copy{max-width:720px}.hero-art{min-height:410px}.coverage-layout{grid-template-columns:1fr;gap:30px}.services-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}.service.primary{grid-row:auto;grid-column:span 2;min-height:300px}.download-card{grid-template-columns:1fr}.download-action{max-width:260px}}
+@media(max-width:650px){.wrap{width:min(100% - 30px,560px)}.nav{height:68px}.brand{font-size:22px}.brand-mark{width:38px;height:38px}.nav-links{display:none}.nav-actions>.btn{display:none}.menu-toggle{display:grid}.mobile-panel{position:absolute;top:68px;right:15px;left:15px;padding:12px;background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);display:none}.mobile-panel.open{display:grid}.mobile-panel a{padding:11px 13px;border-radius:11px;font-weight:700;color:var(--muted)}.mobile-panel a:hover{background:var(--soft);color:var(--green)}.hero{padding:48px 0 58px}.hero h1{font-size:clamp(39px,11vw,54px);letter-spacing:-1.8px}.hero-copy>p{font-size:15px}.hero-art{min-height:360px;border-radius:26px;padding:18px}.parcel-card{top:30px;right:20px}.route-label{right:20px;bottom:24px}.art-index{left:20px;bottom:30px}.trust-inner{align-items:flex-start}.trust-points{gap:15px 22px}.trust-point{font-size:12px}.section{padding:68px 0}.section-head{margin-bottom:25px}.services-grid{grid-template-columns:1fr}.service.primary{grid-column:auto;min-height:280px}.service{padding:23px}.city-board{padding:18px}.city-list{grid-template-columns:1fr 1fr;gap:8px}.city-chip{padding:11px 10px}.city-chip span{font-size:12px}.city-detail{align-items:flex-start;flex-direction:column;gap:5px}.steps{grid-template-columns:1fr;gap:5px}.step{padding:20px 4px}.download-section{padding:0 0 65px}.download-card{padding:34px 24px;border-radius:25px}.download-action{max-width:none}.footer-row{align-items:flex-start;flex-direction:column}.footer-links{gap:14px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
-<div class="ambient-field" aria-hidden="true">
-  <div class="orb orb-a"></div>
-  <div class="orb orb-b"></div>
-</div>
-
-<header>
-  <div class="wrap topbar">
-    <a class="brand-wordmark" href="#">دَرْب</a>
-    <nav class="nav-links" aria-label="التنقل الرئيسي">
-      <a href="#services">الخدمات</a>
-      <a href="#cities">المدن</a>
-      <a href="#how">كيف يعمل؟</a>
-      <a href="#download">التنزيل</a>
-    </nav>
-    <a class="btn btn-primary" href="#download">تنزيل دَرْب</a>
+<a class="skip-link" href="#main">انتقل إلى المحتوى</a>
+<header class="site-header">
+ <div class="wrap nav">
+  <a class="brand" href="#" aria-label="دَرْب - الصفحة الرئيسية">
+   <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 18.5 9.2 5.5h5.1L19 18.5M8 14.5h8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+   <span>دَرْب</span>
+  </a>
+  <nav class="nav-links" aria-label="التنقل الرئيسي"><a href="#services">ماذا يقدم دَرْب؟</a><a href="#coverage">التغطية</a><a href="#how">كيف يعمل؟</a><a href="#download">التطبيق</a></nav>
+  <div class="nav-actions">
+   <button class="theme-toggle" id="themeToggle" type="button" aria-label="تبديل المظهر" title="تبديل المظهر"><svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button>
+   <a class="btn btn-primary" href="#download">حمّل دَرْب <span aria-hidden="true">←</span></a>
+   <button class="menu-toggle" id="menuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
+ </div>
+ <nav class="mobile-panel" id="mobilePanel" aria-label="قائمة الهاتف"><a href="#services">ماذا يقدم دَرْب؟</a><a href="#coverage">التغطية</a><a href="#how">كيف يعمل؟</a><a href="#download">تنزيل التطبيق</a></nav>
 </header>
-
-<main>
-  <section class="hero">
-    <div class="wrap">
-      <div class="workspace-bar surface">
-        <div class="meta-inline">
-          <span>منصة توصيل متعددة الأدوار في سوريا</span>
-          <span aria-hidden="true">·</span>
-          <span>متاجر · توصيل مستقل · عروض سائقين</span>
-        </div>
-        <div class="controls-group">
-          <div class="segmented" role="group" aria-label="نمط الواجهة">
-            <button type="button" id="styleGlassBtn" aria-pressed="true">زجاجي حديث</button>
-            <button type="button" id="styleStandardBtn" aria-pressed="false">كلاسيكي</button>
-          </div>
-          <div class="segmented" role="group" aria-label="المظهر">
-            <button type="button" id="themeLightBtn" aria-pressed="true">نهاري</button>
-            <button type="button" id="themeDarkBtn" aria-pressed="false">ليلي</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <div class="hero-kicker">تجربة توصيل عصرية مصممة للسوق السوري</div>
-          <h1>طريقك الأقرب لكل ما تحتاجه — <span>بوضوح وسرعة.</span></h1>
-          <p>
-            يجمع دَرْب بين طلبات المتاجر المحلية وخدمة التوصيل المستقل في تطبيق واحد. استعرض المتاجر القريبة أو أرسل طردك مع سائق مستقل وقارن عروض الأجرة بنفسك قبل التأكيد.
-          </p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#download">تنزيل تطبيق أندرويد</a>
-            <a class="btn btn-outline" href="#how">كيف يعمل دَرْب؟</a>
-          </div>
-          <div class="hero-proof">
-            <div class="proof-item">
-              <strong class="tabular">5 مدن</strong>
-              <span>دمشق · حلب · حمص · حماة · اللاذقية</span>
-            </div>
-            <div class="proof-item">
-              <strong class="tabular">3 لغات</strong>
-              <span>العربية RTL · English · Türkçe</span>
-            </div>
-            <div class="proof-item">
-              <strong class="tabular">4 أدوار</strong>
-              <span>عميل · سائق · متجر · إدارة</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero-visual surface" aria-label="المدن المدعومة في تطبيق درب">
-          <div class="img-fallback" aria-hidden="true">دَرْب سوريا</div>
-          <img id="heroCityImg" src="assets/cities/damascus.jpg" alt="مدينة دمشق — تغطية دَرْب" referrerpolicy="no-referrer">
-          <div class="hero-scrim" aria-hidden="true"></div>
-          <div class="hero-visual-overlay">
-            <div id="heroCityMeta" class="hero-visual-meta">DAM · تغطية فعّالة للمتاجر والتوصيل المستقل</div>
-            <h2 id="heroCityTitle" class="hero-visual-title">دمشق — قلب الخدمة والانطلاق</h2>
-            <div class="city-switcher" role="tablist" aria-label="اختر المدينة">
-              <button type="button" role="tab" aria-selected="true" data-city="damascus">دمشق</button>
-              <button type="button" role="tab" aria-selected="false" data-city="aleppo">حلب</button>
-              <button type="button" role="tab" aria-selected="false" data-city="homs">حمص</button>
-              <button type="button" role="tab" aria-selected="false" data-city="hama">حماة</button>
-              <button type="button" role="tab" aria-selected="false" data-city="latakia">اللاذقية</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="band" id="services">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-kicker">الخدمات والمسارات</div>
-        <h2>منظومة متكاملة للعميل والسائق والمتجر</h2>
-        <p>كل مسار مبني بوضوح لتصل إلى نتيجتك من الخطوة الأولى دون تعقيد أو خطوات مخفية.</p>
-      </div>
-      <div class="bento-grid">
-        <article class="bento-card surface wide">
-          <div class="bento-num tabular">01 · طلبات المتاجر المباشرة</div>
-          <h3>تصفح المتاجر والمنتجات مع حساب رسوم التوصيل قبل الإرسال</h3>
-          <p>ابحث حسب المدينة والنشاط والمنتج، راجع تكلفة التوصيل التقديرية بناءً على المسافة الفعلية قبل تأكيد السلة، وتابع مراحل التحضير والاستلام لحظة بلحظة.</p>
-        </article>
-        <article class="bento-card surface">
-          <div class="bento-num tabular">02 · التوصيل المستقل</div>
-          <h3>أنت تحدد المسار وتختار عرض السائق</h3>
-          <p>أرسل مستندات أو طروداً من أي نقطة استلام إلى أي نقطة تسليم في 3 خطوات، واستقبل عروض الأجرة من السائقين القريبين لاختيار الأنسب.</p>
-        </article>
-        <article class="bento-card surface">
-          <div class="bento-num tabular">03 · تطبيق السائق</div>
-          <h3>مرونة كاملة بالدراجة أو السيارة</h3>
-          <p>تحكم بحالة اتصالك، راجع الطلبات المتاحة في مدينتك، قدّم عروضك على التوصيل المستقل، وتابع أرباحك وعدد رحلاتك المكتملة.</p>
-        </article>
-        <article class="bento-card surface wide">
-          <div class="bento-num tabular">04 · مساعد الطلبات الذكي وإدارة المتجر</div>
-          <h3>أدوات عملية لإدارة المنتجات والطلبات بالصوت والنص</h3>
-          <p>يدعم التطبيق مساعد طلبات ذكياً يفهم احتياجك باللهجة السورية ويجهز السلة، كما يمنح المتاجر لوحة كاملة لإدارة المنتجات والمخزون وحالة الإغلاق والفتح.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="band alt" id="cities">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-kicker">التغطية الجغرافية</div>
-        <h2>حاضرة في كبرى المدن السورية</h2>
-        <p>نبدأ بخمس مدن سورية أساسية مع جاهزية معمارية للتوسع نحو مدن أخرى وأسواق إقليمية مجاورة.</p>
-      </div>
-      <div class="cities-grid">
-        <article class="city-tile">
-          <div class="img-fallback" aria-hidden="true">دمشق</div>
-          <img src="assets/cities/damascus.jpg" alt="دمشق" loading="lazy" referrerpolicy="no-referrer">
-          <div class="tile-scrim" aria-hidden="true"></div>
-          <div class="tile-body"><strong>دمشق</strong><span class="tabular">DAM · دمشق الكبرى</span></div>
-        </article>
-        <article class="city-tile">
-          <div class="img-fallback" aria-hidden="true">حلب</div>
-          <img src="assets/cities/aleppo.jpg" alt="حلب" loading="lazy" referrerpolicy="no-referrer">
-          <div class="tile-scrim" aria-hidden="true"></div>
-          <div class="tile-body"><strong>حلب</strong><span class="tabular">ALE · الشهباء</span></div>
-        </article>
-        <article class="city-tile">
-          <div class="img-fallback" aria-hidden="true">حمص</div>
-          <img src="assets/cities/homs.jpg" alt="حمص" loading="lazy" referrerpolicy="no-referrer">
-          <div class="tile-scrim" aria-hidden="true"></div>
-          <div class="tile-body"><strong>حمص</strong><span class="tabular">HMS · المنطقة الوسطى</span></div>
-        </article>
-        <article class="city-tile">
-          <div class="img-fallback" aria-hidden="true">حماة</div>
-          <img src="assets/cities/hama.jpg" alt="حماة" loading="lazy" referrerpolicy="no-referrer">
-          <div class="tile-scrim" aria-hidden="true"></div>
-          <div class="tile-body"><strong>حماة</strong><span class="tabular">HMA · مدينة النواعير</span></div>
-        </article>
-        <article class="city-tile">
-          <div class="img-fallback" aria-hidden="true">اللاذقية</div>
-          <img src="assets/cities/latakia.jpg" alt="اللاذقية" loading="lazy" referrerpolicy="no-referrer">
-          <div class="tile-scrim" aria-hidden="true"></div>
-          <div class="tile-body"><strong>اللاذقية</strong><span class="tabular">LAT · الساحل السوري</span></div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="band" id="how">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="section-kicker">آلية العمل</div>
-        <h2>ثلاث خطوات وتكون على دَرْب</h2>
-        <p>تجربة واضحة باللغات العربية والإنجليزية والتركية مع احترام تفضيلات المظهر وتقليل الحركة.</p>
-      </div>
-      <div class="steps-grid">
-        <article class="step-card surface">
-          <div class="step-index tabular">01. إنشاء الطلب</div>
-          <h3>اختر متجراً أو مسار توصيل</h3>
-          <p>حدد منتجاتك من متاجر مدينتك أو أنشئ رحلة توصيل مستقلة بتحديد موقع الاستلام والتسليم بدقة.</p>
-        </article>
-        <article class="step-card surface">
-          <div class="step-index tabular">02. التقدير والعروض</div>
-          <h3>تأكد من الأجرة أو اختر السائق</h3>
-          <p>اطّلع على رسوم التوصيل قبل الإرسال في طلبات المتاجر، أو قارن عروض السائقين في التوصيل المستقل.</p>
-        </article>
-        <article class="step-card surface">
-          <div class="step-index tabular">03. المتابعة والاستلام</div>
-          <h3>تتبع فوري حتى بابك</h3>
-          <p>راقب حالة طلبك وموقع المندوب داخل التطبيق مع خيار إلغاء الطلبات المعلقة فوراً قبل قبولها.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="band" id="download">
-    <div class="wrap">
-      <div class="download-box">
-        <div>
-          <div class="download-kicker">إصدار أندرويد الرسمي</div>
-          <h2>ابدأ رحلتك مع دَرْب اليوم</h2>
-          <p>قم بتنزيل أحدث إصدار رسمي موقّع من تطبيق دَرْب لأجهزة أندرويد واستفد من النظام الزجاجي الحديث والوضعين النهاري والليلي.</p>
-        </div>
-        <div class="download-cta">
-          <a id="downloadBtn" class="btn btn-mint" href="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" download="darb-app-release.apk">تنزيل تطبيق أندرويد</a>
-          <div id="downloadStatus" class="download-meta" aria-live="polite">أحدث إصدار رسمي موقّع · حزمة Android APK مباشرة</div>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap foot-row">
-    <div>دَرْب · <span id="year"></span> — جميع الحقوق محفوظة</div>
-    <div class="foot-links">
-      <a href="#services">الخدمات</a>
-      <a href="#cities">المدن</a>
-      <a href="#how">آلية العمل</a>
-      <a href="#download">التنزيل</a>
-    </div>
+<main id="main">
+ <section class="hero">
+  <div class="wrap hero-layout">
+   <div class="hero-copy">
+    <div class="eyebrow">من تفاصيل يومك… إلى باب بيتك</div>
+    <h1>مشوارك أسهل، لما يكون إله <em>دَرْب.</em></h1>
+    <p>طلب أغراضك من المتاجر القريبة، أو إرسال غرض لشخص بتحبه، صار أبسط. دَرْب يجمع أصحاب المتاجر والسائقين المستقلين والناس بمكان واحد.</p>
+    <div class="hero-actions"><a class="btn btn-primary" href="#download">اكتشف تطبيق دَرْب <span aria-hidden="true">←</span></a><a class="btn btn-quiet" href="#how">شوف كيف بيشتغل</a></div>
+    <div class="hero-note"><span class="note-avatars" aria-hidden="true"><span>د</span><span>ر</span><span>ب</span></span><span>من طلب صغير إلى مشوار كامل — كل شيء أوضح من البداية.</span></div>
+   </div>
+   <div class="hero-art" role="img" aria-label="رسم توضيحي لمسار توصيل يربط نقطة الاستلام بنقطة الوصول">
+    <div class="art-grid"></div><div class="art-glow"></div>
+    <svg class="route-art" viewBox="0 0 520 440" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+     <path class="route-path" d="M90 305 C130 260 140 220 205 220 S280 300 340 250 370 145 435 120"/>
+     <circle class="route-halo" cx="90" cy="305" r="25"/><circle class="route-pin" cx="90" cy="305" r="9"/>
+     <circle class="route-halo" cx="435" cy="120" r="25"/><circle class="route-pin end" cx="435" cy="120" r="9"/>
+     <path d="M160 90h92M160 105h56M330 345h85M330 360h48" stroke="#B9E4D2" stroke-opacity=".28" stroke-width="2" stroke-linecap="round"/>
+     <circle cx="260" cy="220" r="5" fill="#D8EF8A"/><circle cx="340" cy="250" r="4" fill="#F1A78C"/>
+    </svg>
+    <div class="parcel-card"><span class="parcel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Z"/><path d="m3 7 9 4 9-4M12 11v10M7.5 5 16 9"/></svg></span><span><strong>طلبك بالطريق</strong><small>من نقطة الاستلام لبابك</small></span></div>
+    <div class="route-label"><span class="live-dot"></span><span><strong>كل خطوة واضحة</strong><small>استلام · طريق · وصول</small></span></div>
+    <div class="art-index">DARB / YOUR EVERYDAY ROUTE</div>
+   </div>
   </div>
-</footer>
-
+ </section>
+ <section class="trust-strip" aria-label="مزايا دَرْب">
+  <div class="wrap trust-inner"><div class="trust-lead">مصمم ليجمع أطراف التوصيل في تجربة واحدة</div><div class="trust-points">
+   <div class="trust-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16v13H4zM8 7V4h8v3M8 12h8m-8 4h5"/></svg>متاجر محلية</div>
+   <div class="trust-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M4 17H2V8h11l5 5h3v4h-1M13 8v5h5M7 14h4"/></svg>سائقون مستقلون</div>
+   <div class="trust-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8m0-12.8L5.6 18.4"/></svg>تتبع ومتابعة</div>
+  </div></div>
+ </section>
+ <section class="section" id="services">
+  <div class="wrap">
+   <div class="section-head"><div class="section-kicker">مسارات دَرْب</div><h2>أكثر من طريقة… ووجهة واحدة.</h2><p>كل خدمة إلها مسارها الواضح، سواء كنت عم تطلب من متجر أو بدك تبعت غرض أو تشتغل كسائق.</p></div>
+   <div class="services-grid">
+    <article class="service primary"><div><div class="service-top"><span class="service-number">01 / SHOP</span><span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9h16l-1.5 11h-13L4 9Z"/><path d="m6 9 2-5h8l2 5M9 13v3m6-3v3"/></svg></span></div><h3>متاجرك المفضلة، أقرب مما تتوقع.</h3><p>تصفح المنتجات من المتاجر المحلية، راجع تفاصيل طلبك وتكلفة التوصيل، وتابع الطلب من التجهيز حتى الاستلام.</p></div><div class="service-foot">للطلبات اليومية والمشتريات <span>←</span></div></article>
+    <article class="service"><div class="service-top"><span class="service-number">02 / DELIVERY</span><span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span></div><h3>عندك غرض لازم يوصل؟</h3><p>حدد الاستلام والتسليم، واستقبل عروض أجرة من السائقين المستقلين واختر العرض الأنسب.</p></article>
+    <article class="service"><div class="service-top"><span class="service-number">03 / DRIVERS</span><span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M4 17H2V8h11l5 5h3v4h-1M13 8v5h5M7 14h4"/></svg></span></div><h3>اشتغل على دَرْب بطريقتك.</h3><p>كسائق مستقل، تابع الطلبات المتاحة وقدّم عروضك ونظّم رحلاتك بحسب وقتك ووسيلة نقلك.</p></article>
+    <article class="service"><div class="service-top"><span class="service-number">04 / SMART TOOLS</span><span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 14 9l6 3-6 2-2 7-2-7-6-2 6-3 2-6Z"/></svg></span></div><h3>أدوات تساعد المتاجر تكبر.</h3><p>إدارة المنتجات والمخزون والطلبات من مكان واحد، مع أدوات ذكية لتسهيل تجهيز الطلبات.</p></article>
+   </div>
+  </div>
+ </section>
+ <section class="section coverage" id="coverage">
+  <div class="wrap coverage-layout">
+   <div><div class="section-kicker">نبدأ من هون</div><div class="section-head"><h2>قريبين من الناس، حيّاً بعد حيّ.</h2><p>دَرْب مبني ليتوسع تدريجياً حسب جاهزية الخدمة وتوفر المتاجر والسائقين في كل منطقة.</p></div><div class="coverage-note">اختر مدينة لتشوف رمزها ضمن شبكة التغطية. تفاصيل التوفر الفعلي داخل التطبيق هي المرجع عند إنشاء الطلب.</div></div>
+   <div class="city-board"><div class="city-board-head"><strong>مدن ضمن خريطة دَرْب</strong><span class="coverage-badge">شبكة قابلة للتوسع</span></div>
+    <div class="city-list" role="group" aria-label="اختر مدينة">
+     <button class="city-chip" type="button" data-city="damascus" aria-pressed="true"><span>دمشق</span><small>DAM</small><i></i></button>
+     <button class="city-chip" type="button" data-city="aleppo" aria-pressed="false"><span>حلب</span><small>ALE</small><i></i></button>
+     <button class="city-chip" type="button" data-city="homs" aria-pressed="false"><span>حمص</span><small>HMS</small><i></i></button>
+     <button class="city-chip" type="button" data-city="hama" aria-pressed="false"><span>حماة</span><small>HMA</small><i></i></button>
+     <button class="city-chip" type="button" data-city="latakia" aria-pressed="false"><span>اللاذقية</span><small>LAT</small><i></i></button>
+    </div>
+    <div class="city-detail" aria-live="polite"><div><strong id="cityName">دمشق</strong><p id="cityDescription">نقطة انطلاق شبكة دَرْب ومساراتها.</p></div><span class="city-code" id="cityCode">DAMASCUS / SY</span></div>
+   </div>
+  </div>
+ </section>
+ <section class="section" id="how">
+  <div class="wrap"><div class="section-head"><div class="section-kicker">ببساطة</div><h2>من أول خطوة… لحد ما يوصل.</h2><p>التجربة واضحة، والمعلومات المهمة بتكون قدامك قبل ما تأكد طلبك.</p></div>
+   <div class="steps">
+    <article class="step"><h3>حدد شو بدك</h3><p>اختار منتجات من متجر، أو أنشئ طلب توصيل مستقل وحدد نقطة الاستلام والوصول.</p></article>
+    <article class="step"><h3>راجع التفاصيل</h3><p>شوف تفاصيل الطلب ورسومه، أو قارن عروض السائقين قبل اختيار العرض المناسب.</p></article>
+    <article class="step"><h3>تابع لحد الوصول</h3><p>تابع حالة الطلب ومراحله من داخل التطبيق، وخليك على اطلاع بكل تحديث.</p></article>
+   </div>
+  </div>
+ </section>
+ <section class="download-section" id="download">
+  <div class="wrap"><div class="download-card"><div class="download-copy"><div class="download-kicker">دَرْب معك وين ما كان مشوارك</div><h2>جاهز تجرّب طريق أسهل؟</h2><p>نزّل تطبيق دَرْب على أندرويد وابدأ استكشاف خدمات المتاجر والتوصيل المستقل.</p></div><div class="download-action"><a class="btn" id="downloadBtn" href="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" download="darb-app-release.apk">تنزيل تطبيق أندرويد <span aria-hidden="true">↓</span></a><small id="downloadStatus" aria-live="polite">ملف APK من إصدار دَرْب الرسمي</small></div></div></div>
+ </section>
+</main>
+<footer><div class="wrap footer-row"><div><span class="footer-brand">دَرْب</span> · <span id="year"></span> — كل مشوار إله طريق.</div><nav class="footer-links" aria-label="روابط أسفل الصفحة"><a href="#services">الخدمات</a><a href="#coverage">التغطية</a><a href="#how">كيف يعمل؟</a><a href="#download">تنزيل التطبيق</a></nav></div></footer>
 <script>
-const cityShowcase = {
-  damascus: {
-    img: 'assets/cities/damascus.jpg',
-    title: 'دمشق — قلب الخدمة والانطلاق',
-    meta: 'DAM · تغطية فعّالة للمتاجر والتوصيل المستقل'
-  },
-  aleppo: {
-    img: 'assets/cities/aleppo.jpg',
-    title: 'حلب — شبكة متاجر ومندوبين نشطة',
-    meta: 'ALE · طلبات المتاجر وعروض التوصيل المستقل'
-  },
-  homs: {
-    img: 'assets/cities/homs.jpg',
-    title: 'حمص — توصيل سريع بين الأحياء',
-    meta: 'HMS · تسعير واضح حسب المسافة الفعلية'
-  },
-  hama: {
-    img: 'assets/cities/hama.jpg',
-    title: 'حماة — متابعة فورية وموثوقة',
-    meta: 'HMA · تغطية للمتاجر والمندوبين المستقلين'
-  },
-  latakia: {
-    img: 'assets/cities/latakia.jpg',
-    title: 'اللاذقية — ربط مباشر على الساحل',
-    meta: 'LAT · رحلات مرنة بالدراجات والسيارات'
-  }
-};
-
-document.getElementById('year').textContent = String(new Date().getFullYear());
-
-const htmlEl = document.documentElement;
-const styleGlassBtn = document.getElementById('styleGlassBtn');
-const styleStandardBtn = document.getElementById('styleStandardBtn');
-const themeLightBtn = document.getElementById('themeLightBtn');
-const themeDarkBtn = document.getElementById('themeDarkBtn');
-
-function setStyleMode(mode) {
-  htmlEl.setAttribute('data-style', mode);
-  styleGlassBtn.setAttribute('aria-pressed', String(mode === 'glass'));
-  styleStandardBtn.setAttribute('aria-pressed', String(mode === 'standard'));
-}
-
-function setThemeMode(dark) {
-  htmlEl.classList.toggle('dark', dark);
-  themeLightBtn.setAttribute('aria-pressed', String(!dark));
-  themeDarkBtn.setAttribute('aria-pressed', String(dark));
-}
-
-styleGlassBtn.addEventListener('click', () => setStyleMode('glass'));
-styleStandardBtn.addEventListener('click', () => setStyleMode('standard'));
-themeLightBtn.addEventListener('click', () => setThemeMode(false));
-themeDarkBtn.addEventListener('click', () => setThemeMode(true));
-
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-  setThemeMode(true);
-}
-
-const cityButtons = document.querySelectorAll('.city-switcher button');
-const heroCityImg = document.getElementById('heroCityImg');
-const heroCityTitle = document.getElementById('heroCityTitle');
-const heroCityMeta = document.getElementById('heroCityMeta');
-
-heroCityImg.addEventListener('error', () => {
-  heroCityImg.style.opacity = '0';
-});
-heroCityImg.addEventListener('load', () => {
-  heroCityImg.style.opacity = '1';
-});
-
-document.querySelectorAll('.city-tile img').forEach((img) => {
-  img.addEventListener('error', () => {
-    img.style.display = 'none';
-  });
-});
-
-cityButtons.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const key = btn.getAttribute('data-city');
-    const info = cityShowcase[key];
-    if (!info) return;
-    cityButtons.forEach((b) => b.setAttribute('aria-selected', String(b === btn)));
-    heroCityImg.src = info.img;
-    heroCityImg.alt = info.title;
-    heroCityTitle.textContent = info.title;
-    heroCityMeta.textContent = info.meta;
-  });
-});
+(() => {
+ const root=document.documentElement;
+ const themeToggle=document.getElementById('themeToggle');
+ const themeIcon=document.getElementById('themeIcon');
+ const storedTheme=(()=>{try{return localStorage.getItem('darb-site-theme')}catch{return null}})();
+ const prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+ function setTheme(dark){root.classList.toggle('dark',dark);themeToggle.setAttribute('aria-pressed',String(dark));themeToggle.setAttribute('aria-label',dark?'تفعيل المظهر الفاتح':'تفعيل المظهر الداكن');themeIcon.innerHTML=dark?'<path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z"/>':'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>';try{localStorage.setItem('darb-site-theme',dark?'dark':'light')}catch{}}
+ setTheme(storedTheme?storedTheme==='dark':prefersDark);
+ themeToggle.addEventListener('click',()=>setTheme(!root.classList.contains('dark')));
+ const menuToggle=document.getElementById('menuToggle'),mobilePanel=document.getElementById('mobilePanel');
+ menuToggle.addEventListener('click',()=>{const open=mobilePanel.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'إغلاق القائمة':'فتح القائمة')});
+ mobilePanel.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobilePanel.classList.remove('open');menuToggle.setAttribute('aria-expanded','false')}));
+ const cities={
+  damascus:{name:'دمشق',code:'DAMASCUS / SY',description:'نقطة انطلاق شبكة دَرْب ومساراتها.'},
+  aleppo:{name:'حلب',code:'ALEPPO / SY',description:'مسارات للمتاجر والتوصيل المستقل.'},
+  homs:{name:'حمص',code:'HOMS / SY',description:'ربط الطلبات المحلية بمسارات السائقين.'},
+  hama:{name:'حماة',code:'HAMA / SY',description:'تجربة توصيل مرنة بحسب توفر الخدمة.'},
+  latakia:{name:'اللاذقية',code:'LATAKIA / SY',description:'امتداد شبكة دَرْب نحو الساحل.'}
+ };
+ const cityButtons=document.querySelectorAll('[data-city]');
+ cityButtons.forEach(button=>button.addEventListener('click',()=>{const city=cities[button.dataset.city];if(!city)return;cityButtons.forEach(item=>item.setAttribute('aria-pressed',String(item===button)));document.getElementById('cityName').textContent=city.name;document.getElementById('cityCode').textContent=city.code;document.getElementById('cityDescription').textContent=city.description}));
+ document.getElementById('year').textContent=String(new Date().getFullYear());
+})();
 </script>
 </body>
 </html>
