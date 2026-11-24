@@ -536,29 +536,28 @@ class _DarbTabViewStackState extends State<DarbTabViewStack> {
 
           return Positioned.fill(
             key: ValueKey<int>(i),
-            child: IgnorePointer(
-              ignoring: !active,
-              child: ExcludeSemantics(
-                excluding: !active,
-                child: TickerMode(
-                  enabled: active,
-                  child: reduced
-                      ? Visibility(
-                          visible: active,
-                          maintainState: true,
-                          child: widget.children[i],
-                        )
-                      : AnimatedOpacity(
-                          opacity: active ? 1.0 : 0.0,
-                          duration: duration,
-                          curve: active ? DarbMotion.enter : DarbMotion.exit,
-                          child: AnimatedSlide(
-                            offset: active ? Offset.zero : inactiveOffset,
+            child: Offstage(
+              offstage: !active,
+              child: IgnorePointer(
+                ignoring: !active,
+                child: ExcludeSemantics(
+                  excluding: !active,
+                  child: TickerMode(
+                    enabled: active,
+                    // Keep inactive tabs mounted but completely outside the
+                    // paint tree. Cross-fading two full pages caused their
+                    // contents to show through each other during navigation.
+                    child: active && !reduced
+                        ? AnimatedSlide(
+                            offset: Offset.zero,
                             duration: duration,
-                            curve: DarbMotion.enter,
+                            curve: movingForward
+                                ? DarbMotion.enter
+                                : DarbMotion.emphasis,
                             child: widget.children[i],
-                          ),
-                        ),
+                          )
+                        : widget.children[i],
+                  ),
                 ),
               ),
             ),
