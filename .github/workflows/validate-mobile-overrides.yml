@@ -139,7 +139,7 @@ jobs:
           localization = Path("lib/core/l10n/app_localizations.dart")
           source = localization.read_text(encoding="utf-8")
           source_map = source.split("static const Map<String, Map<String, String>> _values = {", 1)[0]
-          keys = re.findall(r"(?m)^\\s*'((?:\\\\.|[^'])*)'\\s*:", source_map)
+          keys = re.findall(r"(?m)^\s*'((?:\\.|[^'])*)'\s*:", source_map)
           duplicates = sorted({key for key in keys if keys.count(key) > 1})
           if duplicates:
               raise SystemExit("Duplicate source translation keys: " + ", ".join(duplicates))
