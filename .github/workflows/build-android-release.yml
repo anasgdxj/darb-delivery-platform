@@ -1,3 +1,4 @@
+# Manual verification run: build signed artifacts without replacing the public latest release.
 name: Build signed DARB Android release
 on:
   push:
