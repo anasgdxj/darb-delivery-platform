@@ -131,6 +131,32 @@ jobs:
           p.write_text("\n".join(lines)+"\n")
           PY
           flutter pub get
+      - name: Verify vector-only city artwork and unique translation keys
+        working-directory: extracted/darb-project/mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          localization = Path("lib/core/l10n/app_localizations.dart")
+          source = localization.read_text(encoding="utf-8")
+          source_map = source.split("static const Map<String, Map<String, String>> _values = {", 1)[0]
+          keys = re.findall(r"(?m)^\\s*'((?:\\\\.|[^'])*)'\\s*:", source_map)
+          duplicates = sorted({key for key in keys if keys.count(key) > 1})
+          if duplicates:
+              raise SystemExit("Duplicate source translation keys: " + ", ".join(duplicates))
+
+          carousel = Path("lib/features/auth/city_carousel.dart").read_text(encoding="utf-8")
+          if "DarbLoginVectorMap" not in carousel or "assets/cities/" in carousel or "Image.asset" in carousel:
+              raise SystemExit("City carousel must use abstract vector artwork, not photographs.")
+          if "assets/cities/" in Path("pubspec.yaml").read_text(encoding="utf-8"):
+              raise SystemExit("City photo assets must not be declared in pubspec.yaml.")
+          if Path("assets/cities").exists():
+              raise SystemExit("City photo assets directory must not be included in the mobile build.")
+          print("Vector-only city artwork and localization keys verified.")
+          PY
       - name: Configure release signing and print OAuth fingerprint
         working-directory: extracted/darb-project/mobile
         env:
