@@ -376,5 +376,13 @@ jobs:
             -X POST "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/publish" \
             -H "Authorization: Bearer $DARB_RELEASE_WEBHOOK_TOKEN" \
             -H "Content-Type: application/json" \
-            --data-binary @"$RUNNER_TEMP/darb-release-notification.json"
-          echo "Release push announcement: sent to backend for FCM delivery" >> "$GITHUB_STEP_SUMMARY"
+            --data-binary @"$RUNNER_TEMP/darb-release-notification.json" \
+            --output "$RUNNER_TEMP/darb-release-notification-result.json"
+          if ! jq -e '.pushSkipped == false' "$RUNNER_TEMP/darb-release-notification-result.json" >/dev/null; then
+            echo "::error::Backend accepted the release event but FCM is not configured; push delivery was not confirmed."
+            cat "$RUNNER_TEMP/darb-release-notification-result.json"
+            exit 1
+          fi
+          TARGETED="$(jq -r '.targetedDevices // 0' "$RUNNER_TEMP/darb-release-notification-result.json")"
+          SENT="$(jq -r '.pushSent // 0' "$RUNNER_TEMP/darb-release-notification-result.json")"
+          echo "Release push announcement: FCM accepted $SENT notifications for $TARGETED registered devices." >> "$GITHUB_STEP_SUMMARY"
