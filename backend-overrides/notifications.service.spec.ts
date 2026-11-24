@@ -180,6 +180,37 @@ describe('NotificationsService', () => {
     expect(result.pushSent).toBe(501);
   });
 
+  it('prunes invalid release tokens and reports other FCM delivery failures', async () => {
+    prisma.userDevice.findMany.mockResolvedValueOnce([
+      { userId: 'user-1', token: 'token-valid' },
+      { userId: 'user-2', token: 'token-invalid' },
+      { userId: 'user-3', token: 'token-temporary-failure' },
+    ]);
+    const sendEachForMulticast = jest.fn().mockResolvedValueOnce({
+      successCount: 1,
+      failureCount: 2,
+      responses: [
+        { success: true },
+        { success: false, error: { code: 'messaging/registration-token-not-registered' } },
+        { success: false, error: { code: 'messaging/internal-error' } },
+      ],
+    });
+    (service as any).messaging = { sendEachForMulticast };
+
+    const result = await service.broadcastRelease({
+      releaseTag: 'latest',
+      versionCode: 1402,
+      versionName: '1.0.1402',
+      apkUrl: 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+    });
+
+    expect(result.pushSent).toBe(1);
+    expect(result.pushFailed).toBe(1);
+    expect(prisma.userDevice.deleteMany).toHaveBeenCalledWith({
+      where: { token: { in: ['token-invalid'] } },
+    });
+  });
+
   it('keeps vendor order creation successful when vendor notification lookup fails', async () => {
     prisma.vendor.findUnique.mockRejectedValueOnce(new Error('database unavailable'));
     await expect(service.notifyVendor('vendor-1', 'Order', 'New', { type: 'ORDER_CREATED' })).resolves.toBeUndefined();
