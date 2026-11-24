@@ -2,10 +2,9 @@
 
 This file records the explicit publication request for the verified DARB 2026 design refresh.
 
-- Source commit: 519ad96df7f9bc282a7c5ca6d7664117d841739b
-- Validation workflow: 45437977966 — passed (Flutter analyze, Android debug build, Flutter tests).
-- Signed release workflow: 45437977957 — passed (APK and AAB builds, APK signature verification).
-- Release certificate SHA-256: ac0ebf366e71c7192170b62c09fad36eacc1b63343322ade991cf25a9e8a8268
-- Firebase configuration: present.
+- Source commit: 56aabcdb1ae0957c0114f56ec6b3052fefd72153
+- Flutter validation workflow: 45465839126 — running on main.
+- Signed release workflow: 45465839104 — running on main.
+- Source archive validation: 45465839047 — passed on main.
 
-Publish the verified signed APK and its matching app-update.json as the public latest release. This file does not change application code.
+Publish the signed APK and its matching app-update.json as the public latest release after the main-branch build and verification steps succeed. This file does not change application code.
