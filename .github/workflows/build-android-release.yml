@@ -357,3 +357,24 @@ jobs:
           else
             gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دَرْب — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دَرْب."
           fi
+
+      - name: Notify DARB users about the published release
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        env:
+          DARB_RELEASE_WEBHOOK_TOKEN: ${{ secrets.DARB_RELEASE_WEBHOOK_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${DARB_RELEASE_WEBHOOK_TOKEN:-}" ]; then
+            echo "::warning::DARB_RELEASE_WEBHOOK_TOKEN is not configured; release was published but push announcements were skipped."
+            echo "Release push announcement: skipped (missing GitHub secret)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          MANIFEST="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json"
+          jq --arg releaseTag "latest" '. + {releaseTag: $releaseTag}' "$MANIFEST" > "$RUNNER_TEMP/darb-release-notification.json"
+          curl --fail-with-body --silent --show-error --retry 3 --retry-all-errors \
+            -X POST "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/publish" \
+            -H "Authorization: Bearer $DARB_RELEASE_WEBHOOK_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @"$RUNNER_TEMP/darb-release-notification.json"
+          echo "Release push announcement: sent to backend for FCM delivery" >> "$GITHUB_STEP_SUMMARY"
