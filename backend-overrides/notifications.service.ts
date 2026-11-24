@@ -37,12 +37,12 @@ export class NotificationsService {
       const projectId = credentials.project_id ?? credentials.projectId;
       const clientEmail = credentials.client_email ?? credentials.clientEmail;
       const privateKey = credentials.private_key ?? credentials.privateKey;
-      const missing = [
-        !projectId ? 'project_id' : null,
-        !clientEmail ? 'client_email' : null,
-        !privateKey ? 'private_key' : null,
-      ].filter((field): field is string => field !== null);
-      if (missing.length) {
+      if (!projectId || !clientEmail || !privateKey) {
+        const missing = [
+          !projectId ? 'project_id' : null,
+          !clientEmail ? 'client_email' : null,
+          !privateKey ? 'private_key' : null,
+        ].filter((field): field is string => field !== null);
         throw new Error(`Service-account JSON is missing required fields: ${missing.join(', ')}.`);
       }
 
