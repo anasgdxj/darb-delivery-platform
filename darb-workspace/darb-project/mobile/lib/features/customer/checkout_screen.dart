@@ -297,6 +297,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 children: [
                   Row(
                     children: [
+                      _CheckoutStepPill(step: '1'),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           dt('عنوان التوصيل'),
@@ -360,9 +362,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    dt('ملخص السلة'),
-                    style: TextStyle(color: DarbColors.inkOf(context), fontSize: 16, fontWeight: FontWeight.w900),
+                  Row(
+                    children: [
+                      _CheckoutStepPill(step: '2'),
+                      const SizedBox(width: 8),
+                      Text(
+                        dt('ملخص السلة'),
+                        style: TextStyle(color: DarbColors.inkOf(context), fontSize: 16, fontWeight: FontWeight.w900),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   for (final item in widget.items)
@@ -440,12 +448,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 14),
             DarbGlassSurface(
               padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: _notesController,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  labelText: dt('ملاحظات للمتجر (اختياري)'),
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      _CheckoutStepPill(step: '3'),
+                      const SizedBox(width: 8),
+                      Text(
+                        dt('ملاحظات للمتجر (اختياري)'),
+                        style: TextStyle(
+                          color: DarbColors.inkOf(context),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _notesController,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: dt('ملاحظات للمتجر (اختياري)'),
+                    ),
+                  ),
+                ],
               ),
             ),
             if (_error != null) ...[
@@ -508,4 +536,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ],
         ),
       );
+}
+
+class _CheckoutStepPill extends StatelessWidget {
+  const _CheckoutStepPill({required this.step});
+  final String step;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = DarbColors.primaryOf(context);
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.14),
+        shape: BoxShape.circle,
+        border: Border.all(color: primary.withValues(alpha: 0.35)),
+      ),
+      child: Center(
+        child: Text(
+          step,
+          style: TextStyle(
+            color: primary,
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+      ),
+    );
+  }
 }

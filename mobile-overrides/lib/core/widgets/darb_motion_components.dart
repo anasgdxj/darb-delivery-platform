@@ -792,3 +792,160 @@ class _DarbPulseDotState extends State<DarbPulseDot>
     );
   }
 }
+
+/// Smooth GPU-friendly shimmer sweep for loading skeletons. Honors Reduce Motion
+/// by falling back to a calm static tonal block.
+class DarbShimmer extends StatefulWidget {
+  const DarbShimmer({super.key, required this.child});
+  final Widget child;
+
+  @override
+  State<DarbShimmer> createState() => _DarbShimmerState();
+}
+
+class _DarbShimmerState extends State<DarbShimmer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (DarbMotion.reduceMotion(context)) {
+      if (_controller.isAnimating) _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (DarbMotion.reduceMotion(context)) return widget.child;
+    final isDark = DarbColors.isDark(context);
+    final base = isDark
+        ? DarbColors.darkSurfaceAlt
+        : DarbColors.surfaceAlt;
+    final highlight = isDark
+        ? DarbColors.forestSoft.withValues(alpha: 0.72)
+        : Colors.white.withValues(alpha: 0.92);
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final slide = (_controller.value * 2.4) - 0.7;
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) => LinearGradient(
+            begin: Alignment(slide - 0.8, -0.2),
+            end: Alignment(slide + 0.8, 0.2),
+            colors: [base, highlight, base],
+            stops: const [0.15, 0.5, 0.85],
+          ).createShader(bounds),
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+/// Three-dot animated typing indicator for AI assistant & live dispatch states.
+class DarbTypingDots extends StatefulWidget {
+  const DarbTypingDots({super.key, this.color, this.size = 6});
+
+  final Color? color;
+  final double size;
+
+  @override
+  State<DarbTypingDots> createState() => _DarbTypingDotsState();
+}
+
+class _DarbTypingDotsState extends State<DarbTypingDots>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (DarbMotion.reduceMotion(context)) {
+      if (_controller.isAnimating) _controller.stop();
+      _controller.value = 0.5;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = widget.color ?? DarbColors.primaryOf(context);
+    final reduced = DarbMotion.reduceMotion(context);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (i) {
+        return Padding(
+          padding: EdgeInsetsDirectional.only(end: i < 2 ? 4 : 0),
+          child: reduced
+              ? Container(
+                  width: widget.size,
+                  height: widget.size,
+                  decoration: BoxDecoration(
+                    color: tone.withValues(alpha: 0.7),
+                    shape: BoxShape.circle,
+                  ),
+                )
+              : AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, _) {
+                    final phase = (_controller.value - (i * 0.18)) % 1.0;
+                    final wave = math.sin(phase * math.pi).clamp(0.0, 1.0);
+                    return Transform.translate(
+                      offset: Offset(0, -wave * 3.5),
+                      child: Opacity(
+                        opacity: 0.35 + (wave * 0.65),
+                        child: Container(
+                          width: widget.size,
+                          height: widget.size,
+                          decoration: BoxDecoration(
+                            color: tone,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        );
+      }),
+    );
+  }
+}

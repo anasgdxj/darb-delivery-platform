@@ -239,7 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
           slivers: [
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 300,
+                height: 326,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -346,6 +346,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(height: 14),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 6,
+                                    alignment: WrapAlignment.center,
+                                    children: [
+                                      _HeroFeatureChip(
+                                        icon: Icons.storefront_rounded,
+                                        label: l.t('featureStores'),
+                                      ),
+                                      _HeroFeatureChip(
+                                        icon: Icons.delivery_dining_rounded,
+                                        label: l.t('featureDelivery'),
+                                      ),
+                                      _HeroFeatureChip(
+                                        icon: Icons.near_me_rounded,
+                                        label: l.t('featureNearby'),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
@@ -369,22 +389,66 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            _otpSent ? l.t('otpTitle') : l.t('phoneTitle'),
-                            style: TextStyle(
-                              color: DarbColors.inkOf(context),
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _otpSent ? l.t('otpSubtitle') : l.t('phoneSubtitle'),
-                            style: TextStyle(
-                              color: DarbColors.mutedOf(context),
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _otpSent
+                                          ? l.t('otpTitle')
+                                          : l.t('phoneTitle'),
+                                      style: TextStyle(
+                                        color: DarbColors.inkOf(context),
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _otpSent
+                                          ? l.t('otpSubtitle')
+                                          : l.t('phoneSubtitle'),
+                                      style: TextStyle(
+                                        color: DarbColors.mutedOf(context),
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: DarbColors.primaryOf(context)
+                                      .withValues(alpha: isDark ? 0.18 : 0.10),
+                                  borderRadius:
+                                      BorderRadius.circular(DarbRadius.pill),
+                                  border: Border.all(
+                                    color: DarbColors.primaryOf(context)
+                                        .withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: Text(
+                                  _otpSent ? '2 / 2' : '1 / 2',
+                                  style: TextStyle(
+                                    color: DarbColors.primaryOf(context),
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w900,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 18),
                           AnimatedSize(
@@ -595,6 +659,43 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _HeroFeatureChip extends StatelessWidget {
+  const _HeroFeatureChip({
+    required this.icon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(DarbRadius.pill),
+        border: Border.all(color: DarbColors.mint.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13.5, color: DarbColors.lime),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }

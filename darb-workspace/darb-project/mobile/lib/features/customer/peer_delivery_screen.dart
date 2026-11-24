@@ -268,25 +268,71 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
               child: Row(
                 children: List.generate(3, (i) {
                   final active = i <= _step;
+                  final completed = i < _step;
+                  final primary = DarbColors.primaryOf(context);
                   return Expanded(
                     child: Padding(
                       padding: EdgeInsetsDirectional.only(end: i < 2 ? 8 : 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AnimatedContainer(
-                            duration: DarbMotion.effectiveDuration(
-                              context,
-                              DarbMotion.fast,
-                            ),
-                            height: 5,
-                            decoration: BoxDecoration(
-                              color: active
-                                  ? DarbColors.primaryOf(context)
-                                  : DarbColors.borderOf(context),
-                              borderRadius:
-                                  BorderRadius.circular(DarbRadius.pill),
-                            ),
+                          Row(
+                            children: [
+                              AnimatedContainer(
+                                duration: DarbMotion.effectiveDuration(
+                                  context,
+                                  DarbMotion.fast,
+                                ),
+                                width: 22,
+                                height: 22,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: active
+                                      ? primary
+                                      : DarbColors.softSurfaceOf(context),
+                                  border: Border.all(
+                                    color: active
+                                        ? primary
+                                        : DarbColors.borderOf(context),
+                                  ),
+                                ),
+                                child: Center(
+                                  child: completed
+                                      ? Icon(
+                                          Icons.check_rounded,
+                                          size: 13,
+                                          color: DarbColors.onPrimaryOf(context),
+                                        )
+                                      : Text(
+                                          '${i + 1}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w900,
+                                            color: active
+                                                ? DarbColors.onPrimaryOf(context)
+                                                : DarbColors.mutedOf(context),
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: AnimatedContainer(
+                                  duration: DarbMotion.effectiveDuration(
+                                    context,
+                                    DarbMotion.fast,
+                                  ),
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: active
+                                        ? primary
+                                        : DarbColors.borderOf(context),
+                                    borderRadius:
+                                        BorderRadius.circular(DarbRadius.pill),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -296,7 +342,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                             style: TextStyle(
                               fontSize: 11.5,
                               fontWeight:
-                                  active ? FontWeight.w800 : FontWeight.w600,
+                                  active ? FontWeight.w900 : FontWeight.w600,
                               color: active
                                   ? DarbColors.inkOf(context)
                                   : DarbColors.mutedOf(context),
@@ -550,19 +596,27 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         children: [
           Text(
             dt('راجع طلبك'),
-            style: TextStyle(color: DarbColors.inkOf(context), fontSize: 17, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: DarbColors.inkOf(context),
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 12),
-          _summaryRow(dt('موقع الاستلام'), _pickupAddressController.text.trim()),
-          _summaryRow(
-            dt('عنوان التسليم'),
-            selectedAddr?['details']?.toString() ?? dt('لم يتم اختيار عنوان'),
+          DarbRouteConnector(
+            pickupLabel: dt('موقع الاستلام'),
+            pickupAddress: _pickupAddressController.text.trim(),
+            dropoffLabel: dt('عنوان التسليم'),
+            dropoffAddress:
+                selectedAddr?['details']?.toString() ?? dt('لم يتم اختيار عنوان'),
+            badgeText: _itemTypeController.text.trim(),
           ),
+          const SizedBox(height: 14),
           _summaryRow(dt('نوع الغرض'), _itemTypeController.text.trim()),
           _summaryRow(dt('وصف الغرض'), _itemDescriptionController.text.trim()),
           if (_instructionsController.text.trim().isNotEmpty)
             _summaryRow(dt('تعليمات السائق'), _instructionsController.text.trim()),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(

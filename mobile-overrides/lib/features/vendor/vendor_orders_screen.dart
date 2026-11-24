@@ -379,14 +379,33 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
         children: [
           DarbGlassSurface(
             padding: const EdgeInsets.all(16),
+            borderColor: isOpen
+                ? DarbColors.primaryOf(context).withValues(alpha: 0.24)
+                : null,
             child: Row(
               children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: DarbColors.primaryOf(context).withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    Icons.storefront_rounded,
+                    color: DarbColors.primaryOf(context),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         vendorName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: DarbColors.inkOf(context),
                           fontSize: 17,
@@ -414,10 +433,11 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
                   value: isOpen,
                   onChanged: _togglingOpen ? null : _toggleOpen,
                 ),
-                IconButton(
+                const SizedBox(width: 4),
+                IconButton.filledTonal(
                   tooltip: dt('تعديل'),
                   onPressed: _editVendorProfile,
-                  icon: const Icon(Icons.edit_outlined),
+                  icon: const Icon(Icons.edit_outlined, size: 19),
                 ),
               ],
             ),

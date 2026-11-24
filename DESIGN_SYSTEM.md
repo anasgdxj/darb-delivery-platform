@@ -1,6 +1,6 @@
 # DARB Design System
 
-Version: 2026.1 (DARB — DESIGN EVOLUTION 2026)  
+Version: 2026.2 (Obsidian Emerald Precision & Kinetic Topography)  
 Scope: Flutter mobile app (customer, driver, vendor, administration)  
 Source of truth: `mobile-overrides/lib/core/theme/darb_design_system.dart`
 
@@ -17,15 +17,17 @@ This document defines the shared visual, motion, and structural system for DARB.
 - Separate UI widgets from API/session logic cleanly.
 - Preserve Google Sign-In, MsgPlus SMS OTP, Firebase/FCM notifications, `com.darb.darb` package identity, release signing, and dual-track APK / Play Store builds.
 
-## Approved visual direction: Premium + Dynamic + Neo (Rich Motion)
+## Approved visual direction: Obsidian Emerald Precision & Kinetic Topography
 
-DARB feels like a live city logistics network: confident, spatial, dark-emerald neo surfaces, crisp borders, and responsive motion.
+DARB feels like a live city logistics command network: deep Obsidian Emerald hero anchors (`#12302A`), asymmetric 6:5 Bento action splits, vertical pickup-to-dropoff route connectors (`DarbRouteConnector`), animated GPU shimmer wireframes (`DarbShimmer`), spatial map HUDs, and responsive motion.
 
-- **Visual hierarchy:** one dominant task per view; supporting details sit on layered surfaces (`DarbColors.canvasOf`, `surfaceOf`, `surfaceAltOf`).
-- **Customer experience:** greeting hero, deterministic `DarbCitySceneCard` matched strictly to the active city (no cross-city swapping), clear split between Stores and Peer Delivery, active-order live banner with `DarbOrderTimeline`, and real-time map tracking.
-- **Driver experience:** live Neo cockpit (`DarbPulseDot` when online), daily summary, pickup/dropoff route cards (`DarbInteractiveCard`), and status actions with double-tap protection.
-- **Vendor experience:** store status beacon, double-tap-locked order progression (`Accept` / `Preparing` / `Ready`), compact `DarbOrderTimeline`, and searchable product management.
-- **Administration:** operational KPIs, pending approvals, user/role search (`DarbSearchBar`), city & delivery-zone pricing controls, and protected single-flight mutations.
+- **Visual hierarchy:** asymmetric Bento grids (`DarbBentoActionCard`), editorial storefront headers, and numbered step pills replace uniform stacked-box layouts; supporting details sit on layered semantic surfaces (`DarbColors.canvasOf`, `surfaceOf`, `surfaceAltOf`).
+- **Auth & Global Shell:** expanded `326px` `DarbLoginVectorMap` hero with localized capability pills (`featureStores`, `featureDelivery`, `featureNearby`), `1 / 2 -> 2 / 2` auth step pill, `_ShellActionWell` 38x38 app bar wells, and frosted floating `DarbGlassBottomNav`.
+- **Customer experience:** greeting hero, deterministic `DarbCitySceneCard`, asymmetric 6:5 Bento split (`DarbBentoActionCard` Peer Delivery + AI Order Assistant), live active-order banner with `DarbOrderTimeline`, storefront header with `DarbPulseDot` + active-in-cart mint tint, step-numbered checkout, `DarbRouteConnector` peer review/order cards, interactive map HUD legend + camera re-center in `DriverTrackingScreen`, and `DarbTypingDots` + quick-fill chips in AI Order Assistant.
+- **Driver experience:** live Neo cockpit (`DarbPulseDot` + lime border glow when online), daily summary, `DarbRouteConnector` pickup/dropoff cards, highlighted earnings strip, and status actions with double-tap protection.
+- **Vendor experience:** storefront emblem command header with `DarbPulseDot`, double-tap-locked order progression (`Accept` / `Preparing` / `Ready`), compact `DarbOrderTimeline`, and product inventory rows with category/stock pills and tonal icon wells.
+- **Administration:** multi-accent operational KPIs, storefront/vehicle approval cards with tonal icon wells, order feed with `DarbOrderTimeline` + fee/total strips, zone/city/user/audit rows with icon wells, and protected single-flight mutations.
+- **Account & AI Role Assistant:** Obsidian Emerald hero profile card, `AccountActionTile` colored icon wells, segmented Glass/Standard & Light/Dark appearance switchers, starter prompt chips, asymmetrical chat bubbles, and live `DarbTypingDots`.
 - **Map & tracking use:** animated map camera updates and real-coordinate route polylines (`DriverTrackingScreen`) and active map pickers (`DarbMapPicker`).
 
 ## Color system
@@ -86,7 +88,7 @@ All screen colors resolve through `DarbColors.*Of(context)` and `Theme.of(contex
 
 `DarbSpace`: `xxs: 4`, `xs: 8`, `sm: 12`, `md: 16`, `lg: 20`, `xl: 24`, `xxl: 32`, `section: 40`.  
 `DarbRadius`: `sm: 12`, `md: 16`, `lg: 22`, `xl: 28`, `hero: 36`, `pill: 999`.  
-`DarbElevation`: `none`, `card(isDark)`, `floating(isDark)`.
+`DarbElevation`: `none`, `card(isDark)`, `floating(isDark)`, `glow(color, {isDark})`.
 
 ## Motion & Haptics (`DarbMotion` + `DarbHaptics`)
 
@@ -105,6 +107,10 @@ All screen colors resolve through `DarbColors.*Of(context)` and `Theme.of(contex
 Core components in `darb_motion_components.dart`, `darb_components.dart`, and `darb_city_scene.dart`:
 - `DarbActionButton`: animated state machine (`idle -> loading -> success -> error`), press scale, shake on validation/API failure, haptics.
 - `DarbInteractiveCard`: press shrink, highlighted border feedback, selection haptic.
+- `DarbBentoActionCard`: asymmetric Bento surface supporting Obsidian Emerald dark hero or Frosted Glass highlight modes with optional pill badge.
+- `DarbRouteConnector`: spatial pickup-to-dropoff logistics track with emerald origin pin, vertical gradient connector, and optional distance/fee pills.
+- `DarbShimmer`: GPU `ShaderMask` sweep animation (`1400ms`) powering multi-block skeleton loading wireframes (`DarbStateView.loading`).
+- `DarbTypingDots`: 3-dot staggered sine-wave AI thinking indicator.
 - `DarbPulseDot`: live ambient halo pulse on online/active indicators; stops cleanly when inactive or `reduceMotion` is enabled.
 - `DarbTabViewStack`: keyed `ValueKey<int>(i)` stack preserving child state, scroll positions, offscreen `TickerMode` pause, and `paintOrder` layering.
 - `DarbPageRoute`: unified fade + slide + micro-scale push transition across all feature navigation.

@@ -563,22 +563,97 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
                               ),
                             ),
                           ),
+                        if (pickupPoint != null ||
+                            dropoffPoint != null ||
+                            point != null)
+                          PositionedDirectional(
+                            start: 12,
+                            bottom: 12,
+                            child: DarbGlassSurface(
+                              elevated: false,
+                              borderRadius: DarbRadius.pill,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (pickupPoint != null) ...[
+                                    _MapLegendItem(
+                                      color: DarbColors.infoOf(context),
+                                      label: dt('الاستلام'),
+                                    ),
+                                    const SizedBox(width: 10),
+                                  ],
+                                  if (point != null) ...[
+                                    _MapLegendItem(
+                                      color: DarbColors.primaryOf(context),
+                                      label: dt('المندوب'),
+                                    ),
+                                    if (dropoffPoint != null)
+                                      const SizedBox(width: 10),
+                                  ],
+                                  if (dropoffPoint != null)
+                                    _MapLegendItem(
+                                      color: DarbColors.successOf(context),
+                                      label: dt('التسليم'),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
                         PositionedDirectional(
                           end: 12,
                           bottom: 12,
                           child: Column(
                             children: [
                               if (point != null)
-                                FloatingActionButton.small(
-                                  heroTag: 'center-driver-location',
-                                  onPressed: () {
-                                    setState(() => _followDriver = true);
-                                    if (_mapReady) {
-                                      _animateMapTo(point, 15.5);
-                                    }
-                                  },
-                                  tooltip: dt('توسيط على المندوب'),
-                                  child: const Icon(Icons.my_location_rounded),
+                                Tooltip(
+                                  message: dt('توسيط على المندوب'),
+                                  child: DarbPressScale(
+                                    onTap: () {
+                                      DarbHaptics.selection();
+                                      setState(() => _followDriver = true);
+                                      if (_mapReady) {
+                                        _animateMapTo(point, 15.5);
+                                      }
+                                    },
+                                    child: DarbGlassSurface(
+                                      borderRadius: DarbRadius.pill,
+                                      tintColor: _followDriver
+                                          ? DarbColors.primaryOf(context)
+                                          : null,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 10,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.my_location_rounded,
+                                            size: 18,
+                                            color: _followDriver
+                                                ? DarbColors.onPrimaryOf(context)
+                                                : DarbColors.primaryOf(context),
+                                          ),
+                                          if (!_followDriver) ...[
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              dt('توسيط على المندوب'),
+                                              style: TextStyle(
+                                                color:
+                                                    DarbColors.inkOf(context),
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               if (point == null && _loading)
                                 const Padding(
@@ -616,6 +691,35 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MapLegendItem extends StatelessWidget {
+  const _MapLegendItem({required this.color, required this.label});
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: DarbColors.inkOf(context),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
     );
   }
 }

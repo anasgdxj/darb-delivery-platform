@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/darb_design_system.dart';
 import 'darb_glass.dart';
+import 'darb_motion_components.dart';
 
 class DarbBrandMark extends StatelessWidget {
   const DarbBrandMark({super.key, this.size = 44});
@@ -199,19 +200,23 @@ class DarbMetricCard extends StatelessWidget {
     required this.value,
     this.icon,
     this.accentColor,
+    this.subtitle,
   });
 
   final String label;
   final String value;
   final IconData? icon;
   final Color? accentColor;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = DarbColors.isDark(context);
     final color = accentColor ?? DarbColors.primaryOf(context);
     return DarbGlassSurface(
       padding: const EdgeInsets.all(14),
       borderRadius: DarbRadius.md,
+      borderColor: color.withValues(alpha: isDark ? 0.28 : 0.16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -219,26 +224,46 @@ class DarbMetricCard extends StatelessWidget {
             children: [
               if (icon != null)
                 Container(
-                  width: 30,
-                  height: 30,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        color.withValues(alpha: isDark ? 0.28 : 0.18),
+                        color.withValues(alpha: isDark ? 0.12 : 0.08),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(11),
+                    border: Border.all(
+                      color: color.withValues(alpha: 0.26),
+                    ),
                   ),
                   child: Icon(icon, size: 17, color: color),
                 ),
               const Spacer(),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.72),
+                  shape: BoxShape.circle,
+                  boxShadow: DarbElevation.glow(color, isDark: isDark),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: DarbColors.inkOf(context),
-              fontSize: 18.5,
+              fontSize: 19,
               fontWeight: FontWeight.w900,
+              letterSpacing: -0.3,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
@@ -250,9 +275,22 @@ class DarbMetricCard extends StatelessWidget {
             style: TextStyle(
               color: DarbColors.mutedOf(context),
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
+          if (subtitle != null && subtitle!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -272,18 +310,18 @@ class DarbStatusBadge extends StatelessWidget {
       'DELIVERED' || 'APPROVED' || 'OPEN' || 'ONLINE' || 'ACCEPTED' => (
           isDark ? DarbColors.mint : DarbColors.success,
           isDark
-              ? DarbColors.forestSoft.withValues(alpha: 0.9)
+              ? DarbColors.forestSoft.withValues(alpha: 0.92)
               : DarbColors.mintTint,
           _translateStatus(normalized),
         ),
       'CANCELLED' || 'REJECTED' || 'SUSPENDED' || 'CLOSED' || 'OFFLINE' => (
           DarbColors.dangerOf(context),
-          DarbColors.dangerOf(context).withValues(alpha: isDark ? 0.20 : 0.11),
+          DarbColors.dangerOf(context).withValues(alpha: isDark ? 0.22 : 0.11),
           _translateStatus(normalized),
         ),
       'PICKED_UP' || 'ASSIGNED' || 'READY' || 'PREPARING' => (
           DarbColors.infoOf(context),
-          DarbColors.infoOf(context).withValues(alpha: isDark ? 0.22 : 0.12),
+          DarbColors.infoOf(context).withValues(alpha: isDark ? 0.24 : 0.12),
           _translateStatus(normalized),
         ),
       'WITHDRAWN' => (
@@ -293,21 +331,39 @@ class DarbStatusBadge extends StatelessWidget {
         ),
       _ => (
           DarbColors.warningOf(context),
-          DarbColors.warningOf(context).withValues(alpha: isDark ? 0.22 : 0.13),
+          DarbColors.warningOf(context).withValues(alpha: isDark ? 0.24 : 0.13),
           _translateStatus(normalized),
         ),
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(DarbRadius.pill),
-        border: Border.all(color: fg.withValues(alpha: 0.25)),
+        border: Border.all(color: fg.withValues(alpha: isDark ? 0.34 : 0.26)),
       ),
-      child: Text(
-        label,
-        style: TextStyle(color: fg, fontSize: 11.5, fontWeight: FontWeight.w800),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: fg,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: fg,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -428,30 +484,75 @@ class _DarbSkeletonCard extends StatelessWidget {
     final fill = DarbColors.softSurfaceOf(context);
     return DarbGlassSurface(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 140,
-            height: 14,
-            decoration:
-                BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            height: 11,
-            decoration:
-                BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            width: 210,
-            height: 11,
-            decoration:
-                BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8)),
-          ),
-        ],
+      child: DarbShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: fill,
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 140,
+                        height: 13,
+                        decoration: BoxDecoration(
+                          color: fill,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Container(
+                        width: 90,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: fill,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 64,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: fill,
+                    borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              height: 11,
+              decoration: BoxDecoration(
+                color: fill,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 210,
+              height: 11,
+              decoration: BoxDecoration(
+                color: fill,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -758,6 +859,389 @@ class DarbSearchBar extends StatelessWidget {
                 icon: const Icon(Icons.close_rounded, size: 19),
               )
             : null,
+      ),
+    );
+  }
+}
+
+/// Visual logistics route connector displaying Pickup -> Dropoff nodes with a
+/// vertical connecting track, used across driver dispatch, peer delivery, and
+/// customer order summaries.
+class DarbRouteConnector extends StatelessWidget {
+  const DarbRouteConnector({
+    super.key,
+    required this.pickupLabel,
+    required this.pickupAddress,
+    required this.dropoffLabel,
+    required this.dropoffAddress,
+    this.badgeText,
+  });
+
+  final String pickupLabel;
+  final String pickupAddress;
+  final String dropoffLabel;
+  final String dropoffAddress;
+  final String? badgeText;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = DarbColors.isDark(context);
+    final primary = DarbColors.primaryOf(context);
+    final dropoffColor = isDark ? DarbColors.lime : DarbColors.forest;
+    final ink = DarbColors.inkOf(context);
+    final muted = DarbColors.mutedOf(context);
+    final border = DarbColors.borderOf(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: DarbColors.softSurfaceOf(context).withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(DarbRadius.md),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.16),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: primary, width: 2),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 2,
+                    height: 24,
+                    margin: const EdgeInsets.symmetric(vertical: 3),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [primary, dropoffColor],
+                      ),
+                      borderRadius: BorderRadius.circular(DarbRadius.pill),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          pickupLabel,
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        if (badgeText != null && badgeText!.isNotEmpty) ...[
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: DarbColors.surfaceElevatedOf(context),
+                              borderRadius:
+                                  BorderRadius.circular(DarbRadius.pill),
+                              border: Border.all(color: border),
+                            ),
+                            child: Text(
+                              badgeText!,
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      pickupAddress,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: dropoffColor.withValues(alpha: 0.16),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: dropoffColor, width: 1.8),
+                ),
+                child: Icon(
+                  Icons.location_on_rounded,
+                  size: 12,
+                  color: dropoffColor,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dropoffLabel,
+                      style: TextStyle(
+                        color: muted,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      dropoffAddress,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Featured Bento tile with Obsidian Emerald or Frosted Glass styling, icon
+/// badge, optional pill tag, and tactile press response.
+class DarbBentoActionCard extends StatelessWidget {
+  const DarbBentoActionCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+    this.badge,
+    this.isHeroDark = false,
+    this.accentColor,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+  final String? badge;
+  final bool isHeroDark;
+  final Color? accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = DarbColors.isDark(context);
+    final accent = accentColor ??
+        (isHeroDark ? DarbColors.lime : DarbColors.primaryOf(context));
+
+    if (isHeroDark) {
+      return DarbPressScale(
+        onTap: onTap,
+        borderRadius: DarbRadius.lg,
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [DarbColors.forest, DarbColors.forestSoft],
+            ),
+            borderRadius: BorderRadius.circular(DarbRadius.lg),
+            border: Border.all(
+              color: DarbColors.mint.withValues(alpha: 0.28),
+            ),
+            boxShadow: DarbElevation.floating(isDark),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(13),
+                      border: Border.all(
+                        color: accent.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Icon(icon, color: accent, size: 21),
+                  ),
+                  const Spacer(),
+                  if (badge != null && badge!.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accent,
+                        borderRadius: BorderRadius.circular(DarbRadius.pill),
+                      ),
+                      child: Text(
+                        badge!,
+                        style: const TextStyle(
+                          color: DarbColors.forest,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    )
+                  else
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 18,
+                      color: DarbColors.mint.withValues(alpha: 0.88),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: DarbColors.mint.withValues(alpha: 0.86),
+                  fontSize: 11.8,
+                  fontWeight: FontWeight.w600,
+                  height: 1.35,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return DarbInteractiveCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(15),
+      borderRadius: DarbRadius.lg,
+      borderColor: accent.withValues(alpha: isDark ? 0.28 : 0.20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: isDark ? 0.22 : 0.12),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icon, color: accent, size: 21),
+              ),
+              const Spacer(),
+              if (badge != null && badge!.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                )
+              else
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 18,
+                  color: DarbColors.mutedOf(context),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: DarbColors.inkOf(context),
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: DarbColors.mutedOf(context),
+              fontSize: 11.8,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+            ),
+          ),
+        ],
       ),
     );
   }

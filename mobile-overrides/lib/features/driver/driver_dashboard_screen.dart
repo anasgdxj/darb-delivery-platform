@@ -374,6 +374,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
           DarbGlassSurface(
             padding: const EdgeInsets.all(18),
             tintColor: isOnline ? DarbColors.forest : null,
+            borderColor: isOnline
+                ? DarbColors.lime.withValues(alpha: 0.35)
+                : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -652,52 +655,17 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
-          if (isPeer && order['pickupAddress'] != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.radio_button_checked_rounded,
-                    size: 15,
-                    color: DarbColors.infoOf(context),
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      '${dt('الاستلام')}: ${order['pickupAddress']}',
-                      style: TextStyle(
-                        color: DarbColors.mutedOf(context),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (order['address']?['details'] != null)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.place_rounded,
-                  size: 16,
-                  color: DarbColors.successOf(context),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    '${dt('التسليم')}: ${order['address']['details']}',
-                    style: TextStyle(
-                      color: DarbColors.mutedOf(context),
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: 12),
+          DarbRouteConnector(
+            pickupLabel: dt('الاستلام'),
+            pickupAddress: isPeer
+                ? (order['pickupAddress']?.toString() ?? dt('الاستلام'))
+                : (storeName ?? dt('متجر')),
+            dropoffLabel: dt('التسليم'),
+            dropoffAddress:
+                order['address']?['details']?.toString() ?? dt('غير محدد'),
+            badgeText: distLabel,
+          ),
           if (order['notes'] != null &&
               order['notes'].toString().trim().isNotEmpty)
             Padding(

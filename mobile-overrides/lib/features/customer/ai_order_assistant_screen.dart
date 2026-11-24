@@ -216,7 +216,39 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        for (final sample in [
+                          dt('أريد عبوتين زيت وخبز إلى حي الشهباء'),
+                          dt('إرسال مفاتيح من المزة إلى المالكي'),
+                        ])
+                          ActionChip(
+                            avatar: Icon(
+                              Icons.bolt_rounded,
+                              size: 15,
+                              color: DarbColors.primaryOf(context),
+                            ),
+                            label: Text(
+                              sample,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onPressed: _submitting
+                                ? null
+                                : () {
+                                    DarbHaptics.selection();
+                                    setState(() {
+                                      _textController.text = sample;
+                                      _error = null;
+                                      _analyzeState = DarbActionState.idle;
+                                    });
+                                  },
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
                     TextField(
                       controller: _textController,
                       maxLines: 4,
@@ -240,6 +272,23 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                           color: DarbColors.dangerOf(context),
                           fontWeight: FontWeight.w700,
                         ),
+                      ),
+                    ],
+                    if (_submitting) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const DarbTypingDots(),
+                          const SizedBox(width: 10),
+                          Text(
+                            dt('جارٍ التحليل...'),
+                            style: TextStyle(
+                              color: DarbColors.mutedOf(context),
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                     const SizedBox(height: 14),

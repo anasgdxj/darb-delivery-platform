@@ -428,104 +428,60 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             const SizedBox(height: 14),
           ],
 
-          // 4. Dual Core Services Hero (Peer Delivery + Smart AI Assistant)
+          // 4. Asymmetric Bento Service Split (Peer Delivery + AI Order Assistant)
           DarbFadeSlide(
-            child: DarbGlassSurface(
-              borderRadius: DarbRadius.xl,
-              tintColor: DarbColors.forest,
-              borderColor: DarbColors.mint.withValues(alpha: 0.25),
-              padding: const EdgeInsets.all(18),
-              child: Column(
+            child: IntrinsicHeight(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.route_rounded,
-                        size: 16,
-                        color: DarbColors.lime,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        dt('توصيل من الباب إلى الباب'),
-                        style: const TextStyle(
-                          color: DarbColors.mint,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    dt('غرضك بأي مكان…\nودَرْب يوصّله.'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      height: 1.25,
+                  Expanded(
+                    flex: 6,
+                    child: DarbBentoActionCard(
+                      isHeroDark: true,
+                      icon: Icons.local_shipping_outlined,
+                      badge: dt('سريع'),
+                      title: dt('إرسال غرض مستقل'),
+                      subtitle: dt('أرسل طرداً أو غرضاً من أي عنوان إلى آخر'),
+                      onTap: () {
+                        if (_selectedCityId == null) return;
+                        DarbHaptics.light();
+                        Navigator.push(
+                          context,
+                          DarbPageRoute(
+                            builder: (_) => PeerDeliveryScreen(
+                              cityId: _selectedCityId!,
+                              cityName: _selectedCityName,
+                              onCreated: widget.onOrderCreated,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: DarbColors.lime,
-                            foregroundColor: DarbColors.forest,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 5,
+                    child: DarbBentoActionCard(
+                      icon: Icons.auto_awesome_rounded,
+                      accentColor: DarbColors.primaryOf(context),
+                      badge: 'AI',
+                      title: dt('المساعد الذكي'),
+                      subtitle: dt('اكتب طلبك وسيتم تجهيزه تلقائياً'),
+                      onTap: () {
+                        if (_selectedCityId == null) return;
+                        DarbHaptics.light();
+                        Navigator.push(
+                          context,
+                          DarbPageRoute(
+                            builder: (_) => AiOrderAssistantScreen(
+                              cityId: _selectedCityId!,
+                              cityName: _selectedCityName,
+                              onOrderCompleted: widget.onOrderCreated,
+                            ),
                           ),
-                          onPressed: _selectedCityId == null
-                              ? null
-                              : () {
-                                  DarbHaptics.light();
-                                  Navigator.push(
-                                    context,
-                                    DarbPageRoute(
-                                      builder: (_) => PeerDeliveryScreen(
-                                        cityId: _selectedCityId!,
-                                        cityName: _selectedCityName,
-                                        onCreated: widget.onOrderCreated,
-                                      ),
-                                    ),
-                                  );
-                                },
-                          icon: const Icon(
-                            Icons.local_shipping_outlined,
-                            size: 18,
-                          ),
-                          label: Text(dt('إرسال غرض مستقل')),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Tooltip(
-                        message: dt('مساعد الطلبات الذكي'),
-                        child: IconButton.filledTonal(
-                          style: IconButton.styleFrom(
-                            backgroundColor:
-                                DarbColors.mint.withValues(alpha: 0.22),
-                            foregroundColor: DarbColors.mint,
-                            minimumSize: const Size(50, 50),
-                          ),
-                          onPressed: _selectedCityId == null
-                              ? null
-                              : () {
-                                  DarbHaptics.light();
-                                  Navigator.push(
-                                    context,
-                                    DarbPageRoute(
-                                      builder: (_) => AiOrderAssistantScreen(
-                                        cityId: _selectedCityId!,
-                                        cityName: _selectedCityName,
-                                        onOrderCompleted: widget.onOrderCreated,
-                                      ),
-                                    ),
-                                  );
-                                },
-                          icon: const Icon(Icons.auto_awesome_rounded),
-                        ),
-                      ),
-                    ],
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -705,7 +661,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     final isOpen = v['isOpen'] != false;
     final count = (v['_count']?['products'] as num?)?.toInt() ?? 0;
     final reviewsCount = (v['_count']?['reviews'] as num?)?.toInt() ?? 0;
-    final ratingAvg = num.tryParse(v['ratingAvg']?.toString() ?? '')?.toDouble() ?? 0;
+    final ratingAvg =
+        num.tryParse(v['ratingAvg']?.toString() ?? '')?.toDouble() ?? 0;
+    final isDark = DarbColors.isDark(context);
 
     return DarbInteractiveCard(
       onTap: _selectedCityId == null
@@ -721,26 +679,41 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
               ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  DarbColors.primaryOf(context).withValues(alpha: 0.16),
-                  DarbColors.mint.withValues(alpha: 0.25),
-                ],
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      DarbColors.primaryOf(context).withValues(alpha: 0.18),
+                      DarbColors.mint.withValues(alpha: isDark ? 0.14 : 0.30),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: DarbColors.primaryOf(context).withValues(alpha: 0.22),
+                  ),
+                ),
+                child: Icon(
+                  Icons.storefront_rounded,
+                  color: DarbColors.primaryOf(context),
+                  size: 27,
+                ),
               ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              Icons.storefront_rounded,
-              color: DarbColors.primaryOf(context),
-              size: 27,
-            ),
+              if (isOpen)
+                const PositionedDirectional(
+                  top: -3,
+                  end: -3,
+                  child: DarbPulseDot(size: 7.5),
+                ),
+            ],
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -765,43 +738,90 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     DarbStatusBadge(status: isOpen ? 'OPEN' : 'CLOSED'),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  address != null && address.isNotEmpty
-                      ? '$type · $address'
-                      : type,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: DarbColors.mutedOf(context),
-                    fontSize: 13,
-                  ),
-                ),
                 const SizedBox(height: 5),
                 Row(
                   children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: DarbColors.softSurfaceOf(context),
+                        borderRadius: BorderRadius.circular(DarbRadius.pill),
+                      ),
+                      child: Text(
+                        type,
+                        style: TextStyle(
+                          color: DarbColors.inkOf(context),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    if (address != null && address.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          address,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: DarbColors.mutedOf(context),
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.inventory_2_outlined,
+                      size: 14,
+                      color: DarbColors.primaryOf(context),
+                    ),
+                    const SizedBox(width: 4),
                     Text(
                       dt('$count منتج متاح'),
                       style: TextStyle(
                         color: DarbColors.primaryOf(context),
-                        fontSize: 12.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     if (ratingAvg > 0 || reviewsCount > 0) ...[
-                      const SizedBox(width: 10),
-                      Icon(
-                        Icons.star_rounded,
-                        size: 16,
-                        color: DarbColors.warningOf(context),
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        '${ratingAvg.toStringAsFixed(1)} ($reviewsCount)',
-                        style: TextStyle(
-                          color: DarbColors.inkOf(context),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: DarbColors.warningOf(context)
+                              .withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(DarbRadius.pill),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.star_rounded,
+                              size: 14,
+                              color: DarbColors.warningOf(context),
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              '${ratingAvg.toStringAsFixed(1)} ($reviewsCount)',
+                              style: TextStyle(
+                                color: DarbColors.inkOf(context),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -811,9 +831,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             ),
           ),
           const SizedBox(width: 6),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: DarbColors.mutedOf(context),
+          Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: Icon(
+              Icons.chevron_right_rounded,
+              color: DarbColors.mutedOf(context),
+            ),
           ),
         ],
       ),

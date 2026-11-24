@@ -629,13 +629,15 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
               ),
           ],
           if (isPeer && order['pickupAddress'] != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              '${dt('الاستلام')}: ${order['pickupAddress']}',
-              style: TextStyle(
-                color: DarbColors.mutedOf(context),
-                fontSize: 13,
-              ),
+            const SizedBox(height: 10),
+            DarbRouteConnector(
+              pickupLabel: dt('الاستلام'),
+              pickupAddress: order['pickupAddress'].toString(),
+              dropoffLabel: dt('عنوان التسليم'),
+              dropoffAddress: (order['address'] is Map)
+                  ? ((order['address'] as Map)['details']?.toString() ??
+                      dt('غير محدد'))
+                  : dt('غير محدد'),
             ),
           ],
           if (myReview != null) ...[

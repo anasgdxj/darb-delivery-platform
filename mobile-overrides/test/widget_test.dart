@@ -128,6 +128,8 @@ void main() {
       expect(dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'), 'Offline mode — showing cached data');
       expect(dt('حدد الموقع على خريطة دمشق'), 'Pin location on the map for دمشق');
       expect(dt('5 منتج متاح'), '5 products available');
+      expect(dt('سريع'), 'Fast');
+      expect(dt('طلب متجر'), 'Store order');
       expect(formatDarbMoney(15000), '15,000 SYP');
 
       darbLocale.value = const Locale('tr');
@@ -135,6 +137,7 @@ void main() {
       expect(dt('الإشعارات'), 'Bildirimler');
       expect(dt('تحديث التطبيق'), 'Uygulamayı güncelle');
       expect(dt('3 منتج متاح'), '3 ürün mevcut');
+      expect(dt('سريع'), 'Hızlı');
 
       darbLocale.value = const Locale('ar');
     });
@@ -509,6 +512,94 @@ void main() {
       await tester.tap(find.text('بطاقة تفاعلية'));
       await tester.pump();
       expect(cardTapped, isTrue);
+    });
+
+    test('DarbElevation.glow creates soft colored shadow for light and dark themes', () {
+      final lightGlow = DarbElevation.glow(DarbColors.forest, isDark: false);
+      final darkGlow = DarbElevation.glow(DarbColors.forest, isDark: true);
+      expect(lightGlow, hasLength(1));
+      expect(darkGlow, hasLength(1));
+      expect(lightGlow.first.blurRadius, greaterThan(0));
+      expect(darkGlow.first.blurRadius, greaterThan(lightGlow.first.blurRadius));
+    });
+
+    testWidgets('DarbRouteConnector, DarbBentoActionCard, DarbShimmer, and DarbTypingDots render cleanly under Reduce Motion',
+        (tester) async {
+      var heroTapped = false;
+      var glassTapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: Scaffold(
+              body: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  const DarbRouteConnector(
+                    pickupText: 'شارع الثورة · دمشق',
+                    dropoffText: 'حي المالكي · شارع عبد المنعم رياض',
+                    distanceKm: 4.2,
+                    deliveryFee: '8,500 ل.س',
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DarbBentoActionCard(
+                          icon: Icons.local_shipping_rounded,
+                          title: 'توصيل خاص',
+                          subtitle: 'أرسل غرضاً سريعاً',
+                          badgeText: 'سريع',
+                          isHeroDark: true,
+                          onTap: () => heroTapped = true,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: DarbBentoActionCard(
+                          icon: Icons.auto_awesome_rounded,
+                          title: 'اطلب بالكتابة',
+                          subtitle: 'جهّز مسودتك فوراً',
+                          isHeroDark: false,
+                          onTap: () => glassTapped = true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const DarbShimmer(
+                    child: SizedBox(height: 24, width: 140),
+                  ),
+                  const SizedBox(height: 12),
+                  const DarbTypingDots(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.byType(DarbRouteConnector), findsOneWidget);
+      expect(find.text('شارع الثورة · دمشق'), findsOneWidget);
+      expect(find.text('حي المالكي · شارع عبد المنعم رياض'), findsOneWidget);
+      expect(find.text('8,500 ل.س'), findsOneWidget);
+
+      expect(find.byType(DarbBentoActionCard), findsNWidgets(2));
+      expect(find.text('سريع'), findsOneWidget);
+
+      expect(find.byType(DarbShimmer), findsOneWidget);
+      expect(find.byType(DarbTypingDots), findsOneWidget);
+
+      await tester.tap(find.text('توصيل خاص'));
+      await tester.pump();
+      expect(heroTapped, isTrue);
+
+      await tester.tap(find.text('اطلب بالكتابة'));
+      await tester.pump();
+      expect(glassTapped, isTrue);
     });
   });
 }

@@ -165,27 +165,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
-            childAspectRatio: 1.5,
+            childAspectRatio: 1.48,
             children: [
               DarbMetricCard(
                 label: dt('إجمالي الطلبات'),
                 value: '$totalOrders',
                 icon: Icons.receipt_long_rounded,
+                accentColor: DarbColors.primaryOf(context),
               ),
               DarbMetricCard(
                 label: dt('قيد التنفيذ'),
                 value: '$activeOrders',
                 icon: Icons.local_shipping_outlined,
+                accentColor: DarbColors.infoOf(context),
               ),
               DarbMetricCard(
                 label: dt('سائقون متصلون'),
                 value: '$driversOnline',
                 icon: Icons.sensors_rounded,
+                accentColor: DarbColors.successOf(context),
               ),
               DarbMetricCard(
                 label: dt('إجمالي المبيعات'),
                 value: formatDarbMoney(gmv),
                 icon: Icons.account_balance_wallet_outlined,
+                accentColor: DarbColors.warningOf(context),
               ),
             ],
           ),
@@ -293,6 +297,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final status = v['status']?.toString() ?? 'PENDING';
     final id = v['id'].toString();
     final isBusy = _busyIds.contains('v_$id');
+    final accent = status == 'APPROVED'
+        ? DarbColors.successOf(context)
+        : (status == 'PENDING'
+            ? DarbColors.warningOf(context)
+            : DarbColors.primaryOf(context));
     return DarbInteractiveCard(
       padding: const EdgeInsets.all(15),
       child: Column(
@@ -300,22 +309,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  '$name · ${v['type'] ?? ''}',
-                  style: TextStyle(
-                    color: DarbColors.inkOf(context),
-                    fontWeight: FontWeight.w900,
-                  ),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: accent.withValues(alpha: 0.25)),
+                ),
+                child: Icon(
+                  Icons.storefront_rounded,
+                  size: 20,
+                  color: accent,
                 ),
               ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$name · ${v['type'] ?? ''}',
+                      style: TextStyle(
+                        color: DarbColors.inkOf(context),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${v['user']?['name'] ?? ''} · ${v['user']?['phone'] ?? v['user']?['email'] ?? ''}',
+                      style: TextStyle(
+                        color: DarbColors.mutedOf(context),
+                        fontSize: 12.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
               DarbStatusBadge(status: status),
             ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${v['user']?['name'] ?? ''} · ${v['user']?['phone'] ?? v['user']?['email'] ?? ''}',
-            style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 12.5),
           ),
           const SizedBox(height: 12),
           Row(
@@ -360,6 +393,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final status = d['status']?.toString() ?? 'PENDING';
     final id = d['id'].toString();
     final isBusy = _busyIds.contains('d_$id');
+    final vehicle = d['vehicleType']?.toString() ?? 'MOTORCYCLE';
+    final vehicleIcon = switch (vehicle) {
+      'CAR' => Icons.directions_car_rounded,
+      'BICYCLE' => Icons.pedal_bike_rounded,
+      _ => Icons.two_wheeler_rounded,
+    };
+    final accent = status == 'APPROVED'
+        ? DarbColors.successOf(context)
+        : (status == 'PENDING'
+            ? DarbColors.warningOf(context)
+            : DarbColors.infoOf(context));
     return DarbInteractiveCard(
       padding: const EdgeInsets.all(15),
       child: Column(
@@ -367,22 +411,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  d['user']?['name']?.toString() ?? dt('سائق جديد'),
-                  style: TextStyle(
-                    color: DarbColors.inkOf(context),
-                    fontWeight: FontWeight.w900,
-                  ),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: accent.withValues(alpha: 0.25)),
+                ),
+                child: Icon(
+                  vehicleIcon,
+                  size: 20,
+                  color: accent,
                 ),
               ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      d['user']?['name']?.toString() ?? dt('سائق جديد'),
+                      style: TextStyle(
+                        color: DarbColors.inkOf(context),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$vehicle · ${d['city']?['code'] ?? ''} · ${d['user']?['phone'] ?? d['user']?['email'] ?? ''}',
+                      style: TextStyle(
+                        color: DarbColors.mutedOf(context),
+                        fontSize: 12.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
               DarbStatusBadge(status: status),
             ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${d['vehicleType'] ?? 'MOTORCYCLE'} · ${d['city']?['code'] ?? ''} · ${d['user']?['phone'] ?? d['user']?['email'] ?? ''}',
-            style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 12.5),
           ),
           const SizedBox(height: 12),
           Row(

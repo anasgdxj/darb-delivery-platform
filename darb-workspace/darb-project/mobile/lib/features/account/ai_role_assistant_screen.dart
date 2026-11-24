@@ -4,6 +4,7 @@ import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_glass.dart';
+import '../../core/widgets/darb_motion_components.dart';
 
 class AiRoleAssistantScreen extends StatefulWidget {
   const AiRoleAssistantScreen({super.key});
@@ -23,8 +24,8 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
     super.dispose();
   }
 
-  Future<void> _send() async {
-    final text = _inputController.text.trim();
+  Future<void> _send([String? preset]) async {
+    final text = (preset ?? _inputController.text).trim();
     if (text.length < 2 || _sending) return;
     _inputController.clear();
     setState(() {
@@ -53,6 +54,13 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final quickPrompts = [
+      dt('ما حالة طلباتي اليوم؟'),
+      dt('لخّص مهامي الحالية'),
+      dt('كيف أتابع التوصيل المباشر؟'),
+    ];
+    final totalItems = _messages.length + (_sending ? 1 : 0);
+
     return Scaffold(
       appBar: DarbGlassAppBar(title: dt('مساعد دَرْب الشخصي')),
       body: DarbAmbientBackground(
@@ -61,19 +69,60 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
             Expanded(
               child: _messages.isEmpty
                   ? Center(
-                      child: Padding(
+                      child: SingleChildScrollView(
                         padding: const EdgeInsets.all(24),
                         child: DarbGlassSurface(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(22),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.auto_awesome_rounded, size: 38, color: DarbColors.primaryOf(context)),
-                              const SizedBox(height: 12),
+                              Container(
+                                width: 54,
+                                height: 54,
+                                decoration: BoxDecoration(
+                                  color: DarbColors.primaryOf(context)
+                                      .withValues(alpha: 0.14),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.auto_awesome_rounded,
+                                  size: 28,
+                                  color: DarbColors.primaryOf(context),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
                               Text(
                                 dt('اسأل مساعد دَرْب عن طلباتك أو مهامك الحالية وفق صلاحية حسابك'),
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                  color: DarbColors.inkOf(context),
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.45,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  for (final prompt in quickPrompts)
+                                    ActionChip(
+                                      avatar: Icon(
+                                        Icons.bolt_rounded,
+                                        size: 16,
+                                        color: DarbColors.primaryOf(context),
+                                      ),
+                                      label: Text(
+                                        prompt,
+                                        style: const TextStyle(
+                                          fontSize: 12.2,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      onPressed: () => _send(prompt),
+                                    ),
+                                ],
                               ),
                             ],
                           ),
@@ -82,27 +131,85 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                      itemCount: _messages.length,
+                      itemCount: totalItems,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
+                        if (_sending && index == _messages.length) {
+                          return Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 13,
+                              ),
+                              decoration: BoxDecoration(
+                                color: DarbColors.surfaceOf(context),
+                                borderRadius: const BorderRadiusDirectional.only(
+                                  topStart: Radius.circular(6),
+                                  topEnd: Radius.circular(18),
+                                  bottomStart: Radius.circular(18),
+                                  bottomEnd: Radius.circular(18),
+                                ),
+                                border: Border.all(
+                                  color: DarbColors.lineOf(context),
+                                ),
+                              ),
+                              child: const DarbTypingDots(),
+                            ),
+                          );
+                        }
                         final msg = _messages[index];
+                        final bubbleRadius = msg.isUser
+                            ? const BorderRadiusDirectional.only(
+                                topStart: Radius.circular(18),
+                                topEnd: Radius.circular(6),
+                                bottomStart: Radius.circular(18),
+                                bottomEnd: Radius.circular(18),
+                              )
+                            : const BorderRadiusDirectional.only(
+                                topStart: Radius.circular(6),
+                                topEnd: Radius.circular(18),
+                                bottomStart: Radius.circular(18),
+                                bottomEnd: Radius.circular(18),
+                              );
                         return Align(
                           alignment: msg.isUser
                               ? AlignmentDirectional.centerEnd
                               : AlignmentDirectional.centerStart,
                           child: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.82),
-                            child: DarbGlassSurface(
-                              tintColor: msg.isError
-                                  ? DarbColors.dangerSoftOf(context)
-                                  : (msg.isUser ? DarbColors.forest : null),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.sizeOf(context).width * 0.82,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: msg.isError
+                                    ? DarbColors.dangerSoftOf(context)
+                                    : (msg.isUser
+                                        ? DarbColors.forest
+                                        : DarbColors.surfaceOf(context)),
+                                borderRadius: bubbleRadius,
+                                border: Border.all(
+                                  color: msg.isError
+                                      ? DarbColors.dangerOf(context)
+                                          .withValues(alpha: 0.35)
+                                      : (msg.isUser
+                                          ? DarbColors.mint
+                                              .withValues(alpha: 0.25)
+                                          : DarbColors.lineOf(context)),
+                                ),
+                              ),
                               child: Text(
                                 msg.text,
                                 style: TextStyle(
                                   color: msg.isError
                                       ? DarbColors.dangerOf(context)
-                                      : (msg.isUser ? Colors.white : DarbColors.inkOf(context)),
+                                      : (msg.isUser
+                                          ? Colors.white
+                                          : DarbColors.inkOf(context)),
                                   fontWeight: FontWeight.w600,
                                   height: 1.45,
                                 ),
@@ -136,7 +243,9 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                         ),
                       ),
                       IconButton.filled(
-                        style: IconButton.styleFrom(backgroundColor: DarbColors.primaryOf(context)),
+                        style: IconButton.styleFrom(
+                          backgroundColor: DarbColors.primaryOf(context),
+                        ),
                         onPressed: _sending ? null : _send,
                         icon: _sending
                             ? SizedBox(
@@ -147,7 +256,10 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                                   color: DarbColors.onPrimaryOf(context),
                                 ),
                               )
-                            : Icon(Icons.send_rounded, color: DarbColors.onPrimaryOf(context)),
+                            : Icon(
+                                Icons.send_rounded,
+                                color: DarbColors.onPrimaryOf(context),
+                              ),
                       ),
                     ],
                   ),

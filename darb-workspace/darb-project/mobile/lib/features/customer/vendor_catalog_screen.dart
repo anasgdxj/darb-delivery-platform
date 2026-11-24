@@ -241,9 +241,46 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                 ),
                 children: [
                   DarbGlassSurface(
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(15),
+                    borderColor: _vendorOpen
+                        ? DarbColors.primaryOf(context).withValues(alpha: 0.24)
+                        : null,
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    DarbColors.primaryOf(context)
+                                        .withValues(alpha: 0.18),
+                                    DarbColors.mint.withValues(alpha: 0.26),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Icon(
+                                Icons.storefront_rounded,
+                                color: DarbColors.primaryOf(context),
+                                size: 24,
+                              ),
+                            ),
+                            if (_vendorOpen)
+                              const PositionedDirectional(
+                                top: -3,
+                                end: -3,
+                                child: DarbPulseDot(size: 7.5),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,8 +301,8 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: DarbColors.inkOf(context),
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 13.5,
                                         ),
                                       ),
                                     ),
@@ -282,31 +319,37 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                                     style: TextStyle(
                                       color: DarbColors.mutedOf(context),
                                       fontSize: 12.5,
+                                      height: 1.35,
                                     ),
                                   ),
                                 ),
+                              const SizedBox(height: 8),
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(0, 34),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 11,
+                                    vertical: 5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(DarbRadius.pill),
+                                  ),
+                                ),
+                                onPressed: _openReviewsSheet,
+                                icon: Icon(
+                                  Icons.star_rounded,
+                                  size: 16,
+                                  color: DarbColors.warningOf(context),
+                                ),
+                                label: Text(
+                                  ratingAvg > 0
+                                      ? '${ratingAvg.toStringAsFixed(1)} ($reviewsCount)'
+                                      : dt('تقييمات العملاء'),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
                             ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 38),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                          ),
-                          onPressed: _openReviewsSheet,
-                          icon: Icon(
-                            Icons.star_rounded,
-                            size: 17,
-                            color: DarbColors.warningOf(context),
-                          ),
-                          label: Text(
-                            ratingAvg > 0
-                                ? '${ratingAvg.toStringAsFixed(1)} ($reviewsCount)'
-                                : dt('تقييمات العملاء'),
                           ),
                         ),
                       ],
@@ -459,20 +502,36 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
     final outOfStock = stock != null && stock <= 0;
     final qty = _cart[id] ?? 0;
 
+    final isDark = DarbColors.isDark(context);
+    final inCart = qty > 0;
+
     return DarbInteractiveCard(
       padding: const EdgeInsets.all(14),
-      borderColor: qty > 0
-          ? DarbColors.primaryOf(context).withValues(alpha: 0.45)
+      borderColor: inCart
+          ? DarbColors.primaryOf(context).withValues(alpha: 0.55)
+          : null,
+      tintColor: inCart
+          ? (isDark
+              ? DarbColors.forestSoft.withValues(alpha: 0.42)
+              : DarbColors.mintTint.withValues(alpha: 0.45))
           : null,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 58,
-            height: 58,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
-              color: DarbColors.softSurfaceOf(context),
+              color: inCart
+                  ? DarbColors.primaryOf(context).withValues(alpha: 0.16)
+                  : DarbColors.softSurfaceOf(context),
               borderRadius: BorderRadius.circular(16),
+              border: inCart
+                  ? Border.all(
+                      color:
+                          DarbColors.primaryOf(context).withValues(alpha: 0.32),
+                    )
+                  : null,
             ),
             child: Icon(
               Icons.shopping_bag_outlined,

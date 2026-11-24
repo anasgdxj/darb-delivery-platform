@@ -183,6 +183,14 @@ class DarbElevation {
           offset: const Offset(0, 10),
         ),
       ];
+
+  static List<BoxShadow> glow(Color color, {bool isDark = false}) => [
+        BoxShadow(
+          color: color.withValues(alpha: isDark ? 0.28 : 0.18),
+          blurRadius: 20,
+          offset: const Offset(0, 6),
+        ),
+      ];
 }
 
 class DarbAppearanceController extends ChangeNotifier {
@@ -694,15 +702,16 @@ class DarbTheme {
         backgroundColor: softSurf,
         selectedColor: isDark ? DarbColors.forestSoft : DarbColors.mintTint,
         checkmarkColor: isDark ? DarbColors.mint : DarbColors.forest,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         labelStyle: TextStyle(
           color: ink,
           fontWeight: FontWeight.w700,
-          fontSize: 13,
+          fontSize: 12.5,
         ),
         secondaryLabelStyle: TextStyle(
           color: isDark ? DarbColors.mint : DarbColors.forest,
           fontWeight: FontWeight.w800,
-          fontSize: 13,
+          fontSize: 12.5,
         ),
         side: BorderSide(color: border),
         shape: RoundedRectangleBorder(

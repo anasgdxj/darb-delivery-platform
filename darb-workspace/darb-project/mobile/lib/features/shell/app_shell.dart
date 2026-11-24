@@ -255,19 +255,21 @@ class _AppShellState extends State<AppShell> {
             ],
           ),
           const SizedBox(height: 12),
-          if (pickupAddress != null && pickupAddress.trim().isNotEmpty) ...[
-            Text(
-              '${dt('الاستلام')}: $pickupAddress',
-              style: TextStyle(color: DarbColors.mutedOf(ctx), fontSize: 13),
+          if ((pickupAddress != null && pickupAddress.trim().isNotEmpty) ||
+              (addrDetails != null && addrDetails.trim().isNotEmpty)) ...[
+            DarbRouteConnector(
+              pickupLabel: dt('الاستلام'),
+              pickupAddress: (pickupAddress != null &&
+                      pickupAddress.trim().isNotEmpty)
+                  ? pickupAddress.trim()
+                  : dt('المتجر'),
+              dropoffLabel: dt('عنوان التوصيل'),
+              dropoffAddress:
+                  (addrDetails != null && addrDetails.trim().isNotEmpty)
+                      ? addrDetails.trim()
+                      : dt('غير محدد'),
             ),
-            const SizedBox(height: 6),
-          ],
-          if (addrDetails != null && addrDetails.trim().isNotEmpty) ...[
-            Text(
-              '${dt('عنوان التوصيل')}: $addrDetails',
-              style: TextStyle(color: DarbColors.mutedOf(ctx), fontSize: 13),
-            ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
           ],
           if (notes != null && notes.trim().isNotEmpty) ...[
             Text(
@@ -662,36 +664,38 @@ class _AppShellState extends State<AppShell> {
               valueListenable: DarbUpdater.instance.availableUpdate,
               builder: (context, update, _) {
                 if (update == null) return const SizedBox.shrink();
-                return IconButton(
+                return _ShellActionWell(
                   tooltip: dt('تحديث التطبيق'),
-                  onPressed: () {
+                  onTap: () {
                     DarbHaptics.light();
                     showDialog<void>(
                       context: context,
                       builder: (_) => DarbUpdateDialog(info: update),
                     );
                   },
-                  icon: Icon(
+                  child: Icon(
                     Icons.system_update_rounded,
+                    size: 19,
                     color: DarbColors.primaryOf(context),
                   ),
                 );
               },
             ),
-          IconButton(
+          _ShellActionWell(
             tooltip: dt('الإشعارات'),
-            onPressed: _openNotifications,
-            icon: Stack(
+            onTap: _openNotifications,
+            child: Stack(
               clipBehavior: Clip.none,
               children: [
                 Icon(
                   Icons.notifications_none_rounded,
+                  size: 20,
                   color: DarbColors.inkOf(context),
                 ),
                 if (_unreadNotifications > 0)
                   PositionedDirectional(
-                    top: -3,
-                    end: -4,
+                    top: -6,
+                    end: -6,
                     child: DarbAnimatedBadge(
                       count: _unreadNotifications,
                       fontSize: 9.5,
@@ -704,17 +708,19 @@ class _AppShellState extends State<AppShell> {
               ],
             ),
           ),
-          IconButton(
+          _ShellActionWell(
             tooltip: dt('المساعد الذكي'),
-            onPressed: () {
+            highlighted: true,
+            onTap: () {
               DarbHaptics.light();
               Navigator.push(
                 context,
                 DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
               );
             },
-            icon: Icon(
+            child: Icon(
               Icons.auto_awesome_rounded,
+              size: 19,
               color: DarbColors.primaryOf(context),
             ),
           ),
@@ -870,6 +876,56 @@ class _AppShellState extends State<AppShell> {
           setState(() => _tabIndex = index);
           _refreshUnreadCount();
         },
+      ),
+    );
+  }
+}
+
+class _ShellActionWell extends StatelessWidget {
+  const _ShellActionWell({
+    required this.tooltip,
+    required this.onTap,
+    required this.child,
+    this.highlighted = false,
+  });
+
+  final String tooltip;
+  final VoidCallback onTap;
+  final Widget child;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = DarbColors.primaryOf(context);
+    final isDark = DarbColors.isDark(context);
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(start: 6),
+      child: Tooltip(
+        message: tooltip,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: onTap,
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: highlighted
+                    ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
+                    : DarbColors.softSurfaceOf(context).withValues(alpha: 0.78),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: highlighted
+                      ? primary.withValues(alpha: 0.30)
+                      : DarbColors.borderOf(context),
+                ),
+              ),
+              child: Center(child: child),
+            ),
+          ),
+        ),
       ),
     );
   }

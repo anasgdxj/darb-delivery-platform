@@ -102,15 +102,46 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                     children: [
                       Row(
                         children: [
-                          Expanded(
-                            child: Text(
-                              '${o['orderNumber']} · ${o['city']?['code'] ?? ''}',
-                              style: TextStyle(
-                                color: DarbColors.inkOf(context),
-                                fontWeight: FontWeight.w900,
-                              ),
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: DarbColors.primaryOf(context)
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(11),
+                            ),
+                            child: Icon(
+                              o['type'] == 'PEER_DELIVERY'
+                                  ? Icons.local_shipping_rounded
+                                  : Icons.storefront_rounded,
+                              size: 19,
+                              color: DarbColors.primaryOf(context),
                             ),
                           ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${o['orderNumber']} · ${o['city']?['code'] ?? ''}',
+                                  style: TextStyle(
+                                    color: DarbColors.inkOf(context),
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${o['customer']?['name'] ?? ''} · ${o['customer']?['phone'] ?? o['customer']?['email'] ?? ''}',
+                                  style: TextStyle(
+                                    color: DarbColors.mutedOf(context),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 6),
                           DarbStatusBadge(
                             status: o['status']?.toString() ?? 'PENDING',
                           ),
@@ -122,23 +153,41 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                         isPeer: o['type'] == 'PEER_DELIVERY',
                         compact: true,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${o['customer']?['name'] ?? ''} · ${o['customer']?['phone'] ?? o['customer']?['email'] ?? ''}',
-                        style: TextStyle(
-                          color: DarbColors.mutedOf(context),
-                          fontSize: 12.5,
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        formatDarbMoney(
-                          num.tryParse(o['total']?.toString() ?? '0') ?? 0,
-                          o['currency']?.toString() ?? 'SYP',
+                        decoration: BoxDecoration(
+                          color: DarbColors.surfaceAltOf(context),
+                          borderRadius: BorderRadius.circular(DarbRadius.sm),
                         ),
-                        style: TextStyle(
-                          color: DarbColors.primaryOf(context),
-                          fontWeight: FontWeight.w900,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              o['type'] == 'PEER_DELIVERY'
+                                  ? dt('توصيل مستقل')
+                                  : dt('طلب متجر'),
+                              style: TextStyle(
+                                color: DarbColors.mutedOf(context),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              formatDarbMoney(
+                                num.tryParse(o['total']?.toString() ?? '0') ??
+                                    0,
+                                o['currency']?.toString() ?? 'SYP',
+                              ),
+                              style: TextStyle(
+                                color: DarbColors.primaryOf(context),
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -742,6 +791,21 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                     padding: const EdgeInsets.all(14),
                     child: Row(
                       children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: DarbColors.primaryOf(context)
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          child: Icon(
+                            Icons.route_rounded,
+                            size: 19,
+                            color: DarbColors.primaryOf(context),
+                          ),
+                        ),
+                        const SizedBox(width: 11),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -760,10 +824,11 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                             ],
                           ),
                         ),
-                        IconButton(
+                        IconButton.filledTonal(
                           onPressed: () => _openZoneDialog(existing: z),
-                          icon: const Icon(Icons.edit_outlined),
+                          icon: const Icon(Icons.edit_outlined, size: 19),
                         ),
+                        const SizedBox(width: 6),
                         IconButton(
                           onPressed: () => _deleteZone(z['id'].toString()),
                           icon: Icon(
@@ -794,6 +859,19 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   child: SwitchListTile(
                     contentPadding: EdgeInsets.zero,
+                    secondary: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: DarbColors.infoOf(context).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.location_city_rounded,
+                        size: 18,
+                        color: DarbColors.infoOf(context),
+                      ),
+                    ),
                     title: Text(
                       _cityLabel(c),
                       style: const TextStyle(fontWeight: FontWeight.w800),
@@ -844,6 +922,21 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                     padding: const EdgeInsets.all(14),
                     child: Row(
                       children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: DarbColors.primaryOf(context)
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          child: Icon(
+                            Icons.person_outline_rounded,
+                            size: 20,
+                            color: DarbColors.primaryOf(context),
+                          ),
+                        ),
+                        const SizedBox(width: 11),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -969,23 +1062,43 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: DarbGlassSurface(
                     padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          '${l['action'] ?? ''} · ${l['targetType'] ?? ''}',
-                          style: TextStyle(
-                            color: DarbColors.inkOf(context),
-                            fontWeight: FontWeight.w800,
-                            fontSize: 13.5,
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: DarbColors.surfaceAltOf(context),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.history_rounded,
+                            size: 17,
+                            color: DarbColors.primaryOf(context),
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${l['actorRole'] ?? ''} · ${(l['createdAt']?.toString() ?? '').replaceFirst('T', ' ').substring(0, (l['createdAt']?.toString().length ?? 0).clamp(0, 16))}',
-                          style: TextStyle(
-                            color: DarbColors.mutedOf(context),
-                            fontSize: 12,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${l['action'] ?? ''} · ${l['targetType'] ?? ''}',
+                                style: TextStyle(
+                                  color: DarbColors.inkOf(context),
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13.5,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${l['actorRole'] ?? ''} · ${(l['createdAt']?.toString() ?? '').replaceFirst('T', ' ').substring(0, (l['createdAt']?.toString().length ?? 0).clamp(0, 16))}',
+                                style: TextStyle(
+                                  color: DarbColors.mutedOf(context),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

@@ -604,6 +604,15 @@ class AppLocalizations {
     'لا توجد طلبات مطابقة للتصفية الحالية': 'No orders match the current filter|Mevcut filtreyle eşleşen sipariş yok',
     'ما الجديد في هذا التحديث؟': "What's new in this update?|Bu güncellemede neler yeni?",
     'مبيعات اليوم': "Today's revenue|Bugünkü ciro",
+    'أريد عبوتين زيت وخبز إلى حي الشهباء': '2 bottles of oil and bread to Al-Shahba|Al-Shahba mahallesine 2 şişe yağ ve ekmek',
+    'إرسال مفاتيح من المزة إلى المالكي': 'Send keys from Mazzeh to Malki|Mazzeh’den Malki’ye anahtar gönder',
+    'اكتب طلبك وسيتم تجهيزه تلقائياً': 'Describe your order and it will be prepared automatically|Siparişinizi yazın, otomatik olarak hazırlansın',
+    'المتجر': 'Store|Mağaza',
+    'سريع': 'Fast|Hızlı',
+    'طلب متجر': 'Store order|Mağaza siparişi',
+    'كيف أتابع التوصيل المباشر؟': 'How do I track live delivery?|Canlı teslimatı nasıl takip edebilirim?',
+    'لخّص مهامي الحالية': 'Summarize my current tasks|Mevcut görevlerimi özetle',
+    'ما حالة طلباتي اليوم؟': "What is today's order status?|Bugünkü siparişlerimin durumu nedir?",
   };
 
   static const Map<String, Map<String, String>> _values = {

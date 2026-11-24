@@ -226,12 +226,26 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
             if (leading != null)
               leading!
             else if (Navigator.canPop(context))
-              IconButton(
-                onPressed: () => Navigator.maybePop(context),
-                icon: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 19,
-                  color: ink,
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 4),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => Navigator.maybePop(context),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: DarbColors.softSurfaceOf(context)
+                          .withValues(alpha: 0.78),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: DarbColors.borderOf(context)),
+                    ),
+                    child: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 17,
+                      color: ink,
+                    ),
+                  ),
                 ),
               )
             else
@@ -389,14 +403,14 @@ class DarbGlassBottomNav extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        12,
+        14,
         0,
-        12,
-        bottomPadding > 0 ? bottomPadding : 10,
+        14,
+        bottomPadding > 0 ? bottomPadding + 2 : 12,
       ),
       child: DarbGlassSurface(
         borderRadius: DarbRadius.xl,
-        blurSigma: 24,
+        blurSigma: 26,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: itemsRow,
       ),

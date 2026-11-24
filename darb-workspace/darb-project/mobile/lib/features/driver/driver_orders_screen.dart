@@ -209,30 +209,47 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
               ],
             ),
           ],
-          const SizedBox(height: 4),
-          if (o['pickupAddress'] != null)
-            Text(
-              '${dt('الاستلام')}: ${o['pickupAddress']}',
-              style: TextStyle(
-                color: DarbColors.mutedOf(context),
-                fontSize: 13,
-              ),
-            ),
-          if (addr?['details'] != null)
-            Text(
-              '${dt('التسليم')}: ${addr!['details']}',
-              style: TextStyle(
-                color: DarbColors.mutedOf(context),
-                fontSize: 13,
-              ),
-            ),
           const SizedBox(height: 10),
-          Text(
-            '${dt('أجرة التوصيل')}: ${formatDarbMoney(fee, currency)} · ${formatDarbMoney(total, currency)}',
-            style: TextStyle(
-              color: DarbColors.primaryOf(context),
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
+          DarbRouteConnector(
+            pickupLabel: dt('الاستلام'),
+            pickupAddress: o['pickupAddress']?.toString() ??
+                (o['vendor']?['translations'] is List &&
+                        (o['vendor']['translations'] as List).isNotEmpty
+                    ? (o['vendor']['translations'] as List)
+                            .first['name']
+                            ?.toString() ??
+                        dt('متجر')
+                    : dt('متجر')),
+            dropoffLabel: dt('التسليم'),
+            dropoffAddress: addr?['details']?.toString() ?? dt('غير محدد'),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: DarbColors.primaryOf(context).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(DarbRadius.sm),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${dt('أجرة التوصيل')}: ${formatDarbMoney(fee, currency)}',
+                  style: TextStyle(
+                    color: DarbColors.primaryOf(context),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  formatDarbMoney(total, currency),
+                  style: TextStyle(
+                    color: DarbColors.inkOf(context),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),

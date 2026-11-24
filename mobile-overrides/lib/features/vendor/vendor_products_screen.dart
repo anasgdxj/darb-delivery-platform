@@ -453,26 +453,82 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
         children: [
           Row(
             children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: available
+                      ? DarbColors.primaryOf(context).withValues(alpha: 0.12)
+                      : DarbColors.softSurfaceOf(context),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  Icons.inventory_2_outlined,
+                  color: available
+                      ? DarbColors.primaryOf(context)
+                      : DarbColors.mutedOf(context),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: DarbColors.inkOf(context),
                         fontSize: 15.5,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      '${formatDarbMoney(price, currency)}${category != null && category.isNotEmpty ? ' · $category' : ''}${stock != null ? ' · # $stock' : ''}',
-                      style: TextStyle(
-                        color: DarbColors.primaryOf(context),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          formatDarbMoney(price, currency),
+                          style: TextStyle(
+                            color: DarbColors.primaryOf(context),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13.5,
+                          ),
+                        ),
+                        if (category != null && category.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: DarbColors.softSurfaceOf(context),
+                              borderRadius:
+                                  BorderRadius.circular(DarbRadius.pill),
+                            ),
+                            child: Text(
+                              category,
+                              style: TextStyle(
+                                color: DarbColors.mutedOf(context),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        if (stock != null)
+                          Text(
+                            dt('المتبقي: $stock'),
+                            style: TextStyle(
+                              color: DarbColors.mutedOf(context),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -483,9 +539,11 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const Divider(height: 18),
           Row(
             children: [
+              DarbStatusBadge(status: available ? 'OPEN' : 'CLOSED'),
+              const Spacer(),
               TextButton.icon(
                 onPressed:
                     isBusy ? null : () => _openProductSheet(existing: p),

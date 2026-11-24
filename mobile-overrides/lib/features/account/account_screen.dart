@@ -382,11 +382,26 @@ class _AccountScreenState extends State<AccountScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 108),
       children: [
-        DarbGlassSurface(
-          padding: const EdgeInsets.all(18),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
+              colors: [
+                DarbColors.forest,
+                DarbColors.forestSoft,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(DarbRadius.xl),
+            border: Border.all(
+              color: DarbColors.mint.withValues(alpha: 0.24),
+            ),
+            boxShadow: DarbElevation.glow(DarbColors.forest, isDark: DarbColors.isDark(context)),
+          ),
           child: Row(
             children: [
-              const DarbBrandMark(size: 52),
+              const DarbBrandMark(size: 56),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -396,19 +411,37 @@ class _AccountScreenState extends State<AccountScreen> {
                       widget.user['name']?.toString().isNotEmpty == true
                           ? widget.user['name'].toString()
                           : dt('مرحباً بك في دَرْب'),
-                      style: TextStyle(color: DarbColors.inkOf(context), fontSize: 17, fontWeight: FontWeight.w900),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Text(
-                      widget.user['phone']?.toString() ?? widget.user['email']?.toString() ?? roleLabel,
-                      style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 13),
+                      widget.user['phone']?.toString() ??
+                          widget.user['email']?.toString() ??
+                          roleLabel,
+                      style: TextStyle(
+                        color: DarbColors.mint.withValues(alpha: 0.9),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     DarbStatusBadge(status: role),
                   ],
                 ),
               ),
-              IconButton(onPressed: _editName, icon: const Icon(Icons.edit_outlined)),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withValues(alpha: 0.14),
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _editName,
+                icon: const Icon(Icons.edit_outlined, size: 20),
+              ),
             ],
           ),
         ),
@@ -477,8 +510,14 @@ class _AccountScreenState extends State<AccountScreen> {
                 const SizedBox(height: 10),
                 SegmentedButton<DarbVisualStyle>(
                   segments: [
-                    ButtonSegment(value: DarbVisualStyle.glass, label: Text(dt('زجاجي حديث (Glass)'))),
-                    ButtonSegment(value: DarbVisualStyle.standard, label: Text(dt('كلاسيكي (Standard)'))),
+                    ButtonSegment(
+                      value: DarbVisualStyle.glass,
+                      label: Text(dt('زجاجي حديث (Glass)')),
+                    ),
+                    ButtonSegment(
+                      value: DarbVisualStyle.standard,
+                      label: Text(dt('كلاسيكي (Standard)')),
+                    ),
                   ],
                   selected: {appearance.visualStyle},
                   onSelectionChanged: (s) {
@@ -489,14 +528,27 @@ class _AccountScreenState extends State<AccountScreen> {
                 const SizedBox(height: 14),
                 Text(
                   dt('مظهر التطبيق'),
-                  style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w900, fontSize: 15),
+                  style: TextStyle(
+                    color: DarbColors.inkOf(context),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 15,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 SegmentedButton<ThemeMode>(
                   segments: [
-                    ButtonSegment(value: ThemeMode.system, label: Text(dt('حسب الجهاز'))),
-                    ButtonSegment(value: ThemeMode.light, label: Text(dt('نهاري'))),
-                    ButtonSegment(value: ThemeMode.dark, label: Text(dt('ليلي'))),
+                    ButtonSegment(
+                      value: ThemeMode.system,
+                      label: Text(dt('حسب الجهاز')),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.light,
+                      label: Text(dt('نهاري')),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.dark,
+                      label: Text(dt('ليلي')),
+                    ),
                   ],
                   selected: {appearance.themeMode},
                   onSelectionChanged: (s) {
@@ -513,56 +565,67 @@ class _AccountScreenState extends State<AccountScreen> {
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Column(
             children: [
-              ListTile(
-                leading: Icon(Icons.auto_awesome_rounded, color: DarbColors.primaryOf(context)),
-                title: Text(dt('مساعد دَرْب الشخصي'), style: const TextStyle(fontWeight: FontWeight.w800)),
-                trailing: const Icon(Icons.chevron_right_rounded),
+              _AccountActionTile(
+                icon: Icons.auto_awesome_rounded,
+                accentColor: DarbColors.primaryOf(context),
+                title: dt('مساعد دَرْب الشخصي'),
                 onTap: () => Navigator.push(
                   context,
                   DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
                 ),
               ),
               if (role == 'CUSTOMER') ...[
-                ListTile(
-                  leading: Icon(Icons.location_on_outlined, color: DarbColors.primaryOf(context)),
-                  title: Text(dt('عناوين التوصيل'), style: const TextStyle(fontWeight: FontWeight.w800)),
-                  trailing: const Icon(Icons.chevron_right_rounded),
+                _AccountActionTile(
+                  icon: Icons.location_on_outlined,
+                  accentColor: DarbColors.infoOf(context),
+                  title: dt('عناوين التوصيل'),
                   onTap: () => Navigator.push(
                     context,
                     DarbPageRoute(builder: (_) => const AddressesScreen()),
                   ),
                 ),
-                ListTile(
-                  leading: Icon(Icons.delivery_dining_outlined, color: DarbColors.primaryOf(context)),
-                  title: Text(dt('كن سائقاً في دَرْب'), style: const TextStyle(fontWeight: FontWeight.w800)),
-                  subtitle: Text(dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء')),
-                  trailing: const Icon(Icons.chevron_right_rounded),
+                _AccountActionTile(
+                  icon: Icons.delivery_dining_outlined,
+                  accentColor: DarbColors.successOf(context),
+                  title: dt('كن سائقاً في دَرْب'),
+                  subtitle: dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء'),
                   onTap: _applyDriver,
                 ),
-                ListTile(
-                  leading: Icon(Icons.storefront_outlined, color: DarbColors.primaryOf(context)),
-                  title: Text(dt('انضم بمتجرك'), style: const TextStyle(fontWeight: FontWeight.w800)),
-                  subtitle: Text(dt('اعرض منتجات متجرك واستقبل طلبات العملاء')),
-                  trailing: const Icon(Icons.chevron_right_rounded),
+                _AccountActionTile(
+                  icon: Icons.storefront_outlined,
+                  accentColor: DarbColors.warningOf(context),
+                  title: dt('انضم بمتجرك'),
+                  subtitle: dt('اعرض منتجات متجرك واستقبل طلبات العملاء'),
                   onTap: _applyVendor,
                 ),
               ],
-              ListTile(
-                leading: Icon(Icons.language_rounded, color: DarbColors.primaryOf(context)),
-                title: Text(dt('لغة التطبيق'), style: const TextStyle(fontWeight: FontWeight.w800)),
-                trailing: Text(darbLocale.value.languageCode.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900)),
+              _AccountActionTile(
+                icon: Icons.language_rounded,
+                accentColor: DarbColors.primaryOf(context),
+                title: dt('لغة التطبيق'),
+                trailing: Text(
+                  darbLocale.value.languageCode.toUpperCase(),
+                  style: TextStyle(
+                    color: DarbColors.primaryOf(context),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
                 onTap: _pickLanguage,
               ),
               if (!kDarbPlayStoreBuild)
-                ListTile(
-                  leading: Icon(Icons.system_update_rounded, color: DarbColors.primaryOf(context)),
-                  title: Text(dt('تحديث التطبيق'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                _AccountActionTile(
+                  icon: Icons.system_update_rounded,
+                  accentColor: DarbColors.infoOf(context),
+                  title: dt('تحديث التطبيق'),
                   onTap: () async {
                     await DarbUpdater.instance.checkForUpdate(force: true);
                     if (!context.mounted) return;
                     final update = DarbUpdater.instance.availableUpdate.value;
                     if (update != null) {
-                      showDialog<void>(context: context, builder: (_) => DarbUpdateDialog(info: update));
+                      showDialog<void>(
+                        context: context,
+                        builder: (_) => DarbUpdateDialog(info: update),
+                      );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -576,18 +639,63 @@ class _AccountScreenState extends State<AccountScreen> {
                     }
                   },
                 ),
-              ListTile(
-                leading: Icon(Icons.logout_rounded, color: DarbColors.dangerOf(context)),
-                title: Text(
-                  dt('تسجيل الخروج'),
-                  style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w800),
-                ),
+              _AccountActionTile(
+                icon: Icons.logout_rounded,
+                accentColor: DarbColors.dangerOf(context),
+                title: dt('تسجيل الخروج'),
+                isDanger: true,
                 onTap: _logout,
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AccountActionTile extends StatelessWidget {
+  const _AccountActionTile({
+    required this.icon,
+    required this.accentColor,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+    this.trailing,
+    this.isDanger = false,
+  });
+
+  final IconData icon;
+  final Color accentColor;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final bool isDanger;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: accentColor.withValues(alpha: 0.13),
+          borderRadius: BorderRadius.circular(11),
+        ),
+        child: Icon(icon, size: 20, color: accentColor),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isDanger ? accentColor : DarbColors.inkOf(context),
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      subtitle: subtitle == null ? null : Text(subtitle!),
+      trailing: trailing ??
+          (isDanger ? null : const Icon(Icons.chevron_right_rounded)),
+      onTap: onTap,
     );
   }
 }
