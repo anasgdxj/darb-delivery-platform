@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/darb_design_system.dart';
-import '../../core/widgets/darb_glass.dart';
+import 'login_hero_map.dart';
 
 class DarbCityCarousel extends StatefulWidget {
   const DarbCityCarousel({super.key});
@@ -78,13 +78,7 @@ class _DarbCityCarouselState extends State<DarbCityCarousel> {
                     ),
             );
           },
-          child: Image.asset(
-            'assets/cities/${city.assetName}.jpg',
-            key: ValueKey(city.assetName),
-            fit: BoxFit.cover,
-            alignment: Alignment.center,
-            errorBuilder: (_, __, ___) => const ColoredBox(color: DarbColors.forest),
-          ),
+          child: DarbLoginVectorMap(key: ValueKey(city.code)),
         ),
         const DecoratedBox(
           decoration: BoxDecoration(
@@ -101,7 +95,7 @@ class _DarbCityCarouselState extends State<DarbCityCarousel> {
           child: AnimatedSwitcher(
             duration: duration,
             child: DarbGlassSurface(
-              key: ValueKey(city.assetName),
+              key: ValueKey(city.code),
               borderRadius: DarbRadius.pill,
               blurSigma: 14,
               tintColor: DarbColors.forest.withValues(alpha: 0.72),
@@ -152,8 +146,8 @@ class _DarbCityCarouselState extends State<DarbCityCarousel> {
 }
 
 class _CitySlide {
-  const _CitySlide(this.assetName, this.arabic, this.english, this.turkish);
-  final String assetName;
+  const _CitySlide(this.code, this.arabic, this.english, this.turkish);
+  final String code;
   final String arabic;
   final String english;
   final String turkish;
