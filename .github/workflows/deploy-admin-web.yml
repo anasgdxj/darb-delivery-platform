@@ -10,6 +10,7 @@ on:
       - "robots.txt"
       - "sitemap.xml"
       - "site.webmanifest"
+      - "google3dcfcc43ffdf1742.html"
       - ".github/workflows/deploy-admin-web.yml"
   workflow_dispatch:
 permissions:
@@ -58,6 +59,8 @@ jobs:
           cp -R assets .pages/assets
           rm -rf .pages/assets/cities
           cp robots.txt sitemap.xml site.webmanifest .pages/
+          cp google3dcfcc43ffdf1742.html .pages/google3dcfcc43ffdf1742.html
+          test -s .pages/google3dcfcc43ffdf1742.html
           test ! -d .pages/assets/cities
           for section in en tr faq drivers merchants privacy terms; do
             test -s "$section/index.html"
