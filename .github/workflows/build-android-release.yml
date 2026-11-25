@@ -503,7 +503,7 @@ jobs:
             echo "Release push announcement: failed (malformed webhook secret)" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
-          if [ "\${#DARB_RELEASE_WEBHOOK_TOKEN}" -lt 32 ]; then
+          if [ "${#DARB_RELEASE_WEBHOOK_TOKEN}" -lt 32 ]; then
             echo "::error::DARB_RELEASE_WEBHOOK_TOKEN must contain at least 32 characters."
             exit 1
           fi
