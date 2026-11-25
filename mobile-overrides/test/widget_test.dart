@@ -1588,7 +1588,14 @@ void main() {
       await tester.pumpAndSettle();
       final clearTile = find.text('Clear cached data');
       await tester.ensureVisible(clearTile);
-      await tester.tap(clearTile);
+      final clearTileSurface = find.ancestor(
+        of: clearTile,
+        matching: find.byType(DarbSettingsTile),
+      );
+      final clearTileWidget = tester.widget<DarbSettingsTile>(clearTileSurface);
+      expect(clearTileWidget.enabled, isTrue);
+      expect(clearTileWidget.onTap, isNotNull);
+      clearTileWidget.onTap!.call();
       await tester.pumpAndSettle();
       await tester.tap(find.text('Clear cache'));
       await tester.pumpAndSettle();
