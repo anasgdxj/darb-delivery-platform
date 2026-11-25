@@ -497,3 +497,90 @@ jobs:
           else
             echo "Release push announcement: FCM accepted $SENT notifications for $TARGETED registered devices; actionable failures: $FAILED." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Announce published release in Telegram channel
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: "@DAZREVO"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import html
+          import json
+          import os
+          import pathlib
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
+          token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+          chat_id = os.environ.get("TELEGRAM_CHAT_ID", "@DAZREVO").strip()
+          if not token:
+              summary.open("a", encoding="utf-8").write(
+                  "\nTelegram channel announcement: NOT SENT — add the TELEGRAM_BOT_TOKEN repository secret.\n"
+              )
+              print("::warning::Telegram announcement skipped because TELEGRAM_BOT_TOKEN is not configured.")
+              raise SystemExit(0)
+
+          manifest_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          version = html.escape(str(manifest.get("versionName", "New version")))
+          build = html.escape(str(manifest.get("versionCode", "")))
+          notes = str(manifest.get("releaseNotes", "")).strip()
+          notes_html = html.escape(notes[:2500]) if notes else "تحسينات وإصلاحات عامة"
+          apk_url = "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk"
+          release_url = "https://github.com/anasgdxj/darb-delivery-platform/releases/tag/latest"
+          message = (
+              "🚀 <b>صدر تحديث جديد لتطبيق DAZREVO</b>\n\n"
+              f"📦 الإصدار: <b>{version}</b>\n"
+              f"🔢 رقم البناء: <code>{build}</code>\n\n"
+              f"📝 <b>أبرز التحديثات</b>\n{notes_html}\n\n"
+              f"⬇️ <a href=\"{apk_url}\">تحميل APK الرسمي</a>\n"
+              f"📋 <a href=\"{release_url}\">تفاصيل الإصدار</a>\n\n"
+              "DAZREVO — طريقك الأسرع للتوصيل."
+          )
+          payload = urllib.parse.urlencode({
+              "chat_id": chat_id,
+              "text": message,
+              "parse_mode": "HTML",
+              "disable_web_page_preview": "false",
+          }).encode("utf-8")
+          endpoint = "https://api.telegram.org/bot" + token + "/sendMessage"
+          last_error = None
+          for attempt in range(1, 4):
+              request = urllib.request.Request(endpoint, data=payload, method="POST")
+              try:
+                  with urllib.request.urlopen(request, timeout=30) as response:
+                      result = json.loads(response.read().decode("utf-8"))
+                  if not result.get("ok"):
+                      raise RuntimeError("Telegram API rejected the channel message")
+                  message_id = result.get("result", {}).get("message_id", "unknown")
+                  summary.open("a", encoding="utf-8").write(
+                      f"\nTelegram channel announcement: SENT to {chat_id}; message ID {message_id}.\n"
+                  )
+                  print(f"Telegram release announcement delivered to {chat_id}.")
+                  break
+              except urllib.error.HTTPError as error:
+                  response_body = error.read().decode("utf-8", "replace")[:500]
+                  last_error = RuntimeError(f"Telegram API HTTP {error.code}: {response_body}")
+                  if error.code not in (429, 500, 502, 503, 504) or attempt == 3:
+                      break
+              except (urllib.error.URLError, TimeoutError, OSError, ValueError, RuntimeError) as error:
+                  last_error = error
+                  if attempt == 3:
+                      break
+              time.sleep(attempt * 3)
+          else:
+              last_error = RuntimeError("Telegram announcement retry loop ended unexpectedly")
+          if last_error is not None:
+              summary.open("a", encoding="utf-8").write(
+                  "\nTelegram channel announcement: FAILED — see workflow warning; APK release remains published.\n"
+              )
+              print(f"::warning::Telegram announcement failed; APK release remains published: {last_error}")
+              raise SystemExit(0)
+          PY
