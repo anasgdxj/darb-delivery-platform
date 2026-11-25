@@ -400,9 +400,9 @@ class _AppShellState extends State<AppShell> {
       }
       // Push registration is best-effort: an unavailable Firebase plugin or
       // denied notification permission must never prevent account access.
-      try {
-        await DarbNotifications.register();
-      } catch (_) {}
+      // Device registration is deliberately non-blocking. Account content
+      // must render even if FCM permission/token negotiation is slow.
+      unawaited(DarbNotifications.register());
       if (data['role']?.toString().toUpperCase() == 'DRIVER') {
         DriverLocationReporter.start();
       } else {
