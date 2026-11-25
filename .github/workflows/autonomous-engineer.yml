@@ -8,6 +8,10 @@ on:
         type: string
   issues:
     types: [labeled]
+  pull_request:
+    paths:
+      - ".github/workflows/autonomous-engineer.yml"
+      - "automation/agent/**"
 permissions:
   contents: write
   pull-requests: write
@@ -16,6 +20,19 @@ concurrency:
   group: autonomous-engineer-${{ github.repository }}
   cancel-in-progress: false
 jobs:
+  validate-agent:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate agent Python syntax and patch hygiene
+        run: |
+          set -euo pipefail
+          python3 -m py_compile automation/agent/run.py
+          git diff --check
   engineer:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'issues' && github.event.label.name == 'autonomous-task')
     runs-on: ubuntu-latest
