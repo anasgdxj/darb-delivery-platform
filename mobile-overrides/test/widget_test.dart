@@ -1582,10 +1582,10 @@ void main() {
       syncTileWidget.onTap!.call();
       await tester.pumpAndSettle();
       // Clear temporary cache dialog -> confirm
-      await tester.drag(find.byType(ListView).first, const Offset(0, 1200));
-      await tester.pumpAndSettle();
       expect(find.text('Notification sync updated for this device'), findsOneWidget);
 
+      await tester.drag(find.byType(ListView).first, const Offset(0, -1200));
+      await tester.pumpAndSettle();
       final clearTile = find.text('Clear cached data');
       await tester.ensureVisible(clearTile);
       await tester.tap(clearTile);
