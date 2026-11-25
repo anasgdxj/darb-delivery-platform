@@ -1,4 +1,4 @@
-# Manual verification run: build signed artifacts without replacing the public latest release.
+# Signed Android release pipeline. Main commits marked [publish-apk] publish latest and notify registered devices.
 name: Build signed DAZREVO Android release
 on:
   push:
