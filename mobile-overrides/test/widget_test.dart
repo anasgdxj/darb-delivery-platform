@@ -1572,7 +1572,11 @@ void main() {
       // Sync device notifications
       final syncTile = find.text('Sync device push notifications');
       await tester.ensureVisible(syncTile);
-      await tester.tap(syncTile);
+      final syncTileInk = find.ancestor(
+        of: syncTile,
+        matching: find.byType(InkWell),
+      ).first;
+      await tester.tap(syncTileInk);
       await tester.pumpAndSettle();
       // Clear temporary cache dialog -> confirm
       await tester.drag(find.byType(ListView).first, const Offset(0, 1200));
