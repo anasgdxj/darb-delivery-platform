@@ -133,8 +133,28 @@ export class TelegramAdminService implements OnModuleInit {
   }
 
   private async githubRequest<T>(path: string): Promise<T> {
-    const response = await fetch(`${this.githubApi}${path}`, { headers: { accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28' }, signal: AbortSignal.timeout(12000) });
-    if (!response.ok) throw new Error(`GitHub API returned HTTP ${response.status}`);
+    const token = this.config.get<string>('GITHUB_TOKEN')?.trim();
+    const headers: Record<string, string> = {
+      accept: 'application/vnd.github+json',
+      'x-github-api-version': '2022-11-28',
+    };
+    if (token) headers.authorization = `Bearer ${token}`;
+
+    const response = await fetch(`${this.githubApi}${path}`, {
+      headers,
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!response.ok) {
+      const rateLimitRemaining = response.headers.get('x-ratelimit-remaining');
+      const rateLimitReset = response.headers.get('x-ratelimit-reset');
+      if (response.status === 403 && rateLimitRemaining === '0') {
+        const resetAt = rateLimitReset
+          ? new Date(Number(rateLimitReset) * 1000).toISOString()
+          : 'unknown';
+        throw new Error(`GitHub API rate limit exhausted; configure GITHUB_TOKEN on Render. Limit resets at ${resetAt}.`);
+      }
+      throw new Error(`GitHub API returned HTTP ${response.status}`);
+    }
     return response.json() as Promise<T>;
   }
 
