@@ -185,6 +185,25 @@ jobs:
           if not p.exists(): raise SystemExit("Expected android/app/build.gradle.kts was not generated")
           s=p.read_text()
           import re
+          def block_bounds(source, opening):
+              depth = 0
+              close = None
+              for pos in range(opening, len(source)):
+                  if source[pos] == "{":
+                      depth += 1
+                  elif source[pos] == "}":
+                      depth -= 1
+                      if depth == 0:
+                          close = pos
+                          break
+              return close
+          android_match = re.search(r'(?m)^android\\s*\\{', s)
+          if not android_match:
+              raise SystemExit("Could not locate Android configuration block")
+          android_open = s.find("{", android_match.start())
+          android_close = block_bounds(s, android_open)
+          if android_close is None:
+              raise SystemExit("Android configuration block is unbalanced")
           if 'create("release")' not in s:
               signing = '''    signingConfigs {
                   create("release") {
@@ -196,29 +215,41 @@ jobs:
               }
 
           '''
+              s = s[:android_close] + signing + s[android_close:]
               android_match = re.search(r'(?m)^android\\s*\\{', s)
-              if not android_match:
-                  raise SystemExit("Could not locate Android configuration block")
-              depth = 0
-              close = None
-              for pos in range(android_match.end() - 1, len(s)):
-                  if s[pos] == "{": depth += 1
-                  elif s[pos] == "}":
-                      depth -= 1
-                      if depth == 0:
-                          close = pos
-                          break
-              if close is None:
-                  raise SystemExit("Android configuration block is unbalanced")
-              s = s[:close] + signing + s[close:]
+              android_open = s.find("{", android_match.start())
+              android_close = block_bounds(s, android_open)
           s=s.replace('signingConfig = signingConfigs.getByName("debug")','signingConfig = signingConfigs.getByName("release")')
-          release_match = re.search(r'(?s)buildTypes\\s*\\{(.*?)\\n\\s*\\}', s)
-          if not release_match:
-              raise SystemExit("Could not locate Android buildTypes block after safe insertion")
-          block = release_match.group(1)
-          if 'signingConfig = signingConfigs.getByName("release")' not in block:
-              s=s[:release_match.start(1)] + block + '\\n        getByName("release") { signingConfig = signingConfigs.getByName("release") }' + s[release_match.end(1):]
-          if 'signingConfig = signingConfigs.getByName("release")' not in s:
+          build_match = re.search(r'(?m)^\\s*buildTypes\\s*\\{', s[android_open:android_close])
+          signing_line = 'signingConfig = signingConfigs.getByName("release")'
+          if not build_match:
+              addition = '''    buildTypes {
+                  release {
+                      signingConfig = signingConfigs.getByName("release")
+                  }
+              }
+          '''
+              s = s[:android_close] + addition + s[android_close:]
+          else:
+              build_open = android_open + s[android_open:android_close].find("{", build_match.start())
+              build_close = block_bounds(s, build_open)
+              if build_close is None:
+                  raise SystemExit("Android buildTypes block is unbalanced")
+              release_match = re.search(r'(?m)^\\s*(?:release|getByName\\("release"\\))\\s*\\{', s[build_open:build_close])
+              if not release_match:
+                  addition = '''
+                  release {
+                      signingConfig = signingConfigs.getByName("release")
+                  }
+              '''
+                  s = s[:build_close] + addition + s[build_close:]
+              elif signing_line not in s[build_open:build_close]:
+                  release_open = build_open + s[build_open:build_close].find("{", release_match.start())
+                  release_close = block_bounds(s, release_open)
+                  if release_close is None:
+                      raise SystemExit("Android release build type block is unbalanced")
+                  s = s[:release_open + 1] + '\\n                ' + signing_line + s[release_open + 1:]
+          if signing_line not in s:
               raise SystemExit("Release signing config not applied")
           p.write_text(s)
           PY
