@@ -41,6 +41,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Base proposals on current main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout --detach origin/main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -80,7 +85,11 @@ jobs:
           git config user.name "dazrevo-autonomous-engineer[bot]"
           git config user.email "dazrevo-autonomous-engineer[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add -- mobile-overrides backend-overrides darb-workspace/darb-project
+          git add -A -- mobile-overrides backend-overrides
+          if git diff --cached --quiet; then
+            echo "::error::No build-consumed source changes were staged."
+            exit 1
+          fi
           git commit -m "feat(agent): implement queued engineering task"
           git push origin "$BRANCH"
           TITLE="AI engineering proposal #${GH_RUN_ID}"
