@@ -119,6 +119,7 @@ jobs:
           cp backend-overrides/orders.tracking.service.spec.ts extracted/darb-project/backend/src/modules/orders/orders.tracking.service.spec.ts
           cp backend-overrides/driver-location.service.spec.ts extracted/darb-project/backend/src/modules/drivers/driver-location.service.spec.ts
           cp backend-overrides/notifications.service.spec.ts extracted/darb-project/backend/src/modules/notifications/notifications.service.spec.ts
+          cp backend-overrides/release-notifications.controller.spec.ts extracted/darb-project/backend/src/modules/notifications/release-notifications.controller.spec.ts
           bash backend-overrides/prepare-source.sh extracted/darb-project
           mkdir -p extracted/darb-project/backend/prisma/migrations
           cp -R backend/prisma/migrations/. extracted/darb-project/backend/prisma/migrations/

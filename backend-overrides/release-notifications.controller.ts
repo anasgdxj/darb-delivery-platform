@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Headers,
   Post,
   ServiceUnavailableException,
@@ -27,11 +28,31 @@ export class ReleaseNotificationsController {
     private readonly config: ConfigService,
   ) {}
 
+  @Get('readiness')
+  readiness(@Headers('authorization') authorization: string | undefined) {
+    this.assertAuthorized(authorization);
+    if (!this.notifications.isMessagingConfigured()) {
+      throw new ServiceUnavailableException('Firebase Cloud Messaging is not configured.');
+    }
+    return { ready: true };
+  }
+
   @Post('publish')
   async publish(
     @Headers('authorization') authorization: string | undefined,
     @Body() body: ReleaseAnnouncementDto,
   ) {
+    this.assertAuthorized(authorization);
+
+    const officialApkUrl = 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk';
+    if (body.apkUrl !== officialApkUrl) {
+      throw new BadRequestException('APK URL must point to the official DARB latest release asset.');
+    }
+
+    return this.notifications.broadcastRelease(body);
+  }
+
+  private assertAuthorized(authorization: string | undefined): void {
     const expected = this.config.get<string>('DARB_RELEASE_WEBHOOK_TOKEN') ?? '';
     if (expected.length < 32) {
       throw new ServiceUnavailableException('Release notification webhook is not configured.');
@@ -48,12 +69,5 @@ export class ReleaseNotificationsController {
     ) {
       throw new UnauthorizedException();
     }
-
-    const officialApkUrl = 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk';
-    if (body.apkUrl !== officialApkUrl) {
-      throw new BadRequestException('APK URL must point to the official DARB latest release asset.');
-    }
-
-    return this.notifications.broadcastRelease(body);
   }
 }

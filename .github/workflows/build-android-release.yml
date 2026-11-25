@@ -369,6 +369,29 @@ jobs:
           path: extracted-play/darb-project/mobile/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 7
+      - name: Verify release notification readiness
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        env:
+          DARB_RELEASE_WEBHOOK_TOKEN: ${{ secrets.DARB_RELEASE_WEBHOOK_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${DARB_RELEASE_WEBHOOK_TOKEN:-}" ] || [ "${#DARB_RELEASE_WEBHOOK_TOKEN}" -lt 32 ]; then
+            echo "::error::DARB_RELEASE_WEBHOOK_TOKEN must be configured with at least 32 characters before publishing."
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error --retry 2 --retry-all-errors \
+            "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/readiness" \
+            -H "Authorization: Bearer $DARB_RELEASE_WEBHOOK_TOKEN" \
+            -H "Accept: application/json" \
+            --output "$RUNNER_TEMP/darb-release-readiness.json"
+          if ! jq -e '.ready == true' "$RUNNER_TEMP/darb-release-readiness.json" >/dev/null; then
+            echo "::error::Firebase release notifications are not ready; refusing to publish the APK."
+            cat "$RUNNER_TEMP/darb-release-readiness.json"
+            exit 1
+          fi
+          echo "Release notification readiness: verified before publishing." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publish signed APK as the latest public release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
