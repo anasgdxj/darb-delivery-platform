@@ -463,6 +463,7 @@ jobs:
           path: extracted-play/darb-project/mobile/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 7
+      # Release publication is deliberately gated by the [publish-apk] commit marker.
       - name: Publish signed APK as the latest public release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
