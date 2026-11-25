@@ -17,6 +17,7 @@ import '../customer/addresses_screen.dart';
 import 'ai_role_assistant_screen.dart';
 import 'driver_application_screen.dart';
 import 'edit_profile_screen.dart';
+import 'settings_screen.dart';
 import 'vendor_application_screen.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -176,6 +177,19 @@ class _AccountScreenState extends State<AccountScreen> {
       context,
       DarbPageRoute(
         builder: (_) => EditProfileScreen(
+          user: widget.user,
+          onRefreshUser: widget.onRefreshUser,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openSettings() async {
+    DarbHaptics.selection();
+    await Navigator.push<void>(
+      context,
+      DarbPageRoute(
+        builder: (_) => SettingsScreen(
           user: widget.user,
           onRefreshUser: widget.onRefreshUser,
         ),
@@ -363,13 +377,29 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton.filledTonal(
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.14),
-                  foregroundColor: DarbColors.lime,
-                ),
-                onPressed: _openEditProfile,
-                icon: const Icon(Icons.edit_outlined, size: 20),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton.filledTonal(
+                    tooltip: dt('الإعدادات والتخصيص'),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.14),
+                      foregroundColor: DarbColors.lime,
+                    ),
+                    onPressed: _openSettings,
+                    icon: const Icon(Icons.tune_rounded, size: 20),
+                  ),
+                  const SizedBox(height: 6),
+                  IconButton.filledTonal(
+                    tooltip: dt('تعديل الملف الشخصي'),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.14),
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: _openEditProfile,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                  ),
+                ],
               ),
             ],
           ),
@@ -502,124 +532,135 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 14),
-        DarbGlassSurface(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            children: [
-              _AccountActionTile(
-                icon: Icons.manage_accounts_outlined,
-                accentColor: DarbColors.primaryOf(context),
-                title: dt('تعديل الملف الشخصي'),
-                subtitle: dt('تحديث الاسم ولغة الواجهة ومراجعة بيانات التوثيق'),
-                onTap: _openEditProfile,
+        const SizedBox(height: 16),
+        DarbGroupedSection(
+          title: dt('الحساب والخدمات'),
+          children: [
+            DarbSettingsTile(
+              icon: Icons.manage_accounts_outlined,
+              accentColor: DarbColors.primaryOf(context),
+              title: dt('تعديل الملف الشخصي'),
+              subtitle: dt('تحديث الاسم ولغة الواجهة ومراجعة بيانات التوثيق'),
+              onTap: _openEditProfile,
+            ),
+            DarbSettingsTile(
+              icon: Icons.auto_awesome_rounded,
+              accentColor: DarbColors.violetOf(context),
+              title: dt('مساعد دازريفو الشخصي'),
+              onTap: () => Navigator.push(
+                context,
+                DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
               ),
-              _AccountActionTile(
-                icon: Icons.auto_awesome_rounded,
-                accentColor: DarbColors.violetOf(context),
-                title: dt('مساعد دازريفو الشخصي'),
+            ),
+            if (role == 'CUSTOMER') ...[
+              DarbSettingsTile(
+                icon: Icons.location_on_outlined,
+                accentColor: DarbColors.infoOf(context),
+                title: dt('عناوين التوصيل'),
                 onTap: () => Navigator.push(
                   context,
-                  DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
+                  DarbPageRoute(builder: (_) => const AddressesScreen()),
                 ),
               ),
-              if (role == 'CUSTOMER') ...[
-                _AccountActionTile(
-                  icon: Icons.location_on_outlined,
-                  accentColor: DarbColors.infoOf(context),
-                  title: dt('عناوين التوصيل'),
-                  onTap: () => Navigator.push(
-                    context,
-                    DarbPageRoute(builder: (_) => const AddressesScreen()),
-                  ),
-                ),
-                _AccountActionTile(
-                  icon: Icons.delivery_dining_outlined,
-                  accentColor: DarbColors.successOf(context),
-                  title: dt('كن سائقاً في دازريفو'),
-                  subtitle: driverApplication != null
-                      ? dt('متابعة حالة طلب السائق المسجّل')
-                      : dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء'),
-                  trailing: driverApplication != null
-                      ? DarbStatusBadge(status: driverApplication)
-                      : null,
-                  onTap: _openDriverApplication,
-                ),
-                _AccountActionTile(
-                  icon: Icons.storefront_outlined,
-                  accentColor: DarbColors.warningOf(context),
-                  title: dt('انضم بمتجرك'),
-                  subtitle: vendorApplication != null
-                      ? dt('متابعة حالة طلب المتجر المسجّل')
-                      : dt('اعرض منتجات متجرك واستقبل طلبات العملاء'),
-                  trailing: vendorApplication != null
-                      ? DarbStatusBadge(status: vendorApplication)
-                      : null,
-                  onTap: _openVendorApplication,
-                ),
-              ],
-              _AccountActionTile(
-                icon: Icons.language_rounded,
-                accentColor: DarbColors.primaryOf(context),
-                title: dt('لغة التطبيق'),
-                trailing: Text(
-                  darbLocale.value.languageCode.toUpperCase(),
-                  style: TextStyle(
-                    color: DarbColors.primaryOf(context),
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                onTap: _pickLanguage,
+              DarbSettingsTile(
+                icon: Icons.delivery_dining_outlined,
+                accentColor: DarbColors.successOf(context),
+                title: dt('كن سائقاً في دازريفو'),
+                subtitle: driverApplication != null
+                    ? dt('متابعة حالة طلب السائق المسجّل')
+                    : dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء'),
+                trailing: driverApplication != null
+                    ? DarbStatusBadge(status: driverApplication)
+                    : null,
+                onTap: _openDriverApplication,
               ),
-              _AccountActionTile(
-                icon: Icons.auto_stories_outlined,
-                accentColor: DarbColors.primaryOf(context),
-                title: dt('جولة تعريفية'),
-                onTap: () => Navigator.push<void>(
-                  context,
-                  DarbPageRoute(
-                    builder: (_) => OnboardingScreen(
-                      onFinished: () => Navigator.pop(context),
-                    ),
-                  ),
-                ),
-              ),
-              if (!kDarbPlayStoreBuild)
-                _AccountActionTile(
-                  icon: Icons.system_update_rounded,
-                  accentColor: DarbColors.infoOf(context),
-                  title: dt('تحديث التطبيق'),
-                  onTap: () async {
-                    await DarbUpdater.instance.checkForUpdate(force: true);
-                    if (!context.mounted) return;
-                    final update = DarbUpdater.instance.availableUpdate.value;
-                    if (update != null) {
-                      showDialog<void>(
-                        context: context,
-                        builder: (_) => DarbUpdateDialog(info: update),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            DarbUpdater.instance.checkFailed
-                                ? dt('تعذر التحقق من التحديث')
-                                : dt('تطبيقك محدّث إلى آخر إصدار'),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              _AccountActionTile(
-                icon: Icons.logout_rounded,
-                accentColor: DarbColors.dangerOf(context),
-                title: dt('تسجيل الخروج'),
-                isDanger: true,
-                onTap: _logout,
+              DarbSettingsTile(
+                icon: Icons.storefront_outlined,
+                accentColor: DarbColors.warningOf(context),
+                title: dt('انضم بمتجرك'),
+                subtitle: vendorApplication != null
+                    ? dt('متابعة حالة طلب المتجر المسجّل')
+                    : dt('اعرض منتجات متجرك واستقبل طلبات العملاء'),
+                trailing: vendorApplication != null
+                    ? DarbStatusBadge(status: vendorApplication)
+                    : null,
+                onTap: _openVendorApplication,
               ),
             ],
-          ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        DarbGroupedSection(
+          title: dt('التخصيص واللغة'),
+          children: [
+            DarbSettingsTile(
+              icon: Icons.tune_rounded,
+              accentColor: DarbColors.primaryOf(context),
+              title: dt('الإعدادات والتخصيص'),
+              subtitle: dt('حجم النصوص، تقليل الحركة، تفضيلات الإشعارات، والخصوصية'),
+              onTap: _openSettings,
+            ),
+            DarbSettingsTile(
+              icon: Icons.language_rounded,
+              accentColor: DarbColors.primaryOf(context),
+              title: dt('لغة التطبيق'),
+              valueLabel: darbLocale.value.languageCode.toUpperCase(),
+              onTap: _pickLanguage,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        DarbGroupedSection(
+          title: dt('التطبيق والأمان'),
+          children: [
+            DarbSettingsTile(
+              icon: Icons.auto_stories_outlined,
+              accentColor: DarbColors.primaryOf(context),
+              title: dt('جولة تعريفية'),
+              onTap: () => Navigator.push<void>(
+                context,
+                DarbPageRoute(
+                  builder: (_) => OnboardingScreen(
+                    onFinished: () => Navigator.pop(context),
+                  ),
+                ),
+              ),
+            ),
+            if (!kDarbPlayStoreBuild)
+              DarbSettingsTile(
+                icon: Icons.system_update_rounded,
+                accentColor: DarbColors.infoOf(context),
+                title: dt('تحديث التطبيق'),
+                onTap: () async {
+                  await DarbUpdater.instance.checkForUpdate(force: true);
+                  if (!context.mounted) return;
+                  final update = DarbUpdater.instance.availableUpdate.value;
+                  if (update != null) {
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => DarbUpdateDialog(info: update),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          DarbUpdater.instance.checkFailed
+                              ? dt('تعذر التحقق من التحديث')
+                              : dt('تطبيقك محدّث إلى آخر إصدار'),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            DarbSettingsTile(
+              icon: Icons.logout_rounded,
+              accentColor: DarbColors.dangerOf(context),
+              title: dt('تسجيل الخروج'),
+              isDanger: true,
+              onTap: _logout,
+            ),
+          ],
         ),
       ],
     );
@@ -646,50 +687,4 @@ class _ActivitySummary {
   final String tertiaryLabel;
   final String tertiaryValue;
   final IconData icon;
-}
-
-class _AccountActionTile extends StatelessWidget {
-  const _AccountActionTile({
-    required this.icon,
-    required this.accentColor,
-    required this.title,
-    required this.onTap,
-    this.subtitle,
-    this.trailing,
-    this.isDanger = false,
-  });
-
-  final IconData icon;
-  final Color accentColor;
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final bool isDanger;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: accentColor.withValues(alpha: 0.13),
-          borderRadius: BorderRadius.circular(11),
-        ),
-        child: Icon(icon, size: 20, color: accentColor),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isDanger ? accentColor : DarbColors.inkOf(context),
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-      subtitle: subtitle == null ? null : Text(subtitle!),
-      trailing: trailing ??
-          (isDanger ? null : const Icon(Icons.chevron_right_rounded)),
-      onTap: onTap,
-    );
-  }
 }

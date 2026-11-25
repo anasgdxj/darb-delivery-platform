@@ -145,13 +145,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 : RefreshIndicator(
                     onRefresh: _load,
                     child: _items.isEmpty
-                        ? ListView(
-                            children: [
-                              DarbStateView.empty(
-                                message: dt('لا توجد إشعارات حتى الآن'),
-                                icon: Icons.notifications_none_rounded,
+                        ? LayoutBuilder(
+                            builder: (context, constraints) =>
+                                SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: constraints.maxHeight,
+                                ),
+                                child: DarbStateView.empty(
+                                  message: dt('لا توجد إشعارات حتى الآن'),
+                                  icon: Icons.notifications_none_rounded,
+                                  onRetry: _load,
+                                ),
                               ),
-                            ],
+                            ),
                           )
                         : ListView.separated(
                             padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),

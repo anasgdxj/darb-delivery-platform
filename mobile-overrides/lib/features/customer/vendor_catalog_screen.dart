@@ -121,6 +121,18 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
     }).toList();
   }
 
+  String get _cartCurrency {
+    for (final entry in _cart.entries) {
+      final prod = _products.cast<Map<String, dynamic>?>().firstWhere(
+            (p) => p?['id']?.toString() == entry.key,
+            orElse: () => null,
+          );
+      final currency = prod?['currency']?.toString();
+      if (currency != null && currency.isNotEmpty) return currency;
+    }
+    return 'SYP';
+  }
+
   double get _cartSubtotal {
     var total = 0.0;
     for (final entry in _cart.entries) {
@@ -393,8 +405,18 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                     DarbStateView.error(message: _error, onRetry: _loadProducts)
                   else if (filtered.isEmpty)
                     DarbStateView.empty(
-                      message: dt('لا توجد منتجات متاحة'),
-                      icon: Icons.inventory_2_outlined,
+                      message: _products.isEmpty
+                          ? dt('لا توجد منتجات متاحة')
+                          : dt('لم نعثر على نتائج مطابقة'),
+                      icon: _products.isEmpty
+                          ? Icons.inventory_2_outlined
+                          : Icons.search_off_rounded,
+                      onRetry: _products.isEmpty
+                          ? _loadProducts
+                          : () {
+                              _searchController.clear();
+                              setState(() => _selectedCategory = '');
+                            },
                     )
                   else
                     for (final prod in filtered)
@@ -460,7 +482,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                               ),
                             ),
                             Text(
-                              formatDarbMoney(_cartSubtotal),
+                              formatDarbMoney(_cartSubtotal, _cartCurrency),
                               style: const TextStyle(
                                 color: DarbColors.lime,
                                 fontWeight: FontWeight.w900,

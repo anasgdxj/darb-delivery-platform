@@ -218,18 +218,43 @@ class DarbAppearanceController extends ChangeNotifier {
   static const _storage = FlutterSecureStorage();
   static const _themeKey = 'darb_theme_mode';
   static const _styleKey = 'darb_visual_style';
+  static const _textScaleKey = 'darb_text_scale';
+  static const _reduceMotionKey = 'darb_reduce_motion';
+  static const _hapticsKey = 'darb_haptics_enabled';
+  static const _inAppBannersKey = 'darb_notif_in_app_banners';
+  static const _orderAlertsKey = 'darb_notif_orders';
+  static const _promoAlertsKey = 'darb_notif_promo';
 
   ThemeMode _themeMode = ThemeMode.system;
   DarbVisualStyle _visualStyle = DarbVisualStyle.glass;
+  double _textScale = 1.0;
+  bool _reduceMotionOverride = false;
+  bool _hapticsEnabled = true;
+  bool _inAppBannersEnabled = true;
+  bool _orderAlertsEnabled = true;
+  bool _promoAlertsEnabled = true;
 
   ThemeMode get themeMode => _themeMode;
   DarbVisualStyle get visualStyle => _visualStyle;
   bool get isGlass => _visualStyle == DarbVisualStyle.glass;
+  double get textScale => _textScale;
+  bool get reduceMotionOverride => _reduceMotionOverride;
+  bool get hapticsEnabled => _hapticsEnabled;
+  bool get inAppBannersEnabled => _inAppBannersEnabled;
+  bool get orderAlertsEnabled => _orderAlertsEnabled;
+  bool get promoAlertsEnabled => _promoAlertsEnabled;
 
   Future<void> restore() async {
     try {
       final savedTheme = await _storage.read(key: _themeKey);
       final savedStyle = await _storage.read(key: _styleKey);
+      final savedScale = await _storage.read(key: _textScaleKey);
+      final savedReduceMotion = await _storage.read(key: _reduceMotionKey);
+      final savedHaptics = await _storage.read(key: _hapticsKey);
+      final savedBanners = await _storage.read(key: _inAppBannersKey);
+      final savedOrderAlerts = await _storage.read(key: _orderAlertsKey);
+      final savedPromoAlerts = await _storage.read(key: _promoAlertsKey);
+
       _themeMode = switch (savedTheme) {
         'light' => ThemeMode.light,
         'dark' => ThemeMode.dark,
@@ -239,6 +264,14 @@ class DarbAppearanceController extends ChangeNotifier {
         'standard' => DarbVisualStyle.standard,
         _ => DarbVisualStyle.glass,
       };
+      final parsedScale = double.tryParse(savedScale ?? '');
+      _textScale =
+          parsedScale != null ? parsedScale.clamp(0.90, 1.25).toDouble() : 1.0;
+      _reduceMotionOverride = savedReduceMotion == 'true';
+      _hapticsEnabled = savedHaptics != 'false';
+      _inAppBannersEnabled = savedBanners != 'false';
+      _orderAlertsEnabled = savedOrderAlerts != 'false';
+      _promoAlertsEnabled = savedPromoAlerts != 'false';
       notifyListeners();
     } catch (_) {}
   }
@@ -258,6 +291,79 @@ class DarbAppearanceController extends ChangeNotifier {
     notifyListeners();
     try {
       await _storage.write(key: _styleKey, value: style.name);
+    } catch (_) {}
+  }
+
+  Future<void> setTextScale(double scale) async {
+    final clamped = scale.clamp(0.90, 1.25).toDouble();
+    if (_textScale == clamped) return;
+    _textScale = clamped;
+    notifyListeners();
+    try {
+      await _storage.write(key: _textScaleKey, value: clamped.toString());
+    } catch (_) {}
+  }
+
+  Future<void> setReduceMotionOverride(bool enabled) async {
+    if (_reduceMotionOverride == enabled) return;
+    _reduceMotionOverride = enabled;
+    notifyListeners();
+    try {
+      await _storage.write(key: _reduceMotionKey, value: enabled.toString());
+    } catch (_) {}
+  }
+
+  Future<void> setHapticsEnabled(bool enabled) async {
+    if (_hapticsEnabled == enabled) return;
+    _hapticsEnabled = enabled;
+    notifyListeners();
+    try {
+      await _storage.write(key: _hapticsKey, value: enabled.toString());
+    } catch (_) {}
+  }
+
+  Future<void> setInAppBannersEnabled(bool enabled) async {
+    if (_inAppBannersEnabled == enabled) return;
+    _inAppBannersEnabled = enabled;
+    notifyListeners();
+    try {
+      await _storage.write(key: _inAppBannersKey, value: enabled.toString());
+    } catch (_) {}
+  }
+
+  Future<void> setOrderAlertsEnabled(bool enabled) async {
+    if (_orderAlertsEnabled == enabled) return;
+    _orderAlertsEnabled = enabled;
+    notifyListeners();
+    try {
+      await _storage.write(key: _orderAlertsKey, value: enabled.toString());
+    } catch (_) {}
+  }
+
+  Future<void> setPromoAlertsEnabled(bool enabled) async {
+    if (_promoAlertsEnabled == enabled) return;
+    _promoAlertsEnabled = enabled;
+    notifyListeners();
+    try {
+      await _storage.write(key: _promoAlertsKey, value: enabled.toString());
+    } catch (_) {}
+  }
+
+  Future<void> resetAccessibilityAndNotifications() async {
+    _textScale = 1.0;
+    _reduceMotionOverride = false;
+    _hapticsEnabled = true;
+    _inAppBannersEnabled = true;
+    _orderAlertsEnabled = true;
+    _promoAlertsEnabled = true;
+    notifyListeners();
+    try {
+      await _storage.delete(key: _textScaleKey);
+      await _storage.delete(key: _reduceMotionKey);
+      await _storage.delete(key: _hapticsKey);
+      await _storage.delete(key: _inAppBannersKey);
+      await _storage.delete(key: _orderAlertsKey);
+      await _storage.delete(key: _promoAlertsKey);
     } catch (_) {}
   }
 }
@@ -288,7 +394,8 @@ class DarbMotion {
   static bool reduceMotion(BuildContext context) {
     final media = MediaQuery.maybeOf(context);
     return (media?.disableAnimations ?? false) ||
-        (media?.accessibleNavigation ?? false);
+        (media?.accessibleNavigation ?? false) ||
+        DarbAppearanceController.instance.reduceMotionOverride;
   }
 
   static Duration effectiveDuration(BuildContext context, Duration target) =>
@@ -458,7 +565,8 @@ class _DarbPressScaleState extends State<DarbPressScale> {
 
   void _handleTap() {
     if (widget.onTap == null) return;
-    if (widget.enableHaptics) {
+    if (widget.enableHaptics &&
+        DarbAppearanceController.instance.hapticsEnabled) {
       try {
         HapticFeedback.selectionClick();
       } catch (_) {}

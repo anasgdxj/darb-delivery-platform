@@ -34,18 +34,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _complete() async {
-    DarbHaptics.success();
-
-    // Notify an owning flow immediately; persistence remains best-effort and
-    // must not delay navigation or the completion contract.
+    DarbHaptics.medium();
+    try {
+      await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
+    } catch (_) {}
+    if (!mounted) return;
     if (widget.onFinished != null) {
       widget.onFinished!.call();
-      await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
       return;
     }
-
-    await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
-    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       DarbPageRoute(builder: (_) => const LoginScreen()),
     );
@@ -57,14 +54,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return;
     }
     DarbHaptics.selection();
-    final duration =
-        DarbMotion.effectiveDuration(context, DarbMotion.standard);
-    if (duration <= Duration.zero) {
-      _pageController.jumpToPage(_index + 1);
-      return;
-    }
     _pageController.nextPage(
-      duration: duration,
+      duration: DarbMotion.effectiveDuration(context, DarbMotion.standard),
       curve: DarbMotion.enter,
     );
   }
@@ -160,7 +151,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            value: darbLocale.value.languageCode,
+                            value: const ['ar', 'en', 'tr'].contains(
+                              darbLocale.value.languageCode,
+                            )
+                                ? darbLocale.value.languageCode
+                                : 'ar',
                             isDense: true,
                             dropdownColor: DarbColors.surfaceElevatedOf(context),
                             style: TextStyle(

@@ -314,17 +314,21 @@ class _AddressesScreenState extends State<AddressesScreen> {
               : _error != null
                   ? DarbStateView.error(message: _error, onRetry: _load)
                   : _addresses.isEmpty
-                      ? ListView(
-                          children: [
-                            DarbStateView.empty(
-                              message: dt('لا يوجد عنوان محفوظ'),
-                              icon: Icons.location_off_outlined,
-                              onRetry: () async {
-                                final created = await showAddressFormSheet(context);
-                                if (created != null) _load();
-                              },
+                      ? LayoutBuilder(
+                          builder: (context, constraints) => SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                              child: DarbStateView.empty(
+                                message: dt('لا يوجد عنوان محفوظ'),
+                                icon: Icons.location_off_outlined,
+                                onRetry: () async {
+                                  final created = await showAddressFormSheet(context);
+                                  if (created != null) _load();
+                                },
+                              ),
                             ),
-                          ],
+                          ),
                         )
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),

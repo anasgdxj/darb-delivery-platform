@@ -28,7 +28,9 @@ import '../vendor/vendor_orders_screen.dart';
 import '../vendor/vendor_products_screen.dart';
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  const AppShell({super.key, this.checkForUpdates = true});
+
+  final bool checkForUpdates;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -50,29 +52,50 @@ class _AppShellState extends State<AppShell> {
   ({String title, String body, Map<String, dynamic> data})? _bannerNotification;
   Map<String, dynamic>? _pendingNotificationData;
   bool _handlingNotification = false;
+  bool _redirectingToLogin = false;
 
   @override
   void initState() {
     super.initState();
+    Api.instance.sessionExpiredNotifier.addListener(_onSessionExpired);
     _loadUser();
     _setupNotifications();
-    if (!kDarbPlayStoreBuild) {
+    if (!kDarbPlayStoreBuild && widget.checkForUpdates) {
       DarbUpdater.instance.checkForUpdate();
     }
   }
 
   @override
   void dispose() {
+    Api.instance.sessionExpiredNotifier.removeListener(_onSessionExpired);
     _bannerTimer?.cancel();
     _fgSub?.cancel();
     _openSub?.cancel();
     super.dispose();
   }
 
+  Future<void> _onSessionExpired() async {
+    if (!mounted || _redirectingToLogin) return;
+    await _redirectToLogin();
+  }
+
+  Future<void> _redirectToLogin() async {
+    if (_redirectingToLogin) return;
+    _redirectingToLogin = true;
+    DriverLocationReporter.stop();
+    await Api.instance.clear();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      DarbPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
+  }
+
   void _setupNotifications() {
     _fgSub = DarbNotifications.listenForeground((title, body, data) {
       if (!mounted) return;
       _refreshUnreadCount();
+      if (!DarbAppearanceController.instance.inAppBannersEnabled) return;
       final resolvedTitle =
           (title != null && title.trim().isNotEmpty) ? title.trim() : dt('إشعار جديد');
       final resolvedBody = body?.trim() ?? '';
@@ -368,7 +391,9 @@ class _AppShellState extends State<AppShell> {
       if (data is! Map<String, dynamic>) {
         throw const ApiException('بيانات الجلسة غير صالحة');
       }
-      await DarbLocalCache.instance.writeJson(_profileCacheKey, data);
+      try {
+        await DarbLocalCache.instance.writeJson(_profileCacheKey, data);
+      } catch (_) {}
       final localeCode = data['locale']?.toString();
       if (localeCode != null && ['ar', 'en', 'tr'].contains(localeCode)) {
         darbLocale.value = Locale(localeCode);
@@ -396,18 +421,16 @@ class _AppShellState extends State<AppShell> {
       if (e.statusCode == 401 ||
           e.statusCode == 403 ||
           Api.instance.sessionInvalidated) {
-        await Api.instance.clear();
-        if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          DarbPageRoute(builder: (_) => const LoginScreen()),
-          (_) => false,
-        );
+        await _redirectToLogin();
         return;
       }
       if (e.isNetworkError &&
           e.statusCode == null &&
           !Api.instance.sessionInvalidated) {
-        final cached = await DarbLocalCache.instance.readJson(_profileCacheKey);
+        dynamic cached;
+        try {
+          cached = await DarbLocalCache.instance.readJson(_profileCacheKey);
+        } catch (_) {}
         if (cached is Map && mounted) {
           final profile = Map<String, dynamic>.from(cached);
           final localeCode = profile['locale']?.toString();

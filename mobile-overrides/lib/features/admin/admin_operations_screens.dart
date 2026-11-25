@@ -88,8 +88,18 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
           const SizedBox(height: 14),
           if (_orders.isEmpty)
             DarbStateView.empty(
-              message: dt('لا توجد طلبات حتى الآن'),
-              icon: Icons.receipt_long_outlined,
+              message: _statusFilter.isEmpty
+                  ? dt('لا توجد طلبات حتى الآن')
+                  : dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+              icon: _statusFilter.isEmpty
+                  ? Icons.receipt_long_outlined
+                  : Icons.filter_list_off_rounded,
+              onRetry: _statusFilter.isEmpty
+                  ? _load
+                  : () {
+                      setState(() => _statusFilter = '');
+                      _load();
+                    },
             )
           else
             for (final o in _orders)
@@ -220,6 +230,7 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
   bool _loading = true;
   bool _savingSettings = false;
   String? _error;
+  String? _partialError;
   int _section = 0; // 0: zones & cities, 1: users, 2: settings & audit
   final Set<String> _busyIds = <String>{};
 
@@ -241,6 +252,7 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _partialError = null;
     });
     try {
       final results = await Future.wait([
@@ -254,13 +266,16 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
       List<Map<String, dynamic>> logs = const [];
       Map<String, dynamic> settings = const {};
       var hasSettings = false;
+      var hasPartialFailure = false;
 
       try {
         final adminCities = await Api.instance.get('/admin/cities');
         if (adminCities is List && adminCities.isNotEmpty) {
           cities = adminCities.whereType<Map<String, dynamic>>().toList();
         }
-      } catch (_) {}
+      } catch (_) {
+        hasPartialFailure = true;
+      }
 
       try {
         final q = _userSearchCtrl.text.trim();
@@ -270,7 +285,9 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
         final u = await Api.instance.get(path);
         final raw = u is Map ? (u['items'] as List? ?? []) : (u as List? ?? []);
         users = raw.whereType<Map<String, dynamic>>().toList();
-      } catch (_) {}
+      } catch (_) {
+        hasPartialFailure = true;
+      }
 
       try {
         final s = await Api.instance.get('/admin/settings');
@@ -281,14 +298,22 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
               s['commissionPercent']?.toString() ?? '10';
           _supportCtrl.text = s['supportContact']?.toString() ?? '';
         }
-      } catch (_) {}
+      } on ApiException catch (e) {
+        if (e.statusCode != 404) hasPartialFailure = true;
+      } catch (_) {
+        hasPartialFailure = true;
+      }
 
       try {
         final audit = await Api.instance.get('/admin/audit-logs?limit=25');
         if (audit is List) {
           logs = audit.whereType<Map<String, dynamic>>().toList();
         }
-      } catch (_) {}
+      } on ApiException catch (e) {
+        if (e.statusCode != 404) hasPartialFailure = true;
+      } catch (_) {
+        hasPartialFailure = true;
+      }
 
       if (!mounted) return;
       setState(() {
@@ -300,6 +325,9 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
         _auditLogs = logs;
         _settings = settings;
         _hasExtendedSettings = hasSettings;
+        _partialError = hasPartialFailure
+            ? dt('تعذر تحميل بعض البيانات الثانوية. أعد المحاولة لتحديثها.')
+            : null;
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -767,6 +795,37 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
             ),
           ),
           const SizedBox(height: 14),
+          if (_partialError != null) ...[
+            DarbGlassSurface(
+              tintColor: DarbColors.warningSoftOf(context),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 18,
+                    color: DarbColors.warningOf(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _partialError!,
+                      style: TextStyle(
+                        color: DarbColors.warningOf(context),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _load,
+                    child: Text(dt('إعادة المحاولة')),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           if (_section == 0) ...[
             DarbSectionHeader(
               title: dt('إعداد رسوم التوصيل'),
@@ -782,6 +841,7 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
               DarbStateView.empty(
                 message: dt('لم تُضف رسوم توصيل بعد'),
                 icon: Icons.payments_outlined,
+                onRetry: _load,
               )
             else
               for (final z in _zones)
@@ -910,6 +970,7 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
               DarbStateView.empty(
                 message: dt('لا توجد بيانات متاحة حالياً'),
                 icon: Icons.people_outline_rounded,
+                onRetry: _load,
               )
             else
               for (final u in _users)

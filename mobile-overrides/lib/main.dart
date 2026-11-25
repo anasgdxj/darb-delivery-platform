@@ -13,10 +13,12 @@ import 'features/shell/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Future.wait([
-    DarbNotifications.initialize(),
-    DarbAppearanceController.instance.restore(),
-  ]);
+  try {
+    await Future.wait([
+      DarbNotifications.initialize(),
+      DarbAppearanceController.instance.restore(),
+    ]);
+  } catch (_) {}
   runApp(const DarbApp());
 }
 
@@ -53,6 +55,21 @@ class DarbApp extends StatelessWidget {
             const Duration(milliseconds: 280),
           ),
           themeAnimationCurve: DarbMotion.enter,
+          builder: (context, child) {
+            if (child == null) return const SizedBox.shrink();
+            if (appearance.textScale == 1.0) return child;
+            final media = MediaQuery.of(context);
+            final effectiveFactor =
+                (media.textScaler.scale(1.0) * appearance.textScale)
+                    .clamp(0.85, 1.38)
+                    .toDouble();
+            return MediaQuery(
+              data: media.copyWith(
+                textScaler: TextScaler.linear(effectiveFactor),
+              ),
+              child: child,
+            );
+          },
           home: initialScreen ?? const _DarbSplashGate(),
         );
       },
@@ -101,11 +118,17 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
   }
 
   Future<void> _restoreSession() async {
-    await Api.instance.restore();
-    final onboardingSeen = Api.instance.accessToken == null
-        ? (await DarbLocalCache.instance.readJson(kDazrevoOnboardingSeenKey)) ==
-            true
-        : true;
+    var onboardingSeen = false;
+    try {
+      await Api.instance.restore();
+      if (Api.instance.accessToken != null) {
+        onboardingSeen = true;
+      } else {
+        onboardingSeen =
+            (await DarbLocalCache.instance.readJson(kDazrevoOnboardingSeenKey)) ==
+                true;
+      }
+    } catch (_) {}
     await Future<void>.delayed(const Duration(milliseconds: 350));
     if (!mounted || _navigated) return;
     _navigated = true;

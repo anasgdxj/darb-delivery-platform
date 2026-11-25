@@ -23,6 +23,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _directoryMode = 0; // 0: Pending queues, 1: All stores, 2: All drivers
   bool _loading = true;
   String? _error;
+  String? _partialError;
   final Set<String> _busyIds = <String>{};
 
   @override
@@ -35,6 +36,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _partialError = null;
     });
     try {
       final results = await Future.wait([
@@ -45,25 +47,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       Map<String, dynamic> stats = const {};
       List<Map<String, dynamic>> allVendors = const [];
       List<Map<String, dynamic>> allDrivers = const [];
+      var hasPartialFailure = false;
 
       try {
         final s = await Api.instance.get('/admin/stats');
         if (s is Map<String, dynamic>) stats = s;
-      } catch (_) {}
+      } catch (_) {
+        hasPartialFailure = true;
+      }
 
       try {
         final v = await Api.instance.get('/admin/vendors');
         if (v is List) {
           allVendors = v.whereType<Map<String, dynamic>>().toList();
         }
-      } catch (_) {}
+      } catch (_) {
+        hasPartialFailure = true;
+      }
 
       try {
         final d = await Api.instance.get('/admin/drivers');
         if (d is List) {
           allDrivers = d.whereType<Map<String, dynamic>>().toList();
         }
-      } catch (_) {}
+      } catch (_) {
+        hasPartialFailure = true;
+      }
 
       if (!mounted) return;
       setState(() {
@@ -76,6 +85,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         _allVendors = allVendors;
         _allDrivers = allDrivers;
         _stats = stats;
+        _partialError = hasPartialFailure
+            ? dt('تعذر تحميل بعض البيانات الثانوية. أعد المحاولة لتحديثها.')
+            : null;
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -158,6 +170,37 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               icon: const Icon(Icons.refresh_rounded),
             ),
           ),
+          if (_partialError != null) ...[
+            const SizedBox(height: 10),
+            DarbGlassSurface(
+              tintColor: DarbColors.warningSoftOf(context),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 18,
+                    color: DarbColors.warningOf(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _partialError!,
+                      style: TextStyle(
+                        color: DarbColors.warningOf(context),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _load,
+                    child: Text(dt('إعادة المحاولة')),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           GridView.count(
             crossAxisCount: 2,
@@ -262,8 +305,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ] else if (_directoryMode == 1) ...[
             if (_allVendors.isEmpty)
               DarbStateView.empty(
-                message: dt('لا توجد متاجر متاحة في هذه المدينة'),
+                message: dt('لا توجد بيانات متاحة حالياً'),
                 icon: Icons.storefront_outlined,
+                onRetry: _load,
               )
             else
               for (final v in _allVendors)
@@ -276,6 +320,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               DarbStateView.empty(
                 message: dt('لا توجد بيانات متاحة حالياً'),
                 icon: Icons.delivery_dining_outlined,
+                onRetry: _load,
               )
             else
               for (final d in _allDrivers)

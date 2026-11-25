@@ -54,6 +54,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   int _errorTrigger = 0;
   int _estimateGeneration = 0;
   String? _estimateError;
+  String? _addressesError;
   String? _error;
 
   @override
@@ -72,27 +73,38 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       widget.items.fold(0, (sum, item) => sum + item.unitPrice * item.quantity);
 
   Future<void> _loadAddresses() async {
-    setState(() => _loadingAddresses = true);
+    setState(() {
+      _loadingAddresses = true;
+      _addressesError = null;
+    });
     try {
       final list = (await Api.instance.get('/addresses') as List? ?? [])
           .whereType<Map<String, dynamic>>()
           .toList();
       if (!mounted) return;
+      final selectedValid = _selectedAddressId != null &&
+          list.any((a) => a['id']?.toString() == _selectedAddressId);
       setState(() {
         _addresses = list;
-        if (_selectedAddressId == null && list.isNotEmpty) {
-          final withLoc = list.where((a) => a['hasLocation'] == true).toList();
-          _selectedAddressId =
-              (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
+        if (!selectedValid) {
+          if (list.isNotEmpty) {
+            final withLoc = list.where((a) => a['hasLocation'] == true).toList();
+            _selectedAddressId =
+                (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
+          } else {
+            _selectedAddressId = null;
+          }
         }
       });
       if (_selectedAddressId != null) {
         await _refreshEstimate();
       }
     } on ApiException catch (e) {
-      if (mounted) setState(() => _error = e.message);
+      if (mounted) setState(() => _addressesError = e.message);
     } catch (_) {
-      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+      if (mounted) {
+        setState(() => _addressesError = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+      }
     } finally {
       if (mounted) setState(() => _loadingAddresses = false);
     }
@@ -321,6 +333,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const SizedBox(height: 6),
                   if (_loadingAddresses)
                     const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
+                  else if (_addressesError != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          _addressesError!,
+                          style: TextStyle(
+                            color: DarbColors.dangerOf(context),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            onPressed: _loadAddresses,
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: Text(dt('إعادة المحاولة')),
+                          ),
+                        ),
+                      ],
+                    )
                   else if (_addresses.isEmpty)
                     Text(
                       dt('لا يوجد عنوان محفوظ'),

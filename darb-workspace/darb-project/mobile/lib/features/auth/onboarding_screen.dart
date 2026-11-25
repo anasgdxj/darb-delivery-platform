@@ -35,7 +35,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _complete() async {
     DarbHaptics.medium();
-    await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
+    try {
+      await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
+    } catch (_) {}
     if (!mounted) return;
     if (widget.onFinished != null) {
       widget.onFinished!.call();
@@ -149,7 +151,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            value: darbLocale.value.languageCode,
+                            value: const ['ar', 'en', 'tr'].contains(
+                              darbLocale.value.languageCode,
+                            )
+                                ? darbLocale.value.languageCode
+                                : 'ar',
                             isDense: true,
                             dropdownColor: DarbColors.surfaceElevatedOf(context),
                             style: TextStyle(

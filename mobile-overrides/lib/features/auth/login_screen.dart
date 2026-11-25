@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/services/notifications_service.dart';
+import '../../core/storage/local_cache.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
@@ -170,6 +171,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ? Map<String, dynamic>.from(data['tokens'] as Map)
           : data;
       await Api.instance.saveTokens(tokens);
+      if (data['user'] is Map) {
+        try {
+          await DarbLocalCache.instance.writeJson(
+            'auth_me_profile',
+            Map<String, dynamic>.from(data['user'] as Map),
+          );
+        } catch (_) {}
+      }
       await DarbNotifications.register();
       if (!mounted) return;
       setState(() {
@@ -249,6 +258,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ? Map<String, dynamic>.from(data['tokens'] as Map)
           : data;
       await Api.instance.saveTokens(tokens);
+      if (data['user'] is Map) {
+        try {
+          await DarbLocalCache.instance.writeJson(
+            'auth_me_profile',
+            Map<String, dynamic>.from(data['user'] as Map),
+          );
+        } catch (_) {}
+      }
       await DarbNotifications.register();
       if (!mounted) return;
       setState(() {
@@ -415,7 +432,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                       const SizedBox(width: 4),
                                       DropdownButtonHideUnderline(
                                         child: DropdownButton<String>(
-                                          value: darbLocale.value.languageCode,
+                                          value: const ['ar', 'en', 'tr'].contains(
+                                            darbLocale.value.languageCode,
+                                          )
+                                              ? darbLocale.value.languageCode
+                                              : 'ar',
                                           isDense: true,
                                           dropdownColor: DarbColors.forest,
                                           iconEnabledColor: Colors.white,

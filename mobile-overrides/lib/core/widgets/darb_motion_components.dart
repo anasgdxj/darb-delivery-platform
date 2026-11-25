@@ -10,31 +10,38 @@ import '../theme/darb_design_system.dart';
 class DarbHaptics {
   DarbHaptics._();
 
+  static bool get _enabled => DarbAppearanceController.instance.hapticsEnabled;
+
   static Future<void> selection() async {
+    if (!_enabled) return;
     try {
       await HapticFeedback.selectionClick();
     } catch (_) {}
   }
 
   static Future<void> light() async {
+    if (!_enabled) return;
     try {
       await HapticFeedback.lightImpact();
     } catch (_) {}
   }
 
   static Future<void> success() async {
+    if (!_enabled) return;
     try {
       await HapticFeedback.mediumImpact();
     } catch (_) {}
   }
 
   static Future<void> error() async {
+    if (!_enabled) return;
     try {
       await HapticFeedback.heavyImpact();
     } catch (_) {}
   }
 
   static Future<void> warning() async {
+    if (!_enabled) return;
     try {
       await HapticFeedback.mediumImpact();
     } catch (_) {}

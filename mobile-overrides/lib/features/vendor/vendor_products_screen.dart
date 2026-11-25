@@ -47,8 +47,17 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
       _error = null;
     });
     try {
-      final mine =
-          await Api.instance.get('/vendors/mine') as Map<String, dynamic>;
+      final rawMine = await Api.instance.get('/vendors/mine');
+      if (rawMine is! Map<String, dynamic>) {
+        if (mounted) {
+          setState(() {
+            _vendorStatus = 'MISSING';
+            _products = const [];
+          });
+        }
+        return;
+      }
+      final mine = rawMine;
       final status = mine['status']?.toString() ?? 'PENDING';
       if (status != 'APPROVED') {
         if (mounted) {
@@ -206,11 +215,15 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                       final name = nameCtrl.text.trim();
                       final category = categoryCtrl.text.trim();
                       final price = double.tryParse(priceCtrl.text.trim());
-                      final stock = stockCtrl.text.trim().isEmpty
-                          ? null
-                          : int.tryParse(stockCtrl.text.trim());
+                      final stockText = stockCtrl.text.trim();
+                      final stock =
+                          stockText.isEmpty ? null : int.tryParse(stockText);
                       if (name.length < 2 || price == null || price < 0) {
                         setSheet(() => err = dt('أدخل اسم المنتج وسعراً صحيحاً'));
+                        return;
+                      }
+                      if (stockText.isNotEmpty && (stock == null || stock < 0)) {
+                        setSheet(() => err = dt('أدخل كمية مخزون صحيحة (0 أو أكثر)'));
                         return;
                       }
                       setSheet(() {
@@ -347,12 +360,26 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
     if (_loading) return const DarbStateView.loading();
     if (_error != null) return DarbStateView.error(message: _error, onRetry: _load);
     if (_vendorStatus != null && _vendorStatus != 'APPROVED') {
-      return DarbStateView.empty(
-        message: _vendorStatus == 'PENDING'
-            ? dt('طلب متجرك قيد المراجعة. ستتمكن من إدارة المنتجات بعد اعتماد الإدارة.')
-            : dt('حالة المتجر: $_vendorStatus'),
-        icon: Icons.store_mall_directory_outlined,
-        onRetry: _load,
+      final msg = _vendorStatus == 'MISSING'
+          ? dt('ملف المتجر غير مكتمل بعد. تواصل مع الإدارة أو أعد المحاولة.')
+          : (_vendorStatus == 'PENDING'
+              ? dt('طلب متجرك قيد المراجعة. ستتمكن من إدارة المنتجات بعد اعتماد الإدارة.')
+              : dt('حالة المتجر: $_vendorStatus'));
+      return RefreshIndicator(
+        onRefresh: _load,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: DarbStateView.empty(
+                message: msg,
+                icon: Icons.store_mall_directory_outlined,
+                onRetry: _load,
+              ),
+            ),
+          ),
+        ),
       );
     }
 
@@ -419,9 +446,18 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
             const SizedBox(height: 14),
             if (filtered.isEmpty)
               DarbStateView.empty(
-                message: dt('لم تضف أي منتجات بعد'),
-                icon: Icons.inventory_2_outlined,
-                onRetry: () => _openProductSheet(),
+                message: _products.isEmpty
+                    ? dt('لم تضف أي منتجات بعد')
+                    : dt('لم نعثر على نتائج مطابقة'),
+                icon: _products.isEmpty
+                    ? Icons.inventory_2_outlined
+                    : Icons.search_off_rounded,
+                onRetry: _products.isEmpty
+                    ? () => _openProductSheet()
+                    : () {
+                        _searchCtrl.clear();
+                        setState(() => _selectedCategory = '');
+                      },
               )
             else
               for (final p in filtered)

@@ -1357,3 +1357,306 @@ class _LedgerCell extends StatelessWidget {
     );
   }
 }
+
+enum DarbFeedbackKind { info, success, warning, error }
+
+class DarbFeedbackBanner extends StatelessWidget {
+  const DarbFeedbackBanner({
+    super.key,
+    required this.message,
+    this.kind = DarbFeedbackKind.info,
+    this.actionLabel,
+    this.onAction,
+    this.onDismiss,
+  });
+
+  final String message;
+  final DarbFeedbackKind kind;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final VoidCallback? onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = DarbColors.isDark(context);
+    final Color foreground;
+    final Color background;
+    final IconData icon;
+
+    switch (kind) {
+      case DarbFeedbackKind.success:
+        foreground = DarbColors.successOf(context);
+        background = isDark ? DarbColors.forestSoft : DarbColors.mintTint;
+        icon = Icons.check_circle_rounded;
+      case DarbFeedbackKind.warning:
+        foreground = DarbColors.warningOf(context);
+        background = DarbColors.warningSoftOf(context);
+        icon = Icons.warning_amber_rounded;
+      case DarbFeedbackKind.error:
+        foreground = DarbColors.dangerOf(context);
+        background = DarbColors.dangerSoftOf(context);
+        icon = Icons.error_outline_rounded;
+      case DarbFeedbackKind.info:
+        foreground = DarbColors.infoOf(context);
+        background = DarbColors.infoSoftOf(context);
+        icon = Icons.info_outline_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(DarbRadius.md),
+        border: Border.all(color: foreground.withValues(alpha: 0.32)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: foreground),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: DarbColors.inkOf(context),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+              ),
+            ),
+          ),
+          if (actionLabel != null && onAction != null)
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: foreground,
+                minimumSize: const Size(0, 32),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+              ),
+              onPressed: onAction,
+              child: Text(actionLabel!),
+            ),
+          if (onDismiss != null)
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: onDismiss,
+              icon: Icon(Icons.close_rounded, size: 17, color: foreground),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class DarbGroupedSection extends StatelessWidget {
+  const DarbGroupedSection({
+    super.key,
+    required this.title,
+    required this.children,
+    this.subtitle,
+    this.trailing,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final border = DarbColors.borderOf(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.only(
+            start: 4,
+            end: 4,
+            bottom: 8,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: DarbColors.inkOf(context),
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    if (subtitle != null && subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: TextStyle(
+                          color: DarbColors.mutedOf(context),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (trailing != null) trailing!,
+            ],
+          ),
+        ),
+        DarbGlassSurface(
+          borderRadius: DarbRadius.lg,
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                children[i],
+                if (i + 1 < children.length)
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    indent: 62,
+                    endIndent: 14,
+                    color: border.withValues(alpha: 0.65),
+                  ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class DarbSettingsTile extends StatelessWidget {
+  const DarbSettingsTile({
+    super.key,
+    required this.icon,
+    required this.accentColor,
+    required this.title,
+    this.subtitle,
+    this.valueLabel,
+    this.trailing,
+    this.isDanger = false,
+    this.enabled = true,
+    this.showChevron = true,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final Color accentColor;
+  final String title;
+  final String? subtitle;
+  final String? valueLabel;
+  final Widget? trailing;
+  final bool isDanger;
+  final bool enabled;
+  final bool showChevron;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = DarbColors.mutedOf(context);
+    final ink = DarbColors.inkOf(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    Widget? resolvedTrailing = trailing;
+    if (resolvedTrailing == null && valueLabel != null) {
+      resolvedTrailing = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 120),
+            child: Text(
+              valueLabel!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: accentColor,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          if (showChevron && !isDanger) ...[
+            const SizedBox(width: 4),
+            Icon(
+              isRtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+              size: 20,
+              color: muted,
+            ),
+          ],
+        ],
+      );
+    } else if (resolvedTrailing == null && showChevron && !isDanger) {
+      resolvedTrailing = Icon(
+        isRtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+        size: 20,
+        color: muted,
+      );
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(DarbRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: enabled ? 0.13 : 0.06),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: enabled ? accentColor : muted,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: !enabled
+                            ? muted
+                            : (isDanger ? accentColor : ink),
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (subtitle != null && subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: TextStyle(
+                          color: muted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (resolvedTrailing != null) ...[
+                const SizedBox(width: 8),
+                resolvedTrailing,
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
