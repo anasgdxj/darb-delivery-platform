@@ -246,8 +246,7 @@ class Api {
           continue;
         }
         break;
-      } catch (error, stackTrace) {
-        debugPrint('DAZREVO_HTTP_ERROR method=$method url=$uri client=${httpClientOverride.runtimeType} attempt=$attempt error=$error\n$stackTrace');
+      } catch (_) {
         if (retryOnTransient && attempt + 1 < maxAttempts) {
           await Future<void>.delayed(
             Duration(milliseconds: 1500 * (1 << attempt)),
