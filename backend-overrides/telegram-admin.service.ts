@@ -71,7 +71,7 @@ export class TelegramAdminService implements OnModuleInit {
     const chatId = message?.chat?.id;
     const senderId = message?.from?.id;
     const text = message?.text?.trim();
-    if (!chatId || !senderId || !text || !text.startsWith('/')) return;
+    if (!chatId || !senderId || message?.chat?.type !== 'private' || !text || !text.startsWith('/')) return;
 
     const command = text.split(/\s+/, 1)[0].split('@', 1)[0].toLowerCase();
     if (command === '/id') {
