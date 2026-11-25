@@ -377,67 +377,125 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 104),
         children: [
-          DarbGlassSurface(
-            padding: const EdgeInsets.all(16),
-            borderColor: isOpen
-                ? DarbColors.primaryOf(context).withValues(alpha: 0.24)
-                : null,
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: DarbColors.primaryOf(context).withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.storefront_rounded,
-                    color: DarbColors.primaryOf(context),
-                    size: 24,
-                  ),
+          Container(
+            padding: const EdgeInsets.all(17),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [DarbColors.forest, Color(0xFF071A14)],
+              ),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: DarbColors.lime.withValues(alpha: 0.22),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: DarbColors.forest.withValues(alpha: 0.18),
+                  blurRadius: 22,
+                  offset: const Offset(0, 9),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const DarbBrandMark(size: 43),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            vendorName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              DarbPulseDot(
+                                active: isOpen,
+                                color: isOpen
+                                    ? DarbColors.lime
+                                    : Colors.white54,
+                                size: 8,
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                isOpen
+                                    ? dt('المتجر يستقبل الطلبات')
+                                    : dt('المتجر متوقف مؤقتاً'),
+                                style: TextStyle(
+                                  color: isOpen
+                                      ? DarbColors.lime
+                                      : Colors.white70,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: dt('تعديل بيانات المتجر'),
+                      onPressed: _editVendorProfile,
+                      style: IconButton.styleFrom(
+                        foregroundColor: DarbColors.lime,
+                        backgroundColor: Colors.white.withValues(alpha: 0.09),
+                      ),
+                      icon: const Icon(Icons.tune_rounded, size: 20),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Container(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 13,
+                    end: 10,
+                    top: 8,
+                    bottom: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.07),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.10),
+                    ),
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        vendorName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: DarbColors.inkOf(context),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
+                      const Icon(
+                        Icons.store_mall_directory_outlined,
+                        color: DarbColors.lime,
+                        size: 19,
+                      ),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Text(
+                          dt('حالة استقبال الطلبات'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          DarbPulseDot(
-                            active: isOpen,
-                            color: isOpen
-                                ? DarbColors.successOf(context)
-                                : DarbColors.dangerOf(context),
-                            size: 7.5,
-                          ),
-                          const SizedBox(width: 6),
-                          DarbStatusBadge(status: isOpen ? 'OPEN' : 'CLOSED'),
-                        ],
+                      Switch(
+                        value: isOpen,
+                        onChanged: _togglingOpen ? null : _toggleOpen,
                       ),
                     ],
                   ),
-                ),
-                Switch(
-                  value: isOpen,
-                  onChanged: _togglingOpen ? null : _toggleOpen,
-                ),
-                const SizedBox(width: 4),
-                IconButton.filledTonal(
-                  tooltip: dt('تعديل'),
-                  onPressed: _editVendorProfile,
-                  icon: const Icon(Icons.edit_outlined, size: 19),
                 ),
               ],
             ),
