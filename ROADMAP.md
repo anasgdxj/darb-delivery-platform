@@ -198,5 +198,14 @@
 - احترام Reduce Motion، والإبقاء على منطق OTP وGoogle Sign-In وواجهات API ومفاتيح التوقيع دون تغيير.
 - أزيلت مفاتيح الترجمة المكررة التي كانت توقف `flutter analyze`; ينتظر التغيير إعادة فحص CI وبناء APK قبل اعتماد المرحلة.
 
+## 25. بوابة جاهزية إشعارات تحديث Android — 2026-11-25
+
+- تشخيص تشغيل مؤكد: Firebase Admin لم يتهيأ في Render لأن `FIREBASE_SERVICE_ACCOUNT_JSON` لا يحتوي الحقول العليا المطلوبة `project_id` و`client_email` و`private_key`.
+- بناء Android client ونجاح اختبارات Flutter لا يثبتان أن FCM الخلفي يعمل؛ يجب التحقق من جاهزية الخادم قبل نشر إصدار عام.
+- فرع `fix/dazrevo-release-notification-preflight` يضيف endpoint محمياً `GET /api/v1/internal/release-notifications/readiness`، واختبارات للمصادقة وحالة Firebase، وخطوة preflight في GitHub Actions قبل استبدال Release `latest`.
+- لا يكشف endpoint بيانات الاعتماد أو رموز الأجهزة؛ يعيد `{ ready: true }` فقط عند صحة Bearer token وتهيئة Firebase Admin.
+- يلزم تصحيح JSON الخاص بـFirebase Admin في Render وضمان تطابق `DARB_RELEASE_WEBHOOK_TOKEN` بين Render وGitHub Actions، ثم اختبار Push حقيقي على جهاز Android.
+- لا يُنشر APK ولا يُرسل إشعار فعلي قبل مراجعة المستخدم واجتياز بوابة الجاهزية.
+
 ---
-آخر تحديث: 2026-11-21
+آخر تحديث: 2026-11-25
