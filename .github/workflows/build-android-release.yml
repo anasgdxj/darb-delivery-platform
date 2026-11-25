@@ -83,9 +83,9 @@ jobs:
           pubspec.write_text("\n".join(lines) + "\n")
           m = manifest.read_text()
           internet = '<uses-permission android:name="android.permission.INTERNET" />'
-          if internet not in m:
-              m = m.replace("<application", internet + "\n    <application", 1)
-          if internet not in m:
+          if not re.search(r'<uses-permission\\b[^>]*android:name=["\\']android\\.permission\\.INTERNET["\\']', m):
+              m = m.replace("<application", internet + "\\n    <application", 1)
+          if not re.search(r'<uses-permission\\b[^>]*android:name=["\\']android\\.permission\\.INTERNET["\\']', m):
               raise SystemExit("Could not add INTERNET permission to Android manifest")
           for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
               tag = f'<uses-permission android:name="android.permission.{p}" />'
@@ -184,9 +184,9 @@ jobs:
           p=Path("android/app/build.gradle.kts")
           if not p.exists(): raise SystemExit("Expected android/app/build.gradle.kts was not generated")
           s=p.read_text()
+          import re
           if 'create("release")' not in s:
-              marker='    buildTypes {'
-              block='''    signingConfigs {
+              signing = '''    signingConfigs {
                   create("release") {
                       storeFile = file(System.getenv("DARB_KEYSTORE_PATH"))
                       storePassword = System.getenv("DARB_KEYSTORE_PASSWORD")
@@ -196,10 +196,30 @@ jobs:
               }
 
           '''
-              if marker not in s: raise SystemExit("Could not locate Android buildTypes block")
-              s=s.replace(marker,block+marker,1)
+              android_match = re.search(r'(?m)^android\\s*\\{', s)
+              if not android_match:
+                  raise SystemExit("Could not locate Android configuration block")
+              depth = 0
+              close = None
+              for pos in range(android_match.end() - 1, len(s)):
+                  if s[pos] == "{": depth += 1
+                  elif s[pos] == "}":
+                      depth -= 1
+                      if depth == 0:
+                          close = pos
+                          break
+              if close is None:
+                  raise SystemExit("Android configuration block is unbalanced")
+              s = s[:close] + signing + s[close:]
           s=s.replace('signingConfig = signingConfigs.getByName("debug")','signingConfig = signingConfigs.getByName("release")')
-          if 'signingConfig = signingConfigs.getByName("release")' not in s: raise SystemExit("Release signing config not applied")
+          release_match = re.search(r'(?s)buildTypes\\s*\\{(.*?)\\n\\s*\\}', s)
+          if not release_match:
+              raise SystemExit("Could not locate Android buildTypes block after safe insertion")
+          block = release_match.group(1)
+          if 'signingConfig = signingConfigs.getByName("release")' not in block:
+              s=s[:release_match.start(1)] + block + '\\n        getByName("release") { signingConfig = signingConfigs.getByName("release") }' + s[release_match.end(1):]
+          if 'signingConfig = signingConfigs.getByName("release")' not in s:
+              raise SystemExit("Release signing config not applied")
           p.write_text(s)
           PY
           rm -rf "$GITHUB_WORKSPACE/extracted-play"
