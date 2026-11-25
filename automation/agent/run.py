@@ -4,7 +4,7 @@ from __future__ import annotations
 import json, os, pathlib, subprocess, sys, urllib.request, urllib.error
 
 ROOT = pathlib.Path.cwd()
-ALLOWED = ("mobile-overrides/", "backend-overrides/", "admin-web/src/", "darb-workspace/darb-project/")
+ALLOWED = ("mobile-overrides/", "backend-overrides/", "darb-workspace/darb-project/")
 EXCLUDED = (".env", "secret", "credential", ".keystore", ".jks", ".pem", ".p12")
 MAX_FILES = 24
 MAX_BYTES = 90000
