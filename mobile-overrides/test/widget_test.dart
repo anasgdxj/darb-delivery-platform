@@ -934,12 +934,12 @@ void main() {
       Api.instance.setSessionForTest(accessToken: 'expired-access-token');
       Api.instance.httpClientOverride = MockClient((request) async {
         if (request.url.path.endsWith('/auth/refresh')) {
-          return http.Response(
+          return _utf8Response(
             jsonEncode({'message': 'Refresh token revoked'}),
             401,
           );
         }
-        return http.Response(jsonEncode({'message': 'Unauthorized'}), 401);
+        return _utf8Response(jsonEncode({'message': 'Unauthorized'}), 401);
       });
       addTearDown(() async {
         _clearSecureStorageMock();
@@ -1053,7 +1053,7 @@ void main() {
         role: 'CUSTOMER',
         onAuthMe: () async {
           if (failAuthMe) {
-            return http.Response(jsonEncode({'message': 'خطأ مؤقت بالخادم'}), 500);
+            return _utf8Response(jsonEncode({'message': 'خطأ مؤقت بالخادم'}), 500);
           }
           return null;
         },
@@ -1192,13 +1192,13 @@ void main() {
       var vendorOrdersCalls = 0;
       Api.instance.httpClientOverride = MockClient((request) async {
         if (request.url.path.endsWith('/vendors/mine')) {
-          return http.Response('null', 200);
+          return _utf8Response('null', 200);
         }
         if (request.url.path.endsWith('/orders/vendor')) {
           vendorOrdersCalls++;
-          return http.Response('[]', 200);
+          return _utf8Response('[]', 200);
         }
-        return http.Response('[]', 200);
+        return _utf8Response('[]', 200);
       });
       addTearDown(() async {
         _clearSecureStorageMock();
@@ -1242,12 +1242,12 @@ void main() {
 
       Api.instance.httpClientOverride = MockClient((request) async {
         if (request.url.path.endsWith('/vendors/mine')) {
-          return http.Response(
+          return _utf8Response(
             jsonEncode({'id': 'v1', 'status': 'PENDING'}),
             200,
           );
         }
-        return http.Response('[]', 200);
+        return _utf8Response('[]', 200);
       });
 
       await tester.pumpWidget(
@@ -1273,7 +1273,7 @@ void main() {
       Api.instance.setSessionForTest(accessToken: 'valid-token');
       Api.instance.httpClientOverride = MockClient((request) async {
         if (request.url.path.endsWith('/drivers/me')) {
-          return http.Response(
+          return _utf8Response(
             jsonEncode({
               'id': 'drv-1',
               'status': 'REJECTED',
@@ -1284,12 +1284,12 @@ void main() {
           );
         }
         if (request.url.path.endsWith('/drivers/stats')) {
-          return http.Response(
+          return _utf8Response(
             jsonEncode({'message': 'إحصائيات غير متوفرة حالياً'}),
             404,
           );
         }
-        return http.Response('[]', 200);
+        return _utf8Response('[]', 200);
       });
       addTearDown(() async {
         DriverLocationReporter.stop();
@@ -1695,6 +1695,13 @@ void _clearSecureStorageMock() {
       .setMockMethodCallHandler(channel, null);
 }
 
+http.Response _utf8Response(String body, int statusCode) =>
+    http.Response.bytes(
+      utf8.encode(body),
+      statusCode,
+      headers: const {'content-type': 'application/json; charset=utf-8'},
+    );
+
 MockClient _createRoleMockClient({
   required String role,
   String? localeOverride,
@@ -1709,7 +1716,7 @@ MockClient _createRoleMockClient({
         final custom = await onAuthMe();
         if (custom != null) return custom;
       }
-      return http.Response(
+      return _utf8Response(
         jsonEncode({
           'id': 'u-$role',
           'name': 'أنس',
@@ -1722,18 +1729,18 @@ MockClient _createRoleMockClient({
     }
 
     if (path.endsWith('/auth/logout')) {
-      return http.Response('{}', 200);
+      return _utf8Response('{}', 200);
     }
 
     if (path.endsWith('/notifications')) {
-      return http.Response(
+      return _utf8Response(
         jsonEncode({'items': <Object>[], 'unreadCount': 0}),
         200,
       );
     }
 
     if (path.endsWith('/cities')) {
-      return http.Response(
+      return _utf8Response(
         jsonEncode([
           {
             'id': 'city-1',
@@ -1751,13 +1758,13 @@ MockClient _createRoleMockClient({
 
     if (path.endsWith('/vendors')) {
       if (failVendors) {
-        return http.Response(jsonEncode({'message': 'خطأ مؤقت بالخادم'}), 500);
+        return _utf8Response(jsonEncode({'message': 'خطأ مؤقت بالخادم'}), 500);
       }
-      return http.Response('[]', 200);
+      return _utf8Response('[]', 200);
     }
 
     if (path.endsWith('/vendors/mine')) {
-      return http.Response(
+      return _utf8Response(
         jsonEncode({
           'id': 'v-1',
           'status': 'APPROVED',
@@ -1771,7 +1778,7 @@ MockClient _createRoleMockClient({
     }
 
     if (path.endsWith('/drivers/me')) {
-      return http.Response(
+      return _utf8Response(
         jsonEncode({
           'id': 'd-1',
           'status': 'PENDING',
@@ -1786,13 +1793,13 @@ MockClient _createRoleMockClient({
         path.endsWith('/vendors/mine/stats') ||
         path.endsWith('/admin/stats') ||
         path.endsWith('/admin/settings')) {
-      return http.Response('{}', 200);
+      return _utf8Response('{}', 200);
     }
 
     if (path.endsWith('/admin/orders')) {
-      return http.Response(jsonEncode({'items': <Object>[]}), 200);
+      return _utf8Response(jsonEncode({'items': <Object>[]}), 200);
     }
 
-    return http.Response('[]', 200);
+    return _utf8Response('[]', 200);
   });
 }
