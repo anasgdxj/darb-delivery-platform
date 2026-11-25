@@ -198,5 +198,16 @@
 - احترام Reduce Motion، والإبقاء على منطق OTP وGoogle Sign-In وواجهات API ومفاتيح التوقيع دون تغيير.
 - أزيلت مفاتيح الترجمة المكررة التي كانت توقف `flutter analyze`; ينتظر التغيير إعادة فحص CI وبناء APK قبل اعتماد المرحلة.
 
+## 25. جاهزية إشعارات تحديث Android — 2026-11-25
+
+- دمج PR #99 في `main` عبر commit `637c4a694a4e58edee09cbcae4f163f7536e8f94`، متضمناً webhook محمياً لنشر إصدار APK، حفظ إشعار `APP_UPDATE`، إرسال FCM على دفعات، وفتح شاشة التحديث عند الضغط على الإشعار.
+- نشر Backend على Render أصبح `live` على commit نفسه في 2026-11-25 الساعة 05:22 UTC، وسجلات NestJS تؤكد تسجيل المسار `POST /api/v1/internal/release-notifications/publish`.
+- فحوصات PR #99: Android signed APK/AAB وBackend وMobile overrides نجحت. خطوة النشر العام وخطوة إرسال الإشعار كانتا `skipped` لأن التشغيل كان فحص PR وليس إصداراً عاماً؛ لم يُنشر APK جديد ولم يُرسل Push.
+- **مانع تشغيل مؤكد:** سجلات Render أظهرت أن تهيئة Firebase Admin فشلت لأن قيمة `FIREBASE_SERVICE_ACCOUNT_JSON` لا تحتوي الحقول العليا المطلوبة `project_id`, `client_email`, `private_key`. لذلك إرسال FCM معطّل حالياً حتى تصحيح السر في Render.
+- PR #101 يضيف endpoint جاهزية محمياً ويجعل GitHub Actions يتحقق من تطابق webhook token ومن تهيئة Firebase قبل استبدال Release `latest`. لم يُدمج؛ فحص Backend على الفرع اجتاز 20 مجموعة و111 اختباراً، بينما كان بناء Android وMobile overrides جارياً وقت التوثيق.
+- إصدار `latest` العام الموجود لم يتغير في هذا التشغيل؛ بيانات GitHub أظهرت آخر تحديث للأصول في 2026-11-24 الساعة 19:10 UTC.
+
+**بوابة الإكمال:** وضع ملف Firebase Admin SDK JSON كاملاً في Render مع الحقول المطلوبة، وضمان تطابق `DARB_RELEASE_WEBHOOK_TOKEN` بين Render وGitHub Actions، ثم مراجعة PR #101 ونشره بموافقة المستخدم. بعد ذلك يلزم التحقق من بصمة شهادة APK ورقم `versionCode` مقارنة بالنسخة المثبتة، ثم تجربة Push فعلي على جهاز Android. لا يُعلن اكتمال الإشعارات قبل هذا الاختبار.
+
 ---
-آخر تحديث: 2026-11-21
+آخر تحديث: 2026-11-25
