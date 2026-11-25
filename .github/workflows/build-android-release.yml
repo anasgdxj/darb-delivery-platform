@@ -83,9 +83,9 @@ jobs:
           pubspec.write_text("\n".join(lines) + "\n")
           m = manifest.read_text()
           internet = '<uses-permission android:name="android.permission.INTERNET" />'
-          if not re.search(r'<uses-permission\b[^>]*android:name=["\']android\.permission\.INTERNET["\']', m):
+          if "android.permission.INTERNET" not in m:
               m = m.replace("<application", internet + "\n    <application", 1)
-          if not re.search(r'<uses-permission\b[^>]*android:name=["\']android\.permission\.INTERNET["\']', m):
+          if "android.permission.INTERNET" not in m:
               raise SystemExit("Could not add INTERNET permission to Android manifest")
           for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
               tag = f'<uses-permission android:name="android.permission.{p}" />'
