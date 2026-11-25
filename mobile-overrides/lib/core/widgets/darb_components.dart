@@ -1600,12 +1600,7 @@ class DarbSettingsTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: enabled && onTap != null
-            ? () {
-                debugPrint('DAZREVO_TILE_TAP title=$title');
-                onTap!.call();
-              }
-            : null,
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(DarbRadius.md),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
