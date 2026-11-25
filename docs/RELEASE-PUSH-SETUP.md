@@ -27,7 +27,13 @@ Store the **same token** in both places:
 
 Do not commit the token, put it in a workflow file, or send it in a URL. The internal endpoint accepts only the official DARB `latest/app-release.apk` URL.
 
-## 3. Verify delivery
+## 3. Release preflight
+
+Before publishing the APK, GitHub Actions calls the protected readiness endpoint. It verifies that the same webhook token is configured on Render and that Firebase Admin messaging initialized successfully. If either check fails, the workflow stops before replacing the public `latest` release.
+
+The readiness endpoint returns only a boolean status; it never returns credentials, service-account fields, or device tokens.
+
+## 4. Verify delivery
 
 1. Install a current signed DARB APK and sign in so the device registers its FCM token.
 2. Confirm the Render logs contain `Firebase Admin initialized` for the expected Firebase project.
