@@ -34,7 +34,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _complete() async {
-    DarbHaptics.medium();
+    DarbHaptics.success();
     try {
       await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
     } catch (_) {}
