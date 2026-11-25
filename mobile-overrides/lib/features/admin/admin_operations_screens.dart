@@ -917,9 +917,11 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                 child: DarbGlassSurface(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  child: SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    secondary: Container(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      secondary: Container(
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
@@ -932,15 +934,16 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                         color: DarbColors.infoOf(context),
                       ),
                     ),
-                    title: Text(
-                      _cityLabel(c),
-                      style: const TextStyle(fontWeight: FontWeight.w800),
+                      title: Text(
+                        _cityLabel(c),
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      subtitle: Text(
+                        '${dt('رمز المدينة: ')}${c['code']} · ${c['defaultCurrency']}',
+                      ),
+                      value: c['isActive'] == true,
+                      onChanged: (v) => _toggleCityActive(c['id'].toString(), v),
                     ),
-                    subtitle: Text(
-                      '${dt('رمز المدينة: ')}${c['code']} · ${c['defaultCurrency']}',
-                    ),
-                    value: c['isActive'] == true,
-                    onChanged: (v) => _toggleCityActive(c['id'].toString(), v),
                   ),
                 ),
               ),
@@ -1037,11 +1040,13 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
           if (_section == 2) ...[
             DarbGlassSurface(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    dt('الإعدادات والسجلات'),
+              child: Material(
+                color: Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      dt('الإعدادات والسجلات'),
                     style: TextStyle(
                       color: DarbColors.inkOf(context),
                       fontSize: 16,
@@ -1104,6 +1109,7 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                     ),
                   ],
                 ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
