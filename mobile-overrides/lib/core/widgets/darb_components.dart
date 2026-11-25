@@ -50,98 +50,49 @@ class _DarbBrandMarkPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final s = size.width;
+    canvas.save();
+    canvas.scale(s / 100);
 
-    // Subtle geometric coordinate hairlines
-    final gridPaint = Paint()
-      ..color = const Color(0xFF28584B).withValues(alpha: 0.45)
-      ..strokeWidth = (s * 0.025).clamp(0.7, 1.8)
+    // DAZREVO signature: a forward-moving D with a location core.
+    final d = Path()
+      ..moveTo(39, 13)
+      ..lineTo(59, 13)
+      ..cubicTo(79, 13, 91, 28, 91, 50)
+      ..cubicTo(91, 72, 78, 87, 59, 87)
+      ..lineTo(39, 87)
+      ..lineTo(51, 72)
+      ..lineTo(59, 72)
+      ..cubicTo(69, 72, 76, 63, 76, 50)
+      ..cubicTo(76, 37, 69, 28, 59, 28)
+      ..lineTo(51, 28)
+      ..close();
+
+    canvas.drawPath(
+      d,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill,
+    );
+
+    final speed = Paint()
+      ..color = DarbColors.lime
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
+    canvas.drawLine(const Offset(9, 31), const Offset(43, 31), speed..strokeWidth = 7);
+    canvas.drawLine(const Offset(5, 49), const Offset(36, 49), speed..strokeWidth = 6);
+    canvas.drawLine(const Offset(13, 66), const Offset(39, 66), speed..strokeWidth = 5);
 
-    final grid = Path()
-      ..moveTo(0, s * 0.27)
-      ..lineTo(s, s * 0.27)
-      ..moveTo(0, s * 0.73)
-      ..lineTo(s, s * 0.73)
-      ..moveTo(s * 0.27, 0)
-      ..lineTo(s * 0.27, s)
-      ..moveTo(s * 0.73, 0)
-      ..lineTo(s * 0.73, s);
-    canvas.drawPath(grid, gridPaint);
+    final pin = Path()
+      ..moveTo(54, 37)
+      ..cubicTo(45, 37, 39, 44, 39, 53)
+      ..cubicTo(39, 64, 54, 78, 54, 78)
+      ..cubicTo(54, 78, 69, 64, 69, 53)
+      ..cubicTo(69, 44, 63, 37, 54, 37)
+      ..close();
+    canvas.drawPath(pin, Paint()..color = DarbColors.lime);
+    canvas.drawCircle(const Offset(54, 52), 5.8, Paint()..color = DarbColors.forest);
 
-    // Symmetrical kinetic Z-route matching DAZREVO brand geometry
-    final start = Offset(s * 0.27, s * 0.72);
-    final end = Offset(s * 0.73, s * 0.28);
-    final route = Path()
-      ..moveTo(start.dx, start.dy)
-      ..cubicTo(
-        s * 0.20,
-        s * 0.34,
-        s * 0.43,
-        s * 0.42,
-        s * 0.50,
-        s * 0.50,
-      )
-      ..cubicTo(
-        s * 0.57,
-        s * 0.58,
-        s * 0.80,
-        s * 0.66,
-        end.dx,
-        end.dy,
-      );
-
-    canvas.drawPath(
-      route,
-      Paint()
-        ..color = DarbColors.lime.withValues(alpha: 0.22)
-        ..strokeWidth = s * 0.16
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke,
-    );
-
-    canvas.drawPath(
-      route,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.bottomLeft,
-          end: Alignment.topRight,
-          colors: [DarbColors.mint, DarbColors.lime],
-        ).createShader(Rect.fromLTWH(0, 0, s, s))
-        ..strokeWidth = (s * 0.086).clamp(2.2, 7.2)
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke,
-    );
-
-    // Origin node (Signal Violet halo + Mint core)
-    final nodeRadius = (s * 0.088).clamp(2.8, 7.5);
-    canvas.drawCircle(
-      start,
-      nodeRadius * 1.35,
-      Paint()..color = DarbColors.violet.withValues(alpha: 0.28),
-    );
-    canvas.drawCircle(start, nodeRadius, Paint()..color = DarbColors.forest);
-    canvas.drawCircle(
-      start,
-      nodeRadius,
-      Paint()
-        ..color = DarbColors.mint
-        ..strokeWidth = (s * 0.036).clamp(1.2, 3.0)
-        ..style = PaintingStyle.stroke,
-    );
-
-    // Destination beacon (Volt Lime)
-    canvas.drawCircle(
-      end,
-      nodeRadius * 1.5,
-      Paint()..color = DarbColors.lime.withValues(alpha: 0.28),
-    );
-    canvas.drawCircle(end, nodeRadius, Paint()..color = DarbColors.lime);
-    canvas.drawCircle(
-      end,
-      nodeRadius * 0.36,
-      Paint()..color = DarbColors.forest,
-    );
+    canvas.restore();
   }
 
   @override
