@@ -52,8 +52,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return;
     }
     DarbHaptics.selection();
+    final duration =
+        DarbMotion.effectiveDuration(context, DarbMotion.standard);
+    if (duration <= Duration.zero) {
+      _pageController.jumpToPage(_index + 1);
+      return;
+    }
     _pageController.nextPage(
-      duration: DarbMotion.effectiveDuration(context, DarbMotion.standard),
+      duration: duration,
       curve: DarbMotion.enter,
     );
   }
