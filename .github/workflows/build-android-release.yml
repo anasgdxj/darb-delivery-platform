@@ -181,31 +181,47 @@ jobs:
           printf '%s\n' "- Release signing SHA-1: $SHA1" >> "$GITHUB_STEP_SUMMARY"
           python3 - <<'PY'
           from pathlib import Path
-          p=Path("android/app/build.gradle.kts")
-          if not p.exists(): raise SystemExit("Expected android/app/build.gradle.kts was not generated")
-          s=p.read_text()
           import re
+
+          p = Path("android/app/build.gradle.kts")
+          s = p.read_text()
+
           def block_bounds(source, opening):
               depth = 0
-              close = None
               for pos in range(opening, len(source)):
                   if source[pos] == "{":
                       depth += 1
                   elif source[pos] == "}":
                       depth -= 1
                       if depth == 0:
-                          close = pos
-                          break
-              return close
-          android_match = re.search(r'(?m)^android\s*\{', s)
-          if not android_match:
+                          return pos
+              return None
+
+          def locate_block(source, pattern, start_at=0):
+              match = re.search(pattern, source[start_at:])
+              if not match:
+                  return None
+              match_start = start_at + match.start()
+              opening = source.find("{", match_start)
+              closing = block_bounds(source, opening)
+              if closing is None:
+                  raise SystemExit("Unbalanced Gradle block: " + pattern)
+              return match_start, opening, closing
+
+          android = locate_block(s, r'(?m)^android\\s*\\{')
+          if not android:
               raise SystemExit("Could not locate Android configuration block")
-          android_open = s.find("{", android_match.start())
-          android_close = block_bounds(s, android_open)
-          if android_close is None:
-              raise SystemExit("Android configuration block is unbalanced")
-          if 'create("release")' not in s:
-              signing = '''    signingConfigs {
+          _, android_open, android_close = android
+
+          # Replace any template-provided signingConfigs block instead of relying
+          # on whether Flutter generated a placeholder with the same name.
+          signing = locate_block(s, r'(?m)^\\s*signingConfigs\\s*\\{', android_open + 1)
+          if signing and signing[2] < android_close:
+              s = s[:signing[0]] + s[signing[2] + 1:]
+              android = locate_block(s, r'(?m)^android\\s*\\{')
+              _, android_open, android_close = android
+
+          signing_block = """    signingConfigs {
                   create("release") {
                       storeFile = file(System.getenv("DARB_KEYSTORE_PATH"))
                       storePassword = System.getenv("DARB_KEYSTORE_PASSWORD")
@@ -214,43 +230,44 @@ jobs:
                   }
               }
 
-          '''
-              s = s[:android_close] + signing + s[android_close:]
-              android_match = re.search(r'(?m)^android\s*\{', s)
-              android_open = s.find("{", android_match.start())
-              android_close = block_bounds(s, android_open)
-          s=s.replace('signingConfig = signingConfigs.getByName("debug")','signingConfig = signingConfigs.getByName("release")')
-          build_match = re.search(r'(?m)^\s*buildTypes\s*\{', s[android_open:android_close])
-          signing_line = 'signingConfig = signingConfigs.getByName("release")'
-          if not build_match:
-              addition = '''    buildTypes {
+          """
+          s = s[:android_open + 1] + "\\n" + signing_block + s[android_open + 1:]
+
+          android = locate_block(s, r'(?m)^android\\s*\\{')
+          _, android_open, android_close = android
+          build_types = locate_block(s, r'(?m)^\\s*buildTypes\\s*\\{', android_open + 1)
+          if not build_types or build_types[2] > android_close:
+              s = s[:android_close] + """
+              buildTypes {
                   release {
                       signingConfig = signingConfigs.getByName("release")
                   }
               }
-          '''
-              s = s[:android_close] + addition + s[android_close:]
+          """ + s[android_close:]
           else:
-              build_open = android_open + s[android_open:android_close].find("{", build_match.start())
-              build_close = block_bounds(s, build_open)
-              if build_close is None:
-                  raise SystemExit("Android buildTypes block is unbalanced")
-              release_match = re.search(r'(?m)^\s*(?:release|getByName\("release"\))\s*\{', s[build_open:build_close])
-              if not release_match:
-                  addition = '''
+              _, build_open, build_close = build_types
+              release = locate_block(s, r'(?m)^\\s*(?:release|getByName\\("release"\\))\\s*\\{', build_open + 1)
+              if not release or release[2] > build_close:
+                  s = s[:build_close] + """
                   release {
                       signingConfig = signingConfigs.getByName("release")
                   }
-              '''
-                  s = s[:build_close] + addition + s[build_close:]
-              elif signing_line not in s[build_open:build_close]:
-                  release_open = build_open + s[build_open:build_close].find("{", release_match.start())
-                  release_close = block_bounds(s, release_open)
-                  if release_close is None:
-                      raise SystemExit("Android release build type block is unbalanced")
-                  s = s[:release_open + 1] + '\n                ' + signing_line + s[release_open + 1:]
-          if signing_line not in s:
-              raise SystemExit("Release signing config not applied")
+              """ + s[build_close:]
+              else:
+                  _, release_open, release_close = release
+                  body = s[release_open + 1:release_close]
+                  body = re.sub(r'(?m)^\\s*signingConfig\\s*=.*(?:\\n|$)', '', body)
+                  body = "\\n                signingConfig = signingConfigs.getByName("release")\\n" + body.lstrip("\\n")
+                  s = s[:release_open + 1] + body + s[release_close:]
+
+          # Fail early if the signing block was not placed inside android{}.
+          android = locate_block(s, r'(?m)^android\\s*\\{')
+          _, android_open, android_close = android
+          android_body = s[android_open:android_close]
+          if 'create("release")' not in android_body:
+              raise SystemExit("Release signing configuration was not created inside android{}")
+          if 'signingConfig = signingConfigs.getByName("release")' not in android_body:
+              raise SystemExit("Release build type is not connected to release signing")
           p.write_text(s)
           PY
           rm -rf "$GITHUB_WORKSPACE/extracted-play"
