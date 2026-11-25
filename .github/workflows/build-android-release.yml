@@ -83,9 +83,9 @@ jobs:
           pubspec.write_text("\n".join(lines) + "\n")
           m = manifest.read_text()
           internet = '<uses-permission android:name="android.permission.INTERNET" />'
-          if not re.search(r'<uses-permission\\b[^>]*android:name=["\\']android\\.permission\\.INTERNET["\\']', m):
-              m = m.replace("<application", internet + "\\n    <application", 1)
-          if not re.search(r'<uses-permission\\b[^>]*android:name=["\\']android\\.permission\\.INTERNET["\\']', m):
+          if not re.search(r'<uses-permission\b[^>]*android:name=["\']android\.permission\.INTERNET["\']', m):
+              m = m.replace("<application", internet + "\n    <application", 1)
+          if not re.search(r'<uses-permission\b[^>]*android:name=["\']android\.permission\.INTERNET["\']', m):
               raise SystemExit("Could not add INTERNET permission to Android manifest")
           for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
               tag = f'<uses-permission android:name="android.permission.{p}" />'
@@ -197,7 +197,7 @@ jobs:
                           close = pos
                           break
               return close
-          android_match = re.search(r'(?m)^android\\s*\\{', s)
+          android_match = re.search(r'(?m)^android\s*\{', s)
           if not android_match:
               raise SystemExit("Could not locate Android configuration block")
           android_open = s.find("{", android_match.start())
@@ -216,11 +216,11 @@ jobs:
 
           '''
               s = s[:android_close] + signing + s[android_close:]
-              android_match = re.search(r'(?m)^android\\s*\\{', s)
+              android_match = re.search(r'(?m)^android\s*\{', s)
               android_open = s.find("{", android_match.start())
               android_close = block_bounds(s, android_open)
           s=s.replace('signingConfig = signingConfigs.getByName("debug")','signingConfig = signingConfigs.getByName("release")')
-          build_match = re.search(r'(?m)^\\s*buildTypes\\s*\\{', s[android_open:android_close])
+          build_match = re.search(r'(?m)^\s*buildTypes\s*\{', s[android_open:android_close])
           signing_line = 'signingConfig = signingConfigs.getByName("release")'
           if not build_match:
               addition = '''    buildTypes {
@@ -235,7 +235,7 @@ jobs:
               build_close = block_bounds(s, build_open)
               if build_close is None:
                   raise SystemExit("Android buildTypes block is unbalanced")
-              release_match = re.search(r'(?m)^\\s*(?:release|getByName\\("release"\\))\\s*\\{', s[build_open:build_close])
+              release_match = re.search(r'(?m)^\s*(?:release|getByName\("release"\))\s*\{', s[build_open:build_close])
               if not release_match:
                   addition = '''
                   release {
@@ -248,7 +248,7 @@ jobs:
                   release_close = block_bounds(s, release_open)
                   if release_close is None:
                       raise SystemExit("Android release build type block is unbalanced")
-                  s = s[:release_open + 1] + '\\n                ' + signing_line + s[release_open + 1:]
+                  s = s[:release_open + 1] + '\n                ' + signing_line + s[release_open + 1:]
           if signing_line not in s:
               raise SystemExit("Release signing config not applied")
           p.write_text(s)
