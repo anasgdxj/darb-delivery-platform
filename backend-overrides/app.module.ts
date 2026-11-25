@@ -15,6 +15,7 @@ import { HealthModule } from './modules/health/health.module';
 import { MapsModule } from './modules/maps/maps.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { TelegramAdminModule } from './modules/telegram-admin/telegram-admin.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RedisModule } from './redis/redis.module';
     AddressesModule,
     AdminModule,
     NotificationsModule,
+    TelegramAdminModule,
   ],
 })
 export class AppModule {}
