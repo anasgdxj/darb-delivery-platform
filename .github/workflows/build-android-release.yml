@@ -425,12 +425,65 @@ jobs:
           fi
           MANIFEST="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json"
           jq --arg releaseTag "latest" '. + {releaseTag: $releaseTag}' "$MANIFEST" > "$RUNNER_TEMP/darb-release-notification.json"
-          curl --fail-with-body --silent --show-error --retry 3 --retry-all-errors \
-            -X POST "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/publish" \
-            -H "Authorization: Bearer $DARB_RELEASE_WEBHOOK_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data-binary @"$RUNNER_TEMP/darb-release-notification.json" \
-            --output "$RUNNER_TEMP/darb-release-notification-result.json"
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import time
+          import urllib.error
+          import urllib.request
+
+          token = os.environ.get("DARB_RELEASE_WEBHOOK_TOKEN", "").strip()
+          payload_path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "darb-release-notification.json"
+          result_path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "darb-release-notification-result.json"
+          payload = payload_path.read_bytes()
+          url = "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/publish"
+          last_error = None
+
+          for attempt in range(1, 5):
+              request = urllib.request.Request(
+                  url,
+                  data=payload,
+                  headers={
+                      "Authorization": "Bearer " + token,
+                      "Content-Type": "application/json",
+                      "Accept": "application/json",
+                  },
+                  method="POST",
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=45) as response:
+                      result_path.write_bytes(response.read())
+                      if response.status < 200 or response.status >= 300:
+                          raise RuntimeError(f"Notification endpoint returned HTTP {response.status}")
+                  break
+              except urllib.error.HTTPError as error:
+                  body = error.read().decode("utf-8", "replace")
+                  last_error = RuntimeError(f"Notification endpoint returned HTTP {error.code}: {body[:1000]}")
+                  if error.code not in (429, 500, 502, 503, 504) or attempt == 4:
+                      raise last_error
+              except (urllib.error.URLError, TimeoutError, OSError) as error:
+                  last_error = error
+                  if attempt == 4:
+                      raise RuntimeError(f"Could not reach notification endpoint after 4 attempts: {error}") from error
+              time.sleep(attempt * 5)
+
+          result = json.loads(result_path.read_text(encoding="utf-8"))
+          if result.get("pushSkipped") is not False or int(result.get("pushFailed", 0) or 0) != 0:
+              raise SystemExit("FCM delivery was not confirmed: " + json.dumps(result, ensure_ascii=False))
+          targeted = int(result.get("targetedDevices", 0) or 0)
+          sent = int(result.get("pushSent", 0) or 0)
+          if targeted > 0 and sent <= 0:
+              raise SystemExit("FCM accepted no notifications for registered devices: " + json.dumps(result, ensure_ascii=False))
+          summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
+          if targeted == 0:
+              summary.open("a", encoding="utf-8").write("Release push announcement: no registered devices; no push was sent.\\n")
+          else:
+              summary.open("a", encoding="utf-8").write(
+                  f"Release push announcement: FCM accepted {sent} notifications for {targeted} registered devices; actionable failures: 0.\\n"
+              )
+          print(f"Release notification confirmed: {sent}/{targeted} devices.")
+          PY
           if ! jq -e '.pushSkipped == false and (.pushFailed // 0) == 0 and ((.targetedDevices // 0) == 0 or (.pushSent // 0) > 0)' "$RUNNER_TEMP/darb-release-notification-result.json" >/dev/null; then
             echo "::error::FCM delivery was not confirmed for the registered DARB devices."
             cat "$RUNNER_TEMP/darb-release-notification-result.json"
