@@ -1574,9 +1574,11 @@ void main() {
       await tester.ensureVisible(syncTile);
       await tester.tap(syncTile);
       await tester.pumpAndSettle();
+      // Clear temporary cache dialog -> confirm
+      await tester.drag(find.byType(ListView).first, const Offset(0, 1200));
+      await tester.pumpAndSettle();
       expect(find.text('Notification sync updated for this device'), findsOneWidget);
 
-      // Clear temporary cache dialog -> confirm
       final clearTile = find.text('Clear cached data');
       await tester.ensureVisible(clearTile);
       await tester.tap(clearTile);
@@ -1617,8 +1619,9 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
-
       expect(find.text('الحساب والخدمات'), findsOneWidget);
+      await tester.drag(find.byType(ListView).first, const Offset(0, -900));
+      await tester.pumpAndSettle();
       expect(find.text('التخصيص واللغة'), findsOneWidget);
 
       final settingsTile = find.text('الإعدادات والتخصيص');
