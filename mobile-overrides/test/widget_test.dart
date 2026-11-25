@@ -978,7 +978,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 450));
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle();
 
       expect(find.byType(OnboardingScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
