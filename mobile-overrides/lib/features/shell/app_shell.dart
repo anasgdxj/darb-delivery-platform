@@ -388,7 +388,6 @@ class _AppShellState extends State<AppShell> {
     });
     try {
       final data = await Api.instance.get('/auth/me');
-      debugPrint('DAZREVO_AUTH_ME_OK type=${data.runtimeType} role=${data is Map ? data['role'] : null}');
       if (data is! Map<String, dynamic>) {
         throw const ApiException('بيانات الجلسة غير صالحة');
       }
@@ -423,7 +422,6 @@ class _AppShellState extends State<AppShell> {
         unawaited(_handleNotificationOpen(pending));
       }
     } on ApiException catch (e) {
-      debugPrint('DAZREVO_AUTH_ME_API_ERROR status=${e.statusCode} network=${e.isNetworkError} message=${e.message}');
       if (!mounted) return;
       if (e.statusCode == 401 ||
           e.statusCode == 403 ||
@@ -463,8 +461,7 @@ class _AppShellState extends State<AppShell> {
         }
       }
       setState(() => _error = e.message);
-    } catch (error, stackTrace) {
-      debugPrint('DAZREVO_AUTH_ME_ERROR $error\n$stackTrace');
+    } catch (_) {
       if (mounted) {
         setState(() => _error = dt('تعذر تحميل حسابك'));
       }
