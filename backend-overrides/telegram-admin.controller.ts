@@ -7,13 +7,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { timingSafeEqual } from 'node:crypto';
-import { TelegramAdminService } from './telegram-admin.service';
-
-interface TelegramUpdatePayload {
-  update_id?: number;
-  message?: unknown;
-  edited_message?: unknown;
-}
+import { TelegramAdminService, TelegramUpdate } from './telegram-admin.service';
 
 @Controller('internal/telegram')
 export class TelegramAdminController {
@@ -22,7 +16,7 @@ export class TelegramAdminController {
   @Post('webhook')
   async webhook(
     @Headers('x-telegram-bot-api-secret-token') suppliedSecret: string | undefined,
-    @Body() update: TelegramUpdatePayload,
+    @Body() update: TelegramUpdate,
   ): Promise<{ ok: true }> {
     const expected = this.telegram.webhookSecret;
     if (expected.length < 32) {
