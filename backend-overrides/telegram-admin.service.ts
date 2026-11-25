@@ -12,7 +12,7 @@ interface TelegramMessage {
   chat?: { id: number; type?: string };
 }
 
-interface TelegramUpdate {
+export interface TelegramUpdate {
   update_id?: number;
   message?: TelegramMessage;
   edited_message?: TelegramMessage;
