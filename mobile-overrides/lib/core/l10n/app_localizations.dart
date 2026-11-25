@@ -192,6 +192,9 @@ class AppLocalizations {
   }
 
   static const Map<String, String> _sourceValues = {
+    'نسخ رقم الطلب': 'Copy order number|Sipariş numarasını kopyala',
+    'تم نسخ رقم الطلب': 'Order number copied|Sipariş numarası kopyalandı',
+    'تعذر نسخ رقم الطلب': 'Could not copy order number|Sipariş numarası kopyalanamadı',
     'مظهر التطبيق': 'Appearance|Görünüm',
     'نمط الواجهة': 'Interface style|Arayüz stili',
     'زجاجي حديث (Glass)': 'Frosted Glass|Buzlu Cam (Glass)',
