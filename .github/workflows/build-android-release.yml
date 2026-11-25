@@ -281,11 +281,13 @@ jobs:
           # Keep commit-derived versions, but never produce an APK older than the published release.
           BUILD_NUMBER=$((1301 + COMMIT_COUNT))
           LATEST_MANIFEST="$RUNNER_TEMP/darb-latest-app-update.json"
-          PUBLISHED_CODE=0
+          # The currently installed customer build is versionCode 1677.
+          # Keep this safe floor even if the GitHub release manifest is temporarily unavailable.
+          PUBLISHED_CODE=1677
           if curl --fail --silent --show-error --location --retry 2 \
             "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json" \
             --output "$LATEST_MANIFEST"; then
-            PUBLISHED_CODE="$(python3 - "$LATEST_MANIFEST" <<'PY'
+            PUBLISHED_CODE_FROM_MANIFEST="$(python3 - "$LATEST_MANIFEST" <<'PY'
           import json, pathlib, sys
           try:
               value = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")).get("versionCode", 0)
@@ -294,6 +296,9 @@ jobs:
               print(0)
           PY
           )"
+            if [ "$PUBLISHED_CODE_FROM_MANIFEST" -gt "$PUBLISHED_CODE" ]; then
+              PUBLISHED_CODE="$PUBLISHED_CODE_FROM_MANIFEST"
+            fi
           fi
           if [ "$PUBLISHED_CODE" -ge "$BUILD_NUMBER" ]; then
             BUILD_NUMBER=$((PUBLISHED_CODE + 1))
