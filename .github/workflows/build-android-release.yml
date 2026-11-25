@@ -404,12 +404,41 @@ jobs:
           set -euo pipefail
           APK="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk"
           APK_DIR="$(dirname "$APK")"
-          if gh release view latest >/dev/null 2>&1; then
-            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --clobber
-            gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
-          else
-            gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
+          RELEASE_TITLE="دازريفو (DAZREVO) — أحدث إصدار أندرويد"
+          RELEASE_NOTES="إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
+          created_draft=false
+          if ! gh release view latest >/dev/null 2>&1; then
+            # A newly-created release stays unpublished until both managed assets verify.
+            gh release create latest --draft --title "$RELEASE_TITLE" --notes "$RELEASE_NOTES"
+            created_draft=true
           fi
+
+          # Keep the currently published APK and manifest intact unless replacement uploads succeed.
+          # Repeated --clobber uploads are safe to retry; never delete live assets as a fallback.
+          upload_release_assets() {
+            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --clobber
+          }
+          uploaded=false
+          for attempt in 1 2 3 4 5 6; do
+            if upload_release_assets; then
+              uploaded=true
+              break
+            fi
+            echo "::warning::GitHub release asset upload failed (attempt $attempt/6); retrying without deleting published assets."
+            sleep $((attempt * 10))
+          done
+          if [ "$uploaded" != true ]; then
+            echo "::error::Could not upload verified APK assets; existing public release assets were preserved."
+            exit 1
+          fi
+
+          ASSETS="$(gh release view latest --json assets --jq '.assets[].name')"
+          grep -Fxq "app-release.apk" <<< "$ASSETS"
+          grep -Fxq "app-update.json" <<< "$ASSETS"
+          gh release edit latest --title "$RELEASE_TITLE" --notes "$RELEASE_NOTES"
+          # Publish any verified draft, including one left behind by a previous failed run.
+          gh release edit latest --draft=false
+          echo "Latest release assets verified and published: app-release.apk and app-update.json." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Notify DARB users about the published release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
