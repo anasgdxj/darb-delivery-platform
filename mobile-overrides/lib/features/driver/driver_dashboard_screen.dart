@@ -371,57 +371,88 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 104),
         children: [
-          DarbGlassSurface(
+          Container(
             padding: const EdgeInsets.all(18),
-            tintColor: isOnline ? DarbColors.forest : null,
-            borderColor: isOnline
-                ? DarbColors.lime.withValues(alpha: 0.35)
-                : null,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [DarbColors.forest, Color(0xFF061A14)],
+              ),
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: (isOnline ? DarbColors.lime : Colors.white)
+                    .withValues(alpha: 0.24),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: DarbColors.forest.withValues(alpha: 0.22),
+                  blurRadius: 22,
+                  offset: const Offset(0, 9),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
-                    if (isApproved) ...[
-                      DarbPulseDot(
-                        active: isOnline,
-                        color: isOnline
-                            ? DarbColors.lime
-                            : DarbColors.mutedOf(context),
-                        size: 9,
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: DarbColors.lime.withValues(alpha: 0.13),
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      const SizedBox(width: 8),
-                    ],
+                      child: const Icon(
+                        Icons.route_rounded,
+                        color: DarbColors.lime,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isApproved
-                                ? (isOnline
-                                    ? dt('متصل لاستلام الطلبات')
-                                    : dt('غير متصل'))
-                                : dt('حساب السائق بانتظار اعتماد الإدارة'),
-                            style: TextStyle(
-                              color: isOnline
-                                  ? Colors.white
-                                  : DarbColors.inkOf(context),
+                            dt('مركز عمل المندوب'),
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontSize: 17,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            isApproved
-                                ? dt('فعّل الحالة لتظهر لك الطلبات الجاهزة')
-                                : dt('قيد مراجعة الإدارة'),
-                            style: TextStyle(
-                              color: isOnline
-                                  ? DarbColors.mint
-                                  : DarbColors.mutedOf(context),
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Row(
+                            children: [
+                              DarbPulseDot(
+                                active: isOnline,
+                                color: isOnline
+                                    ? DarbColors.lime
+                                    : Colors.white54,
+                                size: 8,
+                              ),
+                              const SizedBox(width: 7),
+                              Flexible(
+                                child: Text(
+                                  isApproved
+                                      ? (isOnline
+                                          ? dt('متصل وجاهز لاستلام الطلبات')
+                                          : dt('أنت غير متصل حالياً'))
+                                      : dt('حسابك بانتظار اعتماد الإدارة'),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: isOnline
+                                        ? DarbColors.lime
+                                        : Colors.white70,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -433,19 +464,51 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 15),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 13,
+                    vertical: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.07),
+                    borderRadius: BorderRadius.circular(17),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.10),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.bolt_rounded,
+                        color: DarbColors.lime,
+                        size: 19,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isApproved
+                              ? dt('تحكّم بتوفّرك وموقعك من هنا')
+                              : dt('سيتم تفعيل استقبال الطلبات بعد الاعتماد'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isOnline
-                              ? Colors.white
-                              : DarbColors.inkOf(context),
+                          foregroundColor: Colors.white,
                           side: BorderSide(
-                            color: isOnline
-                                ? Colors.white.withValues(alpha: 0.3)
-                                : DarbColors.borderOf(context),
+                            color: Colors.white.withValues(alpha: 0.28),
                           ),
                         ),
                         onPressed: _pickVehicle,
@@ -459,13 +522,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isOnline
-                              ? DarbColors.mint
-                              : DarbColors.primaryOf(context),
+                          foregroundColor: DarbColors.lime,
                           side: BorderSide(
-                            color: isOnline
-                                ? DarbColors.mint.withValues(alpha: 0.4)
-                                : DarbColors.borderOf(context),
+                            color: DarbColors.lime.withValues(alpha: 0.35),
                           ),
                         ),
                         onPressed:
@@ -477,7 +536,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.my_location_rounded, size: 18),
-                        label: Text(dt('موقع السائق')),
+                        label: Text(dt('تحديث موقعي')),
                       ),
                     ),
                   ],
