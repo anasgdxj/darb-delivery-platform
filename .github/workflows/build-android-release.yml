@@ -278,8 +278,30 @@ jobs:
           flutter test --no-pub
           echo "Flutter tests: passed" >> "$GITHUB_STEP_SUMMARY"
           COMMIT_COUNT="$(git rev-list --count HEAD)"
-          # Installed customer baseline is versionCode 1300; every new build must be higher.
+          # Keep commit-derived versions, but never produce an APK older than the published release.
           BUILD_NUMBER=$((1301 + COMMIT_COUNT))
+          LATEST_MANIFEST="$RUNNER_TEMP/darb-latest-app-update.json"
+          PUBLISHED_CODE=0
+          if curl --fail --silent --show-error --location --retry 2 \
+            "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json" \
+            --output "$LATEST_MANIFEST"; then
+            PUBLISHED_CODE="$(python3 - "$LATEST_MANIFEST" <<'PY'
+          import json, pathlib, sys
+          try:
+              value = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")).get("versionCode", 0)
+              print(int(value) if str(value).isdigit() else 0)
+          except Exception:
+              print(0)
+          PY
+          )"
+          fi
+          if [ "$PUBLISHED_CODE" -ge "$BUILD_NUMBER" ]; then
+            BUILD_NUMBER=$((PUBLISHED_CODE + 1))
+          fi
+          if [ "$BUILD_NUMBER" -le "$PUBLISHED_CODE" ]; then
+            echo "::error::Generated Android versionCode is not greater than the published release."
+            exit 1
+          fi
           BUILD_NAME="1.0.$BUILD_NUMBER"
           echo "- Android versionCode: $BUILD_NUMBER" >> "$GITHUB_STEP_SUMMARY"
           echo "- Android versionName: $BUILD_NAME" >> "$GITHUB_STEP_SUMMARY"
