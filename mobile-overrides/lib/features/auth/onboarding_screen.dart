@@ -35,12 +35,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _complete() async {
     DarbHaptics.success();
-    await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
-    if (!mounted) return;
+
+    // Notify an owning flow immediately; persistence remains best-effort and
+    // must not delay navigation or the completion contract.
     if (widget.onFinished != null) {
       widget.onFinished!.call();
+      await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
       return;
     }
+
+    await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       DarbPageRoute(builder: (_) => const LoginScreen()),
     );
