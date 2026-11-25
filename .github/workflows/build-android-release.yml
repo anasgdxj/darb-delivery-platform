@@ -456,7 +456,12 @@ jobs:
           APK="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk"
           APK_DIR="$(dirname "$APK")"
           if gh release view latest >/dev/null 2>&1; then
-            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --clobber
+            # Explicitly delete stale assets before uploading. `--clobber` uses
+            # GitHub's replace path, which returned HTTP 500 for the existing
+            # APK asset and prevented the release notification from running.
+            gh release delete-asset latest app-release.apk --yes || true
+            gh release delete-asset latest app-update.json --yes || true
+            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json"
             gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
           else
             gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
