@@ -5,6 +5,7 @@ import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
+import '../../core/widgets/darb_copy_order_number_button.dart';
 import '../../core/widgets/darb_motion_components.dart';
 
 class DriverOrdersScreen extends StatefulWidget {
@@ -142,6 +143,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
 
   Widget _buildOrderCard(Map<String, dynamic> o) {
     final id = o['id'].toString();
+    final orderNumber = o['orderNumber']?.toString() ?? '';
     final status = o['status']?.toString() ?? 'ASSIGNED';
     final total = num.tryParse(o['total']?.toString() ?? '0') ?? 0;
     final fee = num.tryParse(o['deliveryFee']?.toString() ?? '0') ?? 0;
@@ -163,7 +165,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
             children: [
               Expanded(
                 child: Text(
-                  o['orderNumber']?.toString() ?? '',
+                  orderNumber,
                   style: TextStyle(
                     color: DarbColors.inkOf(context),
                     fontWeight: FontWeight.w900,
@@ -171,6 +173,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                   ),
                 ),
               ),
+              DarbCopyOrderNumberButton(value: orderNumber),
               DarbStatusBadge(status: status),
             ],
           ),
