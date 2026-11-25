@@ -404,12 +404,81 @@ jobs:
           set -euo pipefail
           APK="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk"
           APK_DIR="$(dirname "$APK")"
-          if gh release view latest >/dev/null 2>&1; then
-            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --clobber
-            gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
-          else
-            gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
+          RELEASE_TITLE="دازريفو (DAZREVO) — أحدث إصدار أندرويد"
+          RELEASE_NOTES="إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
+          created_draft=false
+          if ! gh release view latest >/dev/null 2>&1; then
+            # A newly-created release stays unpublished until both managed assets verify.
+            gh release create latest --draft --title "$RELEASE_TITLE" --notes "$RELEASE_NOTES"
+            created_draft=true
           fi
+
+          # GitHub's asset-clobber endpoint can intermittently return HTTP 500.
+          # Retry uploads, then remove only the two managed assets and upload cleanly.
+          upload_release_assets() {
+            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --clobber
+          }
+          delete_managed_asset_with_retry() {
+            local asset="$1"
+            local deleted=false
+            for attempt in 1 2 3; do
+              local assets
+              assets="$(gh release view latest --json assets --jq '.assets[]?.name')"
+              if ! grep -Fxq "$asset" <<< "$assets"; then
+                return 0
+              fi
+              if gh release delete-asset latest "$asset" --yes; then
+                deleted=true
+                break
+              fi
+              echo "::warning::Could not delete managed asset $asset (attempt $attempt/3); retrying."
+              sleep $((attempt * 10))
+            done
+            if [ "$deleted" != true ]; then
+              local remaining
+              remaining="$(gh release view latest --json assets --jq '.assets[]?.name')"
+              if grep -Fxq "$asset" <<< "$remaining"; then
+                echo "::error::Managed asset $asset remains after three deletion attempts."
+                return 1
+              fi
+            fi
+          }
+          uploaded=false
+          for attempt in 1 2 3 4; do
+            if upload_release_assets; then
+              uploaded=true
+              break
+            fi
+            echo "::warning::GitHub release asset upload failed (attempt $attempt/4); retrying."
+            sleep $((attempt * 10))
+          done
+
+          if [ "$uploaded" != true ]; then
+            echo "::warning::Clobber retries failed; replacing only the two managed release assets."
+            delete_managed_asset_with_retry "app-release.apk"
+            delete_managed_asset_with_retry "app-update.json"
+            for attempt in 1 2 3; do
+              if upload_release_assets; then
+                uploaded=true
+                break
+              fi
+              echo "::warning::Clean release asset upload failed (attempt $attempt/3); retrying."
+              sleep $((attempt * 15))
+            done
+          fi
+          if [ "$uploaded" != true ]; then
+            echo "::error::Could not publish signed APK assets after retry and clean replacement."
+            exit 1
+          fi
+
+          ASSETS="$(gh release view latest --json assets --jq '.assets[].name')"
+          grep -Fxq "app-release.apk" <<< "$ASSETS"
+          grep -Fxq "app-update.json" <<< "$ASSETS"
+          gh release edit latest --title "$RELEASE_TITLE" --notes "$RELEASE_NOTES"
+          if [ "$created_draft" = true ]; then
+            gh release edit latest --draft=false
+          fi
+          echo "Latest release assets verified and published: app-release.apk and app-update.json." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Notify DARB users about the published release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
