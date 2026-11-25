@@ -41,3 +41,15 @@
 - بعد التحقق من إعداد SMS، اطلب موافقة صريحة قبل تنفيذ اختبار إرسال واحد، ثم اختبر استلام OTP وتسجيل الدخول على جهاز فعلي.
 - بعد إغلاق المصادقة، انتقل إلى الاختبارات الوظيفية لدورة الطلب والتسعير، ثم الإشعارات والخرائط والتتبع.
 
+## 2026-11-25 — DAZREVO continuation status
+
+- **Repository:** `anasgdxj/darb-delivery-platform`; production branch: `main`.
+- **Current main commit:** `f138dac3c7d41da31d4262724d73b11bf2516bee` (website language/script repair merged after the DAZREVO rebrand).
+- **Brand:** DAZREVO / دازريفو is the current public identity. Preserve the existing Android application ID `com.darb.darb`, Dart/Kotlin symbols, repository slug, API paths, and existing OAuth/signing configuration.
+- **Website:** PR #103 was merged. The Arabic homepage now has an AR/EN/TR language switcher, shared JavaScript safely handles pages without the mobile menu, the updated website validator passed, and the GitHub Pages deployment completed successfully.
+- **Website consistency:** PR #104 updates the English/Turkish and help/legal pages to DAZREVO and links them from the homepage footer. Its website validation passed; it remains open for review and has not been merged.
+- **Mobile verification:** On main commit `2b6336a4be22279f06d7a5bc06ef6b1d00b2a244`, Flutter analysis, Android debug build, and Flutter tests passed in GitHub Actions. A signed APK/AAB release build was still running at the time of this update; its run is artifact-only and does not publish the public `latest` release.
+- **FCM blocker:** Render logs previously confirmed that Firebase Admin initialization failed because `FIREBASE_SERVICE_ACCOUNT_JSON` lacked `project_id`, `client_email`, and `private_key`. Do not claim push notifications are operational until corrected and verified on a physical Android device.
+- **Release safety:** PR #105 adds a protected readiness endpoint and a GitHub Actions preflight that blocks replacing the public `latest` APK unless the webhook token matches and Firebase Admin Messaging is initialized. CI is pending. The PR does not publish an APK or send a push notification.
+- **Secrets:** Do not read, expose, replace, or commit Render/GitHub secrets. The owner must provide the complete Firebase Admin service-account JSON in Render and ensure `DARB_RELEASE_WEBHOOK_TOKEN` matches between Render and GitHub Actions.
+- **Next work:** finish PR #105 CI review; wait for the signed artifact build; review PR #104; after the owner corrects Render credentials, deploy the readiness endpoint, verify the protected readiness response, then run a real push test and update test on Android. Do not merge PRs or publish a public APK without the owner's approval.
