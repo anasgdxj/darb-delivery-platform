@@ -54,6 +54,7 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
+    unawaited(DarbNotifications.register());
     _loadUser();
     _setupNotifications();
     if (!kDarbPlayStoreBuild) {
