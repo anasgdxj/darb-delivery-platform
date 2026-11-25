@@ -369,10 +369,24 @@ class _LoginScreenState extends State<LoginScreen> {
                                         horizontal: 10,
                                         vertical: 6,
                                       ),
-                                      child: const Icon(
-                                        Icons.auto_stories_outlined,
-                                        size: 14.5,
-                                        color: DarbColors.lime,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.auto_stories_outlined,
+                                            size: 14.5,
+                                            color: DarbColors.lime,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            dt('جولة تعريفية'),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
