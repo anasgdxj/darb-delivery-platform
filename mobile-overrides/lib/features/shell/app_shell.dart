@@ -391,9 +391,9 @@ class _AppShellState extends State<AppShell> {
       if (data is! Map<String, dynamic>) {
         throw const ApiException('بيانات الجلسة غير صالحة');
       }
-      try {
-        await DarbLocalCache.instance.writeJson(_profileCacheKey, data);
-      } catch (_) {}
+      // Cache persistence is best-effort and must not delay the first frame
+      // of an authenticated session.
+      unawaited(DarbLocalCache.instance.writeJson(_profileCacheKey, data));
       final localeCode = data['locale']?.toString();
       if (localeCode != null && ['ar', 'en', 'tr'].contains(localeCode)) {
         darbLocale.value = Locale(localeCode);
@@ -408,13 +408,14 @@ class _AppShellState extends State<AppShell> {
       } else {
         DriverLocationReporter.stop();
       }
-      await _refreshUnreadCount();
       if (!mounted) return;
       setState(() {
         _user = data;
         _offline = false;
         _error = null;
       });
+      // Badge refresh must never block account navigation or first paint.
+      unawaited(_refreshUnreadCount());
       final pending = _pendingNotificationData;
       if (pending != null) {
         _pendingNotificationData = null;
