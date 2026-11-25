@@ -398,7 +398,11 @@ class _AppShellState extends State<AppShell> {
       if (localeCode != null && ['ar', 'en', 'tr'].contains(localeCode)) {
         darbLocale.value = Locale(localeCode);
       }
-      await DarbNotifications.register();
+      // Push registration is best-effort: an unavailable Firebase plugin or
+      // denied notification permission must never prevent account access.
+      try {
+        await DarbNotifications.register();
+      } catch (_) {}
       if (data['role']?.toString().toUpperCase() == 'DRIVER') {
         DriverLocationReporter.start();
       } else {
