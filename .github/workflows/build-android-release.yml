@@ -522,7 +522,7 @@ jobs:
           chat_id = os.environ.get("TELEGRAM_CHAT_ID", "@DAZREVO").strip()
           if not token:
               summary.open("a", encoding="utf-8").write(
-                  "\\nTelegram channel announcement: NOT SENT — add the TELEGRAM_BOT_TOKEN repository secret.\\n"
+                  "\nTelegram channel announcement: NOT SENT — add the TELEGRAM_BOT_TOKEN repository secret.\n"
               )
               print("::warning::Telegram announcement skipped because TELEGRAM_BOT_TOKEN is not configured.")
               raise SystemExit(0)
@@ -536,12 +536,12 @@ jobs:
           apk_url = "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk"
           release_url = "https://github.com/anasgdxj/darb-delivery-platform/releases/tag/latest"
           message = (
-              "🚀 <b>صدر تحديث جديد لتطبيق DAZREVO</b>\\n\\n"
-              f"📦 الإصدار: <b>{version}</b>\\n"
-              f"🔢 رقم البناء: <code>{build}</code>\\n\\n"
-              f"📝 <b>أبرز التحديثات</b>\\n{notes_html}\\n\\n"
-              f"⬇️ <a href=\"{apk_url}\">تحميل APK الرسمي</a>\\n"
-              f"📋 <a href=\"{release_url}\">تفاصيل الإصدار</a>\\n\\n"
+              "🚀 <b>صدر تحديث جديد لتطبيق DAZREVO</b>\n\n"
+              f"📦 الإصدار: <b>{version}</b>\n"
+              f"🔢 رقم البناء: <code>{build}</code>\n\n"
+              f"📝 <b>أبرز التحديثات</b>\n{notes_html}\n\n"
+              f"⬇️ <a href=\"{apk_url}\">تحميل APK الرسمي</a>\n"
+              f"📋 <a href=\"{release_url}\">تفاصيل الإصدار</a>\n\n"
               "DAZREVO — طريقك الأسرع للتوصيل."
           )
           payload = urllib.parse.urlencode({
@@ -561,7 +561,7 @@ jobs:
                       raise RuntimeError("Telegram API rejected the channel message")
                   message_id = result.get("result", {}).get("message_id", "unknown")
                   summary.open("a", encoding="utf-8").write(
-                      f"\\nTelegram channel announcement: SENT to {chat_id}; message ID {message_id}.\\n"
+                      f"\nTelegram channel announcement: SENT to {chat_id}; message ID {message_id}.\n"
                   )
                   print(f"Telegram release announcement delivered to {chat_id}.")
                   break
@@ -579,7 +579,7 @@ jobs:
               last_error = RuntimeError("Telegram announcement retry loop ended unexpectedly")
           if last_error is not None:
               summary.open("a", encoding="utf-8").write(
-                  "\\nTelegram channel announcement: FAILED — see workflow warning; APK release remains published.\\n"
+                  "\nTelegram channel announcement: FAILED — see workflow warning; APK release remains published.\n"
               )
               print(f"::warning::Telegram announcement failed; APK release remains published: {last_error}")
               raise SystemExit(0)
