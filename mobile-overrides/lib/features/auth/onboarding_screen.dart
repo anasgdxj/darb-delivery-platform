@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
@@ -35,9 +37,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _complete() async {
     DarbHaptics.success();
-    try {
-      await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
-    } catch (_) {}
+    // Persist onboarding completion without blocking the transition to login.
+    // Secure storage may be slow or temporarily unavailable on first launch.
+    unawaited(
+      DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true),
+    );
     if (!mounted) return;
     if (widget.onFinished != null) {
       widget.onFinished!.call();
