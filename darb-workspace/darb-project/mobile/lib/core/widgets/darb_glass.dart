@@ -34,12 +34,12 @@ class DarbAmbientBackground extends StatelessWidget {
                 colors: isDark
                     ? const [
                         DarbColors.darkCanvas,
-                        Color(0xFF0E1D18),
+                        Color(0xFF0A241B),
                         DarbColors.darkCanvas,
                       ]
                     : const [
                         DarbColors.canvas,
-                        Color(0xFFEDF2EC),
+                        Color(0xFFEFF4EC),
                         DarbColors.canvas,
                       ],
               ),
@@ -57,8 +57,8 @@ class DarbAmbientBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DarbColors.mint.withValues(alpha: isDark ? 0.14 : 0.40),
-                    DarbColors.mint.withValues(alpha: 0),
+                    DarbColors.lime.withValues(alpha: isDark ? 0.11 : 0.22),
+                    DarbColors.lime.withValues(alpha: 0),
                   ],
                 ),
               ),
@@ -66,7 +66,7 @@ class DarbAmbientBackground extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: 230,
+          top: 240,
           left: -100,
           child: IgnorePointer(
             child: Container(
@@ -76,9 +76,8 @@ class DarbAmbientBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DarbColors.forestSoft
-                        .withValues(alpha: isDark ? 0.22 : 0.10),
-                    DarbColors.forestSoft.withValues(alpha: 0),
+                    DarbColors.violet.withValues(alpha: isDark ? 0.14 : 0.08),
+                    DarbColors.violet.withValues(alpha: 0),
                   ],
                 ),
               ),
@@ -123,7 +122,7 @@ class DarbGlassSurface extends StatelessWidget {
         (isGlass
             ? (isDark
                 ? DarbColors.mint.withValues(alpha: 0.18)
-                : Colors.white.withValues(alpha: 0.85))
+                : Colors.white.withValues(alpha: 0.88))
             : DarbColors.borderOf(context));
 
     final shadow = elevated
@@ -148,8 +147,8 @@ class DarbGlassSurface extends StatelessWidget {
 
     final fill = tintColor ??
         (isDark
-            ? DarbColors.darkSurface.withValues(alpha: 0.76)
-            : Colors.white.withValues(alpha: 0.76));
+            ? DarbColors.darkSurface.withValues(alpha: 0.82)
+            : Colors.white.withValues(alpha: 0.82));
 
     return Container(
       margin: margin,
@@ -174,12 +173,12 @@ class DarbGlassSurface extends StatelessWidget {
                       colors: isDark
                           ? [
                               DarbColors.darkSurfaceElevated
-                                  .withValues(alpha: 0.82),
-                              DarbColors.darkSurface.withValues(alpha: 0.68),
+                                  .withValues(alpha: 0.86),
+                              DarbColors.darkSurface.withValues(alpha: 0.72),
                             ]
                           : [
-                              Colors.white.withValues(alpha: 0.86),
-                              Colors.white.withValues(alpha: 0.66),
+                              Colors.white.withValues(alpha: 0.90),
+                              Colors.white.withValues(alpha: 0.72),
                             ],
                     ),
               border: Border.all(color: effectiveBorder, width: 1.05),
@@ -232,11 +231,11 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
                   borderRadius: BorderRadius.circular(12),
                   onTap: () => Navigator.maybePop(context),
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
                       color: DarbColors.softSurfaceOf(context)
-                          .withValues(alpha: 0.78),
+                          .withValues(alpha: 0.82),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: DarbColors.borderOf(context)),
                     ),
@@ -320,7 +319,7 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: (isDark ? DarbColors.darkSurface : Colors.white)
-                .withValues(alpha: 0.80),
+                .withValues(alpha: 0.84),
             border: Border(
               bottom: BorderSide(
                 color: isDark
@@ -444,7 +443,8 @@ class _DarbNavTileState extends State<_DarbNavTile> {
     final muted = DarbColors.mutedOf(context);
     final active = widget.active;
     final item = widget.destination;
-    final indicatorColor = isDark ? DarbColors.mint : primary;
+    final indicatorColor = isDark ? DarbColors.lime : DarbColors.forest;
+    final activeIconAndText = isDark ? DarbColors.lime : DarbColors.forest;
 
     return Semantics(
       button: true,
@@ -473,9 +473,15 @@ class _DarbNavTileState extends State<_DarbNavTile> {
               borderRadius: BorderRadius.circular(DarbRadius.md),
               color: active
                   ? (isDark
-                      ? DarbColors.forestSoft.withValues(alpha: 0.90)
-                      : DarbColors.mintTint)
+                      ? DarbColors.forestSoft.withValues(alpha: 0.92)
+                      : DarbColors.limeTint.withValues(alpha: 0.72))
                   : Colors.transparent,
+              border: active
+                  ? Border.all(
+                      color: (isDark ? DarbColors.lime : primary)
+                          .withValues(alpha: 0.25),
+                    )
+                  : null,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -484,7 +490,7 @@ class _DarbNavTileState extends State<_DarbNavTile> {
                   clipBehavior: Clip.none,
                   children: [
                     AnimatedScale(
-                      scale: (!reduced && active) ? 1.12 : 1.0,
+                      scale: (!reduced && active) ? 1.10 : 1.0,
                       duration: DarbMotion.effectiveDuration(
                         context,
                         DarbMotion.interactive,
@@ -501,7 +507,7 @@ class _DarbNavTileState extends State<_DarbNavTile> {
                           active ? item.selectedIcon : item.icon,
                           key: ValueKey('${item.label}_$active'),
                           size: 22,
-                          color: active ? primary : muted,
+                          color: active ? activeIconAndText : muted,
                         ),
                       ),
                     ),
@@ -522,7 +528,7 @@ class _DarbNavTileState extends State<_DarbNavTile> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: active ? FontWeight.w900 : FontWeight.w600,
-                    color: active ? primary : muted,
+                    color: active ? activeIconAndText : muted,
                   ),
                   child: Text(
                     item.label,
@@ -546,7 +552,7 @@ class _DarbNavTileState extends State<_DarbNavTile> {
                         ? [
                             BoxShadow(
                               color: indicatorColor.withValues(
-                                alpha: isDark ? 0.55 : 0.35,
+                                alpha: isDark ? 0.55 : 0.28,
                               ),
                               blurRadius: 8,
                               offset: const Offset(0, 1),

@@ -462,7 +462,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     flex: 5,
                     child: DarbBentoActionCard(
                       icon: Icons.auto_awesome_rounded,
-                      accentColor: DarbColors.primaryOf(context),
+                      accentColor: DarbColors.violetOf(context),
                       badge: 'AI',
                       title: dt('المساعد الذكي'),
                       subtitle: dt('اكتب طلبك وسيتم تجهيزه تلقائياً'),

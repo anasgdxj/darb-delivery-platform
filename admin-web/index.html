@@ -3,60 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102B26">
+<meta name="theme-color" content="#0B2F24">
 <meta name="robots" content="noindex,nofollow">
-<title>إدارة دازريفو | مركز العمليات</title>
+<title>إدارة دازريفو | DAZREVO Operations</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap');
 
 :root {
-  --forest: #102B26;
-  --forest-soft: #1C443B;
-  --primary: #102B26;
-  --primary-hover: #1C443B;
+  --forest: #0B2F24;
+  --forest-soft: #144435;
+  --primary: #0D6E4E;
+  --primary-hover: #09583D;
   --on-primary: #FFFFFF;
-  --mint: #B9E4D2;
-  --mint-tint: #E5F4EC;
-  --lime: #C8F169;
-  --canvas: #F5F6F2;
+  --mint: #A8EBC8;
+  --mint-tint: #E1F6EB;
+  --lime: #A7FF00;
+  --lime-ink: #3E6800;
+  --violet: #8A5CF6;
+  --violet-soft: #F1EBFF;
+  --canvas: #F8FAF7;
   --surface: #FFFFFF;
-  --surface-glass: rgba(255, 255, 255, 0.78);
-  --surface-soft: #EDF1EC;
-  --ink: #17231F;
-  --muted: #77837D;
-  --border: #E4E9E3;
-  --border-strong: #CBD5CE;
-  --glass-border: rgba(255, 255, 255, 0.88);
-  --danger: #B94747;
-  --danger-soft: #FBEAEA;
-  --success: #287A50;
-  --warn: #B7791F;
-  --warn-soft: #FCF3E6;
-  --info: #356D9A;
-  --shadow: 0 18px 46px rgba(16, 43, 38, 0.08);
-  --blur: 22px;
+  --surface-glass: rgba(255, 255, 255, 0.84);
+  --surface-soft: #EDF2EC;
+  --ink: #0E221B;
+  --muted: #586E65;
+  --border: #D5DFD9;
+  --border-strong: #B9C7BF;
+  --glass-border: rgba(255, 255, 255, 0.92);
+  --danger: #CF3B3B;
+  --danger-soft: #FDECEC;
+  --success: #17804B;
+  --warn: #C67A12;
+  --warn-soft: #FCF3E3;
+  --info: #1E6FA8;
+  --shadow: 0 20px 50px rgba(11, 47, 36, 0.08);
+  --blur: 20px;
 }
 
 html.dark {
-  --canvas: #0B1512;
-  --surface: #13221D;
-  --surface-glass: rgba(19, 34, 29, 0.82);
-  --surface-soft: #1A2D26;
-  --ink: #F1F5F1;
-  --muted: #A4B2AA;
-  --primary: #B9E4D2;
-  --primary-hover: #A4D9C4;
-  --on-primary: #102B26;
-  --mint-tint: #1A2D26;
-  --border: #2A3B33;
-  --border-strong: #40564A;
-  --glass-border: rgba(185, 228, 210, 0.16);
-  --danger: #E06C6C;
-  --danger-soft: rgba(185, 71, 71, 0.18);
-  --success: #56B881;
-  --warn: #EAA244;
-  --warn-soft: rgba(183, 121, 31, 0.22);
-  --shadow: 0 22px 54px rgba(0, 0, 0, 0.44);
+  --canvas: #071A14;
+  --surface: #0E281F;
+  --surface-glass: rgba(14, 40, 31, 0.84);
+  --surface-soft: #194033;
+  --ink: #F1F7F4;
+  --muted: #9CB3A8;
+  --primary: #A7FF00;
+  --primary-hover: #B8FF33;
+  --on-primary: #071A14;
+  --mint-tint: #14352A;
+  --violet: #A78BFA;
+  --violet-soft: #251A45;
+  --border: #214438;
+  --border-strong: #325E4E;
+  --glass-border: rgba(168, 235, 200, 0.16);
+  --danger: #F06E6E;
+  --danger-soft: #3A1D21;
+  --success: #5EE094;
+  --warn: #F3BA52;
+  --warn-soft: #382914;
+  --shadow: 0 24px 58px rgba(0, 0, 0, 0.48);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -66,13 +71,13 @@ body {
   color: var(--ink);
   font-family: 'Cairo', 'Plus Jakarta Sans', Tahoma, Arial, sans-serif;
   line-height: 1.55;
-  transition: background-color 220ms cubic-bezier(0.22, 1, 0.36, 1), color 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-button, input, select { font: inherit; }
+button, input, select, textarea { font: inherit; }
 button {
   cursor: pointer;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: 12px;
   min-height: 40px;
   padding: 8px 16px;
   font-size: 13.5px;
@@ -83,8 +88,8 @@ button {
 button:hover:not(:disabled) { transform: translateY(-1px); }
 button:active:not(:disabled) { transform: scale(0.98); }
 button:disabled { opacity: 0.55; cursor: not-allowed; }
-button:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 2px solid var(--primary);
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--violet);
   outline-offset: 2px;
 }
 .tabular { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
@@ -100,17 +105,17 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   transition: opacity 200ms ease;
 }
 html[data-style="standard"] .ambient { opacity: 0; }
-.orb { position: absolute; border-radius: 50%; filter: blur(68px); }
+.orb { position: absolute; border-radius: 50%; filter: blur(76px); }
 .orb-1 {
-  width: 440px; height: 440px; top: -120px; left: -120px;
-  background: radial-gradient(circle, rgba(185, 228, 210, 0.48), transparent 70%);
+  width: 440px; height: 440px; top: -130px; left: -120px;
+  background: radial-gradient(circle, rgba(168, 235, 200, 0.42), transparent 70%);
 }
 .orb-2 {
   width: 380px; height: 380px; bottom: -120px; right: -80px;
-  background: radial-gradient(circle, rgba(16, 43, 38, 0.16), transparent 70%);
+  background: radial-gradient(circle, rgba(138, 92, 246, 0.14), transparent 70%);
 }
-html.dark .orb-1 { background: radial-gradient(circle, rgba(185, 228, 210, 0.14), transparent 70%); }
-html.dark .orb-2 { background: radial-gradient(circle, rgba(28, 68, 59, 0.28), transparent 70%); }
+html.dark .orb-1 { background: radial-gradient(circle, rgba(167, 255, 0, 0.08), transparent 70%); }
+html.dark .orb-2 { background: radial-gradient(circle, rgba(138, 92, 246, 0.18), transparent 70%); }
 
 .surface {
   background: var(--surface-glass);
@@ -124,17 +129,18 @@ html[data-style="standard"] .surface {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid var(--border);
-  box-shadow: 0 4px 16px rgba(16, 43, 38, 0.04);
+  box-shadow: 0 4px 14px rgba(11, 47, 36, 0.04);
 }
 
 .btn-primary { background: var(--primary); color: var(--on-primary); }
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
-.btn-accent { background: var(--lime); color: var(--forest); }
+.btn-violet { background: var(--violet); color: #FFFFFF; }
+.btn-violet:hover:not(:disabled) { filter: brightness(1.06); }
 .btn-outline { background: transparent; border-color: var(--border-strong); color: var(--ink); }
 .btn-outline:hover:not(:disabled) { background: var(--surface-soft); }
-.btn-danger { background: var(--danger-soft); color: var(--danger); border-color: rgba(185, 71, 71, 0.28); }
+.btn-danger { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
 
-input, select {
+input, select, textarea {
   width: 100%;
   min-height: 42px;
   padding: 9px 12px;
@@ -154,7 +160,7 @@ input, select {
 }
 .login-card {
   width: min(460px, 100%);
-  border-radius: 28px;
+  border-radius: 26px;
   padding: 32px;
   display: grid;
   gap: 16px;
@@ -165,17 +171,16 @@ input, select {
   gap: 12px;
 }
 .brand-mark {
-  width: 46px; height: 46px;
-  border-radius: 15px;
+  width: 44px; height: 44px;
+  border-radius: 14px;
   background: linear-gradient(135deg, var(--forest), var(--forest-soft));
   color: var(--lime);
-  border: 1px solid rgba(185, 228, 210, 0.28);
+  border: 1px solid rgba(167, 255, 0, 0.34);
   display: grid;
   place-items: center;
-  font-size: 22px;
-  font-weight: 900;
   flex-shrink: 0;
 }
+.brand-mark svg { width: 22px; height: 22px; }
 .login-card h1 { margin: 0; font-size: 22px; font-weight: 900; }
 .login-card p { margin: 0; color: var(--muted); font-size: 13.5px; }
 .notice {
@@ -184,13 +189,13 @@ input, select {
   font-size: 13px;
   font-weight: 700;
   background: var(--mint-tint);
-  color: var(--primary);
+  color: var(--ink);
   border: 1px solid var(--border);
 }
 .notice.bad {
   background: var(--danger-soft);
   color: var(--danger);
-  border-color: rgba(185, 71, 71, 0.3);
+  border-color: color-mix(in srgb, var(--danger) 32%, transparent);
 }
 
 /* Admin Workspace Shell */
@@ -201,12 +206,12 @@ input, select {
 }
 .sidebar {
   background: var(--forest);
-  color: #F1F5F1;
+  color: #F1F7F4;
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  border-inline-end: 1px solid rgba(185, 228, 210, 0.14);
+  border-inline-end: 1px solid rgba(168, 235, 200, 0.14);
 }
 .sidebar .brand-sub { font-size: 12px; color: var(--mint); font-weight: 700; }
 .side-nav {
@@ -215,7 +220,7 @@ input, select {
 }
 .side-nav button {
   background: transparent;
-  color: rgba(241, 245, 241, 0.82);
+  color: rgba(241, 247, 244, 0.84);
   text-align: right;
   display: flex;
   align-items: center;
@@ -227,8 +232,13 @@ input, select {
 .side-nav button:hover { background: rgba(255, 255, 255, 0.08); color: #FFFFFF; }
 .side-nav button.active {
   background: var(--forest-soft);
-  color: var(--mint);
-  border: 1px solid rgba(185, 228, 210, 0.32);
+  color: var(--lime);
+  border: 1px solid rgba(167, 255, 0, 0.32);
+}
+.side-nav button.ai-tab.active {
+  background: rgba(138, 92, 246, 0.24);
+  color: #E9D5FF;
+  border-color: rgba(167, 139, 250, 0.55);
 }
 .count-tag {
   font-size: 12px;
@@ -240,13 +250,13 @@ input, select {
   display: grid;
   gap: 10px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
 }
 .side-seg {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.22);
+  background: rgba(0, 0, 0, 0.24);
   padding: 4px;
   border-radius: 11px;
 }
@@ -254,18 +264,18 @@ input, select {
   min-height: 32px;
   padding: 4px 8px;
   font-size: 12px;
-  color: rgba(241, 245, 241, 0.72);
+  color: rgba(241, 247, 244, 0.72);
   background: transparent;
   border-radius: 8px;
 }
 .side-seg button[aria-pressed="true"] {
-  background: rgba(185, 228, 210, 0.2);
-  color: #FFFFFF;
+  background: rgba(167, 255, 0, 0.2);
+  color: var(--lime);
 }
 
 .workspace {
   padding: 24px 28px;
-  max-width: 1380px;
+  max-width: 1400px;
   width: 100%;
   margin-inline: auto;
   display: grid;
@@ -292,7 +302,7 @@ input, select {
   gap: 14px;
 }
 .kpi-card {
-  border-radius: 22px;
+  border-radius: 20px;
   padding: 18px 20px;
 }
 .kpi-label { font-size: 12.5px; color: var(--muted); font-weight: 700; }
@@ -389,6 +399,55 @@ tbody tr:hover { background: var(--surface-soft); }
 .field-group { display: grid; gap: 5px; }
 .field-group label { font-size: 12px; color: var(--muted); font-weight: 700; }
 
+/* AI Copilot */
+.copilot-box {
+  display: grid;
+  gap: 14px;
+}
+.copilot-prompts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.copilot-prompts button {
+  background: var(--violet-soft);
+  color: var(--violet);
+  border: 1px solid color-mix(in srgb, var(--violet) 32%, transparent);
+  font-size: 12.5px;
+  min-height: 36px;
+  padding: 6px 12px;
+}
+.copilot-feed {
+  display: grid;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+.copilot-msg {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 14px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+.copilot-msg.user {
+  background: var(--violet-soft);
+  border-color: color-mix(in srgb, var(--violet) 38%, transparent);
+}
+.copilot-msg.bad {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.copilot-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.copilot-form input { flex: 1; }
+
 .pager {
   display: flex;
   align-items: center;
@@ -410,7 +469,7 @@ tbody tr:hover { background: var(--surface-soft); }
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(11, 23, 19, 0.6);
+  background: rgba(7, 26, 20, 0.65);
   backdrop-filter: blur(8px);
   display: grid;
   place-items: center;
@@ -435,15 +494,15 @@ tbody tr:hover { background: var(--surface-soft); }
   font-size: 13.5px;
   font-weight: 800;
   background: var(--forest);
-  color: #FFFFFF;
+  color: var(--lime);
   box-shadow: var(--shadow);
-  border: 1px solid var(--mint);
+  border: 1px solid rgba(167, 255, 0, 0.4);
 }
-.toast.bad { background: var(--danger); border-color: #FFFFFF; }
+.toast.bad { background: var(--danger); color: #FFFFFF; border-color: #FFFFFF; }
 
 @media (max-width: 960px) {
   .app-shell { grid-template-columns: 1fr; }
-  .sidebar { border-inline-end: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.14); }
+  .sidebar { border-inline-end: 0; border-bottom: 1px solid rgba(168, 235, 200, 0.14); }
   .side-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -451,6 +510,7 @@ tbody tr:hover { background: var(--surface-soft); }
   .workspace { padding: 16px; }
   .side-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kpi-grid { grid-template-columns: 1fr; }
+  .copilot-form { flex-direction: column; align-items: stretch; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
@@ -468,9 +528,14 @@ tbody tr:hover { background: var(--surface-soft); }
 <section id="loginView" class="login-shell">
   <div class="login-card surface">
     <div class="brand-row">
-      <div class="brand-mark">د</div>
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6.5 18V6h5.5c4.1 0 6.5 2.4 6.5 6s-2.4 6-6.5 6H6.5Z" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/>
+          <circle cx="12.5" cy="12" r="2" fill="#8A5CF6"/>
+        </svg>
+      </div>
       <div>
-        <strong>دازريفو</strong>
+        <strong>دازريفو · DAZREVO</strong>
         <div class="panel-meta">بوابة العمليات والإدارة</div>
       </div>
     </div>
@@ -499,9 +564,14 @@ tbody tr:hover { background: var(--surface-soft); }
 <section id="appView" class="app-shell hidden">
   <aside class="sidebar">
     <div class="brand-row">
-      <div class="brand-mark">د</div>
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6.5 18V6h5.5c4.1 0 6.5 2.4 6.5 6s-2.4 6-6.5 6H6.5Z" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/>
+          <circle cx="12.5" cy="12" r="2" fill="#8A5CF6"/>
+        </svg>
+      </div>
       <div>
-        <strong>دازريفو</strong>
+        <strong>دازريفو · DAZREVO</strong>
         <div class="brand-sub">مركز العمليات والإدارة</div>
       </div>
     </div>
@@ -513,6 +583,7 @@ tbody tr:hover { background: var(--surface-soft); }
       <button type="button" data-tab="users">المستخدمون والصلاحيات</button>
       <button type="button" data-tab="cities" data-kind="zones">المدن ومناطق التوصيل</button>
       <button type="button" data-tab="orders">مراقبة الطلبات</button>
+      <button type="button" data-tab="copilot" class="ai-tab">مساعد الإدارة الذكي</button>
       <button type="button" data-tab="settings">الإعدادات والتدقيق</button>
     </nav>
 
@@ -594,7 +665,6 @@ const LOCAL_API = (window.location.origin || 'http://localhost:3000') + '/api/v1
 const isLocalPreviewHost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname) || window.location.protocol === 'http:';
 
 let API = isLocalPreviewHost ? LOCAL_API : PROD_API;
-// Hold auth tokens strictly in JS runtime memory only (never persisted in Web Storage)
 let accessToken = null;
 let refreshToken = null;
 const token = () => accessToken;
@@ -609,6 +679,8 @@ let vendorStatusFilter = '';
 let driverStatusFilter = '';
 let userRoleFilter = '';
 let userQuery = '';
+const copilotMessages = [];
+let copilotBusy = false;
 
 function notify(text, isError = false) {
   const toast = $('toast');
@@ -660,7 +732,7 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
   const headers = { Accept: 'application/json' };
   if (body !== null) headers['Content-Type'] = 'application/json';
   if (auth && token()) {
-    headers.Authorization='Bearer '+token();
+    headers.Authorization = 'Bearer ' + token();
   }
   let res = await fetch(API + path, {
     method,
@@ -678,7 +750,7 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
       const refreshed = await rr.json();
       accessToken = refreshed.accessToken;
       refreshToken = refreshed.refreshToken;
-      headers.Authorization='Bearer '+token();
+      headers.Authorization = 'Bearer ' + token();
       res = await fetch(API + path, {
         method,
         headers,
@@ -699,7 +771,7 @@ async function enterDashboard(authPayload) {
   accessToken = authPayload.tokens.accessToken;
   refreshToken = authPayload.tokens.refreshToken;
   const me = await apiFetch('/auth/me');
-  if (me.role!=='ADMIN') {
+  if (me.role !== 'ADMIN') {
     accessToken = null;
     refreshToken = null;
     throw new Error('هذا الحساب لا يحمل صلاحية ADMIN لإدارة دازريفو.');
@@ -804,6 +876,7 @@ async function refreshAll() {
     else if (currentTab === 'users') await loadUsers(root);
     else if (currentTab === 'cities') await loadCitiesAndZones(root);
     else if (currentTab === 'orders') await loadOrders(root);
+    else if (currentTab === 'copilot') loadCopilot(root);
     else if (currentTab === 'settings') await loadSettingsAndAudit(root);
   } catch (err) {
     root.replaceChildren(elText('div', 'error-box', err.message || 'تعذر تحميل البيانات'));
@@ -1303,6 +1376,76 @@ async function loadOrders(root) {
   root.replaceChildren(toolbar, wrap, pager);
 }
 
+function loadCopilot(root) {
+  $('breadcrumb').textContent = 'إدارة دازريفو / مساعد الإدارة الذكي';
+  $('pageTitle').textContent = 'مساعد دازريفو الذكي للإدارة';
+  $('panelTitle').textContent = 'تحليل العمليات والإجابة من بيانات النظام الحقيقية';
+  $('panelSummary').textContent = `${copilotMessages.length} رسالة`;
+
+  const box = document.createElement('div');
+  box.className = 'copilot-box';
+
+  const promptsRow = document.createElement('div');
+  promptsRow.className = 'copilot-prompts';
+  const presets = [
+    'لخّص الموافقات المعلقة وحالة الطلبات اليوم',
+    'ما حالة المتاجر والسائقين النشطين حالياً؟',
+    'أعطني نظرة سريعة على العمليات في المدن',
+  ];
+
+  const feed = document.createElement('div');
+  feed.className = 'copilot-feed';
+  if (!copilotMessages.length) {
+    feed.append(elText('div', 'empty-box', 'اكتب سؤالك الإداري أدناه وسيجيبك المساعد اعتماداً على صلاحية الإدارة وبيانات الخادم الفعلية.'));
+  } else {
+    for (const m of copilotMessages) {
+      feed.append(elText('div', `copilot-msg ${m.user ? 'user' : ''} ${m.bad ? 'bad' : ''}`, m.text));
+    }
+  }
+
+  const form = document.createElement('form');
+  form.className = 'copilot-form';
+  const input = document.createElement('input');
+  input.placeholder = 'اسأل المساعد الإداري…';
+  input.disabled = copilotBusy;
+  const sendBtn = elText('button', 'btn-violet', copilotBusy ? 'جارٍ التحليل…' : 'إرسال');
+  sendBtn.type = 'submit';
+  sendBtn.disabled = copilotBusy;
+
+  async function askCopilot(text) {
+    const q = (text || '').trim();
+    if (q.length < 2 || copilotBusy) return;
+    copilotBusy = true;
+    copilotMessages.push({ user: true, text: q });
+    loadCopilot(root);
+    try {
+      const res = await apiFetch('/ai/assistant/ask', 'POST', { message: q });
+      copilotMessages.push({ user: false, text: res.answer || res.reply || 'لا توجد استجابة نصية.' });
+    } catch (e) {
+      copilotMessages.push({ user: false, bad: true, text: e.message || 'تعذر الاتصال بالمساعد الذكي' });
+    } finally {
+      copilotBusy = false;
+      loadCopilot(root);
+    }
+  }
+
+  for (const p of presets) {
+    const b = elText('button', '', p);
+    b.type = 'button';
+    b.disabled = copilotBusy;
+    b.onclick = () => askCopilot(p);
+    promptsRow.append(b);
+  }
+
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    askCopilot(input.value);
+  };
+  form.append(input, sendBtn);
+  box.append(promptsRow, feed, form);
+  root.replaceChildren(box);
+}
+
 async function loadSettingsAndAudit(root) {
   $('breadcrumb').textContent = 'إدارة دازريفو / الإعدادات والتدقيق';
   $('pageTitle').textContent = 'إعدادات المنصة وسجل التدقيق';
@@ -1381,7 +1524,6 @@ async function loadSettingsAndAudit(root) {
   root.replaceChildren(box, logsTitle, logList);
 }
 
-// Navigation & Controls Wiring
 document.querySelectorAll('.side-nav button[data-tab]').forEach((btn) => {
   btn.addEventListener('click', () => {
     currentTab = btn.dataset.tab;
@@ -1417,24 +1559,29 @@ function setAdminStyle(style) {
   document.documentElement.setAttribute('data-style', style);
   $('adminGlassBtn').setAttribute('aria-pressed', String(style === 'glass'));
   $('adminStandardBtn').setAttribute('aria-pressed', String(style === 'standard'));
-  try { sessionStorage.setItem('darb_admin_style', style); } catch (_) {}
+  try {
+    sessionStorage.setItem('dazrevo_admin_style', style);
+    sessionStorage.setItem('darb_admin_style', style);
+  } catch (_) {}
 }
 function setAdminTheme(dark) {
   document.documentElement.classList.toggle('dark', dark);
   $('adminLightBtn').setAttribute('aria-pressed', String(!dark));
   $('adminDarkBtn').setAttribute('aria-pressed', String(dark));
-  try { sessionStorage.setItem('darb_admin_theme', dark ? 'dark' : 'light'); } catch (_) {}
+  try {
+    sessionStorage.setItem('dazrevo_admin_theme', dark ? 'dark' : 'light');
+    sessionStorage.setItem('darb_admin_theme', dark ? 'dark' : 'light');
+  } catch (_) {}
 }
 $('adminGlassBtn').addEventListener('click', () => setAdminStyle('glass'));
 $('adminStandardBtn').addEventListener('click', () => setAdminStyle('standard'));
 $('adminLightBtn').addEventListener('click', () => setAdminTheme(false));
 $('adminDarkBtn').addEventListener('click', () => setAdminTheme(true));
 
-// Restore non-sensitive UI appearance preferences from sessionStorage / OS preference
 try {
-  const savedStyle = sessionStorage.getItem('darb_admin_style');
+  const savedStyle = sessionStorage.getItem('dazrevo_admin_style') || sessionStorage.getItem('darb_admin_style');
   if (savedStyle === 'standard' || savedStyle === 'glass') setAdminStyle(savedStyle);
-  const savedTheme = sessionStorage.getItem('darb_admin_theme');
+  const savedTheme = sessionStorage.getItem('dazrevo_admin_theme') || sessionStorage.getItem('darb_admin_theme');
   if (savedTheme === 'dark' || savedTheme === 'light') {
     setAdminTheme(savedTheme === 'dark');
   } else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {

@@ -22,14 +22,14 @@ class DarbBrandMark extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(size * 0.28),
         border: Border.all(
-          color: DarbColors.mint.withValues(alpha: 0.38),
-          width: size >= 56 ? 1.4 : 1.0,
+          color: DarbColors.lime.withValues(alpha: 0.42),
+          width: size >= 56 ? 1.5 : 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: DarbColors.forest.withValues(alpha: 0.30),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
+            color: DarbColors.forest.withValues(alpha: 0.34),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -51,9 +51,9 @@ class _DarbBrandMarkPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = size.width;
 
-    // Subtle geometric sage map lines inside the emblem
+    // Subtle geometric coordinate hairlines
     final gridPaint = Paint()
-      ..color = const Color(0xFF28584B).withValues(alpha: 0.55)
+      ..color = const Color(0xFF28584B).withValues(alpha: 0.45)
       ..strokeWidth = (s * 0.025).clamp(0.7, 1.8)
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -69,50 +69,57 @@ class _DarbBrandMarkPainter extends CustomPainter {
       ..lineTo(s * 0.73, s);
     canvas.drawPath(grid, gridPaint);
 
-    // Symmetrical S-route matching Android ic_launcher.xml
-    final start = Offset(s * 0.28, s * 0.72);
-    final end = Offset(s * 0.72, s * 0.28);
+    // Symmetrical kinetic Z-route matching DAZREVO brand geometry
+    final start = Offset(s * 0.27, s * 0.72);
+    final end = Offset(s * 0.73, s * 0.28);
     final route = Path()
       ..moveTo(start.dx, start.dy)
       ..cubicTo(
-        s * 0.19,
+        s * 0.20,
         s * 0.34,
         s * 0.43,
-        s * 0.41,
+        s * 0.42,
         s * 0.50,
         s * 0.50,
       )
       ..cubicTo(
         s * 0.57,
-        s * 0.59,
-        s * 0.81,
+        s * 0.58,
+        s * 0.80,
         s * 0.66,
         end.dx,
         end.dy,
       );
 
-    // Soft mint glow
     canvas.drawPath(
       route,
       Paint()
-        ..color = DarbColors.mint.withValues(alpha: 0.28)
-        ..strokeWidth = s * 0.15
+        ..color = DarbColors.lime.withValues(alpha: 0.22)
+        ..strokeWidth = s * 0.16
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke,
     );
 
-    // Core mint route ribbon
     canvas.drawPath(
       route,
       Paint()
-        ..color = DarbColors.mint
-        ..strokeWidth = (s * 0.082).clamp(2.2, 7.0)
+        ..shader = const LinearGradient(
+          begin: Alignment.bottomLeft,
+          end: Alignment.topRight,
+          colors: [DarbColors.mint, DarbColors.lime],
+        ).createShader(Rect.fromLTWH(0, 0, s, s))
+        ..strokeWidth = (s * 0.086).clamp(2.2, 7.2)
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke,
     );
 
-    // Start origin node (Mint ring)
+    // Origin node (Signal Violet halo + Mint core)
     final nodeRadius = (s * 0.088).clamp(2.8, 7.5);
+    canvas.drawCircle(
+      start,
+      nodeRadius * 1.35,
+      Paint()..color = DarbColors.violet.withValues(alpha: 0.28),
+    );
     canvas.drawCircle(start, nodeRadius, Paint()..color = DarbColors.forest);
     canvas.drawCircle(
       start,
@@ -123,16 +130,16 @@ class _DarbBrandMarkPainter extends CustomPainter {
         ..style = PaintingStyle.stroke,
     );
 
-    // Destination beacon (Lime accent)
+    // Destination beacon (Volt Lime)
     canvas.drawCircle(
       end,
-      nodeRadius * 1.45,
-      Paint()..color = DarbColors.lime.withValues(alpha: 0.24),
+      nodeRadius * 1.5,
+      Paint()..color = DarbColors.lime.withValues(alpha: 0.28),
     );
     canvas.drawCircle(end, nodeRadius, Paint()..color = DarbColors.lime);
     canvas.drawCircle(
       end,
-      nodeRadius * 0.38,
+      nodeRadius * 0.36,
       Paint()..color = DarbColors.forest,
     );
   }
@@ -170,6 +177,7 @@ class DarbSectionHeader extends StatelessWidget {
                   color: ink,
                   fontSize: 17,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: -0.2,
                 ),
               ),
               if (subtitle != null && subtitle!.isNotEmpty)
@@ -216,7 +224,7 @@ class DarbMetricCard extends StatelessWidget {
     return DarbGlassSurface(
       padding: const EdgeInsets.all(14),
       borderRadius: DarbRadius.md,
-      borderColor: color.withValues(alpha: isDark ? 0.28 : 0.16),
+      borderColor: color.withValues(alpha: isDark ? 0.30 : 0.18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -231,13 +239,13 @@ class DarbMetricCard extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        color.withValues(alpha: isDark ? 0.28 : 0.18),
-                        color.withValues(alpha: isDark ? 0.12 : 0.08),
+                        color.withValues(alpha: isDark ? 0.26 : 0.18),
+                        color.withValues(alpha: isDark ? 0.10 : 0.06),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(11),
                     border: Border.all(
-                      color: color.withValues(alpha: 0.26),
+                      color: color.withValues(alpha: 0.28),
                     ),
                   ),
                   child: Icon(icon, size: 17, color: color),
@@ -247,7 +255,7 @@ class DarbMetricCard extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.72),
+                  color: color.withValues(alpha: 0.80),
                   shape: BoxShape.circle,
                   boxShadow: DarbElevation.glow(color, isDark: isDark),
                 ),
@@ -308,9 +316,9 @@ class DarbStatusBadge extends StatelessWidget {
 
     final (Color fg, Color bg, String label) = switch (normalized) {
       'DELIVERED' || 'APPROVED' || 'OPEN' || 'ONLINE' || 'ACCEPTED' => (
-          isDark ? DarbColors.mint : DarbColors.success,
+          isDark ? DarbColors.lime : DarbColors.success,
           isDark
-              ? DarbColors.forestSoft.withValues(alpha: 0.92)
+              ? DarbColors.forestSoft.withValues(alpha: 0.94)
               : DarbColors.mintTint,
           _translateStatus(normalized),
         ),
@@ -341,7 +349,7 @@ class DarbStatusBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(DarbRadius.pill),
-        border: Border.all(color: fg.withValues(alpha: isDark ? 0.34 : 0.26)),
+        border: Border.all(color: fg.withValues(alpha: isDark ? 0.36 : 0.28)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -442,8 +450,9 @@ class DarbStateView extends StatelessWidget {
                 width: 58,
                 height: 58,
                 decoration: BoxDecoration(
-                  color: tint.withValues(alpha: 0.12),
+                  color: tint.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: tint.withValues(alpha: 0.25)),
                 ),
                 child: Icon(icon, size: 28, color: tint),
               ),
@@ -591,7 +600,7 @@ class DarbRadioOptionTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(DarbRadius.md),
           color: selected
               ? (isDark
-                  ? DarbColors.forestSoft.withValues(alpha: 0.72)
+                  ? DarbColors.forestSoft.withValues(alpha: 0.78)
                   : DarbColors.mintTint.withValues(alpha: 0.78))
               : DarbColors.softSurfaceOf(context).withValues(alpha: 0.60),
           border: Border.all(
@@ -660,8 +669,6 @@ class DarbRadioOptionTile extends StatelessWidget {
   }
 }
 
-/// Visual order progression timeline used across Customer, Driver, and Vendor
-/// order views. Automatically adapts steps for store vs peer-delivery orders.
 class DarbOrderTimeline extends StatelessWidget {
   const DarbOrderTimeline({
     super.key,
@@ -810,7 +817,8 @@ class DarbOrderTimeline extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 10.5,
-                    fontWeight: i == activeIndex ? FontWeight.w900 : FontWeight.w600,
+                    fontWeight:
+                        i == activeIndex ? FontWeight.w900 : FontWeight.w600,
                     color: reached ? DarbColors.inkOf(context) : muted,
                   ),
                 ),
@@ -864,9 +872,6 @@ class DarbSearchBar extends StatelessWidget {
   }
 }
 
-/// Visual logistics route connector displaying Pickup -> Dropoff nodes with a
-/// vertical connecting track, used across driver dispatch, peer delivery, and
-/// customer order summaries.
 class DarbRouteConnector extends StatelessWidget {
   const DarbRouteConnector({
     super.key,
@@ -1051,8 +1056,6 @@ class DarbRouteConnector extends StatelessWidget {
   }
 }
 
-/// Featured Bento tile with Obsidian Emerald or Frosted Glass styling, icon
-/// badge, optional pill tag, and tactile press response.
 class DarbBentoActionCard extends StatelessWidget {
   const DarbBentoActionCard({
     super.key,
@@ -1093,7 +1096,7 @@ class DarbBentoActionCard extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(DarbRadius.lg),
             border: Border.all(
-              color: DarbColors.mint.withValues(alpha: 0.28),
+              color: accent.withValues(alpha: 0.34),
             ),
             boxShadow: DarbElevation.floating(isDark),
           ),
@@ -1175,7 +1178,7 @@ class DarbBentoActionCard extends StatelessWidget {
       onTap: onTap,
       padding: const EdgeInsets.all(15),
       borderRadius: DarbRadius.lg,
-      borderColor: accent.withValues(alpha: isDark ? 0.28 : 0.20),
+      borderColor: accent.withValues(alpha: isDark ? 0.30 : 0.24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1243,6 +1246,163 @@ class DarbBentoActionCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Real financial & operational activity strip driven strictly by live backend
+/// aggregations (never synthetic balances).
+class DarbActivityLedgerStrip extends StatelessWidget {
+  const DarbActivityLedgerStrip({
+    super.key,
+    required this.title,
+    required this.primaryLabel,
+    required this.primaryValue,
+    required this.secondaryLabel,
+    required this.secondaryValue,
+    this.tertiaryLabel,
+    this.tertiaryValue,
+    this.icon = Icons.insights_rounded,
+    this.accentColor,
+    this.onTap,
+  });
+
+  final String title;
+  final String primaryLabel;
+  final String primaryValue;
+  final String secondaryLabel;
+  final String secondaryValue;
+  final String? tertiaryLabel;
+  final String? tertiaryValue;
+  final IconData icon;
+  final Color? accentColor;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = DarbColors.isDark(context);
+    final accent = accentColor ?? DarbColors.primaryOf(context);
+    final ink = DarbColors.inkOf(context);
+    final muted = DarbColors.mutedOf(context);
+
+    return DarbInteractiveCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(15),
+      borderColor: accent.withValues(alpha: isDark ? 0.30 : 0.20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: isDark ? 0.22 : 0.12),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(icon, size: 18, color: accent),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              if (onTap != null)
+                Icon(Icons.chevron_right_rounded, size: 20, color: muted),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _LedgerCell(
+                  label: primaryLabel,
+                  value: primaryValue,
+                  valueColor: accent,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 32,
+                color: DarbColors.borderOf(context),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+              ),
+              Expanded(
+                child: _LedgerCell(
+                  label: secondaryLabel,
+                  value: secondaryValue,
+                  valueColor: ink,
+                ),
+              ),
+              if (tertiaryLabel != null && tertiaryValue != null) ...[
+                Container(
+                  width: 1,
+                  height: 32,
+                  color: DarbColors.borderOf(context),
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                ),
+                Expanded(
+                  child: _LedgerCell(
+                    label: tertiaryLabel!,
+                    value: tertiaryValue!,
+                    valueColor: ink,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LedgerCell extends StatelessWidget {
+  const _LedgerCell({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+  });
+
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: DarbColors.mutedOf(context),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: valueColor,
+            fontSize: 14.5,
+            fontWeight: FontWeight.w900,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
     );
   }
 }

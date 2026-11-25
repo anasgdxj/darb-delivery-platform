@@ -1,127 +1,121 @@
 # DAZREVO Design System
 
-Version: 2026.2 (Obsidian Emerald Precision & Kinetic Topography)  
-Scope: Flutter mobile app (customer, driver, vendor, administration)  
-Source of truth: `mobile-overrides/lib/core/theme/darb_design_system.dart`
+Version: 2026.3 (Obsidian Emerald, Volt Lime & Signal Violet)  
+Scope: Flutter mobile app (`mobile-overrides/` & `darb-workspace/darb-project/mobile/`), Public Website (`/`), and Admin Operations Portal (`admin-web/`)  
+Source of truth (Mobile): `mobile-overrides/lib/core/theme/darb_design_system.dart`
 
-This document defines the shared visual, motion, and structural system for DAZREVO (formerly DARB; internal `Darb*` code symbols and `com.darb.darb` package identity are preserved). It guides UI and motion architecture without altering authentication, package identity, signing, or backend API contracts.
+This document defines the unified visual, motion, typography, and structural architecture for **DAZREVO** (**دازريفو** in Arabic; **DAZREVO** in English & Turkish). Internal `Darb*` Dart symbols, `com.darb.darb` Android/package identity, signing configuration, and `/api/v1/*` backend contracts are intentionally preserved.
 
-## Product principles
+---
 
-- Arabic-first experience with native RTL layout; English and Turkish remain fully supported (`LTR`).
-- Clear primary action on every screen (`DarbActionButton` or themed `FilledButton`). Avoid competing calls to action.
-- Real API data only. Never populate screens with fabricated stores, orders, fees, ratings, or driver availability.
-- Represent loading, empty, recoverable error, and live state explicitly on network-driven screens.
-- Preserve entered form state across recoverable errors and provide haptic + shake validation feedback (`DarbShakeBox` + `DarbHaptics`).
-- Maintain accessible contrast, clear touch targets (`>= 48dp`), and responsive layouts across small Android viewports.
-- Separate UI widgets from API/session logic cleanly.
-- Preserve Google Sign-In, MsgPlus SMS OTP, Firebase/FCM notifications, `com.darb.darb` package identity, release signing, and dual-track APK / Play Store builds.
+## 1. Product Principles
 
-## Approved visual direction: Obsidian Emerald Precision & Kinetic Topography
+- **Arabic-first RTL + English/Turkish LTR**: Every screen and web page adapts cleanly across `ar` (`RTL`), `en` (`LTR`), and `tr` (`LTR`).
+- **Clear Primary Action**: Single dominant CTA per decision block (`DarbActionButton` / primary pill action), paired with accessible touch targets (`>= 48dp` mobile, `>= 44px` web).
+- **Real Backend Data Only**: Zero synthetic stores, fake wallet balances, mock driver counts, or fabricated ratings. Every ledger strip, AI assistant, order timeline, and admin queue reads live backend APIs.
+- **Explicit Async States**: Loading (`DarbShimmer` wireframes), empty, offline cache banner, and recoverable error states preserve entered form data and give shake + haptic feedback (`DarbShakeBox` + `DarbHaptics`).
+- **Session & Platform Continuity**: Preserves Google Sign-In, MsgPlus SMS OTP, Firebase/FCM notifications, real coordinate map pickers/tracking, `com.darb.darb` package ID, release signing, and dual-track APK / Play Store releases.
 
-DAZREVO feels like a live city logistics command network: deep Obsidian Emerald hero anchors (`#12302A`), asymmetric 6:5 Bento action splits, vertical pickup-to-dropoff route connectors (`DarbRouteConnector`), animated GPU shimmer wireframes (`DarbShimmer`), spatial map HUDs, and responsive motion.
+---
 
-- **Visual hierarchy:** asymmetric Bento grids (`DarbBentoActionCard`), editorial storefront headers, and numbered step pills replace uniform stacked-box layouts; supporting details sit on layered semantic surfaces (`DarbColors.canvasOf`, `surfaceOf`, `surfaceAltOf`).
-- **Auth & Global Shell:** redesigned `LoginScreen` featuring `DarbBrandMark`, abstract geometric `DarbLoginVectorMap` artwork (zero city photos), `1 / 2 -> 2 / 2` auth step pill, LTR phone/OTP inputs with validation & 60s resend countdown, custom multi-color `_GoogleEmblem` Google Sign-In action, `_ShellActionWell` 38x38 app bar wells, and frosted floating `DarbGlassBottomNav`.
-- **Customer experience:** greeting hero, bespoke abstract geometric `DarbCitySceneCard` (zero city photos), asymmetric 6:5 Bento split (`DarbBentoActionCard` Peer Delivery + AI Order Assistant), live active-order banner with `DarbOrderTimeline`, storefront header with `DarbPulseDot` + active-in-cart mint tint, step-numbered checkout, `DarbRouteConnector` peer review/order cards, interactive map HUD legend + camera re-center in `DriverTrackingScreen`, and `DarbTypingDots` + quick-fill chips in AI Order Assistant.
-- **Driver experience:** live Neo cockpit (`DarbPulseDot` + lime border glow when online), daily summary, `DarbRouteConnector` pickup/dropoff cards, highlighted earnings strip, and status actions with double-tap protection.
-- **Vendor experience:** storefront emblem command header with `DarbPulseDot`, double-tap-locked order progression (`Accept` / `Preparing` / `Ready`), compact `DarbOrderTimeline`, and product inventory rows with category/stock pills and tonal icon wells.
-- **Administration:** multi-accent operational KPIs, storefront/vehicle approval cards with tonal icon wells, order feed with `DarbOrderTimeline` + fee/total strips, zone/city/user/audit rows with icon wells, and protected single-flight mutations.
-- **Account, Profile & Onboarding:** Obsidian Emerald hero profile card, dedicated `EditProfileScreen` (`GET /auth/me` & `PATCH /auth/me` with editable name/locale and verified read-only contact info), 5-step `DriverApplicationScreen` and `VendorApplicationScreen` wizards with draft persistence (`DarbLocalCache`) and live status tracking (`PENDING` / `APPROVED` / `REJECTED` / `SUSPENDED`), `AccountActionTile` colored icon wells, segmented Glass/Standard & Light/Dark switchers, and AI Role Assistant.
-- **Map & tracking use:** animated map camera updates and real-coordinate route polylines (`DriverTrackingScreen`) and active map pickers (`DarbMapPicker`).
+## 2. Visual Direction: Obsidian Emerald, Volt Lime & Signal Violet
 
-## Color system
+DAZREVO feels like a precision urban logistics command platform: deep Obsidian Emerald anchors (`#0B2F24`), high-visibility Volt Lime kinetic CTAs and active beacons (`#A7FF00`), Mineral Daylight cards (`#F8FAF7` / `#FFFFFF`), layered Neo Dark surfaces (`#071A14` -> `#0E281F` -> `#14352A`), and dedicated Signal Violet AI surfaces (`#8A5CF6` / `#A78BFA`).
 
-### Shared brand anchors
+- **Splash & Interactive Onboarding (`main.dart`, `onboarding_screen.dart`)**: Obsidian Emerald splash gate + 3-slide interactive `OnboardingScreen` persisted via `kDazrevoOnboardingSeenKey` (`onboarding_seen_v1`) and replayable from `LoginScreen` and `AccountScreen`.
+- **Authentication & Global Shell (`login_screen.dart`, `app_shell.dart`)**: Geometric vector network map (`DarbLoginVectorMap`, zero city photos), `DarbBrandMark`, `1 / 2 -> 2 / 2` auth step pill, LTR Syrian phone formatting + OTP countdown, custom Google emblem CTA, and Signal Violet AI command button in the shell app bar.
+- **Customer Experience (`customer_home_screen.dart`, `vendor_catalog_screen.dart`, `checkout_screen.dart`, `ai_order_assistant_screen.dart`)**: Abstract `DarbCitySceneCard` (zero city photos), 6:5 asymmetric Bento action split (`DarbBentoActionCard`), Signal Violet AI order assistant, Obsidian Emerald + Volt Lime floating cart dock, live `DarbOrderTimeline`, and spatial courier GPS tracking (`DriverTrackingScreen`).
+- **Account & Live Activity Ledger (`account_screen.dart`)**: Obsidian Emerald header card, live role-aware `DarbActivityLedgerStrip` (fetching `/orders/mine`, `/drivers/stats`, `/vendors/mine/stats`, or `/admin/stats`), dedicated `EditProfileScreen`, 5-step Driver & Vendor onboarding wizards (`DriverApplicationScreen`, `VendorApplicationScreen`), Signal Violet `AiRoleAssistantScreen`, and Glass/Standard + System/Light/Dark appearance controls.
+- **Driver, Vendor & Administration**: Unified token resolution across driver cockpit (`DarbPulseDot` + Volt Lime border when online), merchant order progression + product inventory, and multi-tab admin operations portal (`admin-web/index.html`) including an Admin AI Copilot (`POST /ai/assistant/ask`).
 
-| Token | Hex | Usage |
-|---|---|---|
-| `forest` | `#12302A` | Deep emerald brand anchor and hero dark canvas |
-| `primaryGreen` | `#167A5A` | Primary brand interactive green in Light mode |
-| `forestSoft` | `#1C4B3F` | Secondary deep emerald containers |
-| `mint` | `#B9E4D2` | Supportive highlight, selected states, brand route |
-| `lime` | `#C8F169` | High-emphasis live neo beacon (`DarbPulseDot`, badges) |
-| `danger` | `#D64545` | Destructive actions and error states |
-| `success` | `#2E7D32` | Confirmed and delivered states |
-| `warning` | `#C47B19` | Pending and attention states |
-| `info` | `#2B6EA3` | Informational alerts and status |
+---
 
-### Light semantic surfaces
+## 3. Unified Color System
+
+### Brand & Accent Anchors
 
 | Token | Hex | Usage |
 |---|---|---|
-| `canvas` | `#F6F6F3` | Main light screen background |
-| `surface` | `#FFFFFF` | Primary cards, sheets, and inputs |
-| `surfaceAlt` | `#ECEEE9` | Soft secondary containers and icon wells |
-| `ink` | `#1A2E29` | Primary text |
-| `muted` | `#687A75` | Secondary labels and hints |
-| `line` | `#D0D7D4` | Hairline borders and dividers |
-| `borderStrong` | `#B8C3BF` | Stronger interactive borders |
-| `scrim` | `#990D1C18` | Modal backdrops |
+| `forest` | `#0B2F24` | Obsidian Emerald brand anchor, dark hero containers & floating cart dock |
+| `primaryGreen` | `#0D6E4E` | High-contrast interactive primary green in Light mode |
+| `forestSoft` | `#144435` | Secondary emerald containers and dark accent washes |
+| `mint` | `#A8EBC8` | Supportive highlights, selected states, map route accents |
+| `lime` | `#A7FF00` | Volt Lime kinetic CTA, active beacons (`DarbPulseDot`), dark primary |
+| `limeInk` | `#3E6800` | Accessible high-contrast lime ink on light mineral surfaces |
+| `limeTint` | `#E7FFAD` | Soft lime tint badge background on Light mode |
+| `violet` | `#8A5CF6` | Signal Violet AI assistant accent (Light mode) |
+| `violetSoft` | `#F1EBFF` | Signal Violet tinted containers (Light mode) |
+| `danger` | `#CF3B3B` | Destructive actions and error states |
+| `success` | `#17804B` | Confirmed and delivered states |
+| `warning` | `#C67A12` | Pending and review alerts |
+| `info` | `#1E6FA8` | Informational notices |
 
-### Dark semantic surfaces
+### Light Semantic Surfaces (Mineral Daylight Canvas)
 
-Dark mode uses a dedicated Deep Emerald Neo palette (not mechanically inverted):
-
-| Semantic role | Hex | Usage |
+| Token | Hex | Usage |
 |---|---|---|
-| `darkCanvas` | `#0B1512` | App dark canvas background |
-| `darkSurface` | `#12201B` | Cards and navigation containers |
-| `darkSurfaceElevated` | `#182A24` | Dialogs, sheets, and elevated surfaces |
-| `darkSurfaceAlt` | `#1D322B` | Soft containers and inactive pills |
-| `darkInk` | `#EEF5F1` | Primary text on dark |
-| `darkMuted` | `#9CB0A7` | Secondary text on dark |
-| `darkLine` | `#263B33` | Subtle dark borders |
-| `darkBorderStrong` | `#3A544A` | Stronger boundaries on dark |
-| `darkPrimary` | `#6FE0B7` | Primary interactive emerald-mint on dark |
-| `darkOnPrimary` | `#0B1F1A` | Foreground text/icons on `darkPrimary` |
-| `darkAccent` | `#C8F169` | High-priority neo live indicator (`lime`) |
-| `darkDanger` | `#EB6B6B` | Destructive/error foreground on dark |
-| `darkSuccess` | `#54C977` | Confirmed/delivered foreground on dark |
-| `darkWarning` | `#E8B04A` | Attention/warning foreground on dark |
-| `darkInfo` | `#64ADE8` | Informational foreground on dark |
-| `darkScrim` | `#B8000000` | Modal backdrop on dark |
+| `canvas` | `#F8FAF7` | Main light background canvas |
+| `surface` | `#FFFFFF` | Cards, inputs, bottom sheets |
+| `surfaceAlt` | `#EDF2EC` | Secondary containers, pills, icon wells |
+| `ink` | `#0E221B` | Primary high-contrast typography |
+| `muted` | `#586E65` | Secondary metadata and hints |
+| `line` | `#D5DFD9` | Hairline dividers and card outlines |
+| `borderStrong` | `#B9C7BF` | Interactive focus/selected borders |
+| `scrim` | `#99071A14` | Modal overlay scrim |
 
-All screen colors resolve through `DarbColors.*Of(context)` and `Theme.of(context)`. Hard-coded screen colors are forbidden outside brand emblems (`DarbBrandMark`) and dedicated city/login hero vector artwork.
+### Dark Semantic Surfaces (Obsidian Emerald Neo Dark)
 
-## Spacing & Shape
-
-`DarbSpace`: `xxs: 4`, `xs: 8`, `sm: 12`, `md: 16`, `lg: 20`, `xl: 24`, `xxl: 32`, `section: 40`.  
-`DarbRadius`: `sm: 12`, `md: 16`, `lg: 22`, `xl: 28`, `hero: 36`, `pill: 999`.  
-`DarbElevation`: `none`, `card(isDark)`, `floating(isDark)`, `glow(color, {isDark})`.
-
-## Motion & Haptics (`DarbMotion` + `DarbHaptics`)
-
-| Token | Value | Curve / Purpose |
+| Semantic Role | Hex | Usage |
 |---|---|---|
-| `press` | `120 ms` | Tactile scale-down (`DarbPressScale`, `DarbInteractiveCard`) |
-| `fast` | `160 ms` | Micro-state & border highlight (`AnimatedContainer`) |
-| `interactive` | `220 ms` | Release spring-back & button state swap |
-| `tab` | `240 ms` | Bottom navigation tab crossfade + directional slide (`DarbTabViewStack`) |
-| `standard` | `260 ms` | Content reveal (`DarbFadeSlide`) and timeline progress |
-| `route` | `340 ms` | Push navigation (`DarbPageRoute` / `DarbPageTransitionsBuilder`) |
-| `expressive` | `420 ms` | City hero transitions & badge celebrations |
-| `staggerStep` | `55 ms` | Bounded stagger delay (`DarbMotion.staggerDelay`) |
-| `enter` / `exit` / `emphasis` | `easeOutCubic` / `easeInCubic` / `easeOutBack` | Standard motion curves |
+| `darkCanvas` | `#071A14` | App dark canvas background |
+| `darkSurface` | `#0E281F` | Primary dark cards and navigation bars |
+| `darkSurfaceElevated` | `#14352A` | Dialogs, sheets, elevated panels |
+| `darkSurfaceAlt` | `#194033` | Soft secondary containers and chips |
+| `darkInk` | `#F1F7F4` | Primary typography on dark |
+| `darkMuted` | `#9CB3A8` | Secondary labels on dark |
+| `darkLine` | `#214438` | Subtle hairline borders on dark |
+| `darkBorderStrong` | `#325E4E` | Focused dark boundaries |
+| `darkPrimary` | `#A7FF00` | Volt Lime primary action color in Dark mode |
+| `darkOnPrimary` | `#071A14` | Foreground ink on `darkPrimary` |
+| `darkViolet` | `#A78BFA` | Signal Violet AI foreground on dark |
+| `darkVioletSoft` | `#251A45` | Signal Violet AI container wash on dark |
+| `darkDanger` / `darkSuccess` / `darkWarning` / `darkInfo` | `#F06E6E` / `#5EE094` / `#F3BA52` / `#69B6EC` | Accessible semantic states on dark |
 
-Core components in `darb_motion_components.dart`, `darb_components.dart`, and `darb_city_scene.dart`:
-- `DarbActionButton`: animated state machine (`idle -> loading -> success -> error`), press scale, shake on validation/API failure, haptics.
-- `DarbInteractiveCard`: press shrink, highlighted border feedback, selection haptic.
-- `DarbBentoActionCard`: asymmetric Bento surface supporting Obsidian Emerald dark hero or Frosted Glass highlight modes with optional pill badge.
-- `DarbRouteConnector`: spatial pickup-to-dropoff logistics track with emerald origin pin, vertical gradient connector, and optional distance/fee pills.
-- `DarbShimmer`: GPU `ShaderMask` sweep animation (`1400ms`) powering multi-block skeleton loading wireframes (`DarbStateView.loading`).
-- `DarbTypingDots`: 3-dot staggered sine-wave AI thinking indicator.
-- `DarbPulseDot`: live ambient halo pulse on online/active indicators; stops cleanly when inactive or `reduceMotion` is enabled.
-- `DarbTabViewStack`: keyed `ValueKey<int>(i)` stack preserving child state, scroll positions, offscreen `TickerMode` pause, and `paintOrder` layering.
-- `DarbPageRoute`: unified fade + slide + micro-scale push transition across all feature navigation.
-- `DarbOrderTimeline`: step-by-step live order progression (store & peer tracks + cancelled banner).
-- `DarbCitySceneCard`: abstract geometric Obsidian Emerald vector backdrop (`_AbstractCityNetworkPainter`) with zero city photos and Reduce Motion compliance.
-- `DarbSearchBar`: consistent themed search input with instant clear action.
+All UI modules resolve colors exclusively via `DarbColors.*Of(context)` / `Theme.of(context)` in Flutter, and semantic CSS custom properties (`--canvas`, `--surface`, `--accent`, `--lime`, `--violet`, `--ink`) with `[data-theme="dark"]` on Web.
 
-Every animated widget checks `DarbMotion.reduceMotion(context)` and collapses durations to `Duration.zero` / stops continuous loops automatically.
+---
 
-## RTL, Localization & Security
+## 4. Typography, Spacing & Shape
 
-- Locale switcher (`ar` / `en` / `tr`) wired to `app_localizations.dart` (`dt(...)` and `t(...)`).
-- Phone numbers, OTP inputs, coordinates, and technical identifiers stay wrapped in `Directionality(textDirection: TextDirection.ltr)`.
-- Release verification gates: run `flutter analyze lib` and `flutter test` via CI (`.github/workflows/build-android-release.yml`) before merging or publishing.
+### Web & Admin Font Pairing
+- **Arabic Display & Body**: `Cairo` (weights 600–800 for headlines, 400–500 for body)
+- **Latin Display & Body**: `Plus Jakarta Sans` (weights 600–800 display, 400–600 body) paired with `IBM Plex Mono` + `tabular-nums` for fares, order IDs, coordinates, and KPI ledgers.
+
+### Spacing & Radius Scales (`darb_design_system.dart`)
+- `DarbSpace`: `xxs: 4`, `xs: 8`, `sm: 12`, `md: 16`, `lg: 20`, `xl: 24`, `xxl: 32`, `section: 40`.
+- `DarbRadius`: `sm: 12`, `md: 16`, `lg: 22`, `xl: 28`, `hero: 36`, `pill: 999`.
+- `DarbElevation`: `none`, `card(isDark)`, `floating(isDark)`, `glow(color, {isDark})`.
+
+---
+
+## 5. Motion, Haptics & Core Components
+
+`DarbMotion`: `press: 120ms`, `fast: 160ms`, `interactive: 220ms`, `tab: 240ms`, `standard: 260ms`, `route: 340ms`, `expressive: 420ms`, `staggerStep: 55ms`.  
+Curves: `enter = easeOutCubic`, `exit = easeInCubic`, `emphasis = easeOutBack`.
+
+Key reusable components in `mobile-overrides/lib/core/widgets/`:
+- `DarbActionButton`, `DarbInteractiveCard`, `DarbBentoActionCard`, `DarbRouteConnector`
+- `DarbActivityLedgerStrip`: 3-cell tabular live backend summary card for Customer/Driver/Vendor/Admin accounts
+- `DarbShimmer`, `DarbTypingDots`, `DarbPulseDot`, `DarbOrderTimeline`
+- `DarbTabViewStack` (`ValueKey<int>` + `paintOrder` + offscreen `TickerMode` pause), `DarbPageRoute`, `DarbGlassBottomNav`
+- `DarbCitySceneCard` & `DarbLoginVectorMap` (abstract vector city geometry, zero bitmap city photos)
+
+Every animated widget checks `DarbMotion.reduceMotion(context)` (and `@media (prefers-reduced-motion: reduce)` on Web) and disables continuous loops / transitions cleanly.
+
+---
+
+## 6. Verification Gates
+
+- **Mobile**: `.github/workflows/validate-mobile-overrides.yml` & `.github/workflows/build-android-release.yml` (`flutter analyze lib` and `flutter test` run in GitHub Actions CI).
+- **Public Web**: `python3 scripts/validate_public_site.py` + `.github/workflows/validate-public-web.yml`.
+- **Admin Portal**: `.github/workflows/validate-admin-portal.yml` (`node --check` on single inline `<script>` + API contract assertions).

@@ -412,8 +412,8 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                 bottom: 14 + MediaQuery.paddingOf(context).bottom,
                 child: DarbGlassSurface(
                   borderRadius: DarbRadius.xl,
-                  tintColor: DarbColors.forest.withValues(alpha: 0.95),
-                  borderColor: DarbColors.mint.withValues(alpha: 0.35),
+                  tintColor: DarbColors.forest.withValues(alpha: 0.96),
+                  borderColor: DarbColors.lime.withValues(alpha: 0.40),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Row(
@@ -424,7 +424,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: DarbColors.mint,
+                          color: DarbColors.lime,
                           borderRadius: BorderRadius.circular(DarbRadius.pill),
                         ),
                         child: AnimatedSwitcher(
@@ -440,7 +440,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                             '$_cartCount',
                             key: ValueKey(_cartCount),
                             style: const TextStyle(
-                              color: DarbColors.forest,
+                              color: DarbColors.darkCanvas,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -462,7 +462,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                             Text(
                               formatDarbMoney(_cartSubtotal),
                               style: const TextStyle(
-                                color: DarbColors.mint,
+                                color: DarbColors.lime,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 13,
                               ),
@@ -473,7 +473,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                       FilledButton(
                         style: FilledButton.styleFrom(
                           backgroundColor: DarbColors.lime,
-                          foregroundColor: DarbColors.forest,
+                          foregroundColor: DarbColors.darkCanvas,
                           minimumSize: const Size(0, 42),
                         ),
                         onPressed: _openCheckout,

@@ -727,6 +727,7 @@ class _AppShellState extends State<AppShell> {
           _ShellActionWell(
             tooltip: dt('المساعد الذكي'),
             highlighted: true,
+            violetAccent: true,
             onTap: () {
               DarbHaptics.light();
               Navigator.push(
@@ -737,7 +738,7 @@ class _AppShellState extends State<AppShell> {
             child: Icon(
               Icons.auto_awesome_rounded,
               size: 19,
-              color: DarbColors.primaryOf(context),
+              color: DarbColors.violetOf(context),
             ),
           ),
         ],
@@ -903,16 +904,19 @@ class _ShellActionWell extends StatelessWidget {
     required this.onTap,
     required this.child,
     this.highlighted = false,
+    this.violetAccent = false,
   });
 
   final String tooltip;
   final VoidCallback onTap;
   final Widget child;
   final bool highlighted;
+  final bool violetAccent;
 
   @override
   Widget build(BuildContext context) {
-    final primary = DarbColors.primaryOf(context);
+    final accent =
+        violetAccent ? DarbColors.violetOf(context) : DarbColors.primaryOf(context);
     final isDark = DarbColors.isDark(context);
 
     return Padding(
@@ -929,12 +933,12 @@ class _ShellActionWell extends StatelessWidget {
               height: 38,
               decoration: BoxDecoration(
                 color: highlighted
-                    ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
+                    ? accent.withValues(alpha: isDark ? 0.22 : 0.12)
                     : DarbColors.softSurfaceOf(context).withValues(alpha: 0.78),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: highlighted
-                      ? primary.withValues(alpha: 0.30)
+                      ? accent.withValues(alpha: 0.34)
                       : DarbColors.borderOf(context),
                 ),
               ),

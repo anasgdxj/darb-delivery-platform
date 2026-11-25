@@ -4,9 +4,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/l10n/app_localizations.dart';
 import 'core/network/api_client.dart';
 import 'core/services/notifications_service.dart';
+import 'core/storage/local_cache.dart';
 import 'core/theme/darb_design_system.dart';
 import 'core/widgets/darb_components.dart';
 import 'features/auth/login_screen.dart';
+import 'features/auth/onboarding_screen.dart';
 import 'features/shell/app_shell.dart';
 
 Future<void> main() async {
@@ -100,12 +102,21 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
 
   Future<void> _restoreSession() async {
     await Api.instance.restore();
+    final onboardingSeen = Api.instance.accessToken == null
+        ? (await DarbLocalCache.instance.readJson(kDazrevoOnboardingSeenKey)) ==
+            true
+        : true;
     await Future<void>.delayed(const Duration(milliseconds: 350));
     if (!mounted || _navigated) return;
     _navigated = true;
-    final destination = Api.instance.accessToken != null
-        ? const AppShell()
-        : const LoginScreen();
+    final Widget destination;
+    if (Api.instance.accessToken != null) {
+      destination = const AppShell();
+    } else if (onboardingSeen) {
+      destination = const LoginScreen();
+    } else {
+      destination = const OnboardingScreen();
+    }
     Navigator.of(context).pushReplacement(
       DarbPageRoute(builder: (_) => destination),
     );
@@ -118,16 +129,21 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(DarbRadius.xl),
-        color: Colors.white.withValues(alpha: 0.10),
+        color: DarbColors.forestSoft.withValues(alpha: 0.52),
         border: Border.all(
-          color: DarbColors.mint.withValues(alpha: 0.34),
-          width: 1.2,
+          color: DarbColors.lime.withValues(alpha: 0.42),
+          width: 1.3,
         ),
         boxShadow: [
           BoxShadow(
-            color: DarbColors.mint.withValues(alpha: 0.16),
-            blurRadius: 32,
+            color: DarbColors.lime.withValues(alpha: 0.16),
+            blurRadius: 34,
             spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: DarbColors.violet.withValues(alpha: 0.18),
+            blurRadius: 42,
+            offset: const Offset(-10, 12),
           ),
         ],
       ),
@@ -141,19 +157,19 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
           reduce ? emblem : ScaleTransition(scale: _emblemScale, child: emblem),
           const SizedBox(height: 22),
           Text(
-            dt('دازريفو'),
+            dt('دازريفو · DAZREVO'),
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 34,
+              fontSize: 30,
               fontWeight: FontWeight.w900,
-              letterSpacing: -0.4,
+              letterSpacing: -0.3,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             dt('كل طريق يبدأ بخطوة'),
             style: TextStyle(
-              color: DarbColors.mint.withValues(alpha: 0.94),
+              color: DarbColors.lime.withValues(alpha: 0.94),
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -164,7 +180,7 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
             height: 24,
             child: CircularProgressIndicator(
               strokeWidth: 2.4,
-              valueColor: AlwaysStoppedAnimation<Color>(DarbColors.mint),
+              valueColor: AlwaysStoppedAnimation<Color>(DarbColors.lime),
             ),
           ),
         ],
@@ -178,9 +194,9 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
+              DarbColors.darkCanvas,
               DarbColors.forest,
               DarbColors.forestSoft,
-              DarbColors.primaryGreen,
             ],
           ),
         ),

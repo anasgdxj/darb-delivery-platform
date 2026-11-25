@@ -11,58 +11,64 @@ enum DarbVisualStyle { glass, standard }
 class DarbColors {
   DarbColors._();
 
-  // Shared Brand Anchors (DARB DESIGN SYSTEM 2026 — Premium + Dynamic + Neo)
-  static const forest = Color(0xFF12302A); // Dark Green
-  static const primaryGreen = Color(0xFF167A5A); // Primary Green
-  static const forestSoft = Color(0xFF1C4B3F);
-  static const mint = Color(0xFFB9E4D2);
-  static const lime = Color(0xFFC8F169);
-  static const danger = Color(0xFFD64545); // Error
-  static const success = Color(0xFF2E7D32); // Success
-  static const warning = Color(0xFFC47B19);
-  static const info = Color(0xFF2B6EA3);
+  // DAZREVO 2026 Unified Brand Anchors (Obsidian Emerald + Volt Lime + Signal Violet)
+  static const forest = Color(0xFF0B2F24); // Deep Emerald Anchor
+  static const primaryGreen = Color(0xFF0D6E4E); // High-Contrast Light Primary
+  static const forestSoft = Color(0xFF144435);
+  static const mint = Color(0xFFA8EBC8);
+  static const lime = Color(0xFFA7FF00); // Volt Lime Kinetic Action & Live Beacon
+  static const limeInk = Color(0xFF3E6800); // Accessible Lime Text on Light
+  static const limeTint = Color(0xFFE7FFAD);
+  static const violet = Color(0xFF8A5CF6); // Signal Violet AI & Smart Highlight
+  static const violetSoft = Color(0xFFF1EBFF);
+  static const danger = Color(0xFFCF3B3B); // Error
+  static const success = Color(0xFF17804B); // Success
+  static const warning = Color(0xFFC67A12);
+  static const info = Color(0xFF1E6FA8);
 
-  // Light Semantic Surfaces
-  static const canvas = Color(0xFFF6F6F3); // Background Light
-  static const surface = Color(0xFFFFFFFF); // Surface Light
-  static const surfaceAlt = Color(0xFFECEEE9);
-  static const ink = Color(0xFF1A2E29); // Primary Text
-  static const muted = Color(0xFF687A75); // Secondary Text
-  static const line = Color(0xFFD0D7D4); // Border
-  static const borderStrong = Color(0xFFB8C3BF);
-  static const scrim = Color(0x990D1C18);
+  // Light Semantic Surfaces (Mineral Daylight Canvas)
+  static const canvas = Color(0xFFF8FAF7);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceAlt = Color(0xFFEDF2EC);
+  static const ink = Color(0xFF0E221B);
+  static const muted = Color(0xFF586E65);
+  static const line = Color(0xFFD5DFD9);
+  static const borderStrong = Color(0xFFB9C7BF);
+  static const scrim = Color(0x99071A14);
 
   // Compatibility aliases & soft semantic tints
   static const primary = primaryGreen;
   static const surfaceSoft = surfaceAlt;
   static const border = line;
-  static const mintTint = Color(0xFFE5F4ED);
+  static const mintTint = Color(0xFFE1F6EB);
   static const dangerSoft = Color(0xFFFDECEC);
   static const warningSoft = Color(0xFFFCF3E3);
-  static const infoSoft = Color(0xFFEAF4FB);
+  static const infoSoft = Color(0xFFE9F4FC);
 
-  // Dark Semantic Surfaces (Deep Emerald Neo Dark Palette; not mechanically inverted)
-  static const darkCanvas = Color(0xFF0B1512);
-  static const darkSurface = Color(0xFF12201B);
-  static const darkSurfaceElevated = Color(0xFF182A24);
+  // Dark Semantic Surfaces (Layered Obsidian Emerald Neo Dark — never inverted)
+  static const darkCanvas = Color(0xFF071A14);
+  static const darkSurface = Color(0xFF0E281F);
+  static const darkSurfaceElevated = Color(0xFF14352A);
   static const darkSurfaceHigh = darkSurfaceElevated;
-  static const darkSurfaceAlt = Color(0xFF1D322B);
-  static const darkInk = Color(0xFFEEF5F1);
-  static const darkMuted = Color(0xFF9CB0A7);
-  static const darkLine = Color(0xFF263B33);
+  static const darkSurfaceAlt = Color(0xFF194033);
+  static const darkInk = Color(0xFFF1F7F4);
+  static const darkMuted = Color(0xFF9CB3A8);
+  static const darkLine = Color(0xFF214438);
   static const darkBorder = darkLine;
-  static const darkBorderStrong = Color(0xFF3A544A);
-  static const darkPrimary = Color(0xFF6FE0B7);
-  static const darkOnPrimary = Color(0xFF0B1F1A);
+  static const darkBorderStrong = Color(0xFF325E4E);
+  static const darkPrimary = lime;
+  static const darkOnPrimary = Color(0xFF071A14);
   static const darkAccent = lime;
-  static const darkScrim = Color(0xB8000000);
-  static const darkDanger = Color(0xFFEB6B6B);
-  static const darkDangerSoft = Color(0xFF3B1E21);
-  static const darkSuccess = Color(0xFF54C977);
-  static const darkWarning = Color(0xFFE8B04A);
+  static const darkViolet = Color(0xFFA78BFA);
+  static const darkVioletSoft = Color(0xFF251A45);
+  static const darkScrim = Color(0xC2000000);
+  static const darkDanger = Color(0xFFF06E6E);
+  static const darkDangerSoft = Color(0xFF3A1D21);
+  static const darkSuccess = Color(0xFF5EE094);
+  static const darkWarning = Color(0xFFF3BA52);
   static const darkWarningSoft = Color(0xFF382914);
-  static const darkInfo = Color(0xFF64ADE8);
-  static const darkInfoSoft = Color(0xFF162C3D);
+  static const darkInfo = Color(0xFF69B6EC);
+  static const darkInfoSoft = Color(0xFF142D40);
 
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
@@ -100,7 +106,19 @@ class DarbColors {
       isDark(context) ? darkOnPrimary : Colors.white;
 
   static Color accentOf(BuildContext context) =>
-      isDark(context) ? darkAccent : forest;
+      isDark(context) ? lime : forest;
+
+  static Color limeOf(BuildContext context) =>
+      isDark(context) ? lime : limeInk;
+
+  static Color limeTintOf(BuildContext context) =>
+      isDark(context) ? forestSoft : limeTint;
+
+  static Color violetOf(BuildContext context) =>
+      isDark(context) ? darkViolet : violet;
+
+  static Color violetSoftOf(BuildContext context) =>
+      isDark(context) ? darkVioletSoft : violetSoft;
 
   static Color dangerOf(BuildContext context) =>
       isDark(context) ? darkDanger : danger;
@@ -169,7 +187,7 @@ class DarbElevation {
   static List<BoxShadow> card(bool isDark) => [
         BoxShadow(
           color: (isDark ? Colors.black : DarbColors.forest)
-              .withValues(alpha: isDark ? 0.30 : 0.055),
+              .withValues(alpha: isDark ? 0.34 : 0.06),
           blurRadius: isDark ? 18 : 14,
           offset: const Offset(0, 6),
         ),
@@ -178,15 +196,15 @@ class DarbElevation {
   static List<BoxShadow> floating(bool isDark) => [
         BoxShadow(
           color: (isDark ? Colors.black : DarbColors.forest)
-              .withValues(alpha: isDark ? 0.44 : 0.11),
-          blurRadius: 26,
+              .withValues(alpha: isDark ? 0.48 : 0.12),
+          blurRadius: 28,
           offset: const Offset(0, 10),
         ),
       ];
 
   static List<BoxShadow> glow(Color color, {bool isDark = false}) => [
         BoxShadow(
-          color: color.withValues(alpha: isDark ? 0.28 : 0.18),
+          color: color.withValues(alpha: isDark ? 0.30 : 0.20),
           blurRadius: isDark ? 24 : 20,
           offset: const Offset(0, 6),
         ),
@@ -503,11 +521,16 @@ class DarbTheme {
       primary: primary,
       onPrimary: onPrimary,
       primaryContainer: isDark ? DarbColors.forestSoft : DarbColors.mintTint,
-      onPrimaryContainer: isDark ? DarbColors.mint : DarbColors.forest,
-      secondary: isDark ? DarbColors.lime : DarbColors.forest,
-      onSecondary: isDark ? DarbColors.forest : Colors.white,
+      onPrimaryContainer: isDark ? DarbColors.lime : DarbColors.forest,
+      secondary: isDark ? DarbColors.darkViolet : DarbColors.forest,
+      onSecondary: isDark ? DarbColors.darkCanvas : Colors.white,
       secondaryContainer: softSurf,
       onSecondaryContainer: ink,
+      tertiary: isDark ? DarbColors.darkViolet : DarbColors.violet,
+      onTertiary: Colors.white,
+      tertiaryContainer:
+          isDark ? DarbColors.darkVioletSoft : DarbColors.violetSoft,
+      onTertiaryContainer: isDark ? DarbColors.darkViolet : DarbColors.violet,
       error: danger,
       onError: Colors.white,
       surface: surf,
@@ -543,7 +566,7 @@ class DarbTheme {
           color: ink,
           fontSize: 24,
           fontWeight: FontWeight.w900,
-          letterSpacing: -0.3,
+          letterSpacing: -0.4,
         ),
         titleLarge: TextStyle(
           color: ink,
@@ -653,8 +676,8 @@ class DarbTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isDark
-            ? DarbColors.darkSurfaceElevated.withValues(alpha: 0.90)
-            : Colors.white.withValues(alpha: 0.95),
+            ? DarbColors.darkSurfaceElevated.withValues(alpha: 0.92)
+            : Colors.white.withValues(alpha: 0.96),
         hintStyle: TextStyle(color: muted, fontSize: 14),
         labelStyle: TextStyle(color: muted, fontWeight: FontWeight.w600),
         contentPadding:
@@ -677,14 +700,17 @@ class DarbTheme {
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? DarbColors.forestSoft : DarbColors.forest,
+        backgroundColor: isDark ? DarbColors.darkSurfaceElevated : DarbColors.forest,
         contentTextStyle: const TextStyle(
           color: Colors.white,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
         ),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DarbRadius.md),
+          side: BorderSide(
+            color: DarbColors.lime.withValues(alpha: isDark ? 0.35 : 0.25),
+          ),
         ),
       ),
       switchTheme: SwitchThemeData(
@@ -701,7 +727,7 @@ class DarbTheme {
       chipTheme: ChipThemeData(
         backgroundColor: softSurf,
         selectedColor: isDark ? DarbColors.forestSoft : DarbColors.mintTint,
-        checkmarkColor: isDark ? DarbColors.mint : DarbColors.forest,
+        checkmarkColor: isDark ? DarbColors.lime : DarbColors.forest,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         labelStyle: TextStyle(
           color: ink,
@@ -709,7 +735,7 @@ class DarbTheme {
           fontSize: 12.5,
         ),
         secondaryLabelStyle: TextStyle(
-          color: isDark ? DarbColors.mint : DarbColors.forest,
+          color: isDark ? DarbColors.lime : DarbColors.forest,
           fontWeight: FontWeight.w800,
           fontSize: 12.5,
         ),

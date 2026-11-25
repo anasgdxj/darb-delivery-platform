@@ -69,25 +69,30 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
             Expanded(
               child: _messages.isEmpty
                   ? Center(
-                      child: SingleChildScrollView(
+                    child: SingleChildScrollView(
                         padding: const EdgeInsets.all(24),
                         child: DarbGlassSurface(
                           padding: const EdgeInsets.all(22),
+                          borderColor:
+                              DarbColors.violetOf(context).withValues(alpha: 0.34),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
-                                width: 54,
-                                height: 54,
+                                width: 56,
+                                height: 56,
                                 decoration: BoxDecoration(
-                                  color: DarbColors.primaryOf(context)
-                                      .withValues(alpha: 0.14),
+                                  color: DarbColors.violetSoftOf(context),
                                   shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: DarbColors.violetOf(context)
+                                        .withValues(alpha: 0.35),
+                                  ),
                                 ),
                                 child: Icon(
                                   Icons.auto_awesome_rounded,
                                   size: 28,
-                                  color: DarbColors.primaryOf(context),
+                                  color: DarbColors.violetOf(context),
                                 ),
                               ),
                               const SizedBox(height: 14),
@@ -111,7 +116,7 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                                       avatar: Icon(
                                         Icons.bolt_rounded,
                                         size: 16,
-                                        color: DarbColors.primaryOf(context),
+                                        color: DarbColors.violetOf(context),
                                       ),
                                       label: Text(
                                         prompt,
@@ -151,7 +156,8 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                                   bottomEnd: Radius.circular(18),
                                 ),
                                 border: Border.all(
-                                  color: DarbColors.borderOf(context),
+                                  color: DarbColors.violetOf(context)
+                                      .withValues(alpha: 0.35),
                                 ),
                               ),
                               child: const DarbTypingDots(),
@@ -197,9 +203,10 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                                       ? DarbColors.dangerOf(context)
                                           .withValues(alpha: 0.35)
                                       : (msg.isUser
-                                          ? DarbColors.mint
-                                              .withValues(alpha: 0.25)
-                                          : DarbColors.borderOf(context)),
+                                          ? DarbColors.lime
+                                              .withValues(alpha: 0.32)
+                                          : DarbColors.violetOf(context)
+                                              .withValues(alpha: 0.25)),
                                 ),
                               ),
                               child: Text(
@@ -226,6 +233,8 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                 padding: const EdgeInsets.fromLTRB(14, 6, 14, 12),
                 child: DarbGlassSurface(
                   borderRadius: DarbRadius.xl,
+                  borderColor:
+                      DarbColors.violetOf(context).withValues(alpha: 0.30),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: Row(
                     children: [
@@ -244,21 +253,22 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                       ),
                       IconButton.filled(
                         style: IconButton.styleFrom(
-                          backgroundColor: DarbColors.primaryOf(context),
+                          backgroundColor: DarbColors.violetOf(context),
+                          foregroundColor: Colors.white,
                         ),
                         onPressed: _sending ? null : _send,
                         icon: _sending
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: DarbColors.onPrimaryOf(context),
+                                  color: Colors.white,
                                 ),
                               )
-                            : Icon(
+                            : const Icon(
                                 Icons.send_rounded,
-                                color: DarbColors.onPrimaryOf(context),
+                                color: Colors.white,
                               ),
                       ),
                     ],

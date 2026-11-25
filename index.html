@@ -1,162 +1,341 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#12302A">
-<meta name="description" content="دازريفو (DAZREVO) منصة توصيل سورية تجمع طلبات المتاجر المحلية والتوصيل المستقل والسائقين في تجربة واحدة. اطلب من المتاجر أو أرسل طردك وتابع مشوارك بسهولة.">
-<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
-<meta name="googlebot" content="index,follow">
-<meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="color-scheme" content="light dark">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="ar_SY">
-<meta property="og:site_name" content="دازريفو | DAZREVO">
-<meta property="og:title" content="دازريفو | DAZREVO — تطبيق توصيل وطلبات المتاجر في سوريا">
-<meta property="og:description" content="اطلب من المتاجر المحلية أو أرسل طردك مع سائق مستقل. دازريفو يجمع خدمات التوصيل في تجربة واحدة.">
-<meta property="og:url" content="https://anasgdxj.github.io/darb-delivery-platform/">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="دازريفو | DAZREVO — كل مشوار إله طريق">
-<meta name="twitter:description" content="طلبات المتاجر والتوصيل المستقل في سوريا عبر تطبيق دازريفو (DAZREVO).">
-<link rel="canonical" href="https://anasgdxj.github.io/darb-delivery-platform/">
-<link rel="alternate" hreflang="ar-SY" href="https://anasgdxj.github.io/darb-delivery-platform/">
-<link rel="alternate" hreflang="x-default" href="https://anasgdxj.github.io/darb-delivery-platform/">
-<link rel="alternate" hreflang="en" href="https://anasgdxj.github.io/darb-delivery-platform/en/">
-<link rel="alternate" hreflang="tr" href="https://anasgdxj.github.io/darb-delivery-platform/tr/">
-<link rel="manifest" href="./site.webmanifest">
-<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; upgrade-insecure-requests">
-<title>دازريفو | DAZREVO — تطبيق توصيل وطلبات المتاجر</title>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://anasgdxj.github.io/darb-delivery-platform/#organization",
-      "name": "دازريفو",
-      "alternateName": "DAZREVO",
-      "url": "https://anasgdxj.github.io/darb-delivery-platform/",
-      "description": "منصة توصيل سورية تجمع المتاجر المحلية والسائقين المستقلين وخدمات توصيل الطلبات."
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://anasgdxj.github.io/darb-delivery-platform/#website",
-      "url": "https://anasgdxj.github.io/darb-delivery-platform/",
-      "name": "دازريفو",
-      "alternateName": "DAZREVO",
-      "inLanguage": "ar-SY",
-      "publisher": {"@id": "https://anasgdxj.github.io/darb-delivery-platform/#organization"}
-    },
-    {
-      "@type": "MobileApplication",
-      "name": "دازريفو",
-      "alternateName": "DAZREVO",
-      "applicationCategory": "TravelApplication",
-      "operatingSystem": "Android",
-      "description": "تطبيق توصيل وطلبات متاجر في سوريا يربط العملاء بالمتاجر والسائقين المستقلين.",
-      "url": "https://anasgdxj.github.io/darb-delivery-platform/",
-      "downloadUrl": "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk",
-      "inLanguage": ["ar", "en", "tr"]
-    }
-  ]
-}
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./assets/css/site.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0B2F24">
+  <meta name="description" content="دازريفو (DAZREVO) منصة توصيل سورية تجمع طلبات المتاجر المحلية والتوصيل المستقل والسائقين والمساعد الذكي في تجربة واحدة.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="googlebot" content="index,follow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ar_SY">
+  <meta property="og:site_name" content="دازريفو | DAZREVO">
+  <meta property="og:title" content="دازريفو | DAZREVO — منصة التوصيل الذكية وطلبات المتاجر">
+  <meta property="og:description" content="اطلب من المتاجر المحلية أو أرسل طردك مع سائق مستقل وتابع التوصيل لحظة بلحظة عبر دازريفو (DAZREVO).">
+  <meta property="og:url" content="https://anasgdxj.github.io/darb-delivery-platform/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="دازريفو | DAZREVO — توصيل ذكي من الباب إلى الباب">
+  <meta name="twitter:description" content="طلبات المتاجر والتوصيل المستقل في سوريا عبر تطبيق دازريفو (DAZREVO).">
+  <link rel="canonical" href="https://anasgdxj.github.io/darb-delivery-platform/">
+  <link rel="alternate" hreflang="ar-SY" href="https://anasgdxj.github.io/darb-delivery-platform/">
+  <link rel="alternate" hreflang="en" href="https://anasgdxj.github.io/darb-delivery-platform/en/">
+  <link rel="alternate" hreflang="tr" href="https://anasgdxj.github.io/darb-delivery-platform/tr/">
+  <link rel="alternate" hreflang="x-default" href="https://anasgdxj.github.io/darb-delivery-platform/">
+  <link rel="manifest" href="./site.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; upgrade-insecure-requests">
+  <title>دازريفو | DAZREVO — منصة التوصيل الذكية وطلبات المتاجر</title>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://anasgdxj.github.io/darb-delivery-platform/#organization",
+        "name": "دازريفو",
+        "alternateName": "DAZREVO",
+        "url": "https://anasgdxj.github.io/darb-delivery-platform/",
+        "description": "منصة توصيل سورية تجمع المتاجر المحلية والسائقين المستقلين وخدمات توصيل الطلبات."
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://anasgdxj.github.io/darb-delivery-platform/#website",
+        "url": "https://anasgdxj.github.io/darb-delivery-platform/",
+        "name": "دازريفو",
+        "alternateName": "DAZREVO",
+        "inLanguage": "ar-SY",
+        "publisher": {"@id": "https://anasgdxj.github.io/darb-delivery-platform/#organization"}
+      },
+      {
+        "@type": "MobileApplication",
+        "name": "دازريفو",
+        "alternateName": "DAZREVO",
+        "applicationCategory": "TravelApplication",
+        "operatingSystem": "Android",
+        "description": "تطبيق توصيل وطلبات متاجر في سوريا يربط العملاء بالمتاجر والسائقين المستقلين مع تتبع مباشر ومساعد ذكي.",
+        "url": "https://anasgdxj.github.io/darb-delivery-platform/",
+        "downloadUrl": "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk",
+        "inLanguage": ["ar", "en", "tr"]
+      }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/site.css">
 </head>
 <body>
-<a class="skip-link" href="#main">انتقل إلى المحتوى</a>
-<header class="site-header">
- <div class="wrap nav">
-  <a class="brand" href="#" aria-label="دازريفو - الصفحة الرئيسية">
-   <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 18.5 9.2 5.5h5.1L19 18.5M8 14.5h8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-   <span>دازريفو</span>
-  </a>
-  <nav class="nav-links" aria-label="التنقل الرئيسي"><a href="#services">ماذا يقدم دازريفو؟</a><a href="#coverage">التغطية</a><a href="#how">كيف يعمل؟</a><a href="#download">التطبيق</a></nav>
-  <div class="nav-actions">
-   <div class="language-links" aria-label="اختر اللغة"><a href="./" aria-current="page">عربي</a><a href="./en/">EN</a><a href="./tr/">TR</a></div>
-   <button class="theme-toggle" id="themeToggle" type="button" aria-label="تبديل المظهر" title="تبديل المظهر"><svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button>
-   <a class="btn btn-primary" href="#download">حمّل دازريفو <span aria-hidden="true">←</span></a>
-   <button class="menu-toggle" id="menuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  </div>
- </div>
- <nav class="mobile-panel" id="mobilePanel" aria-label="قائمة الهاتف"><a href="#services">ماذا يقدم دازريفو؟</a><a href="#coverage">التغطية</a><a href="#how">كيف يعمل؟</a><a href="#download">تنزيل التطبيق</a></nav>
-</header>
-<main id="main">
- <section class="hero">
-  <div class="wrap hero-layout">
-   <div class="hero-copy">
-    <div class="eyebrow">من تفاصيل يومك… إلى باب بيتك</div>
-    <h1>مشوارك أسهل، مع <em>دازريفو.</em></h1>
-    <p>طلب أغراضك من المتاجر القريبة، أو إرسال غرض لشخص بتحبه، صار أبسط. دازريفو يجمع أصحاب المتاجر والسائقين المستقلين والناس بمكان واحد.</p>
-    <div class="hero-actions"><a class="btn btn-primary" href="#download">اكتشف تطبيق دازريفو <span aria-hidden="true">←</span></a><a class="btn btn-quiet" href="#how">شوف كيف بيشتغل</a></div>
-    <div class="hero-note"><span class="note-avatars" aria-hidden="true"><span>د</span><span>ا</span><span>ز</span></span><span>من طلب صغير إلى مشوار كامل — كل شيء أوضح من البداية.</span></div>
-   </div>
-   <div class="hero-art" role="img" aria-label="رسم توضيحي لمسار توصيل يربط نقطة الاستلام بنقطة الوصول">
-    <div class="art-grid"></div><div class="art-glow"></div>
-    <svg class="route-art" viewBox="0 0 520 440" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-     <path class="route-path" d="M90 305 C130 260 140 220 205 220 S280 300 340 250 370 145 435 120"/>
-     <circle class="route-halo" cx="90" cy="305" r="25"/><circle class="route-pin" cx="90" cy="305" r="9"/>
-     <circle class="route-halo" cx="435" cy="120" r="25"/><circle class="route-pin end" cx="435" cy="120" r="9"/>
-     <path d="M160 90h92M160 105h56M330 345h85M330 360h48" stroke="#B9E4D2" stroke-opacity=".28" stroke-width="2" stroke-linecap="round"/>
-     <circle cx="260" cy="220" r="5" fill="#D8EF8A"/><circle cx="340" cy="250" r="4" fill="#F1A78C"/>
-    </svg>
-    <div class="parcel-card"><span class="parcel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Z"/><path d="m3 7 9 4 9-4M12 11v10M7.5 5 16 9"/></svg></span><span><strong>طلبك بالطريق</strong><small>من نقطة الاستلام لبابك</small></span></div>
-    <div class="route-label"><span class="live-dot"></span><span><strong>كل خطوة واضحة</strong><small>استلام · طريق · وصول</small></span></div>
-    <div class="art-index">DAZREVO / YOUR EVERYDAY ROUTE</div>
-   </div>
-  </div>
- </section>
- <section class="trust-strip" aria-label="مزايا دازريفو">
-  <div class="wrap trust-inner"><div class="trust-lead">مصمم ليجمع أطراف التوصيل في تجربة واحدة</div><div class="trust-points">
-   <div class="trust-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16v13H4zM8 7V4h8v3M8 12h8m-8 4h5"/></svg>متاجر محلية</div>
-   <div class="trust-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M4 17H2V8h11l5 5h3v4h-1M13 8v5h5M7 14h4"/></svg>سائقون مستقلون</div>
-   <div class="trust-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8m0-12.8L5.6 18.4"/></svg>تتبع ومتابعة</div>
-  </div></div>
- </section>
- <section class="section" id="services">
-  <div class="wrap">
-   <div class="section-head"><div class="section-kicker">مسارات دازريفو</div><h2>أكثر من طريقة… ووجهة واحدة.</h2><p>كل خدمة إلها مسارها الواضح، سواء كنت عم تطلب من متجر أو بدك تبعت غرض أو تشتغل كسائق.</p></div>
-   <div class="services-grid">
-    <article class="service primary"><div><div class="service-top"><span class="service-number">01 / SHOP</span><span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9h16l-1.5 11h-13L4 9Z"/><path d="m6 9 2-5h8l2 5M9 13v3m6-3v3"/></svg></span></div><h3>متاجرك المفضلة، أقرب مما تتوقع.</h3><p>تصفح المنتجات من المتاجر المحلية، راجع تفاصيل طلبك وتكلفة التوصيل، وتابع الطلب من التجهيز حتى الاستلام.</p></div><div class="service-foot">للطلبات اليومية والمشتريات <span>←</span></div></article>
-    <article class="service"><div class="service-top"><span class="service-number">02 / DELIVERY</span><span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span></div><h3>عندك غرض لازم يوصل؟</h3><p>حدد الاستلام والتسليم، واستقبل عروض أجرة من السائقين المستقلين واختر العرض الأنسب.</p></article>
-    <article class="service"><div class="service-top"><span class="service-number">03 / DRIVERS</span><span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M4 17H2V8h11l5 5h3v4h-1M13 8v5h5M7 14h4"/></svg></span></div><h3>اشتغل على دازريفو بطريقتك.</h3><p>كسائق مستقل، تابع الطلبات المتاحة وقدّم عروضك ونظّم رحلاتك بحسب وقتك ووسيلة نقلك.</p></article>
-    <article class="service"><div class="service-top"><span class="service-number">04 / SMART TOOLS</span><span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 14 9l6 3-6 2-2 7-2-7-6-2 6-3 2-6Z"/></svg></span></div><h3>أدوات تساعد المتاجر تكبر.</h3><p>إدارة المنتجات والمخزون والطلبات من مكان واحد، مع أدوات ذكية لتسهيل تجهيز الطلبات.</p></article>
-   </div>
-  </div>
- </section>
- <section class="section coverage" id="coverage">
-  <div class="wrap coverage-layout">
-   <div><div class="section-kicker">نبدأ من هون</div><div class="section-head"><h2>قريبين من الناس، حيّاً بعد حيّ.</h2><p>دازريفو مبني ليتوسع تدريجياً حسب جاهزية الخدمة وتوفر المتاجر والسائقين في كل منطقة.</p></div><div class="coverage-note">اختر مدينة لتشوف رمزها ضمن شبكة التغطية. تفاصيل التوفر الفعلي داخل التطبيق هي المرجع عند إنشاء الطلب.</div></div>
-   <div class="city-board"><div class="city-board-head"><strong>مدن ضمن خريطة دازريفو</strong><span class="coverage-badge">شبكة قابلة للتوسع</span></div>
-    <div class="city-list" role="group" aria-label="اختر مدينة">
-     <button class="city-chip" type="button" data-city="damascus" aria-pressed="true"><span>دمشق</span><small>DAM</small><i></i></button>
-     <button class="city-chip" type="button" data-city="aleppo" aria-pressed="false"><span>حلب</span><small>ALE</small><i></i></button>
-     <button class="city-chip" type="button" data-city="homs" aria-pressed="false"><span>حمص</span><small>HMS</small><i></i></button>
-     <button class="city-chip" type="button" data-city="hama" aria-pressed="false"><span>حماة</span><small>HMA</small><i></i></button>
-     <button class="city-chip" type="button" data-city="latakia" aria-pressed="false"><span>اللاذقية</span><small>LAT</small><i></i></button>
+  <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="./" aria-label="دازريفو - الصفحة الرئيسية">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M6.5 18V6h5.5c4.1 0 6.5 2.4 6.5 6s-2.4 6-6.5 6H6.5Z" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/>
+            <circle cx="12.5" cy="12" r="2" fill="#8A5CF6"/>
+          </svg>
+        </span>
+        <span>دازريفو</span>
+      </a>
+      <nav class="nav-links" aria-label="التنقل الرئيسي">
+        <a href="#services">الخدمات</a>
+        <a href="#coverage">التغطية</a>
+        <a href="./drivers/">السائقون</a>
+        <a href="./merchants/">المتاجر</a>
+        <a href="./faq/">الأسئلة</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="language-links" aria-label="تبديل اللغة">
+          <a href="./" aria-current="page">عربي</a>
+          <a href="./en/">EN</a>
+          <a href="./tr/">TR</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="تبديل المظهر" title="تبديل المظهر">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
+          </svg>
+        </button>
+        <a class="btn btn-primary" href="#download">تنزيل التطبيق</a>
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
+      </div>
     </div>
-    <div class="city-detail" aria-live="polite"><div><strong id="cityName">دمشق</strong><p id="cityDescription">نقطة انطلاق شبكة دازريفو ومساراتها.</p></div><span class="city-code" id="cityCode">DAMASCUS / SY</span></div>
-   </div>
-  </div>
- </section>
- <section class="section" id="how">
-  <div class="wrap"><div class="section-head"><div class="section-kicker">ببساطة</div><h2>من أول خطوة… لحد ما يوصل.</h2><p>التجربة واضحة، والمعلومات المهمة بتكون قدامك قبل ما تأكد طلبك.</p></div>
-   <div class="steps">
-    <article class="step"><h3>حدد شو بدك</h3><p>اختار منتجات من متجر، أو أنشئ طلب توصيل مستقل وحدد نقطة الاستلام والوصول.</p></article>
-    <article class="step"><h3>راجع التفاصيل</h3><p>شوف تفاصيل الطلب ورسومه، أو قارن عروض السائقين قبل اختيار العرض المناسب.</p></article>
-    <article class="step"><h3>تابع لحد الوصول</h3><p>تابع حالة الطلب ومراحله من داخل التطبيق، وخليك على اطلاع بكل تحديث.</p></article>
-   </div>
-  </div>
- </section>
- <section class="download-section" id="download">
-  <div class="wrap"><div class="download-card"><div class="download-copy"><div class="download-kicker">دازريفو معك وين ما كان مشوارك</div><h2>جاهز تجرّب طريق أسهل؟</h2><p>نزّل تطبيق دازريفو على أندرويد وابدأ استكشاف خدمات المتاجر والتوصيل المستقل.</p></div><div class="download-action"><a class="btn" id="downloadBtn" href="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" download="dazrevo-app-release.apk">تنزيل تطبيق أندرويد <span aria-hidden="true">↓</span></a><small id="downloadStatus" aria-live="polite">ملف APK من إصدار دازريفو الرسمي</small></div></div></div>
- </section>
-</main>
-<footer><div class="wrap footer-row"><div><span class="footer-brand">دازريفو</span> · <span id="year"></span> — كل مشوار إله طريق.</div><nav class="footer-links" aria-label="روابط أسفل الصفحة"><a href="#services">الخدمات</a><a href="#coverage">التغطية</a><a href="#how">كيف يعمل؟</a><a href="#download">تنزيل التطبيق</a></nav></div></footer>
-<script src="./assets/js/site.js" defer></script>
+    <nav class="mobile-panel" id="mobilePanel" aria-label="قائمة الهاتف">
+      <a href="#services">الخدمات</a>
+      <a href="#coverage">التغطية</a>
+      <a href="./drivers/">السائقون</a>
+      <a href="./merchants/">المتاجر</a>
+      <a href="./faq/">الأسئلة الشائعة</a>
+      <a href="#download">تنزيل التطبيق</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap hero-layout">
+        <div class="hero-copy">
+          <div class="kicker-line">دازريفو · منصة التوصيل والطلبات في سوريا</div>
+          <h1>طلباتك ومشاويرك على <span>مسار واحد</span> أسرع.</h1>
+          <p>اطلب احتياجاتك من المتاجر المحلية، أو أرسل غرضاً بين أي نقطتين بعروض مباشرة من المناديب، مع تتبع حي عبر الخريطة ومساعد ذكي يصيغ طلبك خلال ثوانٍ.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#download">تحميل تطبيق أندرويد</a>
+            <a class="btn btn-quiet" href="#how">كيف يعمل النظام</a>
+          </div>
+          <div class="hero-meta">
+            <span>العربية · English · Türkçe</span>
+            <span aria-hidden="true">·</span>
+            <span>دفع نقدي عند الاستلام</span>
+            <span aria-hidden="true">·</span>
+            <span>تتبّع GPS لحظي</span>
+          </div>
+        </div>
+
+        <div class="hero-art" role="img" aria-label="رسم هندسي لمسار توصيل دازريفو يربط المتجر ونقطة التسليم">
+          <div class="art-grid"></div>
+          <div class="art-glow"></div>
+          <svg class="route-art" viewBox="0 0 520 260" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <path class="route-ai-path" d="M84 196 C150 90 250 175 340 86"/>
+            <path class="route-path" d="M84 196 C145 196 175 126 254 126 S360 156 432 68"/>
+            <circle class="route-halo" cx="84" cy="196" r="24"/>
+            <circle class="route-pin" cx="84" cy="196" r="9"/>
+            <circle class="route-halo" cx="432" cy="68" r="24"/>
+            <circle class="route-pin end" cx="432" cy="68" r="9"/>
+            <circle cx="254" cy="126" r="6" fill="#A7FF00"/>
+          </svg>
+          <div class="art-panels">
+            <div class="art-panel">
+              <strong>توصيل من الباب إلى الباب</strong>
+              <small>مسارات متاجر وعروض سائقين مستقلين</small>
+            </div>
+            <div class="art-panel ai-accent">
+              <strong>مساعد دازريفو الذكي</strong>
+              <small>تحويل الرسائل النصية إلى طلب جاهز</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="role-band" aria-label="مسارات المستخدمين">
+      <div class="wrap">
+        <div class="role-head">
+          <h2>اختر دورك في منظومة دازريفو</h2>
+          <div class="segmented" role="group" aria-label="تبديل نوع الحساب">
+            <button type="button" data-role="customer" aria-pressed="true">العميل</button>
+            <button type="button" data-role="driver" aria-pressed="false">المندوب</button>
+            <button type="button" data-role="merchant" aria-pressed="false">التاجر</button>
+          </div>
+        </div>
+        <div class="role-panel" aria-live="polite">
+          <div>
+            <h3 id="roleTitle">للعملاء: اطلب من المتاجر أو أرسل طرداً مستقلاً</h3>
+            <p id="roleBody">تصفح المتاجر القريبة، أو حدد نقطتي استلام وتسليم لتصلك عروض أجرة السائقين، أو اكتب طلبك بالعربية لمساعد دازريفو الذكي.</p>
+          </div>
+          <div class="role-points" id="rolePoints">
+            <div>الدفع نقداً عند الاستلام مع ملخص رسوم واضح قبل التأكيد</div>
+            <div>تتبّع مباشر لموقع المندوب عبر الخريطة وإشعارات فورية لكل مرحلة</div>
+            <div>صياغة ذكية للطلبات النصية وتحويلها إلى مسودة جاهزة</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-kicker">خدمات المنصة</div>
+          <h2>أربعة مسارات متكاملة في تطبيق واحد.</h2>
+          <p>تصميم عملي يخدم العملاء والمتاجر والمناديب وإدارة المدن بنفس الدقة والوضوح.</p>
+        </div>
+        <div class="services-grid">
+          <article class="service primary">
+            <div>
+              <div class="service-top">
+                <span class="service-number">01</span>
+                <span class="service-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 9h16l-1.5 11h-13L4 9Z"/><path d="m6 9 2-5h8l2 5"/></svg>
+                </span>
+              </div>
+              <h3>الطلب المباشر من المتاجر المحلية.</h3>
+              <p>تصفح المطاعم والأسواق القريبة، قارن المنتجات والكميات المتاحة، واحسب رسوم التوصيل قبل تأكيد الطلب والدفع عند الاستلام.</p>
+            </div>
+            <div class="service-foot">المتاجر المفتوحة وتقدير الرسوم لحظياً</div>
+          </article>
+
+          <article class="service">
+            <div class="service-top">
+              <span class="service-number">02</span>
+              <span class="service-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 7h13v10H3z"/><path d="M16 10h4l2 3v4h-6z"/></svg>
+              </span>
+            </div>
+            <h3>التوصيل المستقل بعروض السائقين</h3>
+            <p>حدّد نقطتي الاستلام والتسليم على الخريطة، واستقبل عروض الأجرة من المناديب القريبين واختر العرض الأنسب.</p>
+          </article>
+
+          <article class="service ai-card">
+            <div class="service-top">
+              <span class="service-number">03</span>
+              <span class="service-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3 14.2 9.2 20.5 11.5 14.2 13.8 12 20 9.8 13.8 3.5 11.5 9.8 9.2 12 3Z"/></svg>
+              </span>
+            </div>
+            <h3>مساعد دازريفو الذكي</h3>
+            <p>اكتب طلبك بلغة طبيعية لتحصل على مسودة منظمة، أو استشر المساعد حول طلباتك ومهامك وفق دور حسابك.</p>
+          </article>
+
+          <article class="service">
+            <div class="service-top">
+              <span class="service-number">04</span>
+              <span class="service-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              </span>
+            </div>
+            <h3>بوابة المناديب والمتاجر</h3>
+            <p>إدارة المخزون، قبول الطلبات بضغطة واحدة، تتبّع الأرباح الحقيقية، ومشاركة الموقع المباشر أثناء التوصيل.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section coverage" id="coverage">
+      <div class="wrap coverage-layout">
+        <div>
+          <div class="section-kicker">التغطية الجغرافية</div>
+          <div class="section-head">
+            <h2>بنية جاهزة للتوسع عبر المدن السورية.</h2>
+            <p>يتم تفعيل المدن ومناطق التوصيل تدريجياً وفق جاهزية المتاجر والمناديب المحليين في كل محافظة.</p>
+          </div>
+          <p class="coverage-note">اختر مدينة لمعاينة رمز التغطية ضمن الشبكة. التوفر الفعلي للطلبات والمتاجر يُعرض مباشرة داخل تطبيق دازريفو.</p>
+        </div>
+        <div class="city-board">
+          <div class="city-board-head">
+            <strong>شبكة المدن المدعومة</strong>
+            <span>تحديد تفاعلي</span>
+          </div>
+          <div class="city-list" role="group" aria-label="اختر مدينة">
+            <button class="city-chip" type="button" data-city="damascus" aria-pressed="true"><span>دمشق</span><small>DAM</small></button>
+            <button class="city-chip" type="button" data-city="aleppo" aria-pressed="false"><span>حلب</span><small>ALE</small></button>
+            <button class="city-chip" type="button" data-city="homs" aria-pressed="false"><span>حمص</span><small>HMS</small></button>
+            <button class="city-chip" type="button" data-city="hama" aria-pressed="false"><span>حماة</span><small>HMA</small></button>
+            <button class="city-chip" type="button" data-city="latakia" aria-pressed="false"><span>اللاذقية</span><small>LAT</small></button>
+          </div>
+          <div class="city-detail" aria-live="polite">
+            <div>
+              <strong id="cityName">دمشق</strong>
+              <p id="cityDescription">نقطة انطلاق شبكة دازريفو ومسارات التوصيل الحضرية.</p>
+            </div>
+            <span class="city-code tabular" id="cityCode">DAMASCUS / SY</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-kicker">آلية العمل</div>
+          <h2>ثلاث خطوات واضحة من البداية حتى التسليم.</h2>
+          <p>شفافية كاملة في الأجرة والموقع وحالة الطلب دون تعقيد.</p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <h3>أنشئ طلبك أو اختر متجراً</h3>
+            <p>تصفح المتاجر المفتوحة، أو حدد استلاماً وتوصيلاً لطرد خاص، أو اكتب رسالة لمساعد دازريفو الذكي.</p>
+          </article>
+          <article class="step">
+            <h3>ثبّت العنوان وقارن الرسوم</h3>
+            <p>حدّد موقعك على الخريطة بدقة، وراجع تكلفة التوصيل المتوقعة أو اختر عرض المندوب الأنسب.</p>
+          </article>
+          <article class="step">
+            <h3>تابع المسار حتى الاستلام</h3>
+            <p>راقب مراحل التحضير، موقع المندوب على الخريطة، واستلم إشعاراً فورياً عند كل تحديث.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="download-section" id="download">
+      <div class="wrap">
+        <div class="download-card">
+          <div class="download-copy">
+            <div class="download-kicker">نسخة أندرويد الرسمية · DAZREVO</div>
+            <h2>ابدأ استخدام دازريفو الآن.</h2>
+            <p>سجّل الدخول عبر رقم الهاتف السوري أو حساب Google في ثوانٍ، وتابع طلباتك ومتجرك أو رحلاتك من تطبيق واحد.</p>
+          </div>
+          <div class="download-action">
+            <a class="btn" id="downloadBtn" href="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" download="dazrevo-app-release.apk">تنزيل ملف APK</a>
+            <small id="downloadStatus">إصدار دازريفو الرسمي لأجهزة أندرويد</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-row">
+      <div><span class="footer-brand">دازريفو · DAZREVO</span> · <span class="tabular" id="year">2026</span></div>
+      <nav class="footer-links" aria-label="روابط الموقع">
+        <a href="./faq/">الأسئلة الشائعة</a>
+        <a href="./drivers/">انضمام السائقين</a>
+        <a href="./merchants/">انضمام المتاجر</a>
+        <a href="./privacy/">الخصوصية</a>
+        <a href="./terms/">الشروط</a>
+      </nav>
+      <div class="creator-links" aria-label="روابط المطور">
+        <span>منصة دازريفو — Anas Al-Sheikh</span>
+        <a href="https://youtube.com/channel/UCswMRlEEwqH22_3gkERIXSA" target="_blank" rel="noopener noreferrer">YouTube</a>
+        <a href="https://instagram.com/anasgdxj" target="_blank" rel="noopener noreferrer">Instagram</a>
+      </div>
+    </div>
+  </footer>
+  <script src="./assets/js/site.js" defer></script>
 </body>
 </html>

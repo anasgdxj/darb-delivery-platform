@@ -9,6 +9,7 @@ import 'package:darb/features/account/edit_profile_screen.dart';
 import 'package:darb/features/account/vendor_application_screen.dart';
 import 'package:darb/features/auth/login_hero_map.dart';
 import 'package:darb/features/auth/login_screen.dart';
+import 'package:darb/features/auth/onboarding_screen.dart';
 import 'package:darb/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,44 +19,52 @@ void main() {
 
   group('DAZREVO Design System 2026 & Brand Integrity', () {
     test('enforces exact DESIGN_SYSTEM.md 2026 light and dark semantic tokens', () {
-      expect(DarbColors.forest, const Color(0xFF12302A));
-      expect(DarbColors.primaryGreen, const Color(0xFF167A5A));
-      expect(DarbColors.forestSoft, const Color(0xFF1C4B3F));
-      expect(DarbColors.mint, const Color(0xFFB9E4D2));
-      expect(DarbColors.lime, const Color(0xFFC8F169));
-      expect(DarbColors.danger, const Color(0xFFD64545));
-      expect(DarbColors.success, const Color(0xFF2E7D32));
-      expect(DarbColors.warning, const Color(0xFFC47B19));
-      expect(DarbColors.info, const Color(0xFF2B6EA3));
+      expect(DarbColors.forest, const Color(0xFF0B2F24));
+      expect(DarbColors.primaryGreen, const Color(0xFF0D6E4E));
+      expect(DarbColors.forestSoft, const Color(0xFF144435));
+      expect(DarbColors.mint, const Color(0xFFA8EBC8));
+      expect(DarbColors.lime, const Color(0xFFA7FF00));
+      expect(DarbColors.limeInk, const Color(0xFF3E6800));
+      expect(DarbColors.limeTint, const Color(0xFFE7FFAD));
+      expect(DarbColors.violet, const Color(0xFF8A5CF6));
+      expect(DarbColors.violetSoft, const Color(0xFFF1EBFF));
+      expect(DarbColors.danger, const Color(0xFFCF3B3B));
+      expect(DarbColors.success, const Color(0xFF17804B));
+      expect(DarbColors.warning, const Color(0xFFC67A12));
+      expect(DarbColors.info, const Color(0xFF1E6FA8));
 
-      expect(DarbColors.canvas, const Color(0xFFF6F6F3));
+      expect(DarbColors.canvas, const Color(0xFFF8FAF7));
       expect(DarbColors.surface, const Color(0xFFFFFFFF));
-      expect(DarbColors.surfaceAlt, const Color(0xFFECEEE9));
-      expect(DarbColors.ink, const Color(0xFF1A2E29));
-      expect(DarbColors.muted, const Color(0xFF687A75));
-      expect(DarbColors.line, const Color(0xFFD0D7D4));
-      expect(DarbColors.borderStrong, const Color(0xFFB8C3BF));
+      expect(DarbColors.surfaceAlt, const Color(0xFFEDF2EC));
+      expect(DarbColors.ink, const Color(0xFF0E221B));
+      expect(DarbColors.muted, const Color(0xFF586E65));
+      expect(DarbColors.line, const Color(0xFFD5DFD9));
+      expect(DarbColors.borderStrong, const Color(0xFFB9C7BF));
 
-      expect(DarbColors.darkCanvas, const Color(0xFF0B1512));
-      expect(DarbColors.darkSurface, const Color(0xFF12201B));
-      expect(DarbColors.darkSurfaceElevated, const Color(0xFF182A24));
-      expect(DarbColors.darkSurfaceAlt, const Color(0xFF1D322B));
-      expect(DarbColors.darkInk, const Color(0xFFEEF5F1));
-      expect(DarbColors.darkMuted, const Color(0xFF9CB0A7));
-      expect(DarbColors.darkLine, const Color(0xFF263B33));
-      expect(DarbColors.darkBorderStrong, const Color(0xFF3A544A));
-      expect(DarbColors.darkPrimary, const Color(0xFF6FE0B7));
-      expect(DarbColors.darkOnPrimary, const Color(0xFF0B1F1A));
+      expect(DarbColors.darkCanvas, const Color(0xFF071A14));
+      expect(DarbColors.darkSurface, const Color(0xFF0E281F));
+      expect(DarbColors.darkSurfaceElevated, const Color(0xFF14352A));
+      expect(DarbColors.darkSurfaceAlt, const Color(0xFF194033));
+      expect(DarbColors.darkInk, const Color(0xFFF1F7F4));
+      expect(DarbColors.darkMuted, const Color(0xFF9CB3A8));
+      expect(DarbColors.darkLine, const Color(0xFF214438));
+      expect(DarbColors.darkBorderStrong, const Color(0xFF325E4E));
+      expect(DarbColors.darkPrimary, const Color(0xFFA7FF00));
+      expect(DarbColors.darkOnPrimary, const Color(0xFF071A14));
+      expect(DarbColors.darkViolet, const Color(0xFFA78BFA));
+      expect(DarbColors.darkVioletSoft, const Color(0xFF251A45));
 
       final themeLight = DarbTheme.light;
       final themeDark = DarbTheme.dark;
 
       expect(themeLight.colorScheme.primary, DarbColors.primaryGreen);
       expect(themeLight.colorScheme.onPrimary, Colors.white);
+      expect(themeLight.colorScheme.tertiary, DarbColors.violet);
       expect(themeLight.scaffoldBackgroundColor, DarbColors.canvas);
 
       expect(themeDark.colorScheme.primary, DarbColors.darkPrimary);
       expect(themeDark.colorScheme.onPrimary, DarbColors.darkOnPrimary);
+      expect(themeDark.colorScheme.tertiary, DarbColors.darkViolet);
       expect(themeDark.scaffoldBackgroundColor, DarbColors.darkCanvas);
       expect(themeDark.colorScheme.brightness, Brightness.dark);
     });
@@ -248,13 +257,48 @@ void main() {
       expect(find.byType(DarbLoginVectorMap), findsOneWidget);
       expect(find.byType(DarbBrandMark), findsOneWidget);
       expect(find.byType(Image), findsNothing);
-      expect(find.text('دازريفو • DAZREVO'), findsOneWidget);
+      expect(find.text('دازريفو · DAZREVO'), findsOneWidget);
+      expect(find.text('جولة تعريفية'), findsOneWidget);
       expect(find.text('أهلاً بك في دازريفو'), findsOneWidget);
       expect(find.text('طريقك الأسهل لاكتشاف المتاجر وطلب ما تحتاجه'), findsOneWidget);
       expect(find.text('سجّل الدخول برقم هاتفك'), findsOneWidget);
       expect(find.text('1 / 2'), findsOneWidget);
       expect(find.text('AR'), findsOneWidget);
       expect(find.text('المتابعة باستخدام Google'), findsOneWidget);
+    });
+
+    testWidgets('OnboardingScreen advances 3 DAZREVO slides and triggers completion callback',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      var finished = false;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            initialScreen: OnboardingScreen(
+              onFinished: () => finished = true,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('دازريفو · DAZREVO'), findsOneWidget);
+      expect(find.text('اطلب من متاجر مدينتك في ثوانٍ'), findsOneWidget);
+      expect(find.text('التالي'), findsOneWidget);
+
+      await tester.tap(find.text('التالي'));
+      await tester.pumpAndSettle();
+      expect(find.text('أرسل أغراضك بحرية مع عروض السائقين'), findsOneWidget);
+
+      await tester.tap(find.text('التالي'));
+      await tester.pumpAndSettle();
+      expect(find.text('مساعد ذكي وتتبّع لحظي على الخريطة'), findsOneWidget);
+      expect(find.text('ابدأ الآن'), findsOneWidget);
+
+      await tester.tap(find.text('ابدأ الآن'));
+      await tester.pump();
+      expect(finished, isTrue);
     });
   });
 
@@ -589,6 +633,41 @@ void main() {
       await tester.tap(find.text('اطلب بالكتابة'));
       await tester.pump();
       expect(glassTapped, isTrue);
+    });
+
+    testWidgets('DarbActivityLedgerStrip displays 3 tabular metrics and fires onTap',
+        (tester) async {
+      var tapped = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DarbTheme.dark,
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(16),
+              child: DarbActivityLedgerStrip(
+                title: 'ملخص النشاط والأرباح',
+                primaryLabel: 'الأرباح المحققة',
+                primaryValue: '125,000 ل.س',
+                secondaryLabel: 'الرحلات المكتملة',
+                secondaryValue: '18',
+                tertiaryLabel: 'التقييم',
+                tertiaryValue: '4.9',
+                onTap: () => tapped = true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.text('ملخص النشاط والأرباح'), findsOneWidget);
+      expect(find.text('125,000 ل.س'), findsOneWidget);
+      expect(find.text('18'), findsOneWidget);
+      expect(find.text('4.9'), findsOneWidget);
+
+      await tester.tap(find.byType(DarbActivityLedgerStrip));
+      await tester.pump();
+      expect(tapped, isTrue);
     });
   });
 

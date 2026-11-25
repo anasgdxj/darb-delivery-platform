@@ -12,6 +12,7 @@ import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
 import '../auth/login_screen.dart';
+import '../auth/onboarding_screen.dart';
 import '../customer/addresses_screen.dart';
 import 'ai_role_assistant_screen.dart';
 import 'driver_application_screen.dart';
@@ -35,11 +36,129 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   bool _preferenceSaved = false;
   Timer? _savedTimer;
+  _ActivitySummary? _activity;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadActivitySummary());
+  }
+
+  @override
+  void didUpdateWidget(covariant AccountScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user['role'] != widget.user['role'] ||
+        oldWidget.user['id'] != widget.user['id']) {
+      unawaited(_loadActivitySummary());
+    }
+  }
 
   @override
   void dispose() {
     _savedTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _loadActivitySummary() async {
+    if (Api.instance.accessToken == null) return;
+    final role = widget.user['role']?.toString().toUpperCase() ?? 'CUSTOMER';
+    try {
+      if (role == 'DRIVER') {
+        final stats = await Api.instance.get('/drivers/stats');
+        if (stats is Map && mounted) {
+          final currency = stats['currency']?.toString() ?? 'SYP';
+          final completed = (stats['completedTrips'] as num?)?.toInt() ?? 0;
+          final totalEarnings = (stats['totalEarnings'] as num?) ?? 0;
+          final todayEarnings = (stats['todayEarnings'] as num?) ?? 0;
+          setState(() {
+            _activity = _ActivitySummary(
+              title: dt('ملخص النشاط والأرباح'),
+              primaryLabel: dt('الأرباح المحققة'),
+              primaryValue: formatDarbMoney(totalEarnings, currency),
+              secondaryLabel: dt('أرباح اليوم'),
+              secondaryValue: formatDarbMoney(todayEarnings, currency),
+              tertiaryLabel: dt('الرحلات المكتملة'),
+              tertiaryValue: '$completed',
+              icon: Icons.insights_rounded,
+            );
+          });
+        }
+      } else if (role == 'VENDOR') {
+        final stats = await Api.instance.get('/vendors/mine/stats');
+        if (stats is Map && mounted) {
+          final currency = stats['currency']?.toString() ?? 'SYP';
+          final todaySales = (stats['todayRevenue'] as num?) ?? 0;
+          final activeOrders = (stats['activeOrders'] as num?)?.toInt() ?? 0;
+          final todayOrders = (stats['todayOrders'] as num?)?.toInt() ?? 0;
+          setState(() {
+            _activity = _ActivitySummary(
+              title: dt('ملخص المتجر والمبيعات'),
+              primaryLabel: dt('مبيعات اليوم'),
+              primaryValue: formatDarbMoney(todaySales, currency),
+              secondaryLabel: dt('طلبات اليوم'),
+              secondaryValue: '$todayOrders',
+              tertiaryLabel: dt('قيد التنفيذ'),
+              tertiaryValue: '$activeOrders',
+              icon: Icons.storefront_rounded,
+            );
+          });
+        }
+      } else if (role == 'ADMIN') {
+        final stats = await Api.instance.get('/admin/stats');
+        if (stats is Map && mounted) {
+          final gmv =
+              num.tryParse(stats['deliveredGrossTotal']?.toString() ?? '0') ??
+                  0;
+          final totalOrders = (stats['ordersTotal'] as num?)?.toInt() ?? 0;
+          final online = (stats['driversOnline'] as num?)?.toInt() ?? 0;
+          setState(() {
+            _activity = _ActivitySummary(
+              title: dt('ملخص التشغيل العام'),
+              primaryLabel: dt('إجمالي المبيعات'),
+              primaryValue: formatDarbMoney(gmv),
+              secondaryLabel: dt('إجمالي الطلبات'),
+              secondaryValue: '$totalOrders',
+              tertiaryLabel: dt('سائقون متصلون'),
+              tertiaryValue: '$online',
+              icon: Icons.analytics_outlined,
+            );
+          });
+        }
+      } else {
+        final ordersRes = await Api.instance.get('/orders/mine');
+        if (ordersRes is List && mounted) {
+          final list = ordersRes.whereType<Map<String, dynamic>>().toList();
+          final delivered = list
+              .where((o) => o['status']?.toString().toUpperCase() == 'DELIVERED')
+              .toList();
+          final active = list
+              .where((o) {
+                final s = o['status']?.toString().toUpperCase() ?? '';
+                return s != 'DELIVERED' && s != 'CANCELLED' && s != 'REJECTED';
+              })
+              .length;
+          num totalSpent = 0;
+          var currency = 'SYP';
+          for (final o in delivered) {
+            totalSpent += num.tryParse(o['total']?.toString() ?? '0') ?? 0;
+            final c = o['currency']?.toString();
+            if (c != null && c.isNotEmpty) currency = c;
+          }
+          setState(() {
+            _activity = _ActivitySummary(
+              title: dt('ملخص الطلبات والمدفوعات'),
+              primaryLabel: dt('إجمالي المدفوع'),
+              primaryValue: formatDarbMoney(totalSpent, currency),
+              secondaryLabel: dt('طلبات مكتملة'),
+              secondaryValue: '${delivered.length}',
+              tertiaryLabel: dt('طلبات نشطة'),
+              tertiaryValue: '$active',
+              icon: Icons.receipt_long_rounded,
+            );
+          });
+        }
+      }
+    } catch (_) {}
   }
 
   void _notifyPreferenceSaved() {
@@ -74,7 +193,11 @@ class _AccountScreenState extends State<AccountScreen> {
         children: [
           Text(
             AppLocalizations.of(ctx).t('languageTitle'),
-            style: TextStyle(color: DarbColors.inkOf(ctx), fontSize: 18, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: DarbColors.inkOf(ctx),
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 10),
           for (final item in [
@@ -83,8 +206,16 @@ class _AccountScreenState extends State<AccountScreen> {
             ('tr', 'Türkçe'),
           ])
             ListTile(
-              title: Text(item.$2, style: const TextStyle(fontWeight: FontWeight.w800)),
-              trailing: current == item.$1 ? Icon(Icons.check_circle_rounded, color: DarbColors.primaryOf(ctx)) : null,
+              title: Text(
+                item.$2,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              trailing: current == item.$1
+                  ? Icon(
+                      Icons.check_circle_rounded,
+                      color: DarbColors.primaryOf(ctx),
+                    )
+                  : null,
               onTap: () => Navigator.pop(ctx, item.$1),
             ),
         ],
@@ -132,7 +263,10 @@ class _AccountScreenState extends State<AccountScreen> {
         title: Text(dt('تسجيل الخروج؟')),
         content: Text(dt('ستحتاج إلى تسجيل الدخول مجدداً للوصول إلى حسابك.')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dt('إلغاء'))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(dt('إلغاء')),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: DarbColors.dangerOf(ctx),
@@ -168,6 +302,7 @@ class _AccountScreenState extends State<AccountScreen> {
       'VENDOR' => dt('حساب تاجر'),
       _ => dt('حساب عميل'),
     };
+    final activity = _activity;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 108),
@@ -179,15 +314,19 @@ class _AccountScreenState extends State<AccountScreen> {
               begin: AlignmentDirectional.topStart,
               end: AlignmentDirectional.bottomEnd,
               colors: [
+                DarbColors.darkCanvas,
                 DarbColors.forest,
                 DarbColors.forestSoft,
               ],
             ),
             borderRadius: BorderRadius.circular(DarbRadius.xl),
             border: Border.all(
-              color: DarbColors.mint.withValues(alpha: 0.24),
+              color: DarbColors.lime.withValues(alpha: 0.34),
             ),
-            boxShadow: DarbElevation.glow(DarbColors.forest, isDark: DarbColors.isDark(context)),
+            boxShadow: DarbElevation.glow(
+              DarbColors.forest,
+              isDark: DarbColors.isDark(context),
+            ),
           ),
           child: Row(
             children: [
@@ -213,7 +352,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           widget.user['email']?.toString() ??
                           roleLabel,
                       style: TextStyle(
-                        color: DarbColors.mint.withValues(alpha: 0.9),
+                        color: DarbColors.lime.withValues(alpha: 0.90),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -227,7 +366,7 @@ class _AccountScreenState extends State<AccountScreen> {
               IconButton.filledTonal(
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.white.withValues(alpha: 0.14),
-                  foregroundColor: Colors.white,
+                  foregroundColor: DarbColors.lime,
                 ),
                 onPressed: _openEditProfile,
                 icon: const Icon(Icons.edit_outlined, size: 20),
@@ -235,6 +374,19 @@ class _AccountScreenState extends State<AccountScreen> {
             ],
           ),
         ),
+        if (activity != null) ...[
+          const SizedBox(height: 14),
+          DarbActivityLedgerStrip(
+            title: activity.title,
+            primaryLabel: activity.primaryLabel,
+            primaryValue: activity.primaryValue,
+            secondaryLabel: activity.secondaryLabel,
+            secondaryValue: activity.secondaryValue,
+            tertiaryLabel: activity.tertiaryLabel,
+            tertiaryValue: activity.tertiaryValue,
+            icon: activity.icon,
+          ),
+        ],
         const SizedBox(height: 14),
         DarbGlassSurface(
           padding: const EdgeInsets.all(16),
@@ -364,7 +516,7 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
               _AccountActionTile(
                 icon: Icons.auto_awesome_rounded,
-                accentColor: DarbColors.primaryOf(context),
+                accentColor: DarbColors.violetOf(context),
                 title: dt('مساعد دازريفو الشخصي'),
                 onTap: () => Navigator.push(
                   context,
@@ -419,6 +571,19 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
                 onTap: _pickLanguage,
               ),
+              _AccountActionTile(
+                icon: Icons.auto_stories_outlined,
+                accentColor: DarbColors.primaryOf(context),
+                title: dt('جولة تعريفية'),
+                onTap: () => Navigator.push<void>(
+                  context,
+                  DarbPageRoute(
+                    builder: (_) => OnboardingScreen(
+                      onFinished: () => Navigator.pop(context),
+                    ),
+                  ),
+                ),
+              ),
               if (!kDarbPlayStoreBuild)
                 _AccountActionTile(
                   icon: Icons.system_update_rounded,
@@ -459,6 +624,28 @@ class _AccountScreenState extends State<AccountScreen> {
       ],
     );
   }
+}
+
+class _ActivitySummary {
+  const _ActivitySummary({
+    required this.title,
+    required this.primaryLabel,
+    required this.primaryValue,
+    required this.secondaryLabel,
+    required this.secondaryValue,
+    required this.tertiaryLabel,
+    required this.tertiaryValue,
+    required this.icon,
+  });
+
+  final String title;
+  final String primaryLabel;
+  final String primaryValue;
+  final String secondaryLabel;
+  final String secondaryValue;
+  final String tertiaryLabel;
+  final String tertiaryValue;
+  final IconData icon;
 }
 
 class _AccountActionTile extends StatelessWidget {
