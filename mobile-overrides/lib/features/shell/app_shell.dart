@@ -123,6 +123,22 @@ class _AppShellState extends State<AppShell> {
     final orderId = data['orderId']?.toString().trim();
     unawaited(_refreshUnreadCount());
 
+    if (data['type']?.toString() == 'APP_UPDATE') {
+      if (!kDarbPlayStoreBuild) {
+        await DarbUpdater.instance.checkForUpdate(force: true);
+        final update = DarbUpdater.instance.availableUpdate.value;
+        if (mounted && update != null) {
+          await showDialog<void>(
+            context: context,
+            builder: (_) => DarbUpdateDialog(info: update),
+          );
+          return;
+        }
+      }
+      await _openNotifications();
+      return;
+    }
+
     if (orderId == null || orderId.isEmpty) {
       await _openNotifications();
       return;
