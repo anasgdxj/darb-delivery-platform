@@ -1576,7 +1576,10 @@ void main() {
         of: syncTile,
         matching: find.byType(DarbSettingsTile),
       );
-      await tester.tap(syncTileSurface);
+      final syncTileWidget = tester.widget<DarbSettingsTile>(syncTileSurface);
+      expect(syncTileWidget.enabled, isTrue);
+      expect(syncTileWidget.onTap, isNotNull);
+      syncTileWidget.onTap!.call();
       await tester.pumpAndSettle();
       // Clear temporary cache dialog -> confirm
       await tester.drag(find.byType(ListView).first, const Offset(0, 1200));
