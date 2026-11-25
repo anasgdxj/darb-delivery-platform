@@ -184,44 +184,44 @@ jobs:
           import re
 
           p = Path("android/app/build.gradle.kts")
-          s = p.read_text()
+          source = p.read_text()
 
-          def block_bounds(source, opening):
+          def block_bounds(value, opening):
               depth = 0
-              for pos in range(opening, len(source)):
-                  if source[pos] == "{":
+              for pos in range(opening, len(value)):
+                  if value[pos] == "{":
                       depth += 1
-                  elif source[pos] == "}":
+                  elif value[pos] == "}":
                       depth -= 1
                       if depth == 0:
                           return pos
               return None
 
-          def locate_block(source, pattern, start_at=0):
-              match = re.search(pattern, source[start_at:])
+          def locate_block(value, pattern, start_at=0):
+              match = re.search(pattern, value[start_at:])
               if not match:
                   return None
               match_start = start_at + match.start()
-              opening = source.find("{", match_start)
-              closing = block_bounds(source, opening)
+              opening = value.find("{", match_start)
+              closing = block_bounds(value, opening)
               if closing is None:
                   raise SystemExit("Unbalanced Gradle block: " + pattern)
               return match_start, opening, closing
 
-          android = locate_block(s, r'(?m)^android\\s*\\{')
+          android = locate_block(source, r'(?m)^android\s*\{')
           if not android:
               raise SystemExit("Could not locate Android configuration block")
           _, android_open, android_close = android
 
-          # Replace any template-provided signingConfigs block instead of relying
-          # on whether Flutter generated a placeholder with the same name.
-          signing = locate_block(s, r'(?m)^\\s*signingConfigs\\s*\\{', android_open + 1)
-          if signing and signing[2] < android_close:
-              s = s[:signing[0]] + s[signing[2] + 1:]
-              android = locate_block(s, r'(?m)^android\\s*\\{')
+          # Remove a generated signingConfigs block, if one exists.
+          existing = locate_block(source, r'(?m)^\s*signingConfigs\s*\{', android_open + 1)
+          if existing and existing[2] < android_close:
+              source = source[:existing[0]] + source[existing[2] + 1:]
+              android = locate_block(source, r'(?m)^android\s*\{')
               _, android_open, android_close = android
 
-          signing_block = """    signingConfigs {
+          signing_block = """ 
+              signingConfigs {
                   create("release") {
                       storeFile = file(System.getenv("DARB_KEYSTORE_PATH"))
                       storePassword = System.getenv("DARB_KEYSTORE_PASSWORD")
@@ -231,44 +231,44 @@ jobs:
               }
 
           """
-          s = s[:android_open + 1] + "\\n" + signing_block + s[android_open + 1:]
+          source = source[:android_open + 1] + "\n" + signing_block + source[android_open + 1:]
 
-          android = locate_block(s, r'(?m)^android\\s*\\{')
+          android = locate_block(source, r'(?m)^android\s*\{')
           _, android_open, android_close = android
-          build_types = locate_block(s, r'(?m)^\\s*buildTypes\\s*\\{', android_open + 1)
+          build_types = locate_block(source, r'(?m)^\s*buildTypes\s*\{', android_open + 1)
+
           if not build_types or build_types[2] > android_close:
-              s = s[:android_close] + """
+              source = source[:android_close] + """
               buildTypes {
                   release {
                       signingConfig = signingConfigs.getByName("release")
                   }
               }
-          """ + s[android_close:]
+          """ + source[android_close:]
           else:
               _, build_open, build_close = build_types
-              release = locate_block(s, r'(?m)^\\s*(?:release|getByName\\("release"\\))\\s*\\{', build_open + 1)
+              release = locate_block(source, r'(?m)^\s*(?:release|getByName\("release"\))\s*\{', build_open + 1)
               if not release or release[2] > build_close:
-                  s = s[:build_close] + """
+                  source = source[:build_close] + """
                   release {
                       signingConfig = signingConfigs.getByName("release")
                   }
-              """ + s[build_close:]
+              """ + source[build_close:]
               else:
                   _, release_open, release_close = release
-                  body = s[release_open + 1:release_close]
-                  body = re.sub(r'(?m)^\\s*signingConfig\\s*=.*(?:\\n|$)', '', body)
-                  body = "\\n                signingConfig = signingConfigs.getByName("release")\\n" + body.lstrip("\\n")
-                  s = s[:release_open + 1] + body + s[release_close:]
+                  body = source[release_open + 1:release_close]
+                  body = re.sub(r'(?m)^\s*signingConfig\s*=.*(?:\n|$)', '', body)
+                  body = '\n                signingConfig = signingConfigs.getByName("release")\n' + body.lstrip('\n')
+                  source = source[:release_open + 1] + body + source[release_close:]
 
-          # Fail early if the signing block was not placed inside android{}.
-          android = locate_block(s, r'(?m)^android\\s*\\{')
+          android = locate_block(source, r'(?m)^android\s*\{')
           _, android_open, android_close = android
-          android_body = s[android_open:android_close]
+          android_body = source[android_open:android_close]
           if 'create("release")' not in android_body:
               raise SystemExit("Release signing configuration was not created inside android{}")
           if 'signingConfig = signingConfigs.getByName("release")' not in android_body:
               raise SystemExit("Release build type is not connected to release signing")
-          p.write_text(s)
+          p.write_text(source)
           PY
           rm -rf "$GITHUB_WORKSPACE/extracted-play"
           cp -a "$GITHUB_WORKSPACE/extracted" "$GITHUB_WORKSPACE/extracted-play"
