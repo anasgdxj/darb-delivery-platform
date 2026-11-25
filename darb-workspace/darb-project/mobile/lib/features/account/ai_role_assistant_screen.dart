@@ -62,7 +62,7 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
     final totalItems = _messages.length + (_sending ? 1 : 0);
 
     return Scaffold(
-      appBar: DarbGlassAppBar(title: dt('مساعد دَرْب الشخصي')),
+      appBar: DarbGlassAppBar(title: dt('مساعد دازريفو الشخصي')),
       body: DarbAmbientBackground(
         child: Column(
           children: [
@@ -92,7 +92,7 @@ class _AiRoleAssistantScreenState extends State<AiRoleAssistantScreen> {
                               ),
                               const SizedBox(height: 14),
                               Text(
-                                dt('اسأل مساعد دَرْب عن طلباتك أو مهامك الحالية وفق صلاحية حسابك'),
+                                dt('اسأل مساعد دازريفو عن طلباتك أو مهامك الحالية وفق صلاحية حسابك'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: DarbColors.inkOf(context),

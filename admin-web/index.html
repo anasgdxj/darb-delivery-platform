@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#102B26">
 <meta name="robots" content="noindex,nofollow">
-<title>إدارة دَرْب | مركز العمليات</title>
+<title>إدارة دازريفو | مركز العمليات</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap');
 
@@ -470,7 +470,7 @@ tbody tr:hover { background: var(--surface-soft); }
     <div class="brand-row">
       <div class="brand-mark">د</div>
       <div>
-        <strong>دَرْب</strong>
+        <strong>دازريفو</strong>
         <div class="panel-meta">بوابة العمليات والإدارة</div>
       </div>
     </div>
@@ -501,7 +501,7 @@ tbody tr:hover { background: var(--surface-soft); }
     <div class="brand-row">
       <div class="brand-mark">د</div>
       <div>
-        <strong>دَرْب</strong>
+        <strong>دازريفو</strong>
         <div class="brand-sub">مركز العمليات والإدارة</div>
       </div>
     </div>
@@ -531,7 +531,7 @@ tbody tr:hover { background: var(--surface-soft); }
   <main class="workspace">
     <header class="topbar">
       <div>
-        <div id="breadcrumb" class="crumb">إدارة دَرْب / الموافقات المعلقة</div>
+        <div id="breadcrumb" class="crumb">إدارة دازريفو / الموافقات المعلقة</div>
         <h1 id="pageTitle">مراجعة طلبات الانضمام والمؤشرات</h1>
       </div>
       <div class="top-actions">
@@ -702,7 +702,7 @@ async function enterDashboard(authPayload) {
   if (me.role!=='ADMIN') {
     accessToken = null;
     refreshToken = null;
-    throw new Error('هذا الحساب لا يحمل صلاحية ADMIN لإدارة دَرْب.');
+    throw new Error('هذا الحساب لا يحمل صلاحية ADMIN لإدارة دازريفو.');
   }
   $('loginView').classList.add('hidden');
   $('appView').classList.remove('hidden');
@@ -818,7 +818,7 @@ function elText(tag, cls, text) {
 }
 
 async function loadPending(root) {
-  $('breadcrumb').textContent = 'إدارة دَرْب / الموافقات المعلقة';
+  $('breadcrumb').textContent = 'إدارة دازريفو / الموافقات المعلقة';
   $('pageTitle').textContent = 'طلبات انضمام السائقين والمتاجر';
   $('panelTitle').textContent = 'قائمة المراجعة والاعتماد';
 
@@ -903,7 +903,7 @@ async function loadPending(root) {
 
 async function loadDirectory(root, kind) {
   const isVendors = kind === 'vendors';
-  $('breadcrumb').textContent = `إدارة دَرْب / ${isVendors ? 'دليل المتاجر' : 'دليل السائقين'}`;
+  $('breadcrumb').textContent = `إدارة دازريفو / ${isVendors ? 'دليل المتاجر' : 'دليل السائقين'}`;
   $('pageTitle').textContent = isVendors ? 'إدارة المتاجر المسجلة' : 'إدارة السائقين المسجلين';
   $('panelTitle').textContent = isVendors ? 'كافة المتاجر' : 'كافة السائقين';
 
@@ -991,7 +991,7 @@ async function loadDirectory(root, kind) {
 }
 
 async function loadUsers(root) {
-  $('breadcrumb').textContent = 'إدارة دَرْب / المستخدمون';
+  $('breadcrumb').textContent = 'إدارة دازريفو / المستخدمون';
   $('pageTitle').textContent = 'إدارة المستخدمين والصلاحيات';
   $('panelTitle').textContent = 'دليل الحسابات';
 
@@ -1043,7 +1043,7 @@ async function loadUsers(root) {
   for (const u of rows) {
     const tr = document.createElement('tr');
     tr.append(
-      elText('td', '', u.name || 'مستخدم دَرْب'),
+      elText('td', '', u.name || 'مستخدم دازريفو'),
       elText('td', 'tabular', u.phone || '—'),
       elText('td', '', u.email || '—'),
       elText('td', 'tabular', u.role)
@@ -1123,7 +1123,7 @@ function renderZones(zoneGrid, zones) {
 }
 
 async function loadCitiesAndZones(root) {
-  $('breadcrumb').textContent = 'إدارة دَرْب / المدن ومناطق التوصيل';
+  $('breadcrumb').textContent = 'إدارة دازريفو / المدن ومناطق التوصيل';
   $('pageTitle').textContent = 'المدن السورية ومناطق التسعير';
   $('panelTitle').textContent = 'إعدادات المدن والرسوم';
 
@@ -1251,7 +1251,7 @@ function renderOrders(wrap, items) {
 }
 
 async function loadOrders(root) {
-  $('breadcrumb').textContent = 'إدارة دَرْب / مراقبة الطلبات';
+  $('breadcrumb').textContent = 'إدارة دازريفو / مراقبة الطلبات';
   $('pageTitle').textContent = 'سجل الطلبات المباشر';
   $('panelTitle').textContent = 'كل الطلبات';
 
@@ -1304,7 +1304,7 @@ async function loadOrders(root) {
 }
 
 async function loadSettingsAndAudit(root) {
-  $('breadcrumb').textContent = 'إدارة دَرْب / الإعدادات والتدقيق';
+  $('breadcrumb').textContent = 'إدارة دازريفو / الإعدادات والتدقيق';
   $('pageTitle').textContent = 'إعدادات المنصة وسجل التدقيق';
   $('panelTitle').textContent = 'التحكم العام والرقابة';
 

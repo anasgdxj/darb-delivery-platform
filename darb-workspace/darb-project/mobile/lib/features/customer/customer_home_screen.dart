@@ -274,7 +274,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       return DarbStateView.error(message: _error, onRetry: _bootstrap);
     }
 
-    final isDark = DarbColors.isDark(context);
     final types = _vendorTypes;
     final filtered = _filteredVendors;
     final featuredOrder = _featuredOrder;
@@ -316,7 +315,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Text(
                         greetingName != null
                             ? '${dt('أهلاً بك')}، $greetingName'
-                            : dt('مرحباً بك في دَرْب'),
+                            : dt('مرحباً بك في دازريفو'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

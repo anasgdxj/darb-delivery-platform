@@ -657,7 +657,7 @@ class _AppShellState extends State<AppShell> {
     };
 
     final roleSubtitle = switch (role) {
-      'ADMIN' => dt('إدارة دَرْب'),
+      'ADMIN' => dt('إدارة دازريفو'),
       'VENDOR' => dt('حساب تاجر'),
       'DRIVER' => dt('حساب سائق'),
       _ => dt('حساب عميل'),

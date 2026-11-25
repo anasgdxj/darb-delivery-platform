@@ -163,7 +163,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final driverApplication = widget.user['driverApplication']?.toString();
     final vendorApplication = widget.user['vendorApplication']?.toString();
     final roleLabel = switch (role) {
-      'ADMIN' => dt('إدارة دَرْب'),
+      'ADMIN' => dt('إدارة دازريفو'),
       'DRIVER' => dt('حساب سائق'),
       'VENDOR' => dt('حساب تاجر'),
       _ => dt('حساب عميل'),
@@ -200,7 +200,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     Text(
                       widget.user['name']?.toString().isNotEmpty == true
                           ? widget.user['name'].toString()
-                          : dt('مرحباً بك في دَرْب'),
+                          : dt('مرحباً بك في دازريفو'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -365,7 +365,7 @@ class _AccountScreenState extends State<AccountScreen> {
               _AccountActionTile(
                 icon: Icons.auto_awesome_rounded,
                 accentColor: DarbColors.primaryOf(context),
-                title: dt('مساعد دَرْب الشخصي'),
+                title: dt('مساعد دازريفو الشخصي'),
                 onTap: () => Navigator.push(
                   context,
                   DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
@@ -384,7 +384,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 _AccountActionTile(
                   icon: Icons.delivery_dining_outlined,
                   accentColor: DarbColors.successOf(context),
-                  title: dt('كن سائقاً في دَرْب'),
+                  title: dt('كن سائقاً في دازريفو'),
                   subtitle: driverApplication != null
                       ? dt('متابعة حالة طلب السائق المسجّل')
                       : dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء'),

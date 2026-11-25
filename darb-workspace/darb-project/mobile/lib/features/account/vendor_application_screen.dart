@@ -445,20 +445,20 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
                 Icons.delivery_dining_rounded,
                 DarbColors.warningOf(context),
                 dt('لديك طلب سائق مسجّل مسبقاً'),
-                dt('الحساب الواحد في دَرْب يرتبط إما بملف سائق أو بملف متجر. يمكنك متابعة طلب السائق من صفحة التقديم الخاصة بالسائقين.'),
+                dt('الحساب الواحد في دازريفو يرتبط إما بملف سائق أو بملف متجر. يمكنك متابعة طلب السائق من صفحة التقديم الخاصة بالسائقين.'),
               )
             : switch (activeStatus) {
                 'APPROVED' => (
                     Icons.verified_rounded,
                     DarbColors.successOf(context),
-                    dt('تم اعتماد متجرك في دَرْب'),
+                    dt('تم اعتماد متجرك في دازريفو'),
                     dt('طلب المتجر معتمد. حدّث حالة الحساب إذا لم تظهر لوحة التاجر تلقائياً.'),
                   ),
                 'REJECTED' || 'SUSPENDED' => (
                     Icons.store_mall_directory_outlined,
                     DarbColors.dangerOf(context),
                     dt('طلب المتجر غير مفعل حالياً'),
-                    dt('تم رفض أو تعليق طلب المتجر الحالي. تواصل مع إدارة دَرْب لمراجعة السبب.'),
+                    dt('تم رفض أو تعليق طلب المتجر الحالي. تواصل مع إدارة دازريفو لمراجعة السبب.'),
                   ),
                 _ => (
                     Icons.hourglass_top_rounded,
@@ -1195,7 +1195,7 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            dt('أؤكد جاهزية المتجر لاستقبال وتحضير طلبات العملاء، وأفهم أن الطلب يخضع لمراجعة إدارة دَرْب قبل التفعيل.'),
+                            dt('أؤكد جاهزية المتجر لاستقبال وتحضير طلبات العملاء، وأفهم أن الطلب يخضع لمراجعة إدارة دازريفو قبل التفعيل.'),
                             style: TextStyle(
                               color: DarbColors.mutedOf(context),
                               fontSize: 12,

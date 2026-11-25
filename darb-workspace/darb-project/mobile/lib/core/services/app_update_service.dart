@@ -343,7 +343,7 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
           : await DarbUpdater.instance.installDownloadedApk();
       if (result == 'permission_required' && mounted) {
         setState(() => _error =
-            dt('اسمح لدَرْب بتثبيت التحديثات من إعدادات أندرويد ثم ارجع واضغط تثبيت'));
+            dt('اسمح لدازريفو بتثبيت التحديثات من إعدادات أندرويد ثم ارجع واضغط تثبيت'));
       }
     } catch (error) {
       if (mounted) setState(() => _error = '${dt('فشل فتح مُثبّت أندرويد')}: $error');

@@ -430,7 +430,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                         const SizedBox(width: 11),
                                         const Text(
-                                          'دَرْب • DARB',
+                                          'دازريفو • DAZREVO',
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,

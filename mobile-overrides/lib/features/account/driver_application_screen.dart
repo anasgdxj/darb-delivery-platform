@@ -384,14 +384,14 @@ class _DriverApplicationScreenState extends State<DriverApplicationScreen> {
                 Icons.storefront_rounded,
                 DarbColors.warningOf(context),
                 dt('لديك طلب متجر مسجّل مسبقاً'),
-                dt('الحساب الواحد في دَرْب يرتبط إما بملف متجر أو بملف سائق. يمكنك متابعة طلب متجرك من صفحة التقديم الخاصة بالمتجر.'),
+                dt('الحساب الواحد في دازريفو يرتبط إما بملف متجر أو بملف سائق. يمكنك متابعة طلب متجرك من صفحة التقديم الخاصة بالمتجر.'),
               )
             : switch (activeStatus) {
                 'APPROVED' => (
                     Icons.verified_rounded,
                     DarbColors.successOf(context),
                     dt('تم اعتماد حسابك كسائق'),
-                    dt('طلبك معتمد في دَرْب. حدّث حالة الحساب إذا لم تظهر لوحة السائق تلقائياً.'),
+                    dt('طلبك معتمد في دازريفو. حدّث حالة الحساب إذا لم تظهر لوحة السائق تلقائياً.'),
                   ),
                 'SUSPENDED' || 'REJECTED' => (
                     Icons.gpp_maybe_rounded,
@@ -1010,7 +1010,7 @@ class _DriverApplicationScreenState extends State<DriverApplicationScreen> {
           _ChecklistTile(
             value: _confirmReviewTerms,
             title: dt('مراجعة الإدارة والتفعيل'),
-            subtitle: dt('أفهم أن الطلب سيظل قيد المراجعة حتى تعتمده إدارة دَرْب قبل تفعيل استقبال الطلبات'),
+            subtitle: dt('أفهم أن الطلب سيظل قيد المراجعة حتى تعتمده إدارة دازريفو قبل تفعيل استقبال الطلبات'),
             onChanged: (v) {
               DarbHaptics.selection();
               setState(() {

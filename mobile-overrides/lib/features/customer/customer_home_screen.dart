@@ -315,7 +315,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Text(
                         greetingName != null
                             ? '${dt('أهلاً بك')}، $greetingName'
-                            : dt('مرحباً بك في دَرْب'),
+                            : dt('مرحباً بك في دازريفو'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

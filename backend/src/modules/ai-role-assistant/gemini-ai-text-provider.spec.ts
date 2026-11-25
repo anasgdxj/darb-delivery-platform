@@ -29,7 +29,7 @@ describe('GeminiAiTextProvider', () => {
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const answer = await provider.generate({
-      systemPrompt: 'مساعد دَرْب',
+      systemPrompt: 'مساعد دازريفو',
       context: { activeOrders: 2 },
       message: 'كم طلباً لدي؟',
     });
@@ -89,6 +89,6 @@ describe('GeminiAiTextProvider', () => {
       systemPrompt: 'مساعد',
       context: {},
       message: 'مرحبا',
-    })).rejects.toThrow('مساعد دَرْب غير متاح حالياً');
+    })).rejects.toThrow('مساعد دازريفو غير متاح حالياً');
   });
 });

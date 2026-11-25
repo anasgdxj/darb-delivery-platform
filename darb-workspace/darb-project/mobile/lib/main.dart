@@ -33,7 +33,7 @@ class DarbApp extends StatelessWidget {
       builder: (context, _) {
         final appearance = DarbAppearanceController.instance;
         return MaterialApp(
-          title: 'دَرْب · DARB',
+          title: 'دازريفو · DAZREVO',
           debugShowCheckedModeBanner: false,
           locale: darbLocale.value,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -141,7 +141,7 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
           reduce ? emblem : ScaleTransition(scale: _emblemScale, child: emblem),
           const SizedBox(height: 22),
           Text(
-            dt('دَرْب'),
+            dt('دازريفو'),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 34,

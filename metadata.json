@@ -1,5 +1,5 @@
 {
-  "name": "دَرْب | Darb Delivery Platform",
+  "name": "دازريفو | DAZREVO Delivery Platform",
   "description": "منصة توصيل متعددة الأدوار في سوريا: طلبات المتاجر، التوصيل المستقل، السائقين، ولوحة تحكم الإدارة.",
   "request_capabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

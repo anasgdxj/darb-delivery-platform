@@ -28,7 +28,7 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
             if (status != DownloadManager.STATUS_SUCCESSFUL) {
                 val reason = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
                 prefs.edit().putString(KEY_STATUS, "failed").putString(KEY_ERROR, "DownloadManager reason=$reason").apply()
-                notifyUser(context, "فشل تنزيل التحديث", "افتح دَرْب وحاول تنزيل التحديث مجدداً")
+                notifyUser(context, "فشل تنزيل التحديث", "افتح دازريفو وحاول تنزيل التحديث مجدداً")
                 return
             }
         }
@@ -36,7 +36,7 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
         val uri = manager.getUriForDownloadedFile(id)
         if (uri == null) {
             prefs.edit().putString(KEY_STATUS, "failed").putString(KEY_ERROR, "Downloaded APK URI is missing").apply()
-            notifyUser(context, "تعذر التحقق من التحديث", "افتح دَرْب وحاول مجدداً")
+            notifyUser(context, "تعذر التحقق من التحديث", "افتح دازريفو وحاول مجدداً")
             return
         }
 
@@ -60,18 +60,18 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
             }
             prefs.edit().putString(KEY_STATUS, "ready").putString(KEY_URI, uri.toString())
                 .putString(KEY_ERROR, "").apply()
-            notifyUser(context, "التحديث جاهز", "افتح دَرْب لإكمال تثبيت التحديث")
+            notifyUser(context, "التحديث جاهز", "افتح دازريفو لإكمال تثبيت التحديث")
         } catch (error: Exception) {
             Log.e(TAG, "Background APK verification failed", error)
             prefs.edit().putString(KEY_STATUS, "failed").putString(KEY_ERROR, error.message ?: error.javaClass.simpleName).apply()
-            notifyUser(context, "تعذر التحقق من التحديث", "افتح دَرْب وحاول مجدداً")
+            notifyUser(context, "تعذر التحقق من التحديث", "افتح دازريفو وحاول مجدداً")
         }
     }
 
     private fun notifyUser(context: Context, title: String, message: String) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(NotificationChannel(CHANNEL_ID, "تحديثات دَرْب", NotificationManager.IMPORTANCE_DEFAULT))
+            manager.createNotificationChannel(NotificationChannel(CHANNEL_ID, "تحديثات دازريفو", NotificationManager.IMPORTANCE_DEFAULT))
         }
         val openApp = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val pending = openApp?.let {

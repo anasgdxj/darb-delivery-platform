@@ -16,7 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('DARB Design System 2026 & Brand Integrity', () {
+  group('DAZREVO Design System 2026 & Brand Integrity', () {
     test('enforces exact DESIGN_SYSTEM.md 2026 light and dark semantic tokens', () {
       expect(DarbColors.forest, const Color(0xFF12302A));
       expect(DarbColors.primaryGreen, const Color(0xFF167A5A));
@@ -193,7 +193,7 @@ void main() {
         MaterialApp(
           theme: DarbTheme.light,
           home: Scaffold(
-            appBar: const DarbGlassAppBar(title: 'دَرْب', subtitle: 'تجربة'),
+            appBar: const DarbGlassAppBar(title: 'دازريفو', subtitle: 'تجربة'),
             body: ListView(
               padding: const EdgeInsets.all(16),
               children: const [
@@ -212,7 +212,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('دَرْب'), findsOneWidget);
+      expect(find.text('دازريفو'), findsOneWidget);
       expect(find.text('42'), findsOneWidget);
 
       expect(find.text('42'), findsOneWidget);
@@ -248,8 +248,8 @@ void main() {
       expect(find.byType(DarbLoginVectorMap), findsOneWidget);
       expect(find.byType(DarbBrandMark), findsOneWidget);
       expect(find.byType(Image), findsNothing);
-      expect(find.text('دَرْب • DARB'), findsOneWidget);
-      expect(find.text('أهلاً بك في دَرْب'), findsOneWidget);
+      expect(find.text('دازريفو • DAZREVO'), findsOneWidget);
+      expect(find.text('أهلاً بك في دازريفو'), findsOneWidget);
       expect(find.text('طريقك الأسهل لاكتشاف المتاجر وطلب ما تحتاجه'), findsOneWidget);
       expect(find.text('سجّل الدخول برقم هاتفك'), findsOneWidget);
       expect(find.text('1 / 2'), findsOneWidget);
@@ -408,7 +408,7 @@ void main() {
     });
   });
 
-  group('DARB Design Evolution 2026 Widgets', () {
+  group('DAZREVO Design Evolution 2026 Widgets', () {
     testWidgets('DarbCitySceneCard renders abstract Neo artwork with zero city photos',
         (tester) async {
       darbLocale.value = const Locale('ar');

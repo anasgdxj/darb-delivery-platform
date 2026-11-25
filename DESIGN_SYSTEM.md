@@ -1,10 +1,10 @@
-# DARB Design System
+# DAZREVO Design System
 
 Version: 2026.2 (Obsidian Emerald Precision & Kinetic Topography)  
 Scope: Flutter mobile app (customer, driver, vendor, administration)  
 Source of truth: `mobile-overrides/lib/core/theme/darb_design_system.dart`
 
-This document defines the shared visual, motion, and structural system for DARB. It guides UI and motion architecture without altering authentication, package identity, signing, or backend API contracts.
+This document defines the shared visual, motion, and structural system for DAZREVO (formerly DARB; internal `Darb*` code symbols and `com.darb.darb` package identity are preserved). It guides UI and motion architecture without altering authentication, package identity, signing, or backend API contracts.
 
 ## Product principles
 
@@ -19,7 +19,7 @@ This document defines the shared visual, motion, and structural system for DARB.
 
 ## Approved visual direction: Obsidian Emerald Precision & Kinetic Topography
 
-DARB feels like a live city logistics command network: deep Obsidian Emerald hero anchors (`#12302A`), asymmetric 6:5 Bento action splits, vertical pickup-to-dropoff route connectors (`DarbRouteConnector`), animated GPU shimmer wireframes (`DarbShimmer`), spatial map HUDs, and responsive motion.
+DAZREVO feels like a live city logistics command network: deep Obsidian Emerald hero anchors (`#12302A`), asymmetric 6:5 Bento action splits, vertical pickup-to-dropoff route connectors (`DarbRouteConnector`), animated GPU shimmer wireframes (`DarbShimmer`), spatial map HUDs, and responsive motion.
 
 - **Visual hierarchy:** asymmetric Bento grids (`DarbBentoActionCard`), editorial storefront headers, and numbered step pills replace uniform stacked-box layouts; supporting details sit on layered semantic surfaces (`DarbColors.canvasOf`, `surfaceOf`, `surfaceAltOf`).
 - **Auth & Global Shell:** redesigned `LoginScreen` featuring `DarbBrandMark`, abstract geometric `DarbLoginVectorMap` artwork (zero city photos), `1 / 2 -> 2 / 2` auth step pill, LTR phone/OTP inputs with validation & 60s resend countdown, custom multi-color `_GoogleEmblem` Google Sign-In action, `_ShellActionWell` 38x38 app bar wells, and frosted floating `DarbGlassBottomNav`.

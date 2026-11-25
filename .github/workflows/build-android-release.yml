@@ -1,5 +1,5 @@
 # Manual verification run: build signed artifacts without replacing the public latest release.
-name: Build signed DARB Android release
+name: Build signed DAZREVO Android release
 on:
   push:
     branches: [main]
@@ -65,6 +65,7 @@ jobs:
           mkdir -p "$M/android/app/src/main/res/drawable"
           cp "$ROOT/mobile-overrides/ic_launcher.xml" "$M/android/app/src/main/res/drawable/ic_launcher.xml"
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|' "$M/android/app/src/main/AndroidManifest.xml"
+          sed -i 's|android:label="darb"|android:label="دازريفو"|' "$M/android/app/src/main/AndroidManifest.xml"
           python3 - "$M/pubspec.yaml" "$M/android/app/src/main/AndroidManifest.xml" <<'PY'
           from pathlib import Path
           import re
@@ -379,9 +380,9 @@ jobs:
           APK_DIR="$(dirname "$APK")"
           if gh release view latest >/dev/null 2>&1; then
             gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --clobber
-            gh release edit latest --title "دَرْب — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دَرْب. تحقق من SHA-256 في ملخص عملية البناء."
+            gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
           else
-            gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دَرْب — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دَرْب."
+            gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
           fi
 
       - name: Notify DARB users about the published release
