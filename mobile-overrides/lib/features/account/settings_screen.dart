@@ -54,6 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showFeedback(DarbFeedbackKind kind, String message) {
+    debugPrint('DAZREVO_FEEDBACK $message');
     _feedbackTimer?.cancel();
     if (!mounted) return;
     setState(() {
@@ -235,6 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _syncPushNotifications() async {
+    debugPrint('DAZREVO_SYNC_HANDLER entered');
     if (_syncingPush) return;
     setState(() => _syncingPush = true);
     try {
