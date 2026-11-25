@@ -944,7 +944,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? const SizedBox.shrink()
                                     : Padding(
                                         padding: const EdgeInsets.only(top: 12),
-                                        child: DarbShake(
+                                        child: DarbShakeBox(
                                           trigger: _primaryErrorTrigger +
                                               _googleErrorTrigger,
                                           child: Container(
