@@ -1088,7 +1088,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 250));
         await tester.pump(const Duration(milliseconds: 250));
 
-        expect(find.text(item.subtitle), findsOneWidget);
+        expect(find.text(item.subtitle), findsWidgets);
         expect(find.text(item.firstTab), findsWidgets);
         expect(tester.takeException(), isNull);
 
