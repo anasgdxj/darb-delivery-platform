@@ -224,6 +224,23 @@ describe('OrdersService safety checks', () => {
       .rejects.toBeInstanceOf(BadRequestException);
     expect(tx.orderStatusHistory.create).not.toHaveBeenCalled();
   });
+  it('blocks shopping pickup until an approved purchase proof is recorded', async () => {
+    prisma.order.findUnique.mockResolvedValue({
+      id: 'shopping-1', type: 'SHOPPING_DELIVERY', status: 'ASSIGNED', driverId: 'driver-1',
+      driver: { userId: 'driver-user-1' }, vendor: null, items: [],
+    });
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const findProof = jest.fn().mockResolvedValue(null);
+    const tx: any = {
+      order: { updateMany },
+      shoppingPurchaseQuote: { findFirst: findProof },
+      orderStatusHistory: { create: jest.fn() },
+    };
+    prisma.$transaction.mockImplementation(async (cb: (tx: any) => unknown) => cb(tx));
+    await expect(service.updateStatus('driver-user-1', 'DRIVER', 'shopping-1', OrderStatus.PICKED_UP)).rejects.toBeInstanceOf(BadRequestException);
+    expect(findProof).toHaveBeenCalled();
+    expect(tx.orderStatusHistory.create).not.toHaveBeenCalled();
+  });
   it('creates a shopping delivery request with a separate purchase budget', async () => {
     const create = jest.fn().mockResolvedValue({ id: 'shopping-1', type: 'SHOPPING_DELIVERY' });
     const tx: any = {
