@@ -411,6 +411,46 @@ tbody tr:hover { background: var(--surface-soft); }
 }
 .copilot-form input { flex: 1; }
 
+
+.command-center{display:grid;gap:18px}
+.command-hero{position:relative;overflow:hidden;border-radius:20px;padding:22px;background:linear-gradient(125deg,var(--forest),#202C31 62%,#1D7A6E);color:#F8F5ED;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.command-hero:after{content:"";position:absolute;width:210px;height:210px;border-radius:50%;inset-inline-end:12%;top:-130px;background:rgba(63,209,190,.18);filter:blur(12px);pointer-events:none}
+.command-hero h2{margin:0 0 5px;font-size:20px;font-weight:900}
+.command-hero p{margin:0;color:rgba(248,245,237,.76);font-size:13px}
+.command-hero .hero-meta{color:var(--lime);font-size:12px;font-weight:800}
+.command-hero>*{position:relative;z-index:1}
+.command-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.command-hero-actions button{min-width:132px}
+.ops-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ops-metric{border:1px solid var(--border);border-radius:16px;padding:15px;background:var(--surface);min-width:0}
+.ops-metric span{display:block;color:var(--muted);font-size:12px;font-weight:800}
+.ops-metric strong{display:block;margin-top:5px;font-size:23px;font-weight:900}
+.ops-metric small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.ops-section-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:14px}
+.ops-subpanel{border:1px solid var(--border);border-radius:18px;padding:17px;background:var(--surface);min-width:0}
+.ops-subpanel h3{margin:0 0 12px;font-size:15px;font-weight:900}
+.ops-alert-list{display:grid;gap:9px}
+.ops-alert{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:13px;background:var(--surface-soft);border:1px solid var(--border)}
+.ops-alert .alert-dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:0 0 auto;background:var(--success)}
+.ops-alert.warn .alert-dot{background:var(--warn)}
+.ops-alert.bad .alert-dot{background:var(--danger)}
+.ops-alert strong{display:block;font-size:12.5px}
+.ops-alert small{display:block;color:var(--muted);font-size:11.5px}
+.ops-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ops-shortcuts button{min-height:54px;white-space:normal;text-align:start;background:var(--surface-soft);color:var(--ink);border:1px solid var(--border)}
+.ops-table{width:100%}
+.ops-table td,.ops-table th{white-space:nowrap}
+.ops-table td:first-child{font-weight:900}
+.copilot-header{border-radius:18px;padding:18px;background:linear-gradient(120deg,rgba(29,122,110,.13),rgba(214,180,108,.12));border:1px solid color-mix(in srgb,var(--violet) 28%,var(--border))}
+.copilot-header strong{display:block;font-size:16px}
+.copilot-header p{margin:4px 0 0;color:var(--muted);font-size:12.5px}
+.copilot-msg{max-width:min(820px,94%)}
+.copilot-msg.user{margin-inline-start:auto}
+.copilot-msg:not(.user){margin-inline-end:auto}
+.copilot-feed{scroll-behavior:smooth}
+@media(max-width:960px){.ops-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ops-section-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.ops-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ops-metric strong{font-size:20px}.command-hero{padding:18px}.command-hero-actions{width:100%}.command-hero-actions button{flex:1}}
+
 .pager {
   display: flex;
   align-items: center;
@@ -544,7 +584,8 @@ tbody tr:hover { background: var(--surface-soft); }
     </div>
 
     <nav class="side-nav" aria-label="أقسام الإدارة">
-      <button type="button" data-tab="pending" class="active">الموافقات المعلقة <span id="navPendingCount" class="count-tag tabular">0</span></button>
+      <button type="button" data-tab="overview" class="active">مركز القيادة</button>
+      <button type="button" data-tab="pending">الموافقات المعلقة <span id="navPendingCount" class="count-tag tabular">0</span></button>
       <button type="button" data-tab="vendors">دليل المتاجر</button>
       <button type="button" data-tab="drivers">دليل السائقين</button>
       <button type="button" data-tab="users">المستخدمون والصلاحيات</button>
@@ -569,8 +610,8 @@ tbody tr:hover { background: var(--surface-soft); }
   <main class="workspace">
     <header class="topbar">
       <div>
-        <div id="breadcrumb" class="crumb">إدارة دازريفو / الموافقات المعلقة</div>
-        <h1 id="pageTitle">مراجعة طلبات الانضمام والمؤشرات</h1>
+        <div id="breadcrumb" class="crumb">إدارة دازريفو / مركز القيادة</div>
+        <h1 id="pageTitle">مركز قيادة عمليات DAZREVO</h1>
       </div>
       <div class="top-actions">
         <button type="button" id="refreshBtn" class="btn-outline">تحديث البيانات</button>
@@ -638,7 +679,7 @@ const token = () => accessToken;
 
 const $ = (id) => document.getElementById(id);
 
-let currentTab = 'pending';
+let currentTab = 'overview';
 let ordersPage = 1;
 let ordersStatusFilter = '';
 let ordersTypeFilter = '';
@@ -828,16 +869,20 @@ async function refreshStats() {
     $('kpiPendingTotal').textContent = formatMoney(pendingSum);
     $('navPendingCount').textContent = String(pendingSum);
     $('kpiGmv').textContent = formatMoney(stats.deliveredGrossTotal);
-  } catch (_) {}
+    return stats;
+  } catch (_) {
+    return null;
+  }
 }
 
 async function refreshAll() {
   const root = $('contentRoot');
   root.replaceChildren(elText('div', 'empty-box', 'جارٍ تحميل البيانات…'));
-  await refreshStats();
+  const stats = await refreshStats();
 
   try {
-    if (currentTab === 'pending') await loadPending(root);
+    if (currentTab === 'overview') await loadOverview(root, stats);
+    else if (currentTab === 'pending') await loadPending(root);
     else if (currentTab === 'vendors') await loadDirectory(root, 'vendors');
     else if (currentTab === 'drivers') await loadDirectory(root, 'drivers');
     else if (currentTab === 'users') await loadUsers(root);
@@ -1343,6 +1388,165 @@ async function loadOrders(root) {
   root.replaceChildren(toolbar, wrap, pager);
 }
 
+
+async function loadOverview(root, stats) {
+  $('breadcrumb').textContent = 'إدارة دازريفو / مركز القيادة';
+  $('pageTitle').textContent = 'مركز قيادة عمليات DAZREVO';
+  $('panelTitle').textContent = 'صورة تشغيلية موحدة للمنصة';
+  $('panelSummary').textContent = stats && stats.snapshotAt
+    ? 'آخر تحديث: ' + new Date(stats.snapshotAt).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' })
+    : 'بيانات مباشرة من الخادم';
+
+  if (!stats) {
+    root.replaceChildren(elText('div', 'error-box', 'تعذر تحميل مؤشرات مركز القيادة. تحقق من اتصال الخادم ثم أعد المحاولة.'));
+    return;
+  }
+
+  let ordersResult;
+  try {
+    ordersResult = await apiFetch('/admin/orders?page=1&limit=8');
+  } catch (error) {
+    root.replaceChildren(elText('div', 'error-box', 'تعذر تحميل أحدث الطلبات: ' + (error.message || 'خطأ غير معروف')));
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'command-center';
+
+  const hero = document.createElement('section');
+  hero.className = 'command-hero';
+  const heroCopy = document.createElement('div');
+  heroCopy.append(
+    elText('h2', '', 'مركز قيادة DAZREVO'),
+    elText('p', '', 'ملخص حي للطلبات، التغطية، الموافقات، وحركة اليوم. الأرقام مأخوذة من قاعدة بيانات المنصة.'),
+    elText('div', 'hero-meta', 'توقيت التشغيل UTC+03:00 · بيانات تشغيل فعلية'),
+  );
+  const heroActions = document.createElement('div');
+  heroActions.className = 'command-hero-actions';
+  const navigate = (tab) => {
+    currentTab = tab;
+    document.querySelectorAll('.side-nav button[data-tab]').forEach((button) => button.classList.toggle('active', button.dataset.tab === tab));
+    refreshAll();
+  };
+  const aiBtn = elText('button', 'btn-violet', 'اسأل المدير الذكي');
+  aiBtn.type = 'button';
+  aiBtn.onclick = () => navigate('copilot');
+  const ordersBtn = elText('button', 'btn-outline', 'فتح مركز الطلبات');
+  ordersBtn.type = 'button';
+  ordersBtn.onclick = () => navigate('orders');
+  heroActions.append(aiBtn, ordersBtn);
+  hero.append(heroCopy, heroActions);
+
+  const metrics = document.createElement('div');
+  metrics.className = 'ops-metric-grid';
+  const metricData = [
+    ['طلبات اليوم', stats.ordersToday, 'كل الطلبات التي أُنشئت اليوم'],
+    ['طلبات قيد التنفيذ', stats.ordersActive, 'تحتاج متابعة حتى التسليم'],
+    ['سائقون متصلون', stats.driversOnline, 'سائقون معتمدون ومتصلون الآن'],
+    ['تم تسليمها اليوم', stats.deliveredToday, 'طلبات مكتملة خلال يوم العمل'],
+    ['طلبات تحتاج مراجعة', stats.delayedOrders, 'لم تتغير حالتها منذ أكثر من 45 دقيقة'],
+    ['موافقات السائقين', stats.driversPending, 'طلبات انضمام تنتظر القرار'],
+    ['موافقات المتاجر', stats.vendorsPending, 'طلبات انضمام تنتظر القرار'],
+    ['مبيعات اليوم', formatMoney(stats.deliveredGrossToday), 'قيمة الطلبات المسلّمة · SYP'],
+  ];
+  for (const entry of metricData) {
+    const card = document.createElement('article');
+    card.className = 'ops-metric';
+    card.append(
+      elText('span', '', entry[0]),
+      elText('strong', 'tabular', entry[1] === undefined || entry[1] === null ? '—' : String(entry[1])),
+      elText('small', '', entry[2]),
+    );
+    metrics.append(card);
+  }
+
+  const sections = document.createElement('div');
+  sections.className = 'ops-section-grid';
+  const alertsPanel = document.createElement('section');
+  alertsPanel.className = 'ops-subpanel';
+  alertsPanel.append(elText('h3', '', 'مركز التنبيهات والأولويات'));
+  const alertList = document.createElement('div');
+  alertList.className = 'ops-alert-list';
+  const alerts = [];
+  if (Number(stats.delayedOrders || 0) > 0) {
+    alerts.push(['bad', 'طلبات تحتاج تدخلك', stats.delayedOrders + ' طلباً لم تتغير حالته منذ أكثر من 45 دقيقة. راجع التفاصيل قبل اتخاذ إجراء.']);
+  }
+  if (Number(stats.driversPending || 0) + Number(stats.vendorsPending || 0) > 0) {
+    alerts.push(['warn', 'موافقات بانتظار المراجعة', Number(stats.driversPending || 0) + ' سائق و' + Number(stats.vendorsPending || 0) + ' متجر بانتظار القرار.']);
+  }
+  if (Number(stats.ordersActive || 0) > 0 && Number(stats.driversOnline || 0) === 0) {
+    alerts.push(['bad', 'لا يوجد سائقون متصلون', 'هناك طلبات قيد التنفيذ ولا يظهر أي سائق معتمد متصل حالياً. تحقق من التغطية.']);
+  }
+  if (!alerts.length) alerts.push(['', 'لا توجد تنبيهات حرجة', 'المؤشرات الحالية لا تعرض مشكلة تتطلب تدخلاً فورياً. استمر في متابعة الطلبات.']);
+  for (const alert of alerts) {
+    const item = document.createElement('div');
+    item.className = 'ops-alert ' + alert[0];
+    const copy = document.createElement('div');
+    copy.append(elText('strong', '', alert[1]), elText('small', '', alert[2]));
+    item.append(elText('span', 'alert-dot', ''), copy);
+    alertList.append(item);
+  }
+  alertsPanel.append(alertList);
+
+  const shortcutsPanel = document.createElement('section');
+  shortcutsPanel.className = 'ops-subpanel';
+  shortcutsPanel.append(elText('h3', '', 'اختصارات التشغيل'));
+  const shortcuts = document.createElement('div');
+  shortcuts.className = 'ops-shortcuts';
+  const shortcutData = [
+    ['الموافقات المعلقة', 'pending'],
+    ['إدارة الطلبات', 'orders'],
+    ['السائقون', 'drivers'],
+    ['المتاجر', 'vendors'],
+    ['المستخدمون', 'users'],
+    ['الإعدادات والتدقيق', 'settings'],
+  ];
+  for (const entry of shortcutData) {
+    const button = elText('button', '', entry[0]);
+    button.type = 'button';
+    button.onclick = () => navigate(entry[1]);
+    shortcuts.append(button);
+  }
+  shortcutsPanel.append(shortcuts);
+  sections.append(alertsPanel, shortcutsPanel);
+
+  const recentPanel = document.createElement('section');
+  recentPanel.className = 'ops-subpanel';
+  recentPanel.append(elText('h3', '', 'أحدث الطلبات'));
+  const items = Array.isArray(ordersResult.items) ? ordersResult.items : [];
+  if (!items.length) {
+    recentPanel.append(elText('div', 'empty-box', 'لا توجد طلبات مسجلة حتى الآن.'));
+  } else {
+    const tableWrap = document.createElement('div');
+    tableWrap.className = 'table-wrap';
+    const table = document.createElement('table');
+    table.className = 'ops-table';
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    for (const label of ['رقم الطلب', 'العميل', 'المدينة', 'الحالة', 'الإجمالي']) headRow.append(elText('th', '', label));
+    thead.append(headRow);
+    const tbody = document.createElement('tbody');
+    for (const order of items) {
+      const row = document.createElement('tr');
+      const status = statusMeta(order.status);
+      row.append(
+        elText('td', 'tabular', order.orderNumber || String(order.id || '').slice(0, 8)),
+        elText('td', '', order.customer && order.customer.name ? order.customer.name : 'عميل'),
+        elText('td', '', cityName(order.city)),
+        elText('td', 'state-text ' + status[1], status[0]),
+        elText('td', 'tabular', formatMoney(order.total) + ' ' + (order.currency || 'SYP')),
+      );
+      tbody.append(row);
+    }
+    table.append(thead, tbody);
+    tableWrap.append(table);
+    recentPanel.append(tableWrap);
+  }
+
+  wrap.append(hero, metrics, sections, recentPanel);
+  root.replaceChildren(wrap);
+}
+
 function loadCopilot(root) {
   $('breadcrumb').textContent = 'إدارة دازريفو / مساعد الإدارة الذكي';
   $('pageTitle').textContent = 'مساعد دازريفو الذكي للإدارة';
@@ -1354,10 +1558,19 @@ function loadCopilot(root) {
 
   const promptsRow = document.createElement('div');
   promptsRow.className = 'copilot-prompts';
+  const header = document.createElement('div');
+  header.className = 'copilot-header';
+  header.append(
+    elText('strong', '', 'DAZREVO AI · المدير الذكي للعمليات'),
+    elText('p', '', 'يحلل مؤشرات التشغيل المجمعة، يكتشف الاختناقات، ويرتب لك الأولويات. هذه المرحلة للقراءة والتحليل فقط؛ لا ينفذ تغييرات أو مدفوعات.'),
+  );
   const presets = [
-    'لخّص الموافقات المعلقة وحالة الطلبات اليوم',
-    'ما حالة المتاجر والسائقين النشطين حالياً؟',
-    'أعطني نظرة سريعة على العمليات في المدن',
+    'أعطني تقرير المدير اليومي: الأداء والمخاطر وأهم 3 أولويات',
+    'ما الطلبات التي تحتاج تدخلي الآن؟ ولماذا؟',
+    'حلل التوازن بين الطلبات النشطة والسائقين المتصلين',
+    'قارن نشاط المدن وحدد أين نحتاج زيادة التغطية',
+    'حلل مبيعات اليوم والتسليمات والرسوم',
+    'ما القرارات الإدارية التي تقترحها لتحسين DAZREVO؟',
   ];
 
   const feed = document.createElement('div');
@@ -1409,7 +1622,7 @@ function loadCopilot(root) {
     askCopilot(input.value);
   };
   form.append(input, sendBtn);
-  box.append(promptsRow, feed, form);
+  box.append(header, promptsRow, feed, form);
   root.replaceChildren(box);
 }
 
