@@ -43,6 +43,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Enforce unified DAZREVO web identity
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          css = Path('assets/css/site.css').read_text(encoding='utf-8')
+          admin = Path('admin-web/index.html').read_text(encoding='utf-8')
+          icon = Path('assets/favicon.svg').read_text(encoding='utf-8')
+          for token in ['--forest:#14171D', '--lime:#D6B46C', '--violet:#1D7A6E', '--canvas:#FAF9F6', '--dark']:
+              if token == '--dark':
+                  if '--canvas:#0C0D0F' not in css: raise SystemExit('Website dark palette is out of sync.')
+              elif token not in css: raise SystemExit(f'Missing website brand token: {token}')
+          for token in ['--forest:#14171D', '--lime:#D6B46C', '--violet:#1D7A6E', '--canvas:#FAF9F6', '--canvas:#0C0D0F']:
+              if token not in admin: raise SystemExit(f'Missing admin brand token: {token}')
+          for token in ['#14171D', '#D6B46C', '#3FD1BE']:
+              if token not in icon: raise SystemExit(f'Favicon is missing brand color: {token}')
+          stale = ['#0B2F24', '#A7FF00', '#8A5CF6']
+          for name in ['assets/css/site.css', 'assets/css/pages.css', 'admin-web/index.html', 'assets/favicon.svg']:
+              source = Path(name).read_text(encoding='utf-8')
+              if any(color in source for color in stale): raise SystemExit(f'Legacy palette remains in {name}.')
+          for name in ['index.html', 'en/index.html', 'tr/index.html', 'faq/index.html', 'drivers/index.html', 'merchants/index.html', 'privacy/index.html', 'terms/index.html']:
+              source = Path(name).read_text(encoding='utf-8')
+              if 'viewBox="0 0 108 108"' not in source: raise SystemExit(f'Outdated DAZREVO brand mark in {name}.')
+          print('Unified Obsidian / Champagne / Mineral Teal identity verified across public pages and admin.')
+          PY
       - name: Validate shared JavaScript
         run: node --check assets/js/site.js
       - name: Validate public pages, metadata, and deployment assets

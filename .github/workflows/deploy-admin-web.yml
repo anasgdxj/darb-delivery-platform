@@ -13,6 +13,10 @@ on:
       - "google3dcfcc43ffdf1742.html"
       - ".github/workflows/deploy-admin-web.yml"
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Build signed DAZREVO Android release"]
+    types: [completed]
+    branches: [main]
 permissions:
   contents: read
   pages: write
@@ -22,6 +26,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -70,6 +75,23 @@ jobs:
           cat > .pages/404.html <<'EOF'
           <!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الصفحة غير موجودة | دازريفو</title><body style="font-family:Tahoma,Arial;background:#f6f7f2;color:#102b26;display:grid;place-items:center;min-height:90vh;text-align:center"><main><h1>هذه الصفحة غير موجودة</h1><p>قد يكون الرابط غير صحيح أو تم نقل الصفحة.</p><a href="./">العودة إلى موقع دازريفو</a></main></body></html>
           EOF
+      - name: Attach latest Android release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 5 --retry-delay 2 --retry-all-errors \\
+            https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json \\
+            --output .pages/app-update.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('.pages/app-update.json').read_text(encoding='utf-8'))
+          if not isinstance(data.get('versionCode'), int) or not data.get('versionName'):
+              raise SystemExit('Latest Android release metadata is invalid.')
+          if data.get('apkUrl') != 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk':
+              raise SystemExit('Latest APK URL is not the official DAZREVO release asset.')
+          print(f"Website release metadata verified: {data['versionName']} ({data['versionCode']}).")
+          PY
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .pages

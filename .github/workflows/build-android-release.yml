@@ -605,8 +605,7 @@ jobs:
           fi
 
       - name: Send published APK to Telegram channel
-        if: always() && ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]')))
-        continue-on-error: true
+        if: success() && ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]')))
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: "@DAZREVO"
@@ -630,8 +629,8 @@ jobs:
               summary.open("a", encoding="utf-8").write(
                   "\nTelegram APK delivery: NOT SENT — add the TELEGRAM_BOT_TOKEN repository secret.\n"
               )
-              print("::warning::Telegram APK delivery skipped because TELEGRAM_BOT_TOKEN is not configured.")
-              raise SystemExit(0)
+              print("::error::Telegram APK delivery cannot be skipped: TELEGRAM_BOT_TOKEN is not configured.")
+              raise SystemExit(1)
 
           apk_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk")
           manifest_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json")
@@ -641,8 +640,8 @@ jobs:
               summary.open("a", encoding="utf-8").write(
                   "\nTelegram APK delivery: NOT SENT — ARM64 APK exceeds Telegram's 50 MB Bot API upload limit; universal APK remains available in GitHub Releases.\n"
               )
-              print("::warning::ARM64 APK exceeds Telegram's 50 MB upload limit; use the GitHub release download.")
-              raise SystemExit(0)
+              print("::error::ARM64 APK exceeds Telegram's 50 MB upload limit; refusing to report a complete release.")
+              raise SystemExit(1)
 
           manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
           version = html.escape(str(manifest.get("versionName", "New version")))
@@ -712,7 +711,7 @@ jobs:
               summary.open("a", encoding="utf-8").write(
                   "\nTelegram APK delivery: FAILED — APK remains available in the GitHub latest release.\n"
               )
-              print(f"::warning::Telegram APK delivery failed; APK remains published: {last_error}")
-              raise SystemExit(0)
+              print(f"::error::Telegram APK delivery failed; APK remains published: {last_error}")
+              raise SystemExit(1)
           PY
 

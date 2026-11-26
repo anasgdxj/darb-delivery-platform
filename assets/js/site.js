@@ -162,4 +162,23 @@
   if (yearEl) {
     yearEl.textContent = String(new Date().getFullYear());
   }
+  const downloadStatus = document.getElementById('downloadStatus');
+  const downloadButton = document.getElementById('downloadBtn');
+  if (downloadStatus || downloadButton) {
+    fetch('./app-update.json', { cache: 'no-store', headers: { accept: 'application/json' } })
+      .then((response) => {
+        if (!response.ok) throw new Error('Release metadata unavailable');
+        return response.json();
+      })
+      .then((release) => {
+        const officialApk = 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk';
+        if (release.apkUrl !== officialApk || !Number.isInteger(Number(release.versionCode)) || !/^1\\./.test(String(release.versionName || ''))) return;
+        if (downloadButton) downloadButton.href = officialApk;
+        if (downloadStatus) downloadStatus.textContent = 'الإصدار الرسمي ' + release.versionName + ' · تحديث DAZREVO';
+      })
+      .catch(() => {
+        if (downloadStatus) downloadStatus.textContent = 'إصدار دازريفو الرسمي لأجهزة أندرويد';
+      });
+  }
+
 })();
