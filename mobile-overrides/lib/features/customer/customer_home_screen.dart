@@ -283,7 +283,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Widget _buildCustomerHero(String? greetingName) {
-    final city = _selectedCityName;
     final address = _primaryAddressLabel;
     return Container(
       decoration: BoxDecoration(
