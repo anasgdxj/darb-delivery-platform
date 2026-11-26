@@ -433,7 +433,7 @@ jobs:
           arm64_succeeded=false
           for attempt in 1 2 3; do
             arm64_log="$RUNNER_TEMP/darb-android-arm64-build-$attempt.log"
-            if flutter build apk "\${args[@]}" --target-platform android-arm64 --dart-define=DARB_PLAY_STORE=false --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME" 2>&1 | tee "$arm64_log"; then
+            if flutter build apk "${args[@]}" --target-platform android-arm64 --dart-define=DARB_PLAY_STORE=false --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME" 2>&1 | tee "$arm64_log"; then
               arm64_succeeded=true
               break
             fi
@@ -515,7 +515,7 @@ jobs:
         id: publish_apk
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -530,10 +530,10 @@ jobs:
             gh release delete-asset latest app-release.apk --yes || true
             gh release delete-asset latest app-update.json --yes || true
             gh release delete-asset latest app-arm64-v8a-release.apk --yes || true
-            gh release upload latest "\${assets[@]}"
+            gh release upload latest "${assets[@]}"
             gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). يتوفر APK عام ونسخة ARM64 للإرسال عبر تيليغرام عند توافق الحجم."
           else
-            gh release create latest "\${assets[@]}" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
+            gh release create latest "${assets[@]}" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
           fi
 
       - name: Notify DARB users about the published release
@@ -624,10 +624,10 @@ jobs:
           fi
 
       - name: Send the signed APK file to Telegram channel
-        if: always() && steps.publish_apk.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        if: always() && steps.publish_apk.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]')))
         continue-on-error: true
         env:
-          TELEGRAM_BOT_TOKEN: \${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: "@DAZREVO"
         shell: bash
         run: |
