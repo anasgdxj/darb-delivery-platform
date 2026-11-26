@@ -273,7 +273,7 @@ class DarbSegmentedDock<T> extends StatelessWidget {
                 final opt = options[i];
                 final active = opt.value == selectedValue;
                 return DarbPressScale(
-                  borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  borderRadius: DarbRadius.pill,
                   onTap: () {
                     if (!active) {
                       DarbHaptics.selection();
@@ -422,7 +422,7 @@ class DarbCityOrbStrip extends StatelessWidget {
                         : DarbColors.borderOf(ctx));
 
                 return DarbPressScale(
-                  borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  borderRadius: DarbRadius.pill,
                   onTap: () {
                     if (!active) {
                       DarbHaptics.selection();
