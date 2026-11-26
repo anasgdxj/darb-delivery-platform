@@ -277,7 +277,8 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         HapticFeedback.selectionClick();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(dt('تم سحب العرض'))),
-        );      }
+        );
+      }
       await _load();
     } on ApiException catch (e) {
       if (mounted) {
@@ -630,7 +631,8 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                 icon: Icons.trending_up_rounded,
               ),
               DarbMetricCard(
-                label: dt('الرحلات المكتملة'),                value: '${stats['completedTrips'] ?? 0}',
+                label: dt('الرحلات المكتملة'),
+                value: '${stats['completedTrips'] ?? 0}',
                 icon: Icons.task_alt_rounded,
               ),
               DarbMetricCard(
