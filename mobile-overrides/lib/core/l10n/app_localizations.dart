@@ -905,6 +905,7 @@ class AppLocalizations {
     'تأكيد الشراء': 'Confirm purchase|Satın almayı onayla',
     'تسجيل إثبات الشراء': 'Record purchase proof|Satın alma kanıtını kaydet',
     'متجر يحدده السائق': 'Store chosen by courier|Kurye tarafından seçilen mağaza',
+    'أضف عنوان تسليم وحدد موقعه على الخريطة من صفحة عناويني أولاً': 'Add a delivery address and pin its location from My Addresses first|Önce Adreslerim bölümünden teslimat adresi ekleyip konumunu haritada işaretleyin',
   };
 
   static const Map<String, Map<String, String>> _values = {
