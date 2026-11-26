@@ -55,7 +55,13 @@ export class GeminiAiTextProvider extends AiTextProvider {
                 ].join('\n\n'),
               }],
             },
-            contents: [{ role: 'user', parts: [{ text: request.message }] }],
+            contents: [
+              ...(request.history ?? []).map((turn) => ({
+                role: turn.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: turn.content }],
+              })),
+              { role: 'user', parts: [{ text: request.message }] },
+            ],
             generationConfig,
           }),
           signal: AbortSignal.timeout(25000),
