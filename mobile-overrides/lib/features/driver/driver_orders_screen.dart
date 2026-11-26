@@ -49,6 +49,58 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
     }
   }
 
+  Future<void> _submitShoppingQuote(String orderId, String currency) async {
+    final amountController = TextEditingController();
+    final detailsController = TextEditingController();
+    final result = await showDialog<Map<String, dynamic>>(context: context, builder: (ctx) => AlertDialog(
+      title: Text(dt('إرسال تكلفة المشتريات')),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: amountController, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(labelText: dt('قيمة المشتريات'), suffixText: currency)),
+        const SizedBox(height: 10),
+        TextField(controller: detailsController, minLines: 2, maxLines: 4, decoration: InputDecoration(labelText: dt('تفاصيل الأصناف والسعر'))),
+      ]),
+      actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(dt('إلغاء'))), FilledButton(onPressed: () {
+        final amount = double.tryParse(amountController.text.trim());
+        if (amount != null && amount > 0 && detailsController.text.trim().length >= 3) Navigator.pop(ctx, {'amount': amount, 'details': detailsController.text.trim()});
+      }, child: Text(dt('إرسال للعميل')))],
+    ));
+    amountController.dispose(); detailsController.dispose();
+    if (result == null || !_updatingOrders.add(orderId)) return;
+    if (mounted) setState(() {});
+    try {
+      await Api.instance.post('/orders/$orderId/shopping-quote', result);
+      if (mounted) DarbHaptics.success();
+      await _load();
+    } on ApiException catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message))); }
+    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً')))); }
+    finally { _updatingOrders.remove(orderId); if (mounted) setState(() {}); }
+  }
+
+  Future<void> _recordShoppingProof(String orderId) async {
+    final referenceController = TextEditingController();
+    final noteController = TextEditingController();
+    final result = await showDialog<Map<String, dynamic>>(context: context, builder: (ctx) => AlertDialog(
+      title: Text(dt('إثبات الشراء')),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: referenceController, decoration: InputDecoration(labelText: dt('رقم الفاتورة أو مرجع الشراء'))),
+        const SizedBox(height: 10),
+        TextField(controller: noteController, minLines: 2, maxLines: 3, decoration: InputDecoration(labelText: dt('ملاحظة (اختياري)'))),
+      ]),
+      actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(dt('إلغاء'))), FilledButton(onPressed: () {
+        if (referenceController.text.trim().length >= 2) Navigator.pop(ctx, {'receiptReference': referenceController.text.trim(), if (noteController.text.trim().isNotEmpty) 'proofNote': noteController.text.trim()});
+      }, child: Text(dt('تأكيد الشراء')))],
+    ));
+    referenceController.dispose(); noteController.dispose();
+    if (result == null || !_updatingOrders.add(orderId)) return;
+    if (mounted) setState(() {});
+    try {
+      await Api.instance.post('/orders/$orderId/purchase-proof', result);
+      if (mounted) DarbHaptics.success();
+      await _load();
+    } on ApiException catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message))); }
+    catch (_) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً')))); }
+    finally { _updatingOrders.remove(orderId); if (mounted) setState(() {}); }
+  }
   Future<void> _advanceStatus(String orderId, String nextStatus) async {
     if (!_updatingOrders.add(orderId)) return;
     if (mounted) setState(() {});
@@ -218,6 +270,10 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
     final orderNumber = o['orderNumber']?.toString() ?? '';
     final status = o['status']?.toString() ?? 'ASSIGNED';
     final isPeer = o['type'] == 'PEER_DELIVERY';
+    final isShopping = o['type'] == 'SHOPPING_DELIVERY';
+    final shoppingQuotes = (o['shoppingPurchaseQuotes'] as List? ?? []).whereType<Map<String, dynamic>>().toList();
+    final latestQuote = shoppingQuotes.isNotEmpty ? shoppingQuotes.first : null;
+    final purchaseRecorded = latestQuote?['purchasedAt'] != null;
     final total = num.tryParse(o['total']?.toString() ?? '0') ?? 0;
     final fee = num.tryParse(o['deliveryFee']?.toString() ?? '0') ?? 0;
     final currency = o['currency']?.toString() ?? 'SYP';
@@ -230,9 +286,8 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
     final dropLng = addr?['longitude'] as num?;
 
     return DarbTicketPass(
-      leadingIcon:
-          isPeer ? Icons.local_shipping_outlined : Icons.route_rounded,
-      title: orderNumber,
+      leadingIcon: (isPeer || isShopping) ? Icons.local_shipping_outlined : Icons.route_rounded,
+      title: isShopping ? '${dt('شراء وتوصيل')} · ${o['shoppingItemName'] ?? orderNumber}' : orderNumber,
       subtitle: customerName,
       status: status,
       headerActions: [
@@ -242,11 +297,13 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DarbOrderTimeline(
-            status: status,
-            isPeer: isPeer,
-            compact: true,
-          ),
+          DarbOrderTimeline(status: status, isPeer: isPeer || isShopping, compact: true),
+          if (isShopping) ...[
+            const SizedBox(height: 8),
+            Text('${dt('وصف الغرض')}: ${o['shoppingDescription'] ?? ''}', style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w700)),
+            if ((o['shoppingStoreName'] ?? '').toString().isNotEmpty) Text('${dt('المتجر')}: ${o['shoppingStoreName']}', style: TextStyle(color: DarbColors.mutedOf(context))),
+            if (latestQuote != null) DarbFeedbackBanner(kind: latestQuote['status'] == 'APPROVED' ? DarbFeedbackKind.success : DarbFeedbackKind.info, message: '${dt('تكلفة المشتريات')}: ${formatDarbMoney(num.tryParse(latestQuote['amount']?.toString() ?? '0') ?? 0, currency)} · ${dt(latestQuote['status'] == 'APPROVED' ? 'موافق عليها' : latestQuote['status'] == 'PENDING' ? 'بانتظار موافقة العميل' : 'تحتاج عرضاً جديداً')}'),
+          ],
           if (customerName != null && customerName.isNotEmpty) ...[
             const SizedBox(height: 8),
             Row(
@@ -279,14 +336,14 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
           const SizedBox(height: 8),
           DarbRouteConnector(
             pickupLabel: dt('الاستلام'),
-            pickupAddress: o['pickupAddress']?.toString() ??
+            pickupAddress: isShopping ? ((o['shoppingStoreName'] ?? '').toString().isNotEmpty ? o['shoppingStoreName'].toString() : dt('متجر يحدده السائق')) : (o['pickupAddress']?.toString() ??
                 (o['vendor']?['translations'] is List &&
                         (o['vendor']['translations'] as List).isNotEmpty
                     ? (o['vendor']['translations'] as List)
                             .first['name']
                             ?.toString() ??
                         dt('متجر')
-                    : dt('متجر')),
+                    : dt('متجر'))),
             dropoffLabel: dt('التسليم'),
             dropoffAddress: addr?['details']?.toString() ?? dt('غير محدد'),
           ),
@@ -339,7 +396,12 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
               icon: const Icon(Icons.place_outlined, size: 17),
               label: Text(dt('موقع التسليم')),
             ),
+          if (isShopping && status == 'ASSIGNED' && latestQuote?['status'] == 'APPROVED' && !purchaseRecorded)
+            OutlinedButton.icon(onPressed: _updatingOrders.contains(id) ? null : () => _recordShoppingProof(id), icon: const Icon(Icons.receipt_long_rounded, size: 17), label: Text(dt('تسجيل إثبات الشراء'))),
+          if (isShopping && status == 'ASSIGNED' && (latestQuote == null || latestQuote['status'] == 'REJECTED' || latestQuote['status'] == 'SUPERSEDED'))
+            OutlinedButton.icon(onPressed: _updatingOrders.contains(id) ? null : () => _submitShoppingQuote(id, currency), icon: const Icon(Icons.request_quote_outlined, size: 17), label: Text(dt('إرسال تكلفة الشراء'))),
           if (status == 'ASSIGNED' || status == 'PICKED_UP')
+            if (!isShopping || status == 'PICKED_UP' || purchaseRecorded)
             FilledButton(
               onPressed: _updatingOrders.contains(id)
                   ? null
