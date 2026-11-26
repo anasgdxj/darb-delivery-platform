@@ -335,7 +335,7 @@ export class OrdersService {
         items: true,
         address: true,
         driver: { select: { id: true, vehicleType: true, user: { select: { name: true, phone: true } } } },
-        customer: { select: { name: true, phone: true } },
+        customer: { select: { id: true, name: true, phone: true } },
       },
     });
   }
@@ -581,6 +581,8 @@ export class OrdersService {
       const purchased = await tx.shoppingPurchaseQuote.findFirst({ where: { orderId, purchasedAt: { not: null } }, select: { id: true } });
       if (purchased) throw new BadRequestException('تم تسجيل شراء هذا الطلب بالفعل');
       await tx.shoppingPurchaseQuote.updateMany({ where: { orderId, status: { in: ['PENDING', 'APPROVED'] } }, data: { status: 'SUPERSEDED' } });
+      await tx.order.update({ where: { id: orderId }, data: { subtotal: 0, total: (await tx.order.findUnique({ where: { id: orderId }, select: { deliveryFee: true } }))!.deliveryFee } });
+      await tx.payment.updateMany({ where: { orderId }, data: { amount: (await tx.order.findUnique({ where: { id: orderId }, select: { deliveryFee: true } }))!.deliveryFee } });
       return tx.shoppingPurchaseQuote.create({ data: { orderId, driverId: driver.id, amount, currency: order.currency, details: cleanDetails, status: 'PENDING' } });
     });
   }
@@ -594,7 +596,13 @@ export class OrdersService {
       if (!quote) throw new BadRequestException('عرض الشراء لم يعد متاحاً');
       if (order.shoppingMaxBudget !== null && Number(quote.amount) > Number(order.shoppingMaxBudget) && !allowBudgetOverride) throw new BadRequestException('التكلفة تتجاوز ميزانيتك؛ فعّل الموافقة على تجاوز الميزانية إذا كنت توافق');
       await tx.shoppingPurchaseQuote.updateMany({ where: { orderId, status: { in: ['PENDING', 'APPROVED'] }, id: { not: quoteId } }, data: { status: 'SUPERSEDED' } });
-      return tx.shoppingPurchaseQuote.update({ where: { id: quoteId }, data: { status: 'APPROVED', approvedAt: new Date(), approvedByUserId: userId } });
+      const approved = await tx.shoppingPurchaseQuote.update({ where: { id: quoteId }, data: { status: 'APPROVED', approvedAt: new Date(), approvedByUserId: userId } });
+      const delivery = await tx.order.findUnique({ where: { id: orderId }, select: { deliveryFee: true } });
+      const purchaseAmount = Number(quote.amount);
+      const deliveryFee = Number(delivery?.deliveryFee ?? 0);
+      await tx.order.update({ where: { id: orderId }, data: { subtotal: purchaseAmount, total: purchaseAmount + deliveryFee } });
+      await tx.payment.updateMany({ where: { orderId }, data: { amount: purchaseAmount + deliveryFee } });
+      return approved;
     });
   }
 
