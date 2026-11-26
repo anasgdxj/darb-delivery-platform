@@ -124,8 +124,10 @@ export class OrdersController {
   @Roles(UserRole.DRIVER)
   async submitShoppingQuote(@CurrentUser() user: { id: string }, @Param('id', new ParseUUIDPipe()) id: string, @Body() dto: CreateShoppingQuoteDto) {
     const quote = await this.orders.submitShoppingPurchaseQuote(user.id, id, dto.amount, dto.details);
-    const assigned = await this.orders.shoppingQuotesForCustomerFromDriver?.(user.id, id);
-    return { ...quote, notificationQueued: Boolean(assigned) };
+    const driverOrders = await this.orders.driverMine(user.id);
+    const assigned = driverOrders.find((order) => order.id === id);
+    if (assigned?.customer?.id) await this.notifications.notifyCustomer(assigned.customer.id, 'تكلفة الشراء جاهزة للموافقة', 'راجع تكلفة المشتريات التي أرسلها السائق قبل أن يبدأ الشراء', { type: 'SHOPPING_QUOTE_PENDING', orderId: id, quoteId: quote.id });
+    return quote;
   }
 
   @Post(':id/shopping-quotes/:quoteId/approve')
@@ -146,6 +148,9 @@ export class OrdersController {
   @Roles(UserRole.DRIVER)
   async purchaseProof(@CurrentUser() user: { id: string }, @Param('id', new ParseUUIDPipe()) id: string, @Body() dto: ShoppingPurchaseProofDto) {
     const proof = await this.orders.recordShoppingPurchaseProof(user.id, id, dto);
+    const driverOrders = await this.orders.driverMine(user.id);
+    const assigned = driverOrders.find((order) => order.id === id);
+    if (assigned?.customer?.id) await this.notifications.notifyCustomer(assigned.customer.id, 'تم تسجيل إثبات الشراء', 'أكمل السائق الشراء ويجري تجهيز طلبك للتوصيل', { type: 'SHOPPING_PURCHASED', orderId: id });
     return proof;
   }
   @Get('mine')
