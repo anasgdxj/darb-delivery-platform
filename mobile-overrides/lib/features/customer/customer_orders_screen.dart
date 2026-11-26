@@ -295,7 +295,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
             if ((order['shoppingStoreName'] ?? '').toString().isNotEmpty) Text('${dt('المتجر المطلوب')}: ${order['shoppingStoreName']}', style: TextStyle(color: DarbColors.inkOf(ctx))),
             const SizedBox(height: 8),
           ],
-          if (!isPeer && !isShopping && vendorName.isNotEmpty) [
+          if (!isPeer && !isShopping && vendorName.isNotEmpty) ...[
             Text(
               '${dt('متجر')}: $vendorName',
               style: TextStyle(
