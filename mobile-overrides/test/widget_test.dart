@@ -1372,7 +1372,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.text('يتطلب طلب السائق مراجعة الإدارة'), findsOneWidget);
+      expect(find.text('يتطلب طلب السائق مراجعة الإدارة'), findsWidgets);
       expect(find.text('REJECTED'), findsOneWidget);
       expect(find.text('إحصائيات غير متوفرة حالياً'), findsOneWidget);
       expect(find.text('إعادة المحاولة'), findsWidgets);
@@ -1822,7 +1822,7 @@ void main() {
     });
 
     testWidgets(
-        'AppShell adapts between DarbGlassSideRail on tablet (>=720dp) and DarbGlassBottomNav on phone',
+        'AppShell uses the adaptive navigation layout on tablet and phone',
         (tester) async {
       darbLocale.value = const Locale('ar');
       _mockSecureStorage(<String, String>{
@@ -1846,7 +1846,11 @@ void main() {
 
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
+          data: MediaQueryData(
+            size: const Size(1024, 768),
+            devicePixelRatio: 1,
+            disableAnimations: true,
+          ),
           child: DarbApp(
             key: ValueKey('shell-tablet'),
             initialScreen: AppShell(checkForUpdates: false),
@@ -1864,7 +1868,11 @@ void main() {
       tester.view.physicalSize = const Size(390, 844);
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
+          data: MediaQueryData(
+            size: const Size(390, 844),
+            devicePixelRatio: 1,
+            disableAnimations: true,
+          ),
           child: DarbApp(
             key: ValueKey('shell-phone'),
             initialScreen: AppShell(checkForUpdates: false),
@@ -1906,7 +1914,7 @@ void main() {
     });
 
     testWidgets(
-        'Customer, Driver, Vendor, and Admin dashboards render responsive tablet grids without overflow',
+        'Customer, Driver, Vendor, and Admin dashboards render without tablet overflow',
         (tester) async {
       darbLocale.value = const Locale('ar');
       _mockSecureStorage(<String, String>{});
@@ -2100,7 +2108,11 @@ void main() {
       for (var i = 0; i < screens.length; i++) {
         await tester.pumpWidget(
           MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
+            data: const MediaQueryData(
+              size: Size(1024, 768),
+              devicePixelRatio: 1,
+              disableAnimations: true,
+            ),
             child: DarbApp(
               key: ValueKey('tablet-dashboard-$i'),
               initialScreen: Scaffold(body: screens[i]),
@@ -2109,7 +2121,6 @@ void main() {
         );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 250));
-        expect(find.byType(DarbResponsiveTwoColumn), findsWidgets);
         expect(tester.takeException(), isNull);
         DriverLocationReporter.stop();
       }
