@@ -1,4 +1,5 @@
 # Signed Android release pipeline. Main commits marked [publish-apk] publish latest and notify registered devices.
+# Firebase configuration refresh build: 2026-11-27.
 name: Build signed DAZREVO Android release
 on:
   push:
