@@ -89,8 +89,14 @@ export class TelegramAdminService implements OnModuleInit {
       }
       await this.sendMessage(chatId, response);
     } catch (error) {
+      const message = error instanceof Error ? error.message : '';
       this.logger.error(`Telegram command ${command} failed.`, error instanceof Error ? error.stack : undefined);
-      await this.sendMessage(chatId, 'تعذر تنفيذ الأمر الآن. تم تسجيل الخطأ في سجلات الخادم.');
+      const userMessage = message.includes('GitHub API rate limit exhausted')
+        ? 'تجاوز GitHub حد الطلبات المتاح. أضف GITHUB_TOKEN بصلاحية قراءة Contents إلى Render ثم أعد المحاولة.'
+        : message.includes("50 MiB upload limit")
+          ? 'حجم ملف APK يتجاوز حد تيليغرام للإرسال كمرفق. لم أرسل رابطاً بديلاً.'
+          : 'تعذر تنفيذ الأمر الآن. تم تسجيل الخطأ في سجلات الخادم.';
+      await this.sendMessage(chatId, userMessage);
     }
   }
 
