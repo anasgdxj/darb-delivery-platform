@@ -438,28 +438,31 @@ jobs:
               break
             fi
             if ! grep -Eiq '429|Too Many Requests|Could not GET|502|503|504|Connection reset|timed out' "$arm64_log"; then
-              exit 1
+              echo "::warning::ARM64-only APK build failed for a non-transient reason; continuing with the universal APK."
+              break
             fi
             if [ "$attempt" -lt 3 ]; then
               echo "::warning::Transient dependency failure; retrying ARM64 APK build (attempt $((attempt + 1))/3)."
               sleep $((attempt * 30))
             fi
           done
-          if [ "$arm64_succeeded" != true ]; then
-            echo "::error::Android ARM64 APK build failed after three retries."
-            exit 1
-          fi
-          ARM64_SIZE="$(stat -c '%s' "$APK")"
-          if [ "$ARM64_SIZE" -le 49000000 ]; then
-            "$APKSIGNER" verify --verbose "$APK"
-            cp "$APK" "$APK_DIR/app-arm64-v8a-release.apk"
-            ARM64_SHA256="$(sha256sum "$APK_DIR/app-arm64-v8a-release.apk" | cut -d' ' -f1)"
-            echo "Telegram ARM64 APK SHA-256: $ARM64_SHA256" >> "$GITHUB_STEP_SUMMARY"
-            echo "Telegram ARM64 APK size: $ARM64_SIZE bytes (within 49 MB)." >> "$GITHUB_STEP_SUMMARY"
+          if [ "$arm64_succeeded" = true ]; then
+            ARM64_SIZE="$(stat -c '%s' "$APK")"
+            if [ "$ARM64_SIZE" -le 49000000 ]; then
+              "$APKSIGNER" verify --verbose "$APK"
+              cp "$APK" "$APK_DIR/app-arm64-v8a-release.apk"
+              ARM64_SHA256="$(sha256sum "$APK_DIR/app-arm64-v8a-release.apk" | cut -d' ' -f1)"
+              echo "Telegram ARM64 APK SHA-256: $ARM64_SHA256" >> "$GITHUB_STEP_SUMMARY"
+              echo "Telegram ARM64 APK size: $ARM64_SIZE bytes (within 49 MB)." >> "$GITHUB_STEP_SUMMARY"
+            else
+              rm -f "$APK_DIR/app-arm64-v8a-release.apk"
+              echo "::warning::ARM64 APK is $ARM64_SIZE bytes and exceeds Telegram's 49 MB upload limit; the universal release remains available."
+              echo "Telegram ARM64 APK: not attached; generated size $ARM64_SIZE bytes exceeds 49 MB." >> "$GITHUB_STEP_SUMMARY"
+            fi
           else
             rm -f "$APK_DIR/app-arm64-v8a-release.apk"
-            echo "::warning::ARM64 APK is $ARM64_SIZE bytes and exceeds Telegram's 49 MB upload limit; the universal release remains available."
-            echo "Telegram ARM64 APK: not attached; generated size $ARM64_SIZE bytes exceeds 49 MB." >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::ARM64 APK unavailable after build retries; continuing with the verified universal APK."
+            echo "Telegram ARM64 APK: not attached; ARM64-only build failed. Universal APK release is unaffected." >> "$GITHUB_STEP_SUMMARY"
           fi
           cp "$UNIVERSAL_APK" "$APK"
           cp "$UNIVERSAL_MANIFEST" "$APK_DIR/app-update.json"
