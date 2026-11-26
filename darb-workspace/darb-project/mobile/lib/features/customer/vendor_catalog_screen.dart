@@ -283,7 +283,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                           ),
                         ),
                         trailing: DarbPressScale(
-                          borderRadius: BorderRadius.circular(DarbRadius.pill),
+                          borderRadius: DarbRadius.pill,
                           onTap: _openReviewsSheet,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
