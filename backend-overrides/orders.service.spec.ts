@@ -224,6 +224,73 @@ describe('OrdersService safety checks', () => {
       .rejects.toBeInstanceOf(BadRequestException);
     expect(tx.orderStatusHistory.create).not.toHaveBeenCalled();
   });
+  it('blocks shopping pickup until an approved purchase proof is recorded', async () => {
+    prisma.order.findUnique.mockResolvedValue({
+      id: 'shopping-1', type: 'SHOPPING_DELIVERY', status: 'ASSIGNED', driverId: 'driver-1',
+      driver: { userId: 'driver-user-1' }, vendor: null, items: [],
+    });
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const findProof = jest.fn().mockResolvedValue(null);
+    const tx: any = {
+      order: { updateMany },
+      shoppingPurchaseQuote: { findFirst: findProof },
+      orderStatusHistory: { create: jest.fn() },
+    };
+    prisma.$transaction.mockImplementation(async (cb: (tx: any) => unknown) => cb(tx));
+    await expect(service.updateStatus('driver-user-1', 'DRIVER', 'shopping-1', OrderStatus.PICKED_UP)).rejects.toBeInstanceOf(BadRequestException);
+    expect(findProof).toHaveBeenCalled();
+    expect(tx.orderStatusHistory.create).not.toHaveBeenCalled();
+  });
+  it('creates a shopping delivery request with a separate purchase budget', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'shopping-1', type: 'SHOPPING_DELIVERY' });
+    const tx: any = {
+      address: { findFirst: jest.fn().mockResolvedValue({ id: 'address-1' }) },
+      city: { findFirst: jest.fn().mockResolvedValue({ id: 'city-1', defaultCurrency: 'SYP' }) },
+      order: { create },
+    };
+    prisma.$transaction.mockImplementation(async (cb: (tx: any) => unknown) => cb(tx));
+    await service.createShoppingRequest('customer-1', { cityId: 'city-1', addressId: 'address-1', itemName: 'مستلزمات منزلية', description: 'منظف وورق مطبخ', maxPurchaseBudget: 250 });
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({
+      type: 'SHOPPING_DELIVERY', shoppingItemName: 'مستلزمات منزلية', shoppingDescription: 'منظف وورق مطبخ',
+      shoppingMaxBudget: 250, subtotal: 0, deliveryFee: 0, total: 0,
+    }) }));
+  });
+
+  it('requires explicit customer override when a shopping quote exceeds the budget', async () => {
+    const tx: any = {
+      $queryRaw: jest.fn(),
+      order: { findFirst: jest.fn().mockResolvedValue({ id: 'shopping-1', shoppingMaxBudget: 100 }) },
+      shoppingPurchaseQuote: { findFirst: jest.fn().mockResolvedValue({ id: 'quote-1', amount: 150 }) },
+    };
+    prisma.$transaction.mockImplementation(async (cb: (tx: any) => unknown) => cb(tx));
+    await expect(service.approveShoppingPurchaseQuote('customer-1', 'shopping-1', 'quote-1', false)).rejects.toBeInstanceOf(BadRequestException);
+    expect(tx.shoppingPurchaseQuote.update).toBeUndefined();
+  });
+
+  it('records shopping proof only against an approved quote assigned to the driver', async () => {
+    prisma.driver.findUnique.mockResolvedValue({ id: 'driver-1', status: 'APPROVED' });
+    const update = jest.fn().mockResolvedValue({ id: 'quote-1', purchasedAt: new Date() });
+    const tx: any = {
+      $queryRaw: jest.fn(),
+      order: { findFirst: jest.fn().mockResolvedValue({ id: 'shopping-1' }) },
+      shoppingPurchaseQuote: { findFirst: jest.fn().mockResolvedValue({ id: 'quote-1' }), update },
+    };
+    prisma.$transaction.mockImplementation(async (cb: (tx: any) => unknown) => cb(tx));
+    await service.recordShoppingPurchaseProof('driver-user-1', 'shopping-1', { receiptReference: 'INV-2026-11' });
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'quote-1' }, data: expect.objectContaining({ receiptReference: 'INV-2026-11', purchasedAt: expect.any(Date) }) }));
+  });
+
+  it('does not allow a driver to record purchase proof before customer approval', async () => {
+    prisma.driver.findUnique.mockResolvedValue({ id: 'driver-1', status: 'APPROVED' });
+    const tx: any = {
+      $queryRaw: jest.fn(),
+      order: { findFirst: jest.fn().mockResolvedValue({ id: 'shopping-1' }) },
+      shoppingPurchaseQuote: { findFirst: jest.fn().mockResolvedValue(null), update: jest.fn() },
+    };
+    prisma.$transaction.mockImplementation(async (cb: (tx: any) => unknown) => cb(tx));
+    await expect(service.recordShoppingPurchaseProof('driver-user-1', 'shopping-1', { receiptReference: 'INV-1' })).rejects.toBeInstanceOf(BadRequestException);
+    expect(tx.shoppingPurchaseQuote.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('Peer delivery offers', () => {
@@ -315,7 +382,7 @@ describe('Peer delivery offers', () => {
     }));
     await expect(service.submitDeliveryOffer('driver-user-1', 'order-1', 75)).rejects.toBeInstanceOf(BadRequestException);
     expect(findFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: { id: 'order-1', cityId: 'city-2', type: 'PEER_DELIVERY', status: 'PENDING', driverId: null },
+      where: { id: 'order-1', cityId: 'city-2', type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] }, status: 'PENDING', driverId: null },
     }));
   });
 
@@ -323,7 +390,7 @@ describe('Peer delivery offers', () => {
     prisma.order.findFirst.mockResolvedValue(null);
     await expect(service.deliveryOffersForCustomer('another-customer', 'order-1')).rejects.toBeInstanceOf(NotFoundException);
     expect(prisma.order.findFirst).toHaveBeenCalledWith({
-      where: { id: 'order-1', customerId: 'another-customer', type: 'PEER_DELIVERY' },
+      where: { id: 'order-1', customerId: 'another-customer', type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] } },
       select: { id: true, status: true },
     });
     expect(prisma.deliveryOffer.findMany).not.toHaveBeenCalled();
