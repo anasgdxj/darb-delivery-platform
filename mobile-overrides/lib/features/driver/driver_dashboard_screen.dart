@@ -614,9 +614,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     final isBusy = _busyOrderIds.contains(id);
 
     return DarbTicketPass(
-      leadingIcon: isPeer
-          ? Icons.local_shipping_outlined
-          : Icons.storefront_outlined,
+      leadingIcon: (isPeer || isShopping) ? Icons.local_shipping_outlined : Icons.storefront_outlined,
       title: isShopping ? '${dt('شراء وتوصيل')}: ${order['shoppingItemName'] ?? dt('غرض')}' : (isPeer ? dt('طلب توصيل مستقل') : (storeName ?? dt('متجر'))),
       subtitle: (totalAmount != null && totalAmount > 0)
           ? formatDarbMoney(totalAmount, orderCurrency)
@@ -653,7 +651,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             pickupLabel: dt('الاستلام'),
             pickupAddress: isShopping ? ((order['shoppingStoreName'] ?? '').toString().isNotEmpty ? order['shoppingStoreName'].toString() : dt('متجر يحدده السائق')) : (isPeer
                 ? (order['pickupAddress']?.toString() ?? dt('الاستلام'))
-                : (storeName ?? dt('متجر')),
+                : (storeName ?? dt('متجر'))),
             dropoffLabel: dt('التسليم'),
             dropoffAddress:
                 order['address']?['details']?.toString() ?? dt('غير محدد'),
