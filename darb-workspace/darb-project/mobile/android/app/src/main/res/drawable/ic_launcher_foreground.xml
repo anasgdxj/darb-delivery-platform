@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Subtle kinetic orbit halo inside 66dp safe zone -->
+    <path
+        android:pathData="M54,54m-29,0a29,29 0,1 1,58 0a29,29 0,1 1,-58 0"
+        android:strokeWidth="1.1"
+        android:strokeColor="#2CA8EBC8" />
+
+    <!-- Tri-node Signal Violet circuit linking customer, store & courier -->
+    <path
+        android:pathData="M36,35 L56,54 L36,73"
+        android:strokeWidth="4.0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FF8A5CF6" />
+
+    <!-- Sculpted forward-moving D arc -->
+    <path
+        android:fillColor="#FFF1F7F4"
+        android:pathData="M37,28 L54,28 C69.5,28 79.5,38.5 79.5,54 C79.5,69.5 69.5,80 54,80 L37,80 L45.5,69.5 L53.5,69.5 C62.6,69.5 68,63.2 68,54 C68,44.8 62.6,38.5 53.5,38.5 L45.5,38.5 Z" />
+
+    <!-- Origin & destination nodes -->
+    <path
+        android:fillColor="#FFA8EBC8"
+        android:pathData="M36,35m-4.4,0a4.4,4.4 0,1 1,8.8 0a4.4,4.4 0,1 1,-8.8 0" />
+    <path
+        android:fillColor="#FFA8EBC8"
+        android:pathData="M36,73m-4.4,0a4.4,4.4 0,1 1,8.8 0a4.4,4.4 0,1 1,-8.8 0" />
+
+    <!-- Kinetic Volt Lime nexus core -->
+    <path
+        android:fillColor="#3EA7FF00"
+        android:pathData="M56,54m-9.8,0a9.8,9.8 0,1 1,19.6 0a9.8,9.8 0,1 1,-19.6 0" />
+    <path
+        android:fillColor="#FFA7FF00"
+        android:pathData="M56,54m-6.4,0a6.4,6.4 0,1 1,12.8 0a6.4,6.4 0,1 1,-12.8 0" />
+    <path
+        android:fillColor="#FF071A14"
+        android:pathData="M56,54m-2.3,0a2.3,2.3 0,1 1,4.6 0a2.3,2.3 0,1 1,-4.6 0" />
+</vector>

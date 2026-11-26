@@ -13,6 +13,7 @@ import 'package:darb/features/account/driver_application_screen.dart';
 import 'package:darb/features/account/edit_profile_screen.dart';
 import 'package:darb/features/account/settings_screen.dart';
 import 'package:darb/features/account/vendor_application_screen.dart';
+import 'package:darb/features/admin/admin_dashboard_screen.dart';
 import 'package:darb/features/auth/login_hero_map.dart';
 import 'package:darb/features/auth/login_screen.dart';
 import 'package:darb/features/auth/onboarding_screen.dart';
@@ -1628,6 +1629,411 @@ void main() {
 
       expect(find.byType(SettingsScreen), findsOneWidget);
       expect(find.text('إمكانية الوصول والحركة'), findsOneWidget);
+    });
+  });
+
+  group('DAZREVO iPadOS 18 Liquid Glass & Adaptive Layout', () {
+    testWidgets('DarbAdaptiveLayout evaluates phone, tablet, and desktop breakpoints',
+        (tester) async {
+      late bool phoneTablet;
+      late bool tabletTablet;
+      late bool desktopFlag;
+      late int narrowMetricCols;
+      late int wideMetricCols;
+      late int contentColsWide;
+
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            phoneTablet = DarbAdaptiveLayout.isTablet(context);
+            narrowMetricCols =
+                DarbAdaptiveLayout.metricColumns(context, availableWidth: 358);
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+
+      tester.view.physicalSize = const Size(1120, 800);
+      await tester.pumpWidget(
+        Builder(
+          key: const ValueKey('tablet-metrics'),
+          builder: (context) {
+            tabletTablet = DarbAdaptiveLayout.isTablet(context);
+            desktopFlag = DarbAdaptiveLayout.isDesktop(context);
+            wideMetricCols =
+                DarbAdaptiveLayout.metricColumns(context, availableWidth: 840);
+            contentColsWide =
+                DarbAdaptiveLayout.contentColumns(context, availableWidth: 840);
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+
+      expect(phoneTablet, isFalse);
+      expect(narrowMetricCols, 2);
+      expect(tabletTablet, isTrue);
+      expect(desktopFlag, isTrue);
+      expect(wideMetricCols, 4);
+      expect(contentColsWide, 2);
+    });
+
+    testWidgets('DarbOtpPinPreview displays 6 cells and entered digits',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: const Scaffold(
+            body: Padding(
+              padding: EdgeInsets.all(16),
+              child: DarbOtpPinPreview(digits: '482'),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('4'), findsOneWidget);
+      expect(find.text('8'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('•'), findsNWidgets(3));
+    });
+
+    testWidgets('DarbContextMenuButton opens popup menu and triggers callback',
+        (tester) async {
+      String? picked;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DarbTheme.light,
+          home: Scaffold(
+            body: Center(
+              child: DarbContextMenuButton<String>(
+                onSelected: (v) => picked = v,
+                items: const [
+                  DarbContextMenuAction(
+                    value: 'refresh',
+                    label: 'تحديث',
+                    icon: Icons.refresh_rounded,
+                  ),
+                  DarbContextMenuAction(
+                    value: 'vehicle',
+                    label: 'تحديث المركبة',
+                    icon: Icons.two_wheeler_rounded,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      expect(find.text('تحديث'), findsOneWidget);
+      expect(find.text('تحديث المركبة'), findsOneWidget);
+
+      await tester.tap(find.text('تحديث المركبة'));
+      await tester.pumpAndSettle();
+      expect(picked, 'vehicle');
+    });
+
+    testWidgets(
+        'AppShell adapts between DarbGlassSideRail on tablet (>=720dp) and DarbGlassBottomNav on phone',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      _mockSecureStorage(<String, String>{
+        'accessToken': 'valid-token',
+        'refreshToken': 'valid-refresh',
+      });
+      addTearDown(() async {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        DriverLocationReporter.stop();
+        _clearSecureStorageMock();
+        Api.instance.httpClientOverride = null;
+        Api.instance.setSessionForTest();
+      });
+
+      Api.instance.setSessionForTest(accessToken: 'valid-token');
+      Api.instance.httpClientOverride = _createRoleMockClient(role: 'CUSTOMER');
+
+      tester.view.physicalSize = const Size(1024, 768);
+      tester.view.devicePixelRatio = 1.0;
+
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            key: ValueKey('shell-tablet'),
+            initialScreen: AppShell(checkForUpdates: false),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byType(DarbGlassSideRail), findsOneWidget);
+      expect(find.byType(DarbGlassBottomNav), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      tester.view.physicalSize = const Size(390, 844);
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            key: ValueKey('shell-phone'),
+            initialScreen: AppShell(checkForUpdates: false),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byType(DarbGlassBottomNav), findsOneWidget);
+      expect(find.byType(DarbGlassSideRail), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('LoginScreen split-pane renders cleanly on tablet viewport',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      tester.view.physicalSize = const Size(1024, 768);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(initialScreen: LoginScreen()),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(DarbLoginVectorMap), findsOneWidget);
+      expect(find.byType(DarbBrandMark), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
+      expect(find.text('دازريفو · DAZREVO'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'Customer, Driver, Vendor, and Admin dashboards render responsive tablet grids without overflow',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      _mockSecureStorage(<String, String>{});
+      tester.view.physicalSize = const Size(1024, 768);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        DriverLocationReporter.stop();
+        _clearSecureStorageMock();
+        Api.instance.httpClientOverride = null;
+        Api.instance.setSessionForTest();
+      });
+
+      Api.instance.setSessionForTest(accessToken: 'valid-token');
+      Api.instance.httpClientOverride = MockClient((request) async {
+        final path = request.url.path;
+        if (path.endsWith('/cities')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'id': 'city-1',
+                'code': 'damascus',
+                'names': [
+                  {'locale': 'ar', 'name': 'دمشق'},
+                ],
+              },
+            ]),
+            200,
+          );
+        }
+        if (path.endsWith('/vendors')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'id': 'v-1',
+                'type': 'مطعم',
+                'isOpen': true,
+                'translations': [
+                  {'locale': 'ar', 'name': 'مطعم دمشق', 'description': 'مأكولات'},
+                ],
+              },
+              {
+                'id': 'v-2',
+                'type': 'حلويات',
+                'isOpen': true,
+                'translations': [
+                  {'locale': 'ar', 'name': 'حلويات الشام', 'description': 'شرقية'},
+                ],
+              },
+            ]),
+            200,
+          );
+        }
+        if (path.endsWith('/drivers/me')) {
+          return http.Response(
+            jsonEncode({
+              'id': 'drv-1',
+              'status': 'APPROVED',
+              'isOnline': true,
+              'vehicleType': 'CAR',
+            }),
+            200,
+          );
+        }
+        if (path.endsWith('/vendors/mine')) {
+          return http.Response(
+            jsonEncode({
+              'id': 'v-1',
+              'status': 'APPROVED',
+              'isOpen': true,
+              'translations': [
+                {'locale': 'ar', 'name': 'متجر الشام', 'description': ''},
+              ],
+            }),
+            200,
+          );
+        }
+        if (path.endsWith('/drivers/stats') ||
+            path.endsWith('/vendors/mine/stats') ||
+            path.endsWith('/admin/stats')) {
+          return http.Response(
+            jsonEncode({
+              'ordersTotal': 12,
+              'ordersActive': 3,
+              'driversOnline': 5,
+              'deliveredGrossTotal': 150000,
+            }),
+            200,
+          );
+        }
+        if (path.endsWith('/orders/available')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'id': 'ord-1',
+                'orderNumber': 'DRB-101',
+                'type': 'VENDOR',
+                'status': 'READY',
+                'total': 25000,
+                'currency': 'SYP',
+                'distanceKm': 2.4,
+                'vendor': {
+                  'translations': [
+                    {'locale': 'ar', 'name': 'مطعم الشام'},
+                  ],
+                },
+              },
+              {
+                'id': 'ord-2',
+                'orderNumber': 'DRB-102',
+                'type': 'PEER_DELIVERY',
+                'status': 'PENDING',
+                'total': 12000,
+                'currency': 'SYP',
+                'distanceKm': 3.1,
+              },
+            ]),
+            200,
+          );
+        }
+        if (path.endsWith('/orders/vendor')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'id': 'vo-1',
+                'orderNumber': 'DRB-201',
+                'type': 'VENDOR',
+                'status': 'PENDING',
+                'subtotal': 18000,
+                'currency': 'SYP',
+                'customer': {'name': 'سارة'},
+                'items': [],
+              },
+              {
+                'id': 'vo-2',
+                'orderNumber': 'DRB-202',
+                'type': 'VENDOR',
+                'status': 'PREPARING',
+                'subtotal': 32000,
+                'currency': 'SYP',
+                'customer': {'name': 'عمر'},
+                'items': [],
+              },
+            ]),
+            200,
+          );
+        }
+        if (path.endsWith('/admin/vendors/pending')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'id': 'pv-1',
+                'type': 'مطعم',
+                'status': 'PENDING',
+                'translations': [
+                  {'locale': 'ar', 'name': 'متجر الندى'},
+                ],
+                'user': {'name': 'أحمد', 'phone': '+963933000111'},
+              },
+              {
+                'id': 'pv-2',
+                'type': 'حلويات',
+                'status': 'PENDING',
+                'translations': [
+                  {'locale': 'ar', 'name': 'حلويات الشرق'},
+                ],
+                'user': {'name': 'نور', 'phone': '+963944000222'},
+              },
+            ]),
+            200,
+          );
+        }
+        if (path.endsWith('/admin/drivers/pending') ||
+            path.endsWith('/admin/vendors') ||
+            path.endsWith('/admin/drivers')) {
+          return http.Response('[]', 200);
+        }
+        return http.Response('[]', 200);
+      });
+
+      final screens = <Widget>[
+        const CustomerHomeScreen(
+          user: {'id': 'u1', 'name': 'أنس', 'role': 'CUSTOMER'},
+        ),
+        const DriverDashboardScreen(),
+        const VendorOrdersScreen(),
+        const AdminDashboardScreen(),
+      ];
+
+      for (var i = 0; i < screens.length; i++) {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: DarbApp(
+              key: ValueKey('tablet-dashboard-$i'),
+              initialScreen: Scaffold(body: screens[i]),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 250));
+        expect(find.byType(DarbResponsiveTwoColumn), findsWidgets);
+        expect(tester.takeException(), isNull);
+        DriverLocationReporter.stop();
+      }
     });
   });
 }

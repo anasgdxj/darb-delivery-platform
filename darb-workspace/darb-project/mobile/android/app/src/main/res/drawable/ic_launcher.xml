@@ -1,97 +1,76 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="1024"
-    android:viewportHeight="1024">
+    android:viewportWidth="108"
+    android:viewportHeight="108">
 
-    <!-- Deep forest emerald background -->
-    <path
-        android:fillColor="#102B26"
-        android:pathData="M0,0h1024v1024h-1024z" />
+    <!-- Obsidian Emerald gradient base -->
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="12"
+                android:startY="8"
+                android:endX="98"
+                android:endY="102">
+                <item android:offset="0.0" android:color="#FF071A14" />
+                <item android:offset="0.55" android:color="#FF0B2F24" />
+                <item android:offset="1.0" android:color="#FF144435" />
+            </gradient>
+        </aapt:attr>
+    </path>
 
-    <!-- Subtle ambient center glow -->
-    <path
-        android:fillColor="#153830"
-        android:fillAlpha="0.85"
-        android:pathData="M512,512 m-410,0 a410,410 0 1,0 820,0 a410,410 0 1,0 -820,0 z" />
+    <!-- Subtle emerald orbital glow -->
+    <path android:pathData="M54,54m-42,0a42,42 0,1 1,84 0a42,42 0,1 1,-84 0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="58"
+                android:centerY="50"
+                android:gradientRadius="42">
+                <item android:offset="0.0" android:color="#30A7FF00" />
+                <item android:offset="0.6" android:color="#1A8A5CF6" />
+                <item android:offset="1.0" android:color="#00071A14" />
+            </gradient>
+        </aapt:attr>
+    </path>
 
-    <!-- Minimalist sage geometric street map grid -->
+    <!-- Subtle geometric orbit ring -->
     <path
-        android:strokeColor="#224B40"
-        android:strokeAlpha="0.52"
-        android:strokeWidth="10"
-        android:strokeLineCap="round"
-        android:pathData="M0,272 L1024,272 M0,752 L1024,752 M272,0 L272,1024 M752,0 L752,1024 M0,432 L416,164 L1024,164 M0,860 L608,860 L1024,592" />
+        android:pathData="M54,54m-33,0a33,33 0,1 1,66 0a33,33 0,1 1,-66 0"
+        android:strokeWidth="1.2"
+        android:strokeColor="#28A8EBC8" />
 
-    <!-- Subtle locator compass ring -->
+    <!-- Tri-node kinetic link (Customer - Merchant - Courier) -->
     <path
-        android:strokeColor="#B9E4D2"
-        android:strokeAlpha="0.14"
-        android:strokeWidth="6"
-        android:pathData="M512,512 m-308,0 a308,308 0 1,0 616,0 a308,308 0 1,0 -616,0 z" />
-
-    <!-- Glowing mint curved S-route outer bloom -->
-    <path
-        android:strokeColor="#B9E4D2"
-        android:strokeAlpha="0.14"
-        android:strokeWidth="92"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:pathData="M344,660 C282,390 462,434 512,512 C562,590 742,634 680,364" />
-
-    <!-- Glowing mint curved S-route mid halo -->
-    <path
-        android:strokeColor="#B9E4D2"
-        android:strokeAlpha="0.28"
-        android:strokeWidth="62"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:pathData="M344,660 C282,390 462,434 512,512 C562,590 742,634 680,364" />
-
-    <!-- Primary mint route ribbon -->
-    <path
-        android:strokeColor="#B9E4D2"
-        android:strokeWidth="40"
+        android:pathData="M35,34 L56,54 L35,74"
+        android:strokeWidth="4.2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M344,660 C282,390 462,434 512,512 C562,590 742,634 680,364" />
+        android:strokeColor="#FF8A5CF6" />
 
-    <!-- Crisp luminous inner route highlight -->
+    <!-- Sculpted forward D arc -->
     <path
-        android:strokeColor="#EAFFF6"
-        android:strokeAlpha="0.65"
-        android:strokeWidth="12"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:pathData="M344,660 C282,390 462,434 512,512 C562,590 742,634 680,364" />
+        android:fillColor="#FFF1F7F4"
+        android:pathData="M36,27 L54,27 C70.5,27 81,38 81,54 C81,70 70.5,81 54,81 L36,81 L45,70 L53.5,70 C63.2,70 69,63.5 69,54 C69,44.5 63.2,38 53.5,38 L45,38 Z" />
 
-    <!-- Origin store beacon (bottom-left) -->
+    <!-- Origin & destination nodes -->
     <path
-        android:fillColor="#B9E4D2"
-        android:fillAlpha="0.18"
-        android:pathData="M344,660 m-80,0 a80,80 0 1,0 160,0 a80,80 0 1,0 -160,0 z" />
+        android:fillColor="#FFA8EBC8"
+        android:pathData="M35,34m-4.6,0a4.6,4.6 0,1 1,9.2 0a4.6,4.6 0,1 1,-9.2 0" />
     <path
-        android:fillColor="#102B26"
-        android:strokeColor="#B9E4D2"
-        android:strokeWidth="16"
-        android:pathData="M344,660 m-52,0 a52,52 0 1,0 104,0 a52,52 0 1,0 -104,0 z" />
-    <path
-        android:fillColor="#F1F5F1"
-        android:pathData="M344,660 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0 z" />
+        android:fillColor="#FFA8EBC8"
+        android:pathData="M35,74m-4.6,0a4.6,4.6 0,1 1,9.2 0a4.6,4.6 0,1 1,-9.2 0" />
 
-    <!-- Destination beacon with lime accent (top-right) -->
+    <!-- Kinetic Volt Lime nexus core -->
     <path
-        android:fillColor="#C8F169"
-        android:fillAlpha="0.20"
-        android:pathData="M680,364 m-90,0 a90,90 0 1,0 180,0 a90,90 0 1,0 -180,0 z" />
+        android:fillColor="#38A7FF00"
+        android:pathData="M56,54m-10.5,0a10.5,10.5 0,1 1,21 0a10.5,10.5 0,1 1,-21 0" />
     <path
-        android:fillColor="#C8F169"
-        android:fillAlpha="0.34"
-        android:pathData="M680,364 m-64,0 a64,64 0 1,0 128,0 a64,64 0 1,0 -128,0 z" />
+        android:fillColor="#FFA7FF00"
+        android:pathData="M56,54m-6.8,0a6.8,6.8 0,1 1,13.6 0a6.8,6.8 0,1 1,-13.6 0" />
     <path
-        android:fillColor="#C8F169"
-        android:pathData="M680,364 m-48,0 a48,48 0 1,0 96,0 a48,48 0 1,0 -96,0 z" />
-    <path
-        android:fillColor="#102B26"
-        android:pathData="M680,364 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0 z" />
+        android:fillColor="#FF071A14"
+        android:pathData="M56,54m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
 </vector>

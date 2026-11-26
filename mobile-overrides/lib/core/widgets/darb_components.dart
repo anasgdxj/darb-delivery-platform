@@ -18,16 +18,20 @@ class DarbBrandMark extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [DarbColors.forestSoft, DarbColors.forest],
+          colors: [
+            DarbColors.darkCanvas,
+            DarbColors.forest,
+            DarbColors.forestSoft,
+          ],
         ),
         borderRadius: BorderRadius.circular(size * 0.28),
         border: Border.all(
-          color: DarbColors.lime.withValues(alpha: 0.42),
-          width: size >= 56 ? 1.5 : 1.0,
+          color: DarbColors.lime.withValues(alpha: 0.44),
+          width: size >= 56 ? 1.5 : 1.05,
         ),
         boxShadow: [
           BoxShadow(
-            color: DarbColors.forest.withValues(alpha: 0.34),
+            color: DarbColors.forest.withValues(alpha: 0.36),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -51,46 +55,85 @@ class _DarbBrandMarkPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = size.width;
     canvas.save();
-    canvas.scale(s / 100);
+    canvas.scale(s / 108.0);
 
-    // DAZREVO signature: a forward-moving D with a location core.
-    final d = Path()
-      ..moveTo(39, 13)
-      ..lineTo(59, 13)
-      ..cubicTo(79, 13, 91, 28, 91, 50)
-      ..cubicTo(91, 72, 78, 87, 59, 87)
-      ..lineTo(39, 87)
-      ..lineTo(51, 72)
-      ..lineTo(59, 72)
-      ..cubicTo(69, 72, 76, 63, 76, 50)
-      ..cubicTo(76, 37, 69, 28, 59, 28)
-      ..lineTo(51, 28)
-      ..close();
-
-    canvas.drawPath(
-      d,
+    // Subtle luminous orbital glow matching Android Adaptive Icon
+    final glowRect = Rect.fromCircle(center: const Offset(56, 52), radius: 42);
+    canvas.drawCircle(
+      const Offset(56, 52),
+      42,
       Paint()
-        ..color = Colors.white
-        ..style = PaintingStyle.fill,
+        ..shader = RadialGradient(
+          colors: [
+            DarbColors.lime.withValues(alpha: 0.22),
+            DarbColors.violet.withValues(alpha: 0.14),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.56, 1.0],
+        ).createShader(glowRect),
     );
 
-    final speed = Paint()
-      ..color = DarbColors.lime
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(const Offset(9, 31), const Offset(43, 31), speed..strokeWidth = 7);
-    canvas.drawLine(const Offset(5, 49), const Offset(36, 49), speed..strokeWidth = 6);
-    canvas.drawLine(const Offset(13, 66), const Offset(39, 66), speed..strokeWidth = 5);
+    // Thin geometric orbit ring
+    canvas.drawCircle(
+      const Offset(54, 54),
+      33,
+      Paint()
+        ..color = DarbColors.mint.withValues(alpha: 0.22)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
 
-    final pin = Path()
-      ..moveTo(54, 37)
-      ..cubicTo(45, 37, 39, 44, 39, 53)
-      ..cubicTo(39, 64, 54, 78, 54, 78)
-      ..cubicTo(54, 78, 69, 64, 69, 53)
-      ..cubicTo(69, 44, 63, 37, 54, 37)
+    // Tri-node Signal Violet kinetic link connecting Customer, Store & Courier
+    final link = Path()
+      ..moveTo(35, 34)
+      ..lineTo(56, 54)
+      ..lineTo(35, 74);
+    canvas.drawPath(
+      link,
+      Paint()
+        ..color = DarbColors.violet
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4.2
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+
+    // Sculpted forward-moving D arc
+    final d = Path()
+      ..moveTo(36, 27)
+      ..lineTo(54, 27)
+      ..cubicTo(70.5, 27, 81, 38, 81, 54)
+      ..cubicTo(81, 70, 70.5, 81, 54, 81)
+      ..lineTo(36, 81)
+      ..lineTo(45, 70)
+      ..lineTo(53.5, 70)
+      ..cubicTo(63.2, 70, 69, 63.5, 69, 54)
+      ..cubicTo(69, 44.5, 63.2, 38, 53.5, 38)
+      ..lineTo(45, 38)
       ..close();
-    canvas.drawPath(pin, Paint()..color = DarbColors.lime);
-    canvas.drawCircle(const Offset(54, 52), 5.8, Paint()..color = DarbColors.forest);
+    canvas.drawPath(d, Paint()..color = const Color(0xFFF1F7F4));
+
+    // Origin & destination nodes
+    final nodePaint = Paint()..color = DarbColors.mint;
+    canvas.drawCircle(const Offset(35, 34), 4.6, nodePaint);
+    canvas.drawCircle(const Offset(35, 74), 4.6, nodePaint);
+
+    // Kinetic Volt Lime nexus core
+    canvas.drawCircle(
+      const Offset(56, 54),
+      10.5,
+      Paint()..color = DarbColors.lime.withValues(alpha: 0.24),
+    );
+    canvas.drawCircle(
+      const Offset(56, 54),
+      6.8,
+      Paint()..color = DarbColors.lime,
+    );
+    canvas.drawCircle(
+      const Offset(56, 54),
+      2.5,
+      Paint()..color = DarbColors.darkCanvas,
+    );
 
     canvas.restore();
   }
@@ -1656,6 +1699,68 @@ class DarbSettingsTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class DarbOtpPinPreview extends StatelessWidget {
+  const DarbOtpPinPreview({
+    super.key,
+    required this.digits,
+    this.length = 6,
+  });
+
+  final String digits;
+  final int length;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = DarbColors.primaryOf(context);
+    final isDark = DarbColors.isDark(context);
+    final ink = DarbColors.inkOf(context);
+    final muted = DarbColors.mutedOf(context);
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        children: List.generate(length, (i) {
+          final hasChar = i < digits.length;
+          final isCurrent = i == digits.length.clamp(0, length - 1);
+          final char = hasChar ? digits[i] : '•';
+          return Expanded(
+            child: AnimatedContainer(
+              duration: DarbMotion.effectiveDuration(context, DarbMotion.fast),
+              curve: DarbMotion.enter,
+              height: 46,
+              margin: EdgeInsets.only(right: i == length - 1 ? 0 : 6),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: hasChar
+                    ? primary.withValues(alpha: isDark ? 0.16 : 0.09)
+                    : DarbColors.softSurfaceOf(context),
+                borderRadius: BorderRadius.circular(DarbRadius.sm),
+                border: Border.all(
+                  color: hasChar
+                      ? primary
+                      : (isCurrent
+                          ? primary.withValues(alpha: 0.55)
+                          : DarbColors.borderOf(context)),
+                  width: hasChar || isCurrent ? 1.5 : 1.0,
+                ),
+              ),
+              child: Text(
+                char,
+                style: TextStyle(
+                  color: hasChar ? ink : muted.withValues(alpha: 0.45),
+                  fontSize: hasChar ? 18 : 16,
+                  fontWeight: FontWeight.w900,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

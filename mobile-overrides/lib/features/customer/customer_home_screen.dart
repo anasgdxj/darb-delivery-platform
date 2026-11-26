@@ -282,239 +282,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildCustomerHero(String? greetingName) {
-    final address = _primaryAddressLabel;
-    final selectedCityId = _selectedCityMap?['id']?.toString();
-    final hasSelectedCity = selectedCityId != null &&
-        _cities.any((city) => city['id']?.toString() == selectedCityId);
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [Color(0xFF12302A), Color(0xFF1B5547), Color(0xFF24765B)],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF12302A).withValues(alpha: 0.20),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: -28,
-            top: -42,
-            child: Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.045),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            dt('مساحتك تبدأ من هنا'),
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.76),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            greetingName != null
-                                ? '${dt('أهلاً')}، $greetingName'
-                                : dt('أهلاً بك في دازريفو'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 23,
-                              height: 1.2,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.13),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.16),
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.route_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  dt('اطلب من المتاجر أو أرسل غرضك إلى أي مكان'),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.84),
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 17),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.11),
-                    borderRadius: BorderRadius.circular(17),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.13),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on_rounded,
-                        color: Color(0xFFB8E8D2),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 9),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              dt('مدينة التوصيل'),
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.68),
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: hasSelectedCity ? selectedCityId : null,
-                                isExpanded: true,
-                                isDense: true,
-                                iconEnabledColor: Colors.white,
-                                dropdownColor: const Color(0xFF174238),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                                items: [
-                                  for (final c in _cities)
-                                    DropdownMenuItem(
-                                      value: c['id'].toString(),
-                                      child: Text(_cityDisplayName(c)),
-                                    ),
-                                ],
-                                onChanged: _cities.isEmpty ? null : (value) {
-                                  if (value != null && value != _selectedCityId) {
-                                    _switchCity(value);
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 1,
-                        height: 34,
-                        color: Colors.white.withValues(alpha: 0.18),
-                      ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          DarbHaptics.light();
-                          _openAddresses();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 6,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.bookmark_outline_rounded,
-                                color: Colors.white,
-                                size: 19,
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                dt('عناويني'),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (address != null && address.trim().isNotEmpty) ...[
-                  const SizedBox(height: 11),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.near_me_rounded,
-                        size: 14,
-                        color: Colors.white.withValues(alpha: 0.78),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          address,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.82),
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_loading && _cities.isEmpty) return const DarbStateView.loading();
@@ -549,207 +316,329 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
     return RefreshIndicator(
       onRefresh: _bootstrap,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 108),
-        children: [
-          if (_offline)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: DarbGlassSurface(
-                tintColor: DarbColors.warningSoftOf(context),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                child: Text(
-                  dt('بيانات مخزنة محلياً لضعف الاتصال'),
-                  style: TextStyle(
-                    color: DarbColors.warningOf(context),
-                    fontWeight: FontWeight.w700,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxW = constraints.maxWidth;
+          final hInset = maxW > 1080 ? (maxW - 1080) / 2 + 16 : 16.0;
+          return ListView(
+            padding: EdgeInsets.fromLTRB(hInset, 10, hInset, 108),
+            children: [
+              if (_offline)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: DarbGlassSurface(
+                    tintColor: DarbColors.warningSoftOf(context),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    child: Text(
+                      dt('بيانات مخزنة محلياً لضعف الاتصال'),
+                      style: TextStyle(
+                        color: DarbColors.warningOf(context),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+
+              // 1. Personalized Greeting Header + Saved Addresses Trigger
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            greetingName != null
+                                ? '${dt('أهلاً بك')}، $greetingName'
+                                : dt('مرحباً بك في دازريفو'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: DarbColors.inkOf(context),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            dt('جاهز لتوصيل طلبك أو غرضك بأسرع مسار'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: DarbColors.mutedOf(context),
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(DarbRadius.pill),
+                        ),
+                      ),
+                      onPressed: _openAddresses,
+                      icon: Icon(
+                        Icons.bookmarks_outlined,
+                        size: 16,
+                        color: DarbColors.primaryOf(context),
+                      ),
+                      label: Text(
+                        dt('العناوين'),
+                        style: const TextStyle(fontSize: 12.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 2. Active City Selector
+              if (_cities.isNotEmpty) ...[
+                DarbGlassSurface(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: DarbColors.primaryOf(context)
+                              .withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: Icon(
+                          Icons.location_city_rounded,
+                          size: 19,
+                          color: DarbColors.primaryOf(context),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _selectedCityMap?['id']?.toString(),
+                            isExpanded: true,
+                            dropdownColor:
+                                DarbColors.surfaceElevatedOf(context),
+                            style: TextStyle(
+                              color: DarbColors.inkOf(context),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                            items: [
+                              for (final c in _cities)
+                                DropdownMenuItem(
+                                  value: c['id'].toString(),
+                                  child: Text(_cityDisplayName(c)),
+                                ),
+                            ],
+                            onChanged: (val) {
+                              if (val != null && val != _selectedCityId) {
+                                _switchCity(val);
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // 3. Deterministic Animated City Scene Banner (Selected city ONLY)
+                DarbCitySceneCard(
+                  cityCode: _selectedCityCode,
+                  cityName: _selectedCityName,
+                  vendorCount: _vendors.length,
+                  activeAddressLabel: _primaryAddressLabel,
+                  onTapAddresses: _openAddresses,
+                ),
+                const SizedBox(height: 14),
+              ],
+
+              // 4. Asymmetric Bento Service Split (Peer Delivery + AI Order Assistant)
+              DarbFadeSlide(
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 6,
+                        child: DarbBentoActionCard(
+                          isHeroDark: true,
+                          icon: Icons.local_shipping_outlined,
+                          badge: dt('سريع'),
+                          title: dt('إرسال غرض مستقل'),
+                          subtitle: dt('أرسل طرداً أو غرضاً من أي عنوان إلى آخر'),
+                          onTap: () {
+                            if (_selectedCityId == null) return;
+                            DarbHaptics.light();
+                            Navigator.push(
+                              context,
+                              DarbPageRoute(
+                                builder: (_) => PeerDeliveryScreen(
+                                  cityId: _selectedCityId!,
+                                  cityName: _selectedCityName,
+                                  onCreated: widget.onOrderCreated,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 5,
+                        child: DarbBentoActionCard(
+                          icon: Icons.auto_awesome_rounded,
+                          accentColor: DarbColors.violetOf(context),
+                          badge: 'AI',
+                          title: dt('المساعد الذكي'),
+                          subtitle: dt('اكتب طلبك وسيتم تجهيزه تلقائياً'),
+                          onTap: () {
+                            if (_selectedCityId == null) return;
+                            DarbHaptics.light();
+                            Navigator.push(
+                              context,
+                              DarbPageRoute(
+                                builder: (_) => AiOrderAssistantScreen(
+                                  cityId: _selectedCityId!,
+                                  cityName: _selectedCityName,
+                                  onOrderCompleted: widget.onOrderCreated,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
 
-          // Premium customer identity and city selector.
-          _buildCustomerHero(greetingName),
-          const SizedBox(height: 14),
-
-          if (_cities.isNotEmpty) ...[
-          // 3. Deterministic Animated City Scene Banner (Selected city ONLY)
-            DarbCitySceneCard(
-              cityCode: _selectedCityCode,
-              cityName: _selectedCityName,
-              vendorCount: _vendors.length,
-              activeAddressLabel: _primaryAddressLabel,
-              onTapAddresses: _openAddresses,
-            ),
-            const SizedBox(height: 14),
-          ],
-
-          // 4. Asymmetric Bento Service Split (Peer Delivery + AI Order Assistant)
-          DarbFadeSlide(
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    flex: 6,
-                    child: DarbBentoActionCard(
-                      isHeroDark: true,
-                      icon: Icons.local_shipping_outlined,
-                      badge: dt('سريع'),
-                      title: dt('إرسال غرض مستقل'),
-                      subtitle: dt('أرسل طرداً أو غرضاً من أي عنوان إلى آخر'),
-                      onTap: () {
-                        if (_selectedCityId == null) return;
-                        DarbHaptics.light();
-                        Navigator.push(
-                          context,
-                          DarbPageRoute(
-                            builder: (_) => PeerDeliveryScreen(
-                              cityId: _selectedCityId!,
-                              cityName: _selectedCityName,
-                              onCreated: widget.onOrderCreated,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+              // 5. Active / Recent Orders Strip (Real API data only)
+              if (featuredOrder != null) ...[
+                const SizedBox(height: 18),
+                DarbSectionHeader(
+                  title: dt('طلبك الحالي'),
+                  trailing: TextButton(
+                    onPressed: widget.onOpenOrders,
+                    child: Text(dt('عرض الكل')),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 5,
-                    child: DarbBentoActionCard(
-                      icon: Icons.auto_awesome_rounded,
-                      accentColor: DarbColors.violetOf(context),
-                      badge: 'AI',
-                      title: dt('المساعد الذكي'),
-                      subtitle: dt('اكتب طلبك وسيتم تجهيزه تلقائياً'),
-                      onTap: () {
-                        if (_selectedCityId == null) return;
-                        DarbHaptics.light();
-                        Navigator.push(
-                          context,
-                          DarbPageRoute(
-                            builder: (_) => AiOrderAssistantScreen(
-                              cityId: _selectedCityId!,
-                              cityName: _selectedCityName,
-                              onOrderCompleted: widget.onOrderCreated,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                ),
+                const SizedBox(height: 8),
+                _buildFeaturedOrderCard(featuredOrder),
+              ],
 
-          // 5. Active / Recent Orders Strip (Real API data only)
-          if (featuredOrder != null) ...[
-            const SizedBox(height: 18),
-            DarbSectionHeader(
-              title: dt('طلبك الحالي'),
-              trailing: TextButton(
-                onPressed: widget.onOpenOrders,
-                child: Text(dt('عرض الكل')),
+              // 6. Store Discovery
+              const SizedBox(height: 20),
+              DarbSectionHeader(
+                title: dt('المتاجر المتاحة'),
+                subtitle: dt('تصفح المتاجر والمنتجات واطلب إلى بابك'),
+                trailing: FilterChip(
+                  label: Text(dt('المفتوحة فقط')),
+                  selected: _openOnly,
+                  onSelected: (v) {
+                    DarbHaptics.selection();
+                    setState(() => _openOnly = v);
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            _buildFeaturedOrderCard(featuredOrder),
-          ],
-
-          // 6. Store Discovery
-          const SizedBox(height: 20),
-          DarbSectionHeader(
-            title: dt('المتاجر المتاحة'),
-            subtitle: dt('تصفح المتاجر والمنتجات واطلب إلى بابك'),
-            trailing: FilterChip(
-              label: Text(dt('المفتوحة فقط')),
-              selected: _openOnly,
-              onSelected: (v) {
-                DarbHaptics.selection();
-                setState(() => _openOnly = v);
-              },
-            ),
-          ),
-          const SizedBox(height: 10),
-          DarbSearchBar(
-            controller: _searchController,
-            hintText: dt('ابحث عن متجر أو نشاط...'),
-            onChanged: (_) => setState(() {}),
-          ),
-          if (types.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ChoiceChip(
-                    label: Text(dt('الكل')),
-                    selected: _selectedType.isEmpty,
-                    onSelected: (_) {
-                      DarbHaptics.selection();
-                      setState(() => _selectedType = '');
-                    },
+              const SizedBox(height: 10),
+              DarbSearchBar(
+                controller: _searchController,
+                hintText: dt('ابحث عن متجر أو نشاط...'),
+                onChanged: (_) => setState(() {}),
+              ),
+              if (types.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      ChoiceChip(
+                        label: Text(dt('الكل')),
+                        selected: _selectedType.isEmpty,
+                        onSelected: (_) {
+                          DarbHaptics.selection();
+                          setState(() => _selectedType = '');
+                        },
+                      ),
+                      for (final t in types) ...[
+                        const SizedBox(width: 8),
+                        ChoiceChip(
+                          label: Text(t),
+                          selected: _selectedType == t,
+                          onSelected: (_) {
+                            DarbHaptics.selection();
+                            setState(() => _selectedType = t);
+                          },
+                        ),
+                      ],
+                    ],
                   ),
-                  for (final t in types) ...[
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                      label: Text(t),
-                      selected: _selectedType == t,
-                      onSelected: (_) {
-                        DarbHaptics.selection();
-                        setState(() => _selectedType = t);
-                      },
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 14),
-          if (_loading || _loadingVendors)
-            const DarbStateView.loading()
-          else if (_vendorsError != null)
-            DarbStateView.error(
-              message: _vendorsError,
-              onRetry: _selectedCityId != null
-                  ? () => _switchCity(_selectedCityId!)
-                  : _bootstrap,
-            )
-          else if (filtered.isEmpty)
-            DarbStateView.empty(
-              message: _vendors.isEmpty
-                  ? dt('لا توجد متاجر متاحة في هذه المدينة')
-                  : dt('لم نعثر على نتائج مطابقة'),
-              icon: _vendors.isEmpty
-                  ? Icons.storefront_outlined
-                  : Icons.search_off_rounded,
-              onRetry: _vendors.isEmpty
-                  ? (_selectedCityId != null
+                ),
+              ],
+              const SizedBox(height: 14),
+              if (_loading || _loadingVendors)
+                const DarbStateView.loading()
+              else if (_vendorsError != null)
+                DarbStateView.error(
+                  message: _vendorsError,
+                  onRetry: _selectedCityId != null
                       ? () => _switchCity(_selectedCityId!)
-                      : _bootstrap)
-                  : () {
-                      _searchController.clear();
-                      setState(() {
-                        _selectedType = '';
-                        _openOnly = false;
-                      });
-                    },
-            )
-          else
-            for (var i = 0; i < filtered.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: i < 6
-                    ? DarbFadeSlide(
-                        delay: DarbMotion.staggerDelay(i),
-                        child: _buildVendorCard(filtered[i]),
-                      )
-                    : _buildVendorCard(filtered[i]),
-              ),
-        ],
+                      : _bootstrap,
+                )
+              else if (filtered.isEmpty)
+                DarbStateView.empty(
+                  message: _vendors.isEmpty
+                      ? dt('لا توجد متاجر متاحة في هذه المدينة')
+                      : dt('لم نعثر على نتائج مطابقة'),
+                  icon: _vendors.isEmpty
+                      ? Icons.storefront_outlined
+                      : Icons.search_off_rounded,
+                  onRetry: _vendors.isEmpty
+                      ? (_selectedCityId != null
+                          ? () => _switchCity(_selectedCityId!)
+                          : _bootstrap)
+                      : () {
+                          _searchController.clear();
+                          setState(() {
+                            _selectedType = '';
+                            _openOnly = false;
+                          });
+                        },
+                )
+              else
+                DarbResponsiveTwoColumn(
+                  children: [
+                    for (var i = 0; i < filtered.length; i++)
+                      i < 6
+                          ? DarbFadeSlide(
+                              delay: DarbMotion.staggerDelay(i),
+                              child: _buildVendorCard(filtered[i]),
+                            )
+                          : _buildVendorCard(filtered[i]),
+                  ],
+                ),
+            ],
+          );
+        },
       ),
     );
   }

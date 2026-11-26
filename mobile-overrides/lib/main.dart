@@ -7,6 +7,7 @@ import 'core/services/notifications_service.dart';
 import 'core/storage/local_cache.dart';
 import 'core/theme/darb_design_system.dart';
 import 'core/widgets/darb_components.dart';
+import 'core/widgets/darb_glass.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/onboarding_screen.dart';
 import 'features/shell/app_shell.dart';
@@ -148,65 +149,81 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
   @override
   Widget build(BuildContext context) {
     final reduce = DarbMotion.reduceMotion(context);
-    final emblem = Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(DarbRadius.xl),
-        color: DarbColors.forestSoft.withValues(alpha: 0.52),
-        border: Border.all(
-          color: DarbColors.lime.withValues(alpha: 0.42),
-          width: 1.3,
+    final emblem = Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 148,
+          height: 148,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [
+                DarbColors.lime.withValues(alpha: 0.20),
+                DarbColors.violet.withValues(alpha: 0.14),
+                Colors.transparent,
+              ],
+            ),
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: DarbColors.lime.withValues(alpha: 0.16),
-            blurRadius: 34,
-            spreadRadius: 2,
-          ),
-          BoxShadow(
-            color: DarbColors.violet.withValues(alpha: 0.18),
-            blurRadius: 42,
-            offset: const Offset(-10, 12),
-          ),
-        ],
-      ),
-      child: const DarbBrandMark(size: 78),
+        DarbGlassSurface(
+          borderRadius: DarbRadius.hero,
+          blurSigma: 24,
+          tintColor: DarbColors.forestSoft.withValues(alpha: 0.54),
+          borderColor: DarbColors.lime.withValues(alpha: 0.40),
+          padding: const EdgeInsets.all(18),
+          child: const DarbBrandMark(size: 82),
+        ),
+      ],
     );
 
     final content = Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          reduce ? emblem : ScaleTransition(scale: _emblemScale, child: emblem),
-          const SizedBox(height: 22),
-          Text(
-            dt('دازريفو · DAZREVO'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.3,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            reduce ? emblem : ScaleTransition(scale: _emblemScale, child: emblem),
+            const SizedBox(height: 22),
+            Text(
+              dt('دازريفو · DAZREVO'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 30,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.3,
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            dt('كل طريق يبدأ بخطوة'),
-            style: TextStyle(
-              color: DarbColors.lime.withValues(alpha: 0.94),
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+            const SizedBox(height: 6),
+            Text(
+              dt('كل طريق يبدأ بخطوة'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: DarbColors.lime.withValues(alpha: 0.94),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          const SizedBox(height: 28),
-          const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.4,
-              valueColor: AlwaysStoppedAnimation<Color>(DarbColors.lime),
+            const SizedBox(height: 28),
+            DarbGlassSurface(
+              borderRadius: DarbRadius.pill,
+              blurSigma: 16,
+              elevated: false,
+              tintColor: DarbColors.darkSurfaceElevated.withValues(alpha: 0.65),
+              borderColor: DarbColors.mint.withValues(alpha: 0.22),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.3,
+                  valueColor: AlwaysStoppedAnimation<Color>(DarbColors.lime),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 

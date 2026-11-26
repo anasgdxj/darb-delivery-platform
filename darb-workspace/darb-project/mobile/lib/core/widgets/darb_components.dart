@@ -18,16 +18,20 @@ class DarbBrandMark extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [DarbColors.forestSoft, DarbColors.forest],
+          colors: [
+            DarbColors.darkCanvas,
+            DarbColors.forest,
+            DarbColors.forestSoft,
+          ],
         ),
         borderRadius: BorderRadius.circular(size * 0.28),
         border: Border.all(
-          color: DarbColors.lime.withValues(alpha: 0.42),
-          width: size >= 56 ? 1.5 : 1.0,
+          color: DarbColors.lime.withValues(alpha: 0.44),
+          width: size >= 56 ? 1.5 : 1.05,
         ),
         boxShadow: [
           BoxShadow(
-            color: DarbColors.forest.withValues(alpha: 0.34),
+            color: DarbColors.forest.withValues(alpha: 0.36),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -50,98 +54,88 @@ class _DarbBrandMarkPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final s = size.width;
+    canvas.save();
+    canvas.scale(s / 108.0);
 
-    // Subtle geometric coordinate hairlines
-    final gridPaint = Paint()
-      ..color = const Color(0xFF28584B).withValues(alpha: 0.45)
-      ..strokeWidth = (s * 0.025).clamp(0.7, 1.8)
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
+    // Subtle luminous orbital glow matching Android Adaptive Icon
+    final glowRect = Rect.fromCircle(center: const Offset(56, 52), radius: 42);
+    canvas.drawCircle(
+      const Offset(56, 52),
+      42,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            DarbColors.lime.withValues(alpha: 0.22),
+            DarbColors.violet.withValues(alpha: 0.14),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.56, 1.0],
+        ).createShader(glowRect),
+    );
 
-    final grid = Path()
-      ..moveTo(0, s * 0.27)
-      ..lineTo(s, s * 0.27)
-      ..moveTo(0, s * 0.73)
-      ..lineTo(s, s * 0.73)
-      ..moveTo(s * 0.27, 0)
-      ..lineTo(s * 0.27, s)
-      ..moveTo(s * 0.73, 0)
-      ..lineTo(s * 0.73, s);
-    canvas.drawPath(grid, gridPaint);
+    // Thin geometric orbit ring
+    canvas.drawCircle(
+      const Offset(54, 54),
+      33,
+      Paint()
+        ..color = DarbColors.mint.withValues(alpha: 0.22)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
 
-    // Symmetrical kinetic Z-route matching DAZREVO brand geometry
-    final start = Offset(s * 0.27, s * 0.72);
-    final end = Offset(s * 0.73, s * 0.28);
-    final route = Path()
-      ..moveTo(start.dx, start.dy)
-      ..cubicTo(
-        s * 0.20,
-        s * 0.34,
-        s * 0.43,
-        s * 0.42,
-        s * 0.50,
-        s * 0.50,
-      )
-      ..cubicTo(
-        s * 0.57,
-        s * 0.58,
-        s * 0.80,
-        s * 0.66,
-        end.dx,
-        end.dy,
-      );
-
+    // Tri-node Signal Violet kinetic link connecting Customer, Store & Courier
+    final link = Path()
+      ..moveTo(35, 34)
+      ..lineTo(56, 54)
+      ..lineTo(35, 74);
     canvas.drawPath(
-      route,
+      link,
       Paint()
-        ..color = DarbColors.lime.withValues(alpha: 0.22)
-        ..strokeWidth = s * 0.16
+        ..color = DarbColors.violet
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4.2
         ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke,
+        ..strokeJoin = StrokeJoin.round,
     );
 
-    canvas.drawPath(
-      route,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.bottomLeft,
-          end: Alignment.topRight,
-          colors: [DarbColors.mint, DarbColors.lime],
-        ).createShader(Rect.fromLTWH(0, 0, s, s))
-        ..strokeWidth = (s * 0.086).clamp(2.2, 7.2)
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke,
+    // Sculpted forward-moving D arc
+    final d = Path()
+      ..moveTo(36, 27)
+      ..lineTo(54, 27)
+      ..cubicTo(70.5, 27, 81, 38, 81, 54)
+      ..cubicTo(81, 70, 70.5, 81, 54, 81)
+      ..lineTo(36, 81)
+      ..lineTo(45, 70)
+      ..lineTo(53.5, 70)
+      ..cubicTo(63.2, 70, 69, 63.5, 69, 54)
+      ..cubicTo(69, 44.5, 63.2, 38, 53.5, 38)
+      ..lineTo(45, 38)
+      ..close();
+    canvas.drawPath(d, Paint()..color = const Color(0xFFF1F7F4));
+
+    // Origin & destination nodes
+    final nodePaint = Paint()..color = DarbColors.mint;
+    canvas.drawCircle(const Offset(35, 34), 4.6, nodePaint);
+    canvas.drawCircle(const Offset(35, 74), 4.6, nodePaint);
+
+    // Kinetic Volt Lime nexus core
+    canvas.drawCircle(
+      const Offset(56, 54),
+      10.5,
+      Paint()..color = DarbColors.lime.withValues(alpha: 0.24),
+    );
+    canvas.drawCircle(
+      const Offset(56, 54),
+      6.8,
+      Paint()..color = DarbColors.lime,
+    );
+    canvas.drawCircle(
+      const Offset(56, 54),
+      2.5,
+      Paint()..color = DarbColors.darkCanvas,
     );
 
-    // Origin node (Signal Violet halo + Mint core)
-    final nodeRadius = (s * 0.088).clamp(2.8, 7.5);
-    canvas.drawCircle(
-      start,
-      nodeRadius * 1.35,
-      Paint()..color = DarbColors.violet.withValues(alpha: 0.28),
-    );
-    canvas.drawCircle(start, nodeRadius, Paint()..color = DarbColors.forest);
-    canvas.drawCircle(
-      start,
-      nodeRadius,
-      Paint()
-        ..color = DarbColors.mint
-        ..strokeWidth = (s * 0.036).clamp(1.2, 3.0)
-        ..style = PaintingStyle.stroke,
-    );
-
-    // Destination beacon (Volt Lime)
-    canvas.drawCircle(
-      end,
-      nodeRadius * 1.5,
-      Paint()..color = DarbColors.lime.withValues(alpha: 0.28),
-    );
-    canvas.drawCircle(end, nodeRadius, Paint()..color = DarbColors.lime);
-    canvas.drawCircle(
-      end,
-      nodeRadius * 0.36,
-      Paint()..color = DarbColors.forest,
-    );
+    canvas.restore();
   }
 
   @override
@@ -1705,6 +1699,68 @@ class DarbSettingsTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class DarbOtpPinPreview extends StatelessWidget {
+  const DarbOtpPinPreview({
+    super.key,
+    required this.digits,
+    this.length = 6,
+  });
+
+  final String digits;
+  final int length;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = DarbColors.primaryOf(context);
+    final isDark = DarbColors.isDark(context);
+    final ink = DarbColors.inkOf(context);
+    final muted = DarbColors.mutedOf(context);
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        children: List.generate(length, (i) {
+          final hasChar = i < digits.length;
+          final isCurrent = i == digits.length.clamp(0, length - 1);
+          final char = hasChar ? digits[i] : '•';
+          return Expanded(
+            child: AnimatedContainer(
+              duration: DarbMotion.effectiveDuration(context, DarbMotion.fast),
+              curve: DarbMotion.enter,
+              height: 46,
+              margin: EdgeInsets.only(right: i == length - 1 ? 0 : 6),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: hasChar
+                    ? primary.withValues(alpha: isDark ? 0.16 : 0.09)
+                    : DarbColors.softSurfaceOf(context),
+                borderRadius: BorderRadius.circular(DarbRadius.sm),
+                border: Border.all(
+                  color: hasChar
+                      ? primary
+                      : (isCurrent
+                          ? primary.withValues(alpha: 0.55)
+                          : DarbColors.borderOf(context)),
+                  width: hasChar || isCurrent ? 1.5 : 1.0,
+                ),
+              ),
+              child: Text(
+                char,
+                style: TextStyle(
+                  color: hasChar ? ink : muted.withValues(alpha: 0.45),
+                  fontSize: hasChar ? 18 : 16,
+                  fontWeight: FontWeight.w900,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

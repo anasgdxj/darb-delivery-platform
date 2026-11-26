@@ -445,190 +445,278 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 104),
-        children: [
-          DarbGlassSurface(
-            padding: const EdgeInsets.all(16),
-            borderColor: isOpen
-                ? DarbColors.primaryOf(context).withValues(alpha: 0.24)
-                : null,
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: DarbColors.primaryOf(context).withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxW = constraints.maxWidth;
+          final hInset = maxW > 1080 ? (maxW - 1080) / 2 + 16 : 16.0;
+          final bodyWidth = maxW - (hInset * 2);
+          final metricCols = DarbAdaptiveLayout.metricColumns(
+            context,
+            availableWidth: bodyWidth,
+          );
+
+          return ListView(
+            padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 104),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(17),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [DarbColors.forest, Color(0xFF071A14)],
                   ),
-                  child: Icon(
-                    Icons.storefront_rounded,
-                    color: DarbColors.primaryOf(context),
-                    size: 24,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(
+                    color: DarbColors.lime.withValues(alpha: 0.22),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: DarbColors.forest.withValues(alpha: 0.18),
+                      blurRadius: 22,
+                      offset: const Offset(0, 9),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        vendorName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: DarbColors.inkOf(context),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        const DarbBrandMark(size: 43),
+                        const SizedBox(width: 11),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                vendorName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Row(
+                                children: [
+                                  DarbPulseDot(
+                                    active: isOpen,
+                                    color: isOpen
+                                        ? DarbColors.lime
+                                        : Colors.white54,
+                                    size: 8,
+                                  ),
+                                  const SizedBox(width: 7),
+                                  Text(
+                                    isOpen
+                                        ? dt('المتجر يستقبل الطلبات')
+                                        : dt('المتجر متوقف مؤقتاً'),
+                                    style: TextStyle(
+                                      color: isOpen
+                                          ? DarbColors.lime
+                                          : Colors.white70,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        DarbContextMenuButton<String>(
+                          tooltip: dt('تعديل بيانات المتجر'),
+                          icon: Icons.tune_rounded,
+                          iconColor: DarbColors.lime,
+                          backgroundColor: Colors.white.withValues(alpha: 0.10),
+                          onSelected: (action) {
+                            if (action == 'edit') {
+                              _editVendorProfile();
+                            } else if (action == 'refresh') {
+                              _load();
+                            }
+                          },
+                          items: [
+                            DarbContextMenuAction(
+                              value: 'edit',
+                              label: dt('تعديل بيانات المتجر'),
+                              icon: Icons.storefront_outlined,
+                            ),
+                            DarbContextMenuAction(
+                              value: 'refresh',
+                              label: dt('تحديث'),
+                              icon: Icons.refresh_rounded,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Container(
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 13,
+                        end: 10,
+                        top: 8,
+                        bottom: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.07),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.10),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Row(
+                      child: Row(
                         children: [
-                          DarbPulseDot(
-                            active: isOpen,
-                            color: isOpen
-                                ? DarbColors.successOf(context)
-                                : DarbColors.dangerOf(context),
-                            size: 7.5,
+                          const Icon(
+                            Icons.store_mall_directory_outlined,
+                            color: DarbColors.lime,
+                            size: 19,
                           ),
-                          const SizedBox(width: 6),
-                          DarbStatusBadge(status: isOpen ? 'OPEN' : 'CLOSED'),
+                          const SizedBox(width: 9),
+                          Expanded(
+                            child: Text(
+                              dt('حالة استقبال الطلبات'),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Switch(
+                            value: isOpen,
+                            onChanged: _togglingOpen ? null : _toggleOpen,
+                          ),
                         ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (stats != null) ...[
+                const SizedBox(height: 12),
+                GridView.count(
+                  crossAxisCount: metricCols,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: metricCols == 4 ? 1.28 : 1.55,
+                  children: [
+                    DarbMetricCard(
+                      label: dt('طلبات اليوم'),
+                      value: '${stats['todayOrders'] ?? 0}',
+                      icon: Icons.today_rounded,
+                    ),
+                    DarbMetricCard(
+                      label: dt('مبيعات اليوم'),
+                      value: formatDarbMoney(
+                        (stats['todayRevenue'] as num?) ?? 0,
+                        statsCurrency,
+                      ),
+                      icon: Icons.payments_outlined,
+                    ),
+                    DarbMetricCard(
+                      label: dt('قيد التنفيذ'),
+                      value: '${stats['activeOrders'] ?? 0}',
+                      icon: Icons.pending_actions_rounded,
+                    ),
+                    DarbMetricCard(
+                      label: dt('التقييم'),
+                      value: ((stats['ratingAvg'] as num?) ?? 0) > 0
+                          ? '${(stats['ratingAvg'] as num).toStringAsFixed(1)} ★'
+                          : '—',
+                      icon: Icons.star_outline_rounded,
+                      accentColor: DarbColors.warningOf(context),
+                    ),
+                  ],
+                ),
+              ],
+              if (_statsError != null) ...[
+                const SizedBox(height: 12),
+                DarbGlassSurface(
+                  tintColor: DarbColors.warningSoftOf(context),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 18,
+                        color: DarbColors.warningOf(context),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _statsError!,
+                          style: TextStyle(
+                            color: DarbColors.warningOf(context),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _load,
+                        child: Text(dt('إعادة المحاولة')),
                       ),
                     ],
                   ),
                 ),
-                Switch(
-                  value: isOpen,
-                  onChanged: _togglingOpen ? null : _toggleOpen,
-                ),
-                const SizedBox(width: 4),
-                IconButton.filledTonal(
-                  tooltip: dt('تعديل'),
-                  onPressed: _editVendorProfile,
-                  icon: const Icon(Icons.edit_outlined, size: 19),
-                ),
               ],
-            ),
-          ),
-          if (stats != null) ...[
-            const SizedBox(height: 12),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 1.55,
-              children: [
-                DarbMetricCard(
-                  label: dt('طلبات اليوم'),
-                  value: '${stats['todayOrders'] ?? 0}',
-                  icon: Icons.today_rounded,
-                ),
-                DarbMetricCard(
-                  label: dt('مبيعات اليوم'),
-                  value: formatDarbMoney(
-                    (stats['todayRevenue'] as num?) ?? 0,
-                    statsCurrency,
-                  ),
-                  icon: Icons.payments_outlined,
-                ),
-                DarbMetricCard(
-                  label: dt('قيد التنفيذ'),
-                  value: '${stats['activeOrders'] ?? 0}',
-                  icon: Icons.pending_actions_rounded,
-                ),
-                DarbMetricCard(
-                  label: dt('التقييم'),
-                  value: ((stats['ratingAvg'] as num?) ?? 0) > 0
-                      ? '${(stats['ratingAvg'] as num).toStringAsFixed(1)} ★'
-                      : '—',
-                  icon: Icons.star_outline_rounded,
-                  accentColor: DarbColors.warningOf(context),
-                ),
-              ],
-            ),
-          ],
-          if (_statsError != null) ...[
-            const SizedBox(height: 12),
-            DarbGlassSurface(
-              tintColor: DarbColors.warningSoftOf(context),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    size: 18,
-                    color: DarbColors.warningOf(context),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _statsError!,
-                      style: TextStyle(
-                        color: DarbColors.warningOf(context),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final pair in [
+                      ('', dt('الكل')),
+                      ('PENDING', dt('قيد الانتظار')),
+                      ('ACCEPTED', dt('مقبول')),
+                      ('PREPARING', dt('قيد التحضير')),
+                      ('READY', dt('جاهز للاستلام')),
+                      ('ASSIGNED', dt('تم تعيين مندوب')),
+                      ('PICKED_UP', dt('في الطريق إليك')),
+                      ('DELIVERED', dt('تم التسليم')),
+                      ('CANCELLED', dt('ملغى')),
+                    ]) ...[
+                      ChoiceChip(
+                        label: Text(pair.$2),
+                        selected: _statusFilter == pair.$1,
+                        onSelected: (_) =>
+                            setState(() => _statusFilter = pair.$1),
                       ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _load,
-                    child: Text(dt('إعادة المحاولة')),
-                  ),
-                ],
+                      const SizedBox(width: 8),
+                    ],
+                  ],
+                ),
               ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final pair in [
-                  ('', dt('الكل')),
-                  ('PENDING', dt('قيد الانتظار')),
-                  ('ACCEPTED', dt('مقبول')),
-                  ('PREPARING', dt('قيد التحضير')),
-                  ('READY', dt('جاهز للاستلام')),
-                  ('ASSIGNED', dt('تم تعيين مندوب')),
-                  ('PICKED_UP', dt('في الطريق إليك')),
-                  ('DELIVERED', dt('تم التسليم')),
-                  ('CANCELLED', dt('ملغى')),
-                ]) ...[
-                  ChoiceChip(
-                    label: Text(pair.$2),
-                    selected: _statusFilter == pair.$1,
-                    onSelected: (_) => setState(() => _statusFilter = pair.$1),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          if (filtered.isEmpty)
-            DarbStateView.empty(
-              message: _orders.isEmpty
-                  ? dt('لا توجد طلبات واردة')
-                  : dt('لا توجد طلبات مطابقة للتصفية الحالية'),
-              icon: _orders.isEmpty
-                  ? Icons.receipt_long_outlined
-                  : Icons.filter_list_off_rounded,
-              onRetry: _orders.isEmpty
-                  ? _load
-                  : () => setState(() => _statusFilter = ''),
-            )
-          else
-            for (final o in filtered)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildOrderCard(o),
-              ),
-        ],
+              const SizedBox(height: 14),
+              if (filtered.isEmpty)
+                DarbStateView.empty(
+                  message: _orders.isEmpty
+                      ? dt('لا توجد طلبات واردة')
+                      : dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+                  icon: _orders.isEmpty
+                      ? Icons.receipt_long_outlined
+                      : Icons.filter_list_off_rounded,
+                  onRetry: _orders.isEmpty
+                      ? _load
+                      : () => setState(() => _statusFilter = ''),
+                )
+              else
+                DarbResponsiveTwoColumn(
+                  children: [
+                    for (final o in filtered) _buildOrderCard(o),
+                  ],
+                ),
+            ],
+          );
+        },
       ),
     );
   }

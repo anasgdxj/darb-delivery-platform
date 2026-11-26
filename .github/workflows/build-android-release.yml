@@ -63,8 +63,8 @@ jobs:
           cp "$ROOT/mobile-overrides/DarbUpdateDownloadReceiver.kt" "$M/android/app/src/main/kotlin/com/darb/darb/DarbUpdateDownloadReceiver.kt"
           cp "$ROOT/mobile-overrides/darb_file_paths.xml" "$M/android/app/src/main/res/xml/darb_file_paths.xml"
           mkdir -p "$M/android/app/src/main/res/drawable"
+          cp -r "$ROOT/mobile-overrides/android-res/." "$M/android/app/src/main/res/"
           cp "$ROOT/mobile-overrides/ic_launcher.xml" "$M/android/app/src/main/res/drawable/ic_launcher.xml"
-          sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|' "$M/android/app/src/main/AndroidManifest.xml"
           sed -i 's|android:label="darb"|android:label="دازريفو"|' "$M/android/app/src/main/AndroidManifest.xml"
           python3 - "$M/pubspec.yaml" "$M/android/app/src/main/AndroidManifest.xml" <<'PY'
           from pathlib import Path
@@ -82,6 +82,8 @@ jobs:
                   lines.insert(dep_index, dep)
           pubspec.write_text("\n".join(lines) + "\n")
           m = manifest.read_text()
+          if 'android:roundIcon=' not in m:
+              m = m.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@mipmap/ic_launcher"\n        android:roundIcon="@mipmap/ic_launcher_round"', 1)
           internet = '<uses-permission android:name="android.permission.INTERNET" />'
           if "android.permission.INTERNET" not in m:
               m = m.replace("<application", internet + "\n    <application", 1)
@@ -112,10 +114,18 @@ jobs:
                       <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
                   </intent-filter>
               </receiver>"""
+          notif_meta = """    <meta-data
+                  android:name="com.google.firebase.messaging.default_notification_icon"
+                  android:resource="@drawable/ic_notification" />
+              <meta-data
+                  android:name="com.google.firebase.messaging.default_notification_color"
+                  android:resource="@color/dazrevo_accent" />"""
           if "DarbUpdateDownloadReceiver" not in m:
               m = m.replace("</application>", receiver + "\n    </application>", 1)
           if "androidx.core.content.FileProvider" not in m:
               m = m.replace("</application>", provider + "\n    </application>", 1)
+          if "default_notification_icon" not in m:
+              m = m.replace("</application>", notif_meta + "\n    </application>", 1)
           manifest.write_text(m)
           PY
           cd "$M"

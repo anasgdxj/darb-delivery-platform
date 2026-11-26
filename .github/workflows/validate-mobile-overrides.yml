@@ -50,13 +50,15 @@ jobs:
           cp mobile-overrides/darb_file_paths.xml "$M/android/app/src/main/res/xml/darb_file_paths.xml"
           cp mobile-overrides/test/widget_test.dart "$M/test/widget_test.dart"
           mkdir -p "$M/android/app/src/main/res/drawable"
+          cp -r mobile-overrides/android-res/. "$M/android/app/src/main/res/"
           cp mobile-overrides/ic_launcher.xml "$M/android/app/src/main/res/drawable/ic_launcher.xml"
-          sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|' "$M/android/app/src/main/AndroidManifest.xml"
           sed -i 's|android:label="darb"|android:label="دازريفو"|' "$M/android/app/src/main/AndroidManifest.xml"
           python3 - "$M/android/app/src/main/AndroidManifest.xml" <<'PY'
           from pathlib import Path
           import sys
           p=Path(sys.argv[1]); m=p.read_text()
+          if 'android:roundIcon=' not in m:
+              m=m.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@mipmap/ic_launcher"\n        android:roundIcon="@mipmap/ic_launcher_round"', 1)
           permission='<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />'
           notification_permission='<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />'
           if notification_permission not in m:
@@ -79,10 +81,18 @@ jobs:
                       <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
                   </intent-filter>
               </receiver>"""
+          notif_meta="""    <meta-data
+                  android:name="com.google.firebase.messaging.default_notification_icon"
+                  android:resource="@drawable/ic_notification" />
+              <meta-data
+                  android:name="com.google.firebase.messaging.default_notification_color"
+                  android:resource="@color/dazrevo_accent" />"""
           if "DarbUpdateDownloadReceiver" not in m:
               m=m.replace("</application>", receiver+"\n    </application>", 1)
           if "androidx.core.content.FileProvider" not in m:
               m=m.replace("</application>", provider+"\n    </application>", 1)
+          if "default_notification_icon" not in m:
+              m=m.replace("</application>", notif_meta+"\n    </application>", 1)
           p.write_text(m)
           PY
           cd "$M"

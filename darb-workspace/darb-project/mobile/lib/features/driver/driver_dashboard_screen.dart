@@ -382,236 +382,281 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 104),
-        children: [
-          DarbGlassSurface(
-            padding: const EdgeInsets.all(18),
-            tintColor: isOnline ? DarbColors.forest : null,
-            borderColor: isOnline
-                ? DarbColors.lime.withValues(alpha: 0.35)
-                : null,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxW = constraints.maxWidth;
+          final hInset = maxW > 1080 ? (maxW - 1080) / 2 + 16 : 16.0;
+          final bodyWidth = maxW - (hInset * 2);
+          final metricCols = DarbAdaptiveLayout.metricColumns(
+            context,
+            availableWidth: bodyWidth,
+          );
+
+          return ListView(
+            padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 104),
+            children: [
+              DarbGlassSurface(
+                padding: const EdgeInsets.all(18),
+                tintColor: isOnline ? DarbColors.forest : null,
+                borderColor: isOnline
+                    ? DarbColors.lime.withValues(alpha: 0.35)
+                    : null,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (isApproved) ...[
-                      DarbPulseDot(
-                        active: isOnline,
-                        color: isOnline
-                            ? DarbColors.lime
-                            : DarbColors.mutedOf(context),
-                        size: 9,
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isApproved
-                                ? (isOnline
-                                    ? dt('متصل لاستلام الطلبات')
-                                    : dt('غير متصل'))
-                                : (isPending
-                                    ? dt('حساب السائق بانتظار اعتماد الإدارة')
-                                    : dt('يتطلب طلب السائق مراجعة الإدارة')),
-                            style: TextStyle(
-                              color: isOnline
+                    Row(
+                      children: [
+                        if (isApproved) ...[
+                          DarbPulseDot(
+                            active: isOnline,
+                            color: isOnline
+                                ? DarbColors.lime
+                                : DarbColors.mutedOf(context),
+                            size: 9,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isApproved
+                                    ? (isOnline
+                                        ? dt('متصل لاستلام الطلبات')
+                                        : dt('غير متصل'))
+                                    : (isPending
+                                        ? dt('حساب السائق بانتظار اعتماد الإدارة')
+                                        : dt('يتطلب طلب السائق مراجعة الإدارة')),
+                                style: TextStyle(
+                                  color: isOnline
+                                      ? Colors.white
+                                      : DarbColors.inkOf(context),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                isApproved
+                                    ? dt('فعّل الحالة لتظهر لك الطلبات الجاهزة')
+                                    : (isPending
+                                        ? dt('قيد مراجعة الإدارة')
+                                        : driverStatus),
+                                style: TextStyle(
+                                  color: isOnline
+                                      ? DarbColors.mint
+                                      : DarbColors.mutedOf(context),
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: isOnline,
+                          onChanged: (!isApproved || _togglingOnline)
+                              ? null
+                              : _toggleOnline,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: isOnline
                                   ? Colors.white
                                   : DarbColors.inkOf(context),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w900,
+                              side: BorderSide(
+                                color: isOnline
+                                    ? Colors.white.withValues(alpha: 0.3)
+                                    : DarbColors.borderOf(context),
+                              ),
+                            ),
+                            onPressed: _pickVehicle,
+                            icon:
+                                const Icon(Icons.two_wheeler_rounded, size: 18),
+                            label: Text(
+                              _vehicleLabel(driver['vehicleType']?.toString()),
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            isApproved
-                                ? dt('فعّل الحالة لتظهر لك الطلبات الجاهزة')
-                                : (isPending
-                                    ? dt('قيد مراجعة الإدارة')
-                                    : driverStatus),
-                            style: TextStyle(
-                              color: isOnline
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: isOnline
                                   ? DarbColors.mint
-                                  : DarbColors.mutedOf(context),
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
+                                  : DarbColors.primaryOf(context),
+                              side: BorderSide(
+                                color: isOnline
+                                    ? DarbColors.mint.withValues(alpha: 0.4)
+                                    : DarbColors.borderOf(context),
+                              ),
                             ),
+                            onPressed: (!isApproved || _sendingLocation)
+                                ? null
+                                : _updateGpsNow,
+                            icon: _sendingLocation
+                                ? const SizedBox(
+                                    width: 15,
+                                    height: 15,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.my_location_rounded,
+                                    size: 18),
+                            label: Text(dt('موقع السائق')),
                           ),
-                        ],
-                      ),
-                    ),
-                    Switch(
-                      value: isOnline,
-                      onChanged:
-                          (!isApproved || _togglingOnline) ? null : _toggleOnline,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: isOnline
-                              ? Colors.white
-                              : DarbColors.inkOf(context),
-                          side: BorderSide(
-                            color: isOnline
-                                ? Colors.white.withValues(alpha: 0.3)
-                                : DarbColors.borderOf(context),
-                          ),
-                        ),
-                        onPressed: _pickVehicle,
-                        icon: const Icon(Icons.two_wheeler_rounded, size: 18),
-                        label: Text(
-                          _vehicleLabel(driver['vehicleType']?.toString()),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: isOnline
-                              ? DarbColors.mint
-                              : DarbColors.primaryOf(context),
-                          side: BorderSide(
-                            color: isOnline
-                                ? DarbColors.mint.withValues(alpha: 0.4)
-                                : DarbColors.borderOf(context),
-                          ),
-                        ),
-                        onPressed:
-                            (!isApproved || _sendingLocation) ? null : _updateGpsNow,
-                        icon: _sendingLocation
-                            ? const SizedBox(
-                                width: 15,
-                                height: 15,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.my_location_rounded, size: 18),
-                        label: Text(dt('موقع السائق')),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          if (_statsError != null) ...[
-            DarbGlassSurface(
-              tintColor: DarbColors.warningSoftOf(context),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    size: 18,
-                    color: DarbColors.warningOf(context),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _statsError!,
-                      style: TextStyle(
+              ),
+              const SizedBox(height: 14),
+              if (_statsError != null) ...[
+                DarbGlassSurface(
+                  tintColor: DarbColors.warningSoftOf(context),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 18,
                         color: DarbColors.warningOf(context),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _statsError!,
+                          style: TextStyle(
+                            color: DarbColors.warningOf(context),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _load,
+                        child: Text(dt('إعادة المحاولة')),
+                      ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: _load,
-                    child: Text(dt('إعادة المحاولة')),
+                ),
+                const SizedBox(height: 10),
+              ],
+              GridView.count(
+                crossAxisCount: metricCols,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: metricCols == 4 ? 1.28 : 1.55,
+                children: [
+                  DarbMetricCard(
+                    label: dt('رحلات اليوم'),
+                    value: '${stats['todayTrips'] ?? 0}',
+                    icon: Icons.today_rounded,
+                  ),
+                  DarbMetricCard(
+                    label: dt('أرباح اليوم'),
+                    value: formatDarbMoney(
+                      (stats['todayEarnings'] as num?) ?? 0,
+                      statsCurrency,
+                    ),
+                    icon: Icons.trending_up_rounded,
+                  ),
+                  DarbMetricCard(
+                    label: dt('الرحلات المكتملة'),
+                    value: '${stats['completedTrips'] ?? 0}',
+                    icon: Icons.task_alt_rounded,
+                  ),
+                  DarbMetricCard(
+                    label: dt('الأرباح المحققة'),
+                    value: formatDarbMoney(
+                      (stats['totalEarnings'] as num?) ?? 0,
+                      statsCurrency,
+                    ),
+                    icon: Icons.account_balance_wallet_outlined,
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 10),
-          ],
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 1.55,
-            children: [
-              DarbMetricCard(
-                label: dt('رحلات اليوم'),
-                value: '${stats['todayTrips'] ?? 0}',
-                icon: Icons.today_rounded,
-              ),
-              DarbMetricCard(
-                label: dt('أرباح اليوم'),
-                value: formatDarbMoney(
-                  (stats['todayEarnings'] as num?) ?? 0,
-                  statsCurrency,
+              const SizedBox(height: 18),
+              DarbSectionHeader(
+                title: dt('طلبات جاهزة للاستلام'),
+                trailing: DarbContextMenuButton<String>(
+                  tooltip: dt('خيارات'),
+                  onSelected: (action) {
+                    if (action == 'refresh') {
+                      _load();
+                    } else if (action == 'gps' && isApproved && !_sendingLocation) {
+                      _updateGpsNow();
+                    } else if (action == 'vehicle') {
+                      _pickVehicle();
+                    }
+                  },
+                  items: [
+                    DarbContextMenuAction(
+                      value: 'refresh',
+                      label: dt('تحديث'),
+                      icon: Icons.refresh_rounded,
+                    ),
+                    if (isApproved)
+                      DarbContextMenuAction(
+                        value: 'gps',
+                        label: dt('موقع السائق'),
+                        icon: Icons.my_location_rounded,
+                      ),
+                    DarbContextMenuAction(
+                      value: 'vehicle',
+                      label: dt('تحديث المركبة'),
+                      icon: Icons.two_wheeler_rounded,
+                    ),
+                  ],
                 ),
-                icon: Icons.trending_up_rounded,
               ),
-              DarbMetricCard(
-                label: dt('الرحلات المكتملة'),
-                value: '${stats['completedTrips'] ?? 0}',
-                icon: Icons.task_alt_rounded,
-              ),
-              DarbMetricCard(
-                label: dt('الأرباح المحققة'),
-                value: formatDarbMoney(
-                  (stats['totalEarnings'] as num?) ?? 0,
-                  statsCurrency,
+              const SizedBox(height: 10),
+              if (!isApproved)
+                DarbStateView.empty(
+                  message: isPending
+                      ? dt('حساب السائق بانتظار اعتماد الإدارة')
+                      : dt('يتطلب طلب السائق مراجعة الإدارة'),
+                  icon: Icons.hourglass_bottom_rounded,
+                  onRetry: _load,
+                )
+              else if (!isOnline)
+                DarbStateView.empty(
+                  message: dt('فعّل الحالة لتظهر لك الطلبات الجاهزة'),
+                  icon: Icons.power_settings_new_rounded,
+                  onRetry: () => _toggleOnline(true),
+                )
+              else if (_availableError != null && _available.isEmpty)
+                DarbStateView.error(
+                  message: _availableError,
+                  onRetry: _load,
+                )
+              else if (_available.isEmpty)
+                DarbStateView.empty(
+                  message: dt('لا توجد طلبات متاحة حالياً'),
+                  icon: Icons.delivery_dining_outlined,
+                  onRetry: _load,
+                )
+              else
+                DarbResponsiveTwoColumn(
+                  children: [
+                    for (final order in _available) _buildAvailableCard(order),
+                  ],
                 ),
-                icon: Icons.account_balance_wallet_outlined,
-              ),
             ],
-          ),
-          const SizedBox(height: 18),
-          DarbSectionHeader(
-            title: dt('طلبات جاهزة للاستلام'),
-            trailing: IconButton(
-              onPressed: _load,
-              icon: const Icon(Icons.refresh_rounded),
-            ),
-          ),
-          const SizedBox(height: 10),
-          if (!isApproved)
-            DarbStateView.empty(
-              message: isPending
-                  ? dt('حساب السائق بانتظار اعتماد الإدارة')
-                  : dt('يتطلب طلب السائق مراجعة الإدارة'),
-              icon: Icons.hourglass_bottom_rounded,
-              onRetry: _load,
-            )
-          else if (!isOnline)
-            DarbStateView.empty(
-              message: dt('فعّل الحالة لتظهر لك الطلبات الجاهزة'),
-              icon: Icons.power_settings_new_rounded,
-              onRetry: () => _toggleOnline(true),
-            )
-          else if (_availableError != null && _available.isEmpty)
-            DarbStateView.error(
-              message: _availableError,
-              onRetry: _load,
-            )
-          else if (_available.isEmpty)
-            DarbStateView.empty(
-              message: dt('لا توجد طلبات متاحة حالياً'),
-              icon: Icons.delivery_dining_outlined,
-              onRetry: _load,
-            )
-          else
-            for (final order in _available)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildAvailableCard(order),
-              ),
-        ],
+          );
+        },
       ),
     );
   }

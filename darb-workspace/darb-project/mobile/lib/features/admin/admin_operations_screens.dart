@@ -54,157 +54,169 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 108),
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final f in [
-                  ('', dt('الكل')),
-                  ('PENDING', dt('قيد الانتظار')),
-                  ('ACCEPTED', dt('مقبول')),
-                  ('PREPARING', dt('قيد التحضير')),
-                  ('READY', dt('جاهز للاستلام')),
-                  ('ASSIGNED', dt('تم تعيين مندوب')),
-                  ('PICKED_UP', dt('في الطريق إليك')),
-                  ('DELIVERED', dt('تم التسليم')),
-                  ('CANCELLED', dt('ملغى')),
-                ]) ...[
-                  ChoiceChip(
-                    label: Text(f.$2),
-                    selected: _statusFilter == f.$1,
-                    onSelected: (_) {
-                      setState(() => _statusFilter = f.$1);
-                      _load();
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          if (_orders.isEmpty)
-            DarbStateView.empty(
-              message: _statusFilter.isEmpty
-                  ? dt('لا توجد طلبات حتى الآن')
-                  : dt('لا توجد طلبات مطابقة للتصفية الحالية'),
-              icon: _statusFilter.isEmpty
-                  ? Icons.receipt_long_outlined
-                  : Icons.filter_list_off_rounded,
-              onRetry: _statusFilter.isEmpty
-                  ? _load
-                  : () {
-                      setState(() => _statusFilter = '');
-                      _load();
-                    },
-            )
-          else
-            for (final o in _orders)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: DarbInteractiveCard(
-                  padding: const EdgeInsets.all(15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: DarbColors.primaryOf(context)
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(11),
-                            ),
-                            child: Icon(
-                              o['type'] == 'PEER_DELIVERY'
-                                  ? Icons.local_shipping_rounded
-                                  : Icons.storefront_rounded,
-                              size: 19,
-                              color: DarbColors.primaryOf(context),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxW = constraints.maxWidth;
+          final hInset = maxW > 1120 ? (maxW - 1120) / 2 + 16 : 16.0;
+          return ListView(
+            padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 108),
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final f in [
+                      ('', dt('الكل')),
+                      ('PENDING', dt('قيد الانتظار')),
+                      ('ACCEPTED', dt('مقبول')),
+                      ('PREPARING', dt('قيد التحضير')),
+                      ('READY', dt('جاهز للاستلام')),
+                      ('ASSIGNED', dt('تم تعيين مندوب')),
+                      ('PICKED_UP', dt('في الطريق إليك')),
+                      ('DELIVERED', dt('تم التسليم')),
+                      ('CANCELLED', dt('ملغى')),
+                    ]) ...[
+                      ChoiceChip(
+                        label: Text(f.$2),
+                        selected: _statusFilter == f.$1,
+                        onSelected: (_) {
+                          setState(() => _statusFilter = f.$1);
+                          _load();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              if (_orders.isEmpty)
+                DarbStateView.empty(
+                  message: _statusFilter.isEmpty
+                      ? dt('لا توجد طلبات حتى الآن')
+                      : dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+                  icon: _statusFilter.isEmpty
+                      ? Icons.receipt_long_outlined
+                      : Icons.filter_list_off_rounded,
+                  onRetry: _statusFilter.isEmpty
+                      ? _load
+                      : () {
+                          setState(() => _statusFilter = '');
+                          _load();
+                        },
+                )
+              else
+                DarbResponsiveTwoColumn(
+                  spacing: 10,
+                  children: [
+                    for (final o in _orders)
+                      DarbInteractiveCard(
+                        padding: const EdgeInsets.all(15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Text(
-                                  '${o['orderNumber']} · ${o['city']?['code'] ?? ''}',
-                                  style: TextStyle(
-                                    color: DarbColors.inkOf(context),
-                                    fontWeight: FontWeight.w900,
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: DarbColors.primaryOf(context)
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(11),
+                                  ),
+                                  child: Icon(
+                                    o['type'] == 'PEER_DELIVERY'
+                                        ? Icons.local_shipping_rounded
+                                        : Icons.storefront_rounded,
+                                    size: 19,
+                                    color: DarbColors.primaryOf(context),
                                   ),
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${o['customer']?['name'] ?? ''} · ${o['customer']?['phone'] ?? o['customer']?['email'] ?? ''}',
-                                  style: TextStyle(
-                                    color: DarbColors.mutedOf(context),
-                                    fontSize: 12,
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${o['orderNumber']} · ${o['city']?['code'] ?? ''}',
+                                        style: TextStyle(
+                                          color: DarbColors.inkOf(context),
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${o['customer']?['name'] ?? ''} · ${o['customer']?['phone'] ?? o['customer']?['email'] ?? ''}',
+                                        style: TextStyle(
+                                          color: DarbColors.mutedOf(context),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                ),
+                                const SizedBox(width: 6),
+                                DarbStatusBadge(
+                                  status: o['status']?.toString() ?? 'PENDING',
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          DarbStatusBadge(
-                            status: o['status']?.toString() ?? 'PENDING',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      DarbOrderTimeline(
-                        status: o['status']?.toString() ?? 'PENDING',
-                        isPeer: o['type'] == 'PEER_DELIVERY',
-                        compact: true,
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: DarbColors.surfaceAltOf(context),
-                          borderRadius: BorderRadius.circular(DarbRadius.sm),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              o['type'] == 'PEER_DELIVERY'
-                                  ? dt('توصيل مستقل')
-                                  : dt('طلب متجر'),
-                              style: TextStyle(
-                                color: DarbColors.mutedOf(context),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                              ),
+                            const SizedBox(height: 10),
+                            DarbOrderTimeline(
+                              status: o['status']?.toString() ?? 'PENDING',
+                              isPeer: o['type'] == 'PEER_DELIVERY',
+                              compact: true,
                             ),
-                            Text(
-                              formatDarbMoney(
-                                num.tryParse(o['total']?.toString() ?? '0') ??
-                                    0,
-                                o['currency']?.toString() ?? 'SYP',
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                              style: TextStyle(
-                                color: DarbColors.primaryOf(context),
-                                fontWeight: FontWeight.w900,
+                              decoration: BoxDecoration(
+                                color: DarbColors.surfaceAltOf(context),
+                                borderRadius:
+                                    BorderRadius.circular(DarbRadius.sm),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    o['type'] == 'PEER_DELIVERY'
+                                        ? dt('توصيل مستقل')
+                                        : dt('طلب متجر'),
+                                    style: TextStyle(
+                                      color: DarbColors.mutedOf(context),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  Text(
+                                    formatDarbMoney(
+                                      num.tryParse(
+                                              o['total']?.toString() ?? '0') ??
+                                          0,
+                                      o['currency']?.toString() ?? 'SYP',
+                                    ),
+                                    style: TextStyle(
+                                      color: DarbColors.primaryOf(context),
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
-              ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -767,9 +779,13 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 108),
-        children: [
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxW = constraints.maxWidth;
+          final hInset = maxW > 1120 ? (maxW - 1120) / 2 + 16 : 16.0;
+          return ListView(
+            padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 108),
+            children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -844,62 +860,65 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                 onRetry: _load,
               )
             else
-              for (final z in _zones)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: DarbGlassSurface(
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: DarbColors.primaryOf(context)
-                                .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(11),
+              DarbResponsiveTwoColumn(
+                spacing: 10,
+                children: [
+                  for (final z in _zones)
+                    DarbGlassSurface(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: DarbColors.primaryOf(context)
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(11),
+                            ),
+                            child: Icon(
+                              Icons.route_rounded,
+                              size: 19,
+                              color: DarbColors.primaryOf(context),
+                            ),
                           ),
-                          child: Icon(
-                            Icons.route_rounded,
-                            size: 19,
-                            color: DarbColors.primaryOf(context),
-                          ),
-                        ),
-                        const SizedBox(width: 11),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                z['name']?.toString() ?? '',
-                                style: const TextStyle(fontWeight: FontWeight.w900),
-                              ),
-                              Text(
-                                '${z['city']?['code'] ?? ''} · ${formatDarbMoney(num.tryParse(z['feeBase']?.toString() ?? '0') ?? 0)} + ${formatDarbMoney(num.tryParse(z['feePerKm']?.toString() ?? '0') ?? 0)}/km',
-                                style: TextStyle(
-                                  color: DarbColors.mutedOf(context),
-                                  fontSize: 12.5,
+                          const SizedBox(width: 11),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  z['name']?.toString() ?? '',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w900),
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  '${z['city']?['code'] ?? ''} · ${formatDarbMoney(num.tryParse(z['feeBase']?.toString() ?? '0') ?? 0)} + ${formatDarbMoney(num.tryParse(z['feePerKm']?.toString() ?? '0') ?? 0)}/km',
+                                  style: TextStyle(
+                                    color: DarbColors.mutedOf(context),
+                                    fontSize: 12.5,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        IconButton.filledTonal(
-                          onPressed: () => _openZoneDialog(existing: z),
-                          icon: const Icon(Icons.edit_outlined, size: 19),
-                        ),
-                        const SizedBox(width: 6),
-                        IconButton(
-                          onPressed: () => _deleteZone(z['id'].toString()),
-                          icon: Icon(
-                            Icons.delete_outline_rounded,
-                            color: DarbColors.dangerOf(context),
+                          IconButton.filledTonal(
+                            onPressed: () => _openZoneDialog(existing: z),
+                            icon: const Icon(Icons.edit_outlined, size: 19),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          IconButton(
+                            onPressed: () => _deleteZone(z['id'].toString()),
+                            icon: Icon(
+                              Icons.delete_outline_rounded,
+                              color: DarbColors.dangerOf(context),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                ],
+              ),
             const SizedBox(height: 16),
             DarbSectionHeader(
               title: dt('المدن المدعومة'),
@@ -911,39 +930,43 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            for (final c in _cities)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: DarbGlassSurface(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  child: SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    secondary: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: DarbColors.infoOf(context).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
+            DarbResponsiveTwoColumn(
+              spacing: 8,
+              children: [
+                for (final c in _cities)
+                  DarbGlassSurface(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    child: SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      secondary: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: DarbColors.infoOf(context)
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.location_city_rounded,
+                          size: 18,
+                          color: DarbColors.infoOf(context),
+                        ),
                       ),
-                      child: Icon(
-                        Icons.location_city_rounded,
-                        size: 18,
-                        color: DarbColors.infoOf(context),
+                      title: Text(
+                        _cityLabel(c),
+                        style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
+                      subtitle: Text(
+                        '${dt('رمز المدينة: ')}${c['code']} · ${c['defaultCurrency']}',
+                      ),
+                      value: c['isActive'] == true,
+                      onChanged: (v) =>
+                          _toggleCityActive(c['id'].toString(), v),
                     ),
-                    title: Text(
-                      _cityLabel(c),
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    subtitle: Text(
-                      '${dt('رمز المدينة: ')}${c['code']} · ${c['defaultCurrency']}',
-                    ),
-                    value: c['isActive'] == true,
-                    onChanged: (v) => _toggleCityActive(c['id'].toString(), v),
                   ),
-                ),
-              ),
+              ],
+            ),
           ],
           if (_section == 1) ...[
             DarbSectionHeader(title: dt('المستخدمون والمدن')),
@@ -973,66 +996,68 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                 onRetry: _load,
               )
             else
-              for (final u in _users)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: DarbInteractiveCard(
-                    onTap: _busyIds.contains('user_${u['id']}')
-                        ? null
-                        : () => _changeUserRole(u),
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: DarbColors.primaryOf(context)
-                                .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(11),
+              DarbResponsiveTwoColumn(
+                spacing: 8,
+                children: [
+                  for (final u in _users)
+                    DarbInteractiveCard(
+                      onTap: _busyIds.contains('user_${u['id']}')
+                          ? null
+                          : () => _changeUserRole(u),
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: DarbColors.primaryOf(context)
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(11),
+                            ),
+                            child: Icon(
+                              Icons.person_outline_rounded,
+                              size: 20,
+                              color: DarbColors.primaryOf(context),
+                            ),
                           ),
-                          child: Icon(
-                            Icons.person_outline_rounded,
-                            size: 20,
-                            color: DarbColors.primaryOf(context),
-                          ),
-                        ),
-                        const SizedBox(width: 11),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                u['name']?.toString() ?? dt('مستخدم'),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
+                          const SizedBox(width: 11),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  u['name']?.toString() ?? dt('مستخدم'),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                u['phone']?.toString() ??
-                                    u['email']?.toString() ??
-                                    '',
-                                style: TextStyle(
-                                  color: DarbColors.mutedOf(context),
-                                  fontSize: 12.5,
+                                Text(
+                                  u['phone']?.toString() ??
+                                      u['email']?.toString() ??
+                                      '',
+                                  style: TextStyle(
+                                    color: DarbColors.mutedOf(context),
+                                    fontSize: 12.5,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        DarbStatusBadge(
-                          status: u['role']?.toString() ?? 'CUSTOMER',
-                        ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          Icons.edit_outlined,
-                          size: 18,
-                          color: DarbColors.mutedOf(context),
-                        ),
-                      ],
+                          DarbStatusBadge(
+                            status: u['role']?.toString() ?? 'CUSTOMER',
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 18,
+                            color: DarbColors.mutedOf(context),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                ],
+              ),
           ],
           if (_section == 2) ...[
             DarbGlassSurface(
@@ -1118,56 +1143,60 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                 ),
               )
             else
-              for (final l in _auditLogs)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: DarbGlassSurface(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: DarbColors.surfaceAltOf(context),
-                            borderRadius: BorderRadius.circular(10),
+              DarbResponsiveTwoColumn(
+                spacing: 8,
+                children: [
+                  for (final l in _auditLogs)
+                    DarbGlassSurface(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: DarbColors.surfaceAltOf(context),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.history_rounded,
+                              size: 17,
+                              color: DarbColors.primaryOf(context),
+                            ),
                           ),
-                          child: Icon(
-                            Icons.history_rounded,
-                            size: 17,
-                            color: DarbColors.primaryOf(context),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${l['action'] ?? ''} · ${l['targetType'] ?? ''}',
-                                style: TextStyle(
-                                  color: DarbColors.inkOf(context),
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13.5,
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${l['action'] ?? ''} · ${l['targetType'] ?? ''}',
+                                  style: TextStyle(
+                                    color: DarbColors.inkOf(context),
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13.5,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${l['actorRole'] ?? ''} · ${(l['createdAt']?.toString() ?? '').replaceFirst('T', ' ').substring(0, (l['createdAt']?.toString().length ?? 0).clamp(0, 16))}',
-                                style: TextStyle(
-                                  color: DarbColors.mutedOf(context),
-                                  fontSize: 12,
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${l['actorRole'] ?? ''} · ${(l['createdAt']?.toString() ?? '').replaceFirst('T', ' ').substring(0, (l['createdAt']?.toString().length ?? 0).clamp(0, 16))}',
+                                  style: TextStyle(
+                                    color: DarbColors.mutedOf(context),
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                ],
+              ),
           ],
         ],
+      );
+        },
       ),
     );
   }

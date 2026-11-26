@@ -160,176 +160,238 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 108),
-        children: [
-          DarbSectionHeader(
-            title: dt('لوحة المؤشرات'),
-            trailing: IconButton(
-              onPressed: _load,
-              icon: const Icon(Icons.refresh_rounded),
-            ),
-          ),
-          if (_partialError != null) ...[
-            const SizedBox(height: 10),
-            DarbGlassSurface(
-              tintColor: DarbColors.warningSoftOf(context),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    size: 18,
-                    color: DarbColors.warningOf(context),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _partialError!,
-                      style: TextStyle(
-                        color: DarbColors.warningOf(context),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxW = constraints.maxWidth;
+          final hInset = maxW > 1120 ? (maxW - 1120) / 2 + 16 : 16.0;
+          final bodyWidth = maxW - (hInset * 2);
+          final metricCols = DarbAdaptiveLayout.metricColumns(
+            context,
+            availableWidth: bodyWidth,
+          );
+
+          return ListView(
+            padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 108),
+            children: [
+              DarbSectionHeader(
+                title: dt('لوحة المؤشرات'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DarbContextMenuButton<String>(
+                      tooltip: dt('خيارات'),
+                      onSelected: (action) {
+                        switch (action) {
+                          case 'refresh':
+                            _load();
+                          case 'pending':
+                            setState(() => _directoryMode = 0);
+                          case 'vendors':
+                            setState(() => _directoryMode = 1);
+                          case 'drivers':
+                            setState(() => _directoryMode = 2);
+                        }
+                      },
+                      items: [
+                        DarbContextMenuAction(
+                          value: 'refresh',
+                          label: dt('تحديث'),
+                          icon: Icons.refresh_rounded,
+                        ),
+                        DarbContextMenuAction(
+                          value: 'pending',
+                          label: dt('قيد الانتظار'),
+                          icon: Icons.pending_actions_rounded,
+                        ),
+                        DarbContextMenuAction(
+                          value: 'vendors',
+                          label: dt('سجل المتاجر'),
+                          icon: Icons.storefront_rounded,
+                        ),
+                        DarbContextMenuAction(
+                          value: 'drivers',
+                          label: dt('سجل السائقين'),
+                          icon: Icons.delivery_dining_rounded,
+                        ),
+                      ],
                     ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: _load,
+                      icon: const Icon(Icons.refresh_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              if (_partialError != null) ...[
+                const SizedBox(height: 10),
+                DarbGlassSurface(
+                  tintColor: DarbColors.warningSoftOf(context),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 18,
+                        color: DarbColors.warningOf(context),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _partialError!,
+                          style: TextStyle(
+                            color: DarbColors.warningOf(context),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _load,
+                        child: Text(dt('إعادة المحاولة')),
+                      ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: _load,
-                    child: Text(dt('إعادة المحاولة')),
+                ),
+              ],
+              const SizedBox(height: 10),
+              GridView.count(
+                crossAxisCount: metricCols,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: metricCols == 4 ? 1.28 : 1.48,
+                children: [
+                  DarbMetricCard(
+                    label: dt('إجمالي الطلبات'),
+                    value: '$totalOrders',
+                    icon: Icons.receipt_long_rounded,
+                    accentColor: DarbColors.primaryOf(context),
+                  ),
+                  DarbMetricCard(
+                    label: dt('قيد التنفيذ'),
+                    value: '$activeOrders',
+                    icon: Icons.local_shipping_outlined,
+                    accentColor: DarbColors.infoOf(context),
+                  ),
+                  DarbMetricCard(
+                    label: dt('سائقون متصلون'),
+                    value: '$driversOnline',
+                    icon: Icons.sensors_rounded,
+                    accentColor: DarbColors.successOf(context),
+                  ),
+                  DarbMetricCard(
+                    label: dt('إجمالي المبيعات'),
+                    value: formatDarbMoney(gmv),
+                    icon: Icons.account_balance_wallet_outlined,
+                    accentColor: DarbColors.warningOf(context),
                   ),
                 ],
               ),
-            ),
-          ],
-          const SizedBox(height: 10),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 1.48,
-            children: [
-              DarbMetricCard(
-                label: dt('إجمالي الطلبات'),
-                value: '$totalOrders',
-                icon: Icons.receipt_long_rounded,
-                accentColor: DarbColors.primaryOf(context),
+              const SizedBox(height: 16),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    ChoiceChip(
+                      label: Text(
+                        '${dt('قيد الانتظار')} (${_pendingVendors.length + _pendingDrivers.length})',
+                      ),
+                      selected: _directoryMode == 0,
+                      onSelected: (_) => setState(() => _directoryMode = 0),
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                      label:
+                          Text('${dt('سجل المتاجر')} (${_allVendors.length})'),
+                      selected: _directoryMode == 1,
+                      onSelected: (_) => setState(() => _directoryMode = 1),
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                      label:
+                          Text('${dt('سجل السائقين')} (${_allDrivers.length})'),
+                      selected: _directoryMode == 2,
+                      onSelected: (_) => setState(() => _directoryMode = 2),
+                    ),
+                  ],
+                ),
               ),
-              DarbMetricCard(
-                label: dt('قيد التنفيذ'),
-                value: '$activeOrders',
-                icon: Icons.local_shipping_outlined,
-                accentColor: DarbColors.infoOf(context),
-              ),
-              DarbMetricCard(
-                label: dt('سائقون متصلون'),
-                value: '$driversOnline',
-                icon: Icons.sensors_rounded,
-                accentColor: DarbColors.successOf(context),
-              ),
-              DarbMetricCard(
-                label: dt('إجمالي المبيعات'),
-                value: formatDarbMoney(gmv),
-                icon: Icons.account_balance_wallet_outlined,
-                accentColor: DarbColors.warningOf(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ChoiceChip(
-                  label: Text(
-                    '${dt('قيد الانتظار')} (${_pendingVendors.length + _pendingDrivers.length})',
+              const SizedBox(height: 14),
+              if (_directoryMode == 0) ...[
+                DarbSectionHeader(
+                  title: '${dt('طلبات المتاجر')} (${_pendingVendors.length})',
+                ),
+                const SizedBox(height: 10),
+                if (_pendingVendors.isEmpty)
+                  DarbGlassSurface(
+                    padding: const EdgeInsets.all(14),
+                    child: Text(
+                      dt('لا توجد طلبات معلّقة حالياً'),
+                      style: TextStyle(color: DarbColors.mutedOf(context)),
+                    ),
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    spacing: 10,
+                    children: [
+                      for (final v in _pendingVendors) _buildVendorCard(v),
+                    ],
                   ),
-                  selected: _directoryMode == 0,
-                  onSelected: (_) => setState(() => _directoryMode = 0),
+                const SizedBox(height: 16),
+                DarbSectionHeader(
+                  title: '${dt('طلبات السائقين')} (${_pendingDrivers.length})',
                 ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text('${dt('سجل المتاجر')} (${_allVendors.length})'),
-                  selected: _directoryMode == 1,
-                  onSelected: (_) => setState(() => _directoryMode = 1),
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text('${dt('سجل السائقين')} (${_allDrivers.length})'),
-                  selected: _directoryMode == 2,
-                  onSelected: (_) => setState(() => _directoryMode = 2),
-                ),
+                const SizedBox(height: 10),
+                if (_pendingDrivers.isEmpty)
+                  DarbGlassSurface(
+                    padding: const EdgeInsets.all(14),
+                    child: Text(
+                      dt('لا توجد طلبات معلّقة حالياً'),
+                      style: TextStyle(color: DarbColors.mutedOf(context)),
+                    ),
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    spacing: 10,
+                    children: [
+                      for (final d in _pendingDrivers) _buildDriverCard(d),
+                    ],
+                  ),
+              ] else if (_directoryMode == 1) ...[
+                if (_allVendors.isEmpty)
+                  DarbStateView.empty(
+                    message: dt('لا توجد بيانات متاحة حالياً'),
+                    icon: Icons.storefront_outlined,
+                    onRetry: _load,
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    spacing: 10,
+                    children: [
+                      for (final v in _allVendors) _buildVendorCard(v),
+                    ],
+                  ),
+              ] else ...[
+                if (_allDrivers.isEmpty)
+                  DarbStateView.empty(
+                    message: dt('لا توجد بيانات متاحة حالياً'),
+                    icon: Icons.delivery_dining_outlined,
+                    onRetry: _load,
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    spacing: 10,
+                    children: [
+                      for (final d in _allDrivers) _buildDriverCard(d),
+                    ],
+                  ),
               ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          if (_directoryMode == 0) ...[
-            DarbSectionHeader(
-              title: '${dt('طلبات المتاجر')} (${_pendingVendors.length})',
-            ),
-            const SizedBox(height: 10),
-            if (_pendingVendors.isEmpty)
-              DarbGlassSurface(
-                padding: const EdgeInsets.all(14),
-                child: Text(
-                  dt('لا توجد طلبات معلّقة حالياً'),
-                  style: TextStyle(color: DarbColors.mutedOf(context)),
-                ),
-              )
-            else
-              for (final v in _pendingVendors)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _buildVendorCard(v),
-                ),
-            const SizedBox(height: 16),
-            DarbSectionHeader(
-              title: '${dt('طلبات السائقين')} (${_pendingDrivers.length})',
-            ),
-            const SizedBox(height: 10),
-            if (_pendingDrivers.isEmpty)
-              DarbGlassSurface(
-                padding: const EdgeInsets.all(14),
-                child: Text(
-                  dt('لا توجد طلبات معلّقة حالياً'),
-                  style: TextStyle(color: DarbColors.mutedOf(context)),
-                ),
-              )
-            else
-              for (final d in _pendingDrivers)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _buildDriverCard(d),
-                ),
-          ] else if (_directoryMode == 1) ...[
-            if (_allVendors.isEmpty)
-              DarbStateView.empty(
-                message: dt('لا توجد بيانات متاحة حالياً'),
-                icon: Icons.storefront_outlined,
-                onRetry: _load,
-              )
-            else
-              for (final v in _allVendors)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _buildVendorCard(v),
-                ),
-          ] else ...[
-            if (_allDrivers.isEmpty)
-              DarbStateView.empty(
-                message: dt('لا توجد بيانات متاحة حالياً'),
-                icon: Icons.delivery_dining_outlined,
-                onRetry: _load,
-              )
-            else
-              for (final d in _allDrivers)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _buildDriverCard(d),
-                ),
-          ],
-        ],
+            ],
+          );
+        },
       ),
     );
   }

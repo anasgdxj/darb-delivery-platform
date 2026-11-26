@@ -844,6 +844,10 @@ class AppLocalizations {
     'إدارة الحساب والدعم': 'Account Management & Support|Hesap Yönetimi ve Destek',
     'إدارة عناوينك المحفوظة وتحديدها على الخريطة': 'Manage saved addresses and map pins|Kayıtlı adresleri ve harita konumlarını yönetin',
     'احصل على إرشادات وإجابات فورية حسب دورك': 'Get instant guidance tailored to your role|Rolünüze özel anında yardım alın',
+    'خيارات': 'Options|Seçenekler',
+    'المتجر يستقبل الطلبات': 'Store is accepting orders|Mağaza sipariş alıyor',
+    'المتجر متوقف مؤقتاً': 'Store is temporarily paused|Mağaza geçici olarak duraklatıldı',
+    'حالة استقبال الطلبات': 'Order intake status|Sipariş kabul durumu',
   };
 
   static const Map<String, Map<String, String>> _values = {

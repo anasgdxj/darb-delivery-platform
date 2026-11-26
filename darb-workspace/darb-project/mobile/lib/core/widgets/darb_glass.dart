@@ -3,6 +3,41 @@ import 'package:flutter/material.dart';
 import '../theme/darb_design_system.dart';
 import 'darb_motion_components.dart';
 
+class DarbAdaptiveLayout {
+  DarbAdaptiveLayout._();
+
+  static const double tabletBreakpoint = 720;
+  static const double desktopBreakpoint = 1080;
+
+  static bool isTablet(BuildContext context) =>
+      MediaQuery.sizeOf(context).width >= tabletBreakpoint;
+
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.sizeOf(context).width >= desktopBreakpoint;
+
+  static int columns(
+    BuildContext context, {
+    int phone = 1,
+    int tablet = 2,
+    int desktop = 2,
+  }) {
+    final w = MediaQuery.sizeOf(context).width;
+    if (w >= desktopBreakpoint) return desktop;
+    if (w >= tabletBreakpoint) return tablet;
+    return phone;
+  }
+
+  static int metricColumns(BuildContext context, {double? availableWidth}) {
+    final w = availableWidth ?? MediaQuery.sizeOf(context).width;
+    return w >= 680 ? 4 : 2;
+  }
+
+  static int contentColumns(BuildContext context, {double? availableWidth}) {
+    final w = availableWidth ?? MediaQuery.sizeOf(context).width;
+    return w >= 620 ? 2 : 1;
+  }
+}
+
 class DarbAmbientBackground extends StatelessWidget {
   const DarbAmbientBackground({
     super.key,
@@ -51,13 +86,13 @@ class DarbAmbientBackground extends StatelessWidget {
           right: -60,
           child: IgnorePointer(
             child: Container(
-              width: 260,
-              height: 260,
+              width: 280,
+              height: 280,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DarbColors.lime.withValues(alpha: isDark ? 0.11 : 0.22),
+                    DarbColors.lime.withValues(alpha: isDark ? 0.12 : 0.22),
                     DarbColors.lime.withValues(alpha: 0),
                   ],
                 ),
@@ -70,13 +105,13 @@ class DarbAmbientBackground extends StatelessWidget {
           left: -100,
           child: IgnorePointer(
             child: Container(
-              width: 240,
-              height: 240,
+              width: 260,
+              height: 260,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    DarbColors.violet.withValues(alpha: isDark ? 0.14 : 0.08),
+                    DarbColors.violet.withValues(alpha: isDark ? 0.15 : 0.08),
                     DarbColors.violet.withValues(alpha: 0),
                   ],
                 ),
@@ -97,7 +132,7 @@ class DarbGlassSurface extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.margin,
     this.borderRadius = DarbRadius.lg,
-    this.blurSigma = 18,
+    this.blurSigma = 20,
     this.tintColor,
     this.borderColor,
     this.elevated = true,
@@ -121,8 +156,8 @@ class DarbGlassSurface extends StatelessWidget {
     final effectiveBorder = borderColor ??
         (isGlass
             ? (isDark
-                ? DarbColors.mint.withValues(alpha: 0.18)
-                : Colors.white.withValues(alpha: 0.88))
+                ? DarbColors.mint.withValues(alpha: 0.20)
+                : Colors.white.withValues(alpha: 0.92))
             : DarbColors.borderOf(context));
 
     final shadow = elevated
@@ -147,8 +182,8 @@ class DarbGlassSurface extends StatelessWidget {
 
     final fill = tintColor ??
         (isDark
-            ? DarbColors.darkSurface.withValues(alpha: 0.82)
-            : Colors.white.withValues(alpha: 0.82));
+            ? DarbColors.darkSurface.withValues(alpha: 0.80)
+            : Colors.white.withValues(alpha: 0.84));
 
     return Container(
       margin: margin,
@@ -161,7 +196,6 @@ class DarbGlassSurface extends StatelessWidget {
         child: BackdropFilter(
           filter: darbBlurFilter(blurSigma),
           child: Container(
-            padding: padding,
             decoration: BoxDecoration(
               borderRadius: radius,
               color: fill,
@@ -173,16 +207,30 @@ class DarbGlassSurface extends StatelessWidget {
                       colors: isDark
                           ? [
                               DarbColors.darkSurfaceElevated
-                                  .withValues(alpha: 0.86),
+                                  .withValues(alpha: 0.88),
                               DarbColors.darkSurface.withValues(alpha: 0.72),
                             ]
                           : [
-                              Colors.white.withValues(alpha: 0.90),
-                              Colors.white.withValues(alpha: 0.72),
+                              Colors.white.withValues(alpha: 0.94),
+                              Colors.white.withValues(alpha: 0.74),
                             ],
                     ),
               border: Border.all(color: effectiveBorder, width: 1.05),
             ),
+            foregroundDecoration: tintColor == null && borderRadius >= DarbRadius.md
+                ? BoxDecoration(
+                    borderRadius: radius,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.center,
+                      colors: [
+                        Colors.white.withValues(alpha: isDark ? 0.06 : 0.34),
+                        Colors.transparent,
+                      ],
+                    ),
+                  )
+                : null,
+            padding: padding,
             child: child,
           ),
         ),
@@ -206,7 +254,7 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 8);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 10);
 
   @override
   Widget build(BuildContext context) {
@@ -218,25 +266,25 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
     final content = SafeArea(
       bottom: false,
       child: Container(
-        height: kToolbarHeight + 4,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        height: kToolbarHeight + 6,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         child: Row(
           children: [
             if (leading != null)
               leading!
             else if (Navigator.canPop(context))
               Padding(
-                padding: const EdgeInsetsDirectional.only(end: 4),
+                padding: const EdgeInsetsDirectional.only(end: 6),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(13),
                   onTap: () => Navigator.maybePop(context),
                   child: Container(
-                    width: 38,
-                    height: 38,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: DarbColors.softSurfaceOf(context)
-                          .withValues(alpha: 0.82),
-                      borderRadius: BorderRadius.circular(12),
+                          .withValues(alpha: 0.85),
+                      borderRadius: BorderRadius.circular(13),
                       border: Border.all(color: DarbColors.borderOf(context)),
                     ),
                     child: Icon(
@@ -278,6 +326,7 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
                         color: ink,
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
+                        letterSpacing: -0.2,
                       ),
                     ),
                   ),
@@ -315,16 +364,27 @@ class DarbGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return ClipRect(
       child: BackdropFilter(
-        filter: darbBlurFilter(20),
+        filter: darbBlurFilter(22),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: (isDark ? DarbColors.darkSurface : Colors.white)
-                .withValues(alpha: 0.84),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: isDark
+                  ? [
+                      DarbColors.darkSurfaceElevated.withValues(alpha: 0.88),
+                      DarbColors.darkSurface.withValues(alpha: 0.80),
+                    ]
+                  : [
+                      Colors.white.withValues(alpha: 0.90),
+                      Colors.white.withValues(alpha: 0.78),
+                    ],
+            ),
             border: Border(
               bottom: BorderSide(
                 color: isDark
-                    ? DarbColors.mint.withValues(alpha: 0.14)
-                    : DarbColors.line.withValues(alpha: 0.85),
+                    ? DarbColors.mint.withValues(alpha: 0.16)
+                    : DarbColors.line.withValues(alpha: 0.88),
               ),
             ),
           ),
@@ -407,11 +467,240 @@ class DarbGlassBottomNav extends StatelessWidget {
         14,
         bottomPadding > 0 ? bottomPadding + 2 : 12,
       ),
-      child: DarbGlassSurface(
-        borderRadius: DarbRadius.xl,
-        blurSigma: 26,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: itemsRow,
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: DarbGlassSurface(
+            borderRadius: DarbRadius.xl + 4,
+            blurSigma: 28,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: itemsRow,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// iPadOS 18-inspired Floating Translucent Sidebar Navigation for tablets (>= 720dp).
+class DarbGlassSideRail extends StatelessWidget {
+  const DarbGlassSideRail({
+    super.key,
+    required this.destinations,
+    required this.selectedIndex,
+    required this.onSelect,
+    this.roleLabel,
+  });
+
+  final List<DarbNavDestination> destinations;
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+  final String? roleLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = DarbColors.isDark(context);
+    final primary = DarbColors.primaryOf(context);
+    final muted = DarbColors.mutedOf(context);
+    final ink = DarbColors.inkOf(context);
+    final activeTint = isDark
+        ? DarbColors.forestSoft.withValues(alpha: 0.94)
+        : DarbColors.limeTint.withValues(alpha: 0.78);
+    final activeForeground = isDark ? DarbColors.lime : DarbColors.forest;
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 8, 16),
+      child: SizedBox(
+        width: 218,
+        child: DarbGlassSurface(
+          borderRadius: DarbRadius.xl,
+          blurSigma: 26,
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (roleLabel != null && roleLabel!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
+                  child: Text(
+                    roleLabel!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: muted,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+              for (var i = 0; i < destinations.length; i++) ...[
+                if (i > 0) const SizedBox(height: 6),
+                Builder(
+                  builder: (ctx) {
+                    final item = destinations[i];
+                    final active = i == selectedIndex;
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(DarbRadius.md),
+                        onTap: () {
+                          if (!active) {
+                            DarbHaptics.selection();
+                          } else {
+                            DarbHaptics.light();
+                          }
+                          onSelect(i);
+                        },
+                        child: AnimatedContainer(
+                          duration: DarbMotion.effectiveDuration(
+                            context,
+                            DarbMotion.tab,
+                          ),
+                          curve: DarbMotion.enter,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 11,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(DarbRadius.md),
+                            color: active ? activeTint : Colors.transparent,
+                            border: active
+                                ? Border.all(
+                                    color: (isDark ? DarbColors.lime : primary)
+                                        .withValues(alpha: 0.28),
+                                  )
+                                : null,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                active ? item.selectedIcon : item.icon,
+                                size: 20,
+                                color: active ? activeForeground : muted,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  item.label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: active ? activeForeground : ink,
+                                    fontSize: 13.5,
+                                    fontWeight: active
+                                        ? FontWeight.w900
+                                        : FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              if (item.badgeCount > 0)
+                                DarbAnimatedBadge(count: item.badgeCount),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DarbContextMenuAction<T> {
+  const DarbContextMenuAction({
+    required this.value,
+    required this.label,
+    required this.icon,
+    this.isDanger = false,
+  });
+
+  final T value;
+  final String label;
+  final IconData icon;
+  final bool isDanger;
+}
+
+class DarbContextMenuButton<T> extends StatelessWidget {
+  const DarbContextMenuButton({
+    super.key,
+    required this.items,
+    required this.onSelected,
+    this.tooltip,
+    this.icon = Icons.more_horiz_rounded,
+    this.iconColor,
+    this.backgroundColor,
+  });
+
+  final List<DarbContextMenuAction<T>> items;
+  final ValueChanged<T> onSelected;
+  final String? tooltip;
+  final IconData icon;
+  final Color? iconColor;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = DarbColors.inkOf(context);
+    final danger = DarbColors.dangerOf(context);
+    final primary = DarbColors.primaryOf(context);
+
+    return PopupMenuButton<T>(
+      tooltip: tooltip ?? '',
+      color: DarbColors.surfaceElevatedOf(context),
+      surfaceTintColor: Colors.transparent,
+      elevation: 10,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(DarbRadius.lg),
+        side: BorderSide(color: DarbColors.borderOf(context)),
+      ),
+      onOpened: DarbHaptics.light,
+      onSelected: (v) {
+        DarbHaptics.selection();
+        onSelected(v);
+      },
+      itemBuilder: (ctx) => [
+        for (final item in items)
+          PopupMenuItem<T>(
+            value: item.value,
+            child: Row(
+              children: [
+                Icon(
+                  item.icon,
+                  size: 18,
+                  color: item.isDanger ? danger : primary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    item.label,
+                    style: TextStyle(
+                      color: item.isDanger ? danger : ink,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: backgroundColor ??
+              DarbColors.softSurfaceOf(context).withValues(alpha: 0.86),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: DarbColors.borderOf(context)),
+        ),
+        child: Icon(icon, size: 19, color: iconColor ?? ink),
       ),
     );
   }
@@ -579,36 +868,105 @@ Future<T?> showDarbGlassModalSheet<T>({
     isScrollControlled: true,
     barrierColor: DarbColors.scrimOf(context),
     backgroundColor: Colors.transparent,
-    builder: (ctx) => Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
-      child: DarbGlassSurface(
-        borderRadius: DarbRadius.xl,
-        blurSigma: 24,
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
-        child: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 14),
-                    decoration: BoxDecoration(
-                      color: DarbColors.mutedOf(ctx).withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(DarbRadius.pill),
+    builder: (ctx) => Center(
+      heightFactor: 1,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+          child: DarbGlassSurface(
+            borderRadius: DarbRadius.xl,
+            blurSigma: 26,
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+            child: SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 14),
+                        decoration: BoxDecoration(
+                          color: DarbColors.mutedOf(ctx).withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(DarbRadius.pill),
+                        ),
+                      ),
                     ),
-                  ),
+                    builder(ctx),
+                  ],
                 ),
-                builder(ctx),
-              ],
+              ),
             ),
           ),
         ),
       ),
     ),
   );
+}
+
+/// Renders [children] as a single vertical stack on narrow viewports and
+/// equal-height paired rows on wide/tablet viewports without fixed aspect clipping.
+class DarbResponsiveTwoColumn extends StatelessWidget {
+  const DarbResponsiveTwoColumn({
+    super.key,
+    required this.children,
+    this.spacing = 12,
+    this.breakpoint = 620,
+  });
+
+  final List<Widget> children;
+  final double spacing;
+  final double breakpoint;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < breakpoint || children.length <= 1) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) SizedBox(height: spacing),
+                children[i],
+              ],
+            ],
+          );
+        }
+        final rows = <Widget>[];
+        for (var i = 0; i < children.length; i += 2) {
+          final hasSecond = i + 1 < children.length;
+          rows.add(
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: i + 2 < children.length ? spacing : 0,
+              ),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: children[i]),
+                    SizedBox(width: spacing),
+                    Expanded(
+                      child: hasSecond
+                          ? children[i + 1]
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: rows,
+        );
+      },
+    );
+  }
 }

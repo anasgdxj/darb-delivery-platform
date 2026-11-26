@@ -692,9 +692,63 @@ class _AppShellState extends State<AppShell> {
     };
 
     final banner = _bannerNotification;
+    final isTablet = DarbAdaptiveLayout.isTablet(context);
+
+    final shellBody = Column(
+      children: [
+        if (_offline)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: DarbGlassSurface(
+              tintColor: DarbColors.warningSoftOf(context),
+              borderColor:
+                  DarbColors.warningOf(context).withValues(alpha: 0.32),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.cloud_off_rounded,
+                    size: 16,
+                    color: DarbColors.warningOf(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'),
+                      style: TextStyle(
+                        color: DarbColors.warningOf(context),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(0, 28),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: _loadUser,
+                    child: Text(dt('تحديث')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        Expanded(
+          child: DarbTabViewStack(
+            index: safeIndex,
+            children: pages,
+          ),
+        ),
+      ],
+    );
 
     return Scaffold(
-      extendBody: true,
+      extendBody: !isTablet,
       appBar: DarbGlassAppBar(
         leading: const Padding(
           padding: EdgeInsetsDirectional.only(start: 6),
@@ -774,58 +828,24 @@ class _AppShellState extends State<AppShell> {
       body: DarbAmbientBackground(
         child: Stack(
           children: [
-            Column(
-              children: [
-                if (_offline)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: DarbGlassSurface(
-                      tintColor: DarbColors.warningSoftOf(context),
-                      borderColor:
-                          DarbColors.warningOf(context).withValues(alpha: 0.32),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.cloud_off_rounded,
-                            size: 16,
-                            color: DarbColors.warningOf(context),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'),
-                              style: TextStyle(
-                                color: DarbColors.warningOf(context),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              minimumSize: const Size(0, 28),
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            onPressed: _loadUser,
-                            child: Text(dt('تحديث')),
-                          ),
-                        ],
-                      ),
-                    ),
+            if (isTablet)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DarbGlassSideRail(
+                    destinations: destinations,
+                    selectedIndex: safeIndex,
+                    roleLabel: roleSubtitle,
+                    onSelect: (index) {
+                      setState(() => _tabIndex = index);
+                      _refreshUnreadCount();
+                    },
                   ),
-                Expanded(
-                  child: DarbTabViewStack(
-                    index: safeIndex,
-                    children: pages,
-                  ),
-                ),
-              ],
-            ),
+                  Expanded(child: shellBody),
+                ],
+              )
+            else
+              shellBody,
             if (banner != null)
               Positioned(
                 top: 8,
@@ -834,78 +854,84 @@ class _AppShellState extends State<AppShell> {
                 child: SafeArea(
                   top: false,
                   bottom: false,
-                  child: DarbPressScale(
-                    onTap: () => _handleNotificationOpen(banner.data),
-                    child: DarbGlassSurface(
-                      borderRadius: DarbRadius.lg,
-                      blurSigma: 22,
-                      borderColor:
-                          DarbColors.primaryOf(context).withValues(alpha: 0.35),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: DarbColors.primaryOf(context)
-                                  .withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(11),
-                            ),
-                            child: Icon(
-                              Icons.notifications_active_rounded,
-                              size: 19,
-                              color: DarbColors.primaryOf(context),
-                            ),
+                  child: Center(
+                    heightFactor: 1,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: DarbPressScale(
+                        onTap: () => _handleNotificationOpen(banner.data),
+                        child: DarbGlassSurface(
+                          borderRadius: DarbRadius.lg,
+                          blurSigma: 22,
+                          borderColor: DarbColors.primaryOf(context)
+                              .withValues(alpha: 0.35),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  banner.title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: DarbColors.inkOf(context),
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w900,
-                                  ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: DarbColors.primaryOf(context)
+                                      .withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(11),
                                 ),
-                                if (banner.body.isNotEmpty) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    banner.body,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: DarbColors.mutedOf(context),
-                                      fontSize: 12,
-                                      height: 1.35,
+                                child: Icon(
+                                  Icons.notifications_active_rounded,
+                                  size: 19,
+                                  color: DarbColors.primaryOf(context),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      banner.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: DarbColors.inkOf(context),
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w900,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ],
-                            ),
+                                    if (banner.body.isNotEmpty) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        banner.body,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: DarbColors.mutedOf(context),
+                                          fontSize: 12,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                tooltip: dt('إغلاق'),
+                                onPressed: _dismissBanner,
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  size: 18,
+                                  color: DarbColors.mutedOf(context),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 6),
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            tooltip: dt('إغلاق'),
-                            onPressed: _dismissBanner,
-                            icon: Icon(
-                              Icons.close_rounded,
-                              size: 18,
-                              color: DarbColors.mutedOf(context),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -914,14 +940,16 @@ class _AppShellState extends State<AppShell> {
           ],
         ),
       ),
-      bottomNavigationBar: DarbGlassBottomNav(
-        destinations: destinations,
-        selectedIndex: safeIndex,
-        onSelect: (index) {
-          setState(() => _tabIndex = index);
-          _refreshUnreadCount();
-        },
-      ),
+      bottomNavigationBar: isTablet
+          ? null
+          : DarbGlassBottomNav(
+              destinations: destinations,
+              selectedIndex: safeIndex,
+              onSelect: (index) {
+                setState(() => _tabIndex = index);
+                _refreshUnreadCount();
+              },
+            ),
     );
   }
 }
