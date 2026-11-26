@@ -45,7 +45,7 @@ class _ShoppingRequestScreenState extends State<ShoppingRequestScreen> {
         _addresses = list;
         if (_addressId == null && list.isNotEmpty) {
           final located = list.where((a) => a['hasLocation'] == true).toList();
-          _addressId = (located.isNotEmpty ? located.first : list.first)['id']?.toString();
+          _addressId = located.isNotEmpty ? located.first['id']?.toString() : null;
         }
       });
     } on ApiException catch (e) { if (mounted) setState(() => _error = e.message); }
@@ -125,10 +125,10 @@ class _ShoppingRequestScreenState extends State<ShoppingRequestScreen> {
             Text(dt('عنوان استلام مشترياتك'), style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w900, fontSize: 15)),
             const SizedBox(height: 8),
             if (_loadingAddresses) const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()))
-            else if (_addresses.isEmpty) Text(dt('أضف عنوان تسليم من صفحة عناويني أولاً'), style: TextStyle(color: DarbColors.mutedOf(context)))
+            else if (_addresses.where((a) => a['hasLocation'] == true).isEmpty) Text(dt('أضف عنوان تسليم وحدد موقعه على الخريطة من صفحة عناويني أولاً'), style: TextStyle(color: DarbColors.mutedOf(context)))
             else DropdownButtonFormField<String>(
               value: _addressId, isExpanded: true, decoration: _decoration('اختر عنوان التسليم', 'عنوانك المحفوظ', Icons.location_on_outlined),
-              items: [for (final address in _addresses) DropdownMenuItem(value: address['id']?.toString(), child: Text([address['label'], address['details']].where((v) => v != null && v.toString().trim().isNotEmpty).join(' · '), overflow: TextOverflow.ellipsis))],
+              items: [for (final address in _addresses.where((a) => a['hasLocation'] == true)) DropdownMenuItem(value: address['id']?.toString(), child: Text([address['label'], address['details']].where((v) => v != null && v.toString().trim().isNotEmpty).join(' · '), overflow: TextOverflow.ellipsis))],
               onChanged: _submitting ? null : (value) => setState(() => _addressId = value),
             ),
           ])),
@@ -136,7 +136,7 @@ class _ShoppingRequestScreenState extends State<ShoppingRequestScreen> {
           DarbFeedbackBanner(kind: DarbFeedbackKind.info, message: dt('لن يبدأ السائق الشراء قبل أن ترى التكلفة الفعلية وتوافق عليها. أجرة التوصيل وقيمة المشتريات تظهران كبندين منفصلين.')),
           if (_error != null) ...[const SizedBox(height: 10), Text(_error!, style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w700))],
           const SizedBox(height: 16),
-          FilledButton.icon(onPressed: _submitting || _loadingAddresses || _addresses.isEmpty ? null : _submit, icon: _submitting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send_rounded), label: Text(_submitting ? dt('جارٍ إرسال الطلب') : dt('إرسال طلب الشراء')), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DarbRadius.pill)))),
+          FilledButton.icon(onPressed: _submitting || _loadingAddresses || _addressId == null ? null : _submit, icon: _submitting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send_rounded), label: Text(_submitting ? dt('جارٍ إرسال الطلب') : dt('إرسال طلب الشراء')), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DarbRadius.pill)))),
         ],
       )),
     );
