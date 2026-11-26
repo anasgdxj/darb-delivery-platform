@@ -474,6 +474,7 @@ jobs:
             echo "::warning::ARM64 APK unavailable after build retries; continuing with the verified universal APK."
             echo "Telegram ARM64 APK: not attached; ARM64-only build failed. Universal APK release is unaffected." >> "$GITHUB_STEP_SUMMARY"
           fi
+          mkdir -p "$APK_DIR"
           cp "$UNIVERSAL_APK" "$APK"
           cp "$UNIVERSAL_MANIFEST" "$APK_DIR/app-update.json"
 
