@@ -1098,7 +1098,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     delay: DarbMotion.staggerDelay(2),
                     child: Container(
                       constraints: BoxConstraints(
-                        minHeight: screenSize.height - heroHeight + 24,
+                        minHeight: (screenSize.height - heroHeight + 24)
+                            .clamp(0.0, double.infinity)
+                            .toDouble(),
                       ),
                       decoration: BoxDecoration(
                         color: DarbColors.canvasOf(context),
