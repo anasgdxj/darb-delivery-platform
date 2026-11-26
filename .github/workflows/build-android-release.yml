@@ -499,7 +499,11 @@ jobs:
           fi
           # This secret must be an opaque, single-line bearer token, never a
           # Firebase service-account JSON document or another multiline secret.
-          if [[ "$DARB_RELEASE_WEBHOOK_TOKEN" == *
+          if printf '%s' "$DARB_RELEASE_WEBHOOK_TOKEN" | grep -q '[[:cntrl:]]' || [[ "$DARB_RELEASE_WEBHOOK_TOKEN" =~ ^[[:space:]]*[\{\[] ]]; then
+            echo "::error::DARB_RELEASE_WEBHOOK_TOKEN has an invalid format. Store only the single-line webhook bearer token; do not paste service-account JSON or private keys."
+            echo "Release push announcement: failed (invalid webhook secret format)" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
           jq --arg releaseTag "latest" '. + {releaseTag: $releaseTag}' "$MANIFEST" > "$RUNNER_TEMP/darb-release-notification.json"
           python3 - <<'PY'
           import json
