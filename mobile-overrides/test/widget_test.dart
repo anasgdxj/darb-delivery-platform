@@ -2121,6 +2121,9 @@ void main() {
         );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 250));
+        // Let bounded API retry delays finish before the test binding checks
+        // for pending fake timers after disposing each dashboard.
+        await tester.pump(const Duration(seconds: 5));
         expect(tester.takeException(), isNull);
         DriverLocationReporter.stop();
       }
