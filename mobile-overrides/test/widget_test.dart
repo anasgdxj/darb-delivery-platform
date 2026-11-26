@@ -6,6 +6,7 @@ import 'package:darb/core/services/location_service.dart';
 import 'package:darb/core/theme/darb_design_system.dart';
 import 'package:darb/core/widgets/darb_city_scene.dart';
 import 'package:darb/core/widgets/darb_components.dart';
+import 'package:darb/core/widgets/darb_copy_order_number_button.dart';
 import 'package:darb/core/widgets/darb_glass.dart';
 import 'package:darb/core/widgets/darb_motion_components.dart';
 import 'package:darb/features/account/account_screen.dart';
@@ -30,6 +31,61 @@ import 'package:http/testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('Order reference copy action', () {
+    testWidgets('copies a trimmed order number and confirms the action',
+        (tester) async {
+      final clipboardCalls = <MethodCall>[];
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardCalls.add(call);
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+
+      darbLocale.value = const Locale('ar');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DarbCopyOrderNumberButton(
+              value: '  DRB-2026-0042  ',
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byTooltip('نسخ رقم الطلب'));
+      await tester.pump();
+
+      expect(clipboardCalls, hasLength(1));
+      expect(
+        clipboardCalls.single.arguments,
+        {'text': 'DRB-2026-0042'},
+      );
+      expect(find.text('تم نسخ رقم الطلب'), findsOneWidget);
+    });
+
+    testWidgets('does not render a copy action for an empty order number',
+        (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DarbCopyOrderNumberButton(value: '   '),
+          ),
+        ),
+      );
+
+      expect(find.byType(IconButton), findsNothing);
+    });
+  });
 
   group('DAZREVO Design System 2026 & Brand Integrity', () {
     test('enforces exact DESIGN_SYSTEM.md 2026 light and dark semantic tokens', () {
@@ -151,6 +207,9 @@ void main() {
       darbLocale.value = const Locale('en');
       expect(dt('إلغاء الطلب'), 'Cancel order');
       expect(dt('الإشعارات'), 'Notifications');
+      expect(dt('نسخ رقم الطلب'), 'Copy order number');
+      expect(dt('تم نسخ رقم الطلب'), 'Order number copied');
+      expect(dt('تعذر نسخ رقم الطلب'), 'Could not copy order number');
       expect(dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'), 'Offline mode — showing cached data');
       expect(dt('حدد الموقع على خريطة دمشق'), 'Pin location on the map for دمشق');
       expect(dt('5 منتج متاح'), '5 products available');
@@ -161,6 +220,9 @@ void main() {
       darbLocale.value = const Locale('tr');
       expect(dt('إلغاء الطلب'), 'Siparişi iptal et');
       expect(dt('الإشعارات'), 'Bildirimler');
+      expect(dt('نسخ رقم الطلب'), 'Sipariş numarasını kopyala');
+      expect(dt('تم نسخ رقم الطلب'), 'Sipariş numarası kopyalandı');
+      expect(dt('تعذر نسخ رقم الطلب'), 'Sipariş numarası kopyalanamadı');
       expect(dt('تحديث التطبيق'), 'Uygulamayı güncelle');
       expect(dt('3 منتج متاح'), '3 ürün mevcut');
       expect(dt('سريع'), 'Hızlı');
