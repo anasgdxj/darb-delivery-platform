@@ -136,7 +136,11 @@ export class TelegramAdminService implements OnModuleInit {
     const maxBytes = 49_000_000;
     const arm64 = release.assets?.find((asset) => asset.name === 'app-arm64-v8a-release.apk');
     const universal = release.assets?.find((asset) => asset.name === 'app-release.apk');
-    const asset = arm64 ?? (universal && (universal.size ?? Number.MAX_SAFE_INTEGER) <= maxBytes ? universal : undefined);
+    const asset = arm64 && typeof arm64.size === 'number' && arm64.size > 0 && arm64.size <= maxBytes
+      ? arm64
+      : universal && typeof universal.size === 'number' && universal.size > 0 && universal.size <= maxBytes
+        ? universal
+        : undefined;
 
     if (!asset?.browser_download_url || !asset.name || typeof asset.size !== 'number') {
       throw new Error('No Telegram-compatible APK asset is published. The release must include app-arm64-v8a-release.apk.');
