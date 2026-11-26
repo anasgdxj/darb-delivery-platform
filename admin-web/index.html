@@ -687,7 +687,25 @@ let vendorStatusFilter = '';
 let driverStatusFilter = '';
 let userRoleFilter = '';
 let userQuery = '';
-const copilotMessages = [];
+const COPILOT_HISTORY_KEY = 'dazrevo_admin_ai_history';
+function readCopilotHistory() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(COPILOT_HISTORY_KEY) || '[]');
+    if (!Array.isArray(saved)) return [];
+    return saved
+      .filter((item) => item && typeof item.text === 'string' && item.text.length > 0)
+      .slice(-20)
+      .map((item) => ({ user: item.user === true, bad: item.bad === true, text: item.text.slice(0, 1200) }));
+  } catch (_) {
+    return [];
+  }
+}
+function persistCopilotHistory() {
+  try {
+    sessionStorage.setItem(COPILOT_HISTORY_KEY, JSON.stringify(copilotMessages.slice(-20)));
+  } catch (_) {}
+}
+const copilotMessages = readCopilotHistory();
 let copilotBusy = false;
 
 function notify(text, isError = false) {
@@ -1597,12 +1615,19 @@ function loadCopilot(root) {
     if (q.length < 2 || copilotBusy) return;
     copilotBusy = true;
     copilotMessages.push({ user: true, text: q });
+    persistCopilotHistory();
+    const history = copilotMessages.slice(0, -1).slice(-8).map((item) => ({
+      role: item.user ? 'user' : 'assistant',
+      content: item.text,
+    }));
     loadCopilot(root);
     try {
-      const res = await apiFetch('/ai/assistant/ask', 'POST', { message: q });
+      const res = await apiFetch('/ai/assistant/ask', 'POST', { message: q, history });
       copilotMessages.push({ user: false, text: res.answer || res.reply || 'لا توجد استجابة نصية.' });
+      persistCopilotHistory();
     } catch (e) {
       copilotMessages.push({ user: false, bad: true, text: e.message || 'تعذر الاتصال بالمساعد الذكي' });
+      persistCopilotHistory();
     } finally {
       copilotBusy = false;
       loadCopilot(root);
