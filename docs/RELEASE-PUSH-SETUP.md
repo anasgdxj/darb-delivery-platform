@@ -31,7 +31,7 @@ Do not commit the token, put it in a workflow file, or send it in a URL. The int
 
 ## 3. Release preflight and delivery
 
-Before replacing the public `latest` APK, GitHub Actions validates the token format and calls the protected readiness endpoint. The endpoint returns ready only when the token matches and Firebase Admin Messaging initialized. If the check fails, the existing release assets are left untouched.
+Before replacing the public `latest` APK, GitHub Actions validates the token format and calls the protected readiness endpoint. The endpoint returns ready only when the token matches and Firebase Admin Messaging initialized. If the check fails, the existing release assets are left untouched. After deployment, a manual workflow run with `publish_release=false` can verify readiness without publishing an APK or sending a push notification.
 
 
 1. Install a current signed DARB APK and sign in so the device registers its FCM token.
