@@ -425,7 +425,7 @@ jobs:
           echo "Direct APK SHA-256: $APK_SHA256" >> "$GITHUB_STEP_SUMMARY"
 
           # Keep the universal APK for the in-app updater. Build a smaller ARM64
-          # variant for Telegram's 50 MiB document-upload limit.
+          # variant for Telegram's 49 MB document-upload limit.
           UNIVERSAL_APK="$RUNNER_TEMP/darb-universal-app-release.apk"
           UNIVERSAL_MANIFEST="$RUNNER_TEMP/darb-universal-app-update.json"
           cp "$APK" "$UNIVERSAL_APK"
@@ -450,16 +450,16 @@ jobs:
             exit 1
           fi
           ARM64_SIZE="$(stat -c '%s' "$APK")"
-          if [ "$ARM64_SIZE" -le $((50 * 1024 * 1024)) ]; then
+          if [ "$ARM64_SIZE" -le $((49_000_000)) ]; then
             "$APKSIGNER" verify --verbose "$APK"
             cp "$APK" "$APK_DIR/app-arm64-v8a-release.apk"
             ARM64_SHA256="$(sha256sum "$APK_DIR/app-arm64-v8a-release.apk" | cut -d' ' -f1)"
             echo "Telegram ARM64 APK SHA-256: $ARM64_SHA256" >> "$GITHUB_STEP_SUMMARY"
-            echo "Telegram ARM64 APK size: $ARM64_SIZE bytes (within 50 MiB)." >> "$GITHUB_STEP_SUMMARY"
+            echo "Telegram ARM64 APK size: $ARM64_SIZE bytes (within 49 MB)." >> "$GITHUB_STEP_SUMMARY"
           else
             rm -f "$APK_DIR/app-arm64-v8a-release.apk"
-            echo "::warning::ARM64 APK is $ARM64_SIZE bytes and exceeds Telegram's 50 MiB upload limit; the universal release remains available."
-            echo "Telegram ARM64 APK: not attached; generated size $ARM64_SIZE bytes exceeds 50 MiB." >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::ARM64 APK is $ARM64_SIZE bytes and exceeds Telegram's 49 MB upload limit; the universal release remains available."
+            echo "Telegram ARM64 APK: not attached; generated size $ARM64_SIZE bytes exceeds 49 MB." >> "$GITHUB_STEP_SUMMARY"
           fi
           cp "$UNIVERSAL_APK" "$APK"
           cp "$UNIVERSAL_MANIFEST" "$APK_DIR/app-update.json"
@@ -663,9 +663,9 @@ jobs:
               fail("The release manifest is missing.")
 
           apk_size = apk_path.stat().st_size
-          telegram_limit = 50 * 1024 * 1024
+          telegram_limit = 49_000_000
           if apk_size > telegram_limit:
-              fail(f"ARM64 APK is {apk_size} bytes; Telegram's sendDocument limit is 50 MiB.")
+              fail(f"ARM64 APK is {apk_size} bytes; Telegram's sendDocument limit is 49 MB.")
 
           manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
           version = html.escape(str(manifest.get("versionName", "إصدار جديد")))
