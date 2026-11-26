@@ -1,12 +1,12 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
+import { OrderStatus, UserRole } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiTextProvider } from './ai-text-provider';
 
 type AssistantUser = { id: string; role: UserRole };
 type RoleContext = Record<string, unknown>;
 
-const ACTIVE_ORDER_STATUSES = ['ACCEPTED', 'PREPARING', 'READY', 'ASSIGNED', 'PICKED_UP'] as const;
+const ACTIVE_ORDER_STATUSES: OrderStatus[] = [OrderStatus.ACCEPTED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.ASSIGNED, OrderStatus.PICKED_UP];
 
 @Injectable()
 export class AiRoleAssistantService {
