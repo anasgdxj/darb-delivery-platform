@@ -530,7 +530,7 @@ jobs:
             echo "Release push announcement: failed (invalid webhook secret format)" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
-          jq --arg releaseTag "latest" '. + {releaseTag: $releaseTag}' "$MANIFEST" > "$RUNNER_TEMP/darb-release-notification.json"
+          jq --arg releaseTag "latest" 'del(.sha256) + {releaseTag: $releaseTag}' "$MANIFEST" > "$RUNNER_TEMP/darb-release-notification.json"
           python3 - <<'PY'
           import json
           import os
