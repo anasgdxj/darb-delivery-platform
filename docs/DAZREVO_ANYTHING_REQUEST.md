@@ -55,10 +55,11 @@ Issue: #133
 جميع المسارات ضمن `/api/v1` وتتطلب JWT والتحقق من الدور والملكية:
 - `POST /orders/shopping` — إنشاء طلب شراء وتوصيل.
 - `GET /orders/:id/purchase-quote` — قراءة أحدث عرض شراء لصاحب الطلب والسائق المعيّن فقط.
-- `POST /orders/:id/purchase-quote` — السائق المعيّن يرسل عرض شراء.
-- `POST /orders/:id/purchase-quote/approve` — العميل المالك يوافق على العرض المحدد.
-- `POST /orders/:id/purchase-quote/reject` — العميل يرفض العرض.
-- `POST /orders/:id/purchase-proof` — السائق يسجل إثبات الشراء بعد الموافقة.
+- `GET /orders/:id/shopping-quotes` — العميل المالك يقرأ عروض الشراء.
+- `POST /orders/:id/shopping-quote` — السائق المعيّن يرسل عرض تكلفة الشراء.
+- `POST /orders/:id/shopping-quotes/:quoteId/approve` — العميل يوافق على عرض محدد، مع خيار صريح لتجاوز الميزانية.
+- `POST /orders/:id/shopping-quotes/:quoteId/reject` — العميل يرفض عرضاً بانتظار الموافقة.
+- `POST /orders/:id/purchase-proof` — السائق يسجل مرجع الفاتورة وملاحظة إثبات الشراء ورابط HTTPS اختياري.
 
 لا يكفي إخفاء الأزرار في Flutter؛ يجب فرض كل شرط داخل Backend. لا يسمح بانتقال حالة السائق إلى `PICKED_UP` أو `DELIVERED` لطلب الشراء ما لم يكن هناك عرض شراء معتمد وإثبات شراء مسجل وفق سياسة المنتج.
 
