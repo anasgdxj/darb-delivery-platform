@@ -315,7 +315,7 @@ describe('Peer delivery offers', () => {
     }));
     await expect(service.submitDeliveryOffer('driver-user-1', 'order-1', 75)).rejects.toBeInstanceOf(BadRequestException);
     expect(findFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: { id: 'order-1', cityId: 'city-2', type: 'PEER_DELIVERY', status: 'PENDING', driverId: null },
+      where: { id: 'order-1', cityId: 'city-2', type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] }, status: 'PENDING', driverId: null },
     }));
   });
 
@@ -323,7 +323,7 @@ describe('Peer delivery offers', () => {
     prisma.order.findFirst.mockResolvedValue(null);
     await expect(service.deliveryOffersForCustomer('another-customer', 'order-1')).rejects.toBeInstanceOf(NotFoundException);
     expect(prisma.order.findFirst).toHaveBeenCalledWith({
-      where: { id: 'order-1', customerId: 'another-customer', type: 'PEER_DELIVERY' },
+      where: { id: 'order-1', customerId: 'another-customer', type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] } },
       select: { id: true, status: true },
     });
     expect(prisma.deliveryOffer.findMany).not.toHaveBeenCalled();
