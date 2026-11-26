@@ -79,9 +79,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --location --retry 5 --retry-delay 2 --retry-all-errors \\
-            https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json \\
-            --output .pages/app-update.json
+          curl --fail --location --retry 5 --retry-delay 2 --retry-all-errors https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json --output .pages/app-update.json
           python3 - <<'PY'
           import json
           from pathlib import Path
