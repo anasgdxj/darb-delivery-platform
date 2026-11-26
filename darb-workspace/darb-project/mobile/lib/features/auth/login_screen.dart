@@ -330,7 +330,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Tooltip(
           message: dt('جولة تعريفية'),
           child: DarbPressScale(
-            borderRadius: BorderRadius.circular(DarbRadius.pill),
+            borderRadius: DarbRadius.pill,
             onTap: () {
               Navigator.of(context).pushReplacement(
                 DarbPageRoute(builder: (_) => const OnboardingScreen()),
