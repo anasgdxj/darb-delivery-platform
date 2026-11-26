@@ -8,3 +8,5 @@ This file records the explicit publication request for the verified DARB 2026 de
 - Source archive validation: 45465839047 — passed on main.
 
 Publish the signed APK and its matching app-update.json as the public latest release after the main-branch build and verification steps succeed. This file does not change application code.
+
+- Publication trigger: this commit requests publication of the latest verified signed APK and matching update manifest.
