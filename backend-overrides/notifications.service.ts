@@ -68,6 +68,10 @@ export class NotificationsService {
     }
   }
 
+  isMessagingConfigured(): boolean {
+    return this.messaging !== undefined;
+  }
+
   async register(userId: string, token: string, platform?: string) {
     return this.prisma.userDevice.upsert({
       where: { token },

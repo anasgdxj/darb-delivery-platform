@@ -14,7 +14,7 @@ The backend never logs credential values. If initialization fails, it reports on
 
 ## 2. Protect the release webhook
 
-Create a random token of at least 32 characters, for example with:
+Create a separate random webhook token of 64 hexadecimal characters, for example with:
 
 ```bash
 openssl rand -hex 32
@@ -25,9 +25,14 @@ Store the **same token** in both places:
 - Render service environment: `DARB_RELEASE_WEBHOOK_TOKEN`
 - GitHub repository Actions secret: `DARB_RELEASE_WEBHOOK_TOKEN`
 
-Do not commit the token, put it in a workflow file, or send it in a URL. The internal endpoint accepts only the official DARB `latest/app-release.apk` URL.
+**This token is not the Firebase service-account JSON and must never contain a private key, JSON, spaces, or line breaks.** `FIREBASE_SERVICE_ACCOUNT_JSON` belongs only in Render as the Firebase credential. `DARB_RELEASE_WEBHOOK_TOKEN` is a separate random value; use the exact same 64-character token in Render and the GitHub Actions secret. The workflow rejects multiline or JSON-shaped values before it can replace the public APK.
 
-## 3. Verify delivery
+Do not commit the token, put it in a workflow file, or send it in a URL. The internal endpoint accepts only the official DAZREVO `latest/app-release.apk` URL.
+
+## 3. Release preflight and delivery
+
+Before replacing the public `latest` APK, GitHub Actions validates the token format and calls the protected readiness endpoint. The endpoint returns ready only when the token matches and Firebase Admin Messaging initialized. If the check fails, the existing release assets are left untouched. After deployment, a manual workflow run with `publish_release=false` can verify readiness without publishing an APK or sending a push notification.
+
 
 1. Install a current signed DARB APK and sign in so the device registers its FCM token.
 2. Confirm the Render logs contain `Firebase Admin initialized` for the expected Firebase project.
@@ -35,7 +40,9 @@ Do not commit the token, put it in a workflow file, or send it in a URL. The int
 4. Confirm the workflow summary reports the number of registered devices and FCM-accepted messages.
 5. Tap the notification on Android and verify that the in-app update screen opens.
 
-If there are no registered devices, the release workflow reports that no push was sent rather than claiming delivery. If FCM is disabled or all sends fail, the notification step fails visibly; the APK release itself may already have been published.
+If there are no registered devices, the release workflow reports that no push was sent rather than claiming delivery. A delivery failure after publication is still reported as a failed workflow; the preflight prevents known configuration failures from replacing the current APK, but a physical-device push test remains required.
+
+If the Firebase service-account JSON was ever entered as the webhook token or appeared in an Actions log, treat that private key as compromised: replace the Render Firebase credential and revoke the exposed service-account key in Google Cloud IAM.
 
 ## Android notification permission
 
