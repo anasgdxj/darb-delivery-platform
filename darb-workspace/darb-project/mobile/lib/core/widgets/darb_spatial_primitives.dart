@@ -680,16 +680,20 @@ class _TelemetryItem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            cell.value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: ink,
-              fontSize: 19,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.3,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              cell.value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: ink,
+                fontSize: 19,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.3,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
           if (cell.subtitle != null && cell.subtitle!.isNotEmpty) ...[
@@ -810,7 +814,14 @@ class DarbTicketPass extends StatelessWidget {
                   ),
                 ),
                 ...headerActions,
-                DarbStatusBadge(status: status),
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: DarbStatusBadge(status: status),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1061,88 +1072,100 @@ class DarbEditorialStoreCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
-                        borderRadius: BorderRadius.circular(DarbRadius.pill),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Icon(
-                            Icons.inventory_2_outlined,
-                            size: 13.5,
-                            color: primary,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            productsLabel,
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 9,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+                                          borderRadius: BorderRadius.circular(DarbRadius.pill),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.inventory_2_outlined,
+                                              size: 13.5,
+                                              color: primary,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              productsLabel,
+                                              style: TextStyle(
+                                                color: primary,
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (ratingAvg > 0 || reviewsCount > 0) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: DarbColors.warningOf(context)
+                                                .withValues(alpha: 0.14),
+                                            borderRadius: BorderRadius.circular(DarbRadius.pill),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.star_rounded,
+                                                size: 14,
+                                                color: DarbColors.warningOf(context),
+                                              ),
+                                              const SizedBox(width: 3),
+                                              Text(
+                                                '${ratingAvg.toStringAsFixed(1)} ($reviewsCount)',
+                                                style: TextStyle(
+                                                  color: ink,
+                                                  fontSize: 11.5,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontFeatures: const [
+                                                    FontFeature.tabularFigures(),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      const Spacer(),
                         ],
                       ),
                     ),
-                    if (ratingAvg > 0 || reviewsCount > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: DarbColors.warningOf(context)
-                              .withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(DarbRadius.pill),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.star_rounded,
-                              size: 14,
-                              color: DarbColors.warningOf(context),
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              '${ratingAvg.toStringAsFixed(1)} ($reviewsCount)',
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w800,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const Spacer(),
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: DarbColors.surfaceAltOf(context),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: DarbColors.borderOf(context)),
-                      ),
-                      child: Icon(
-                        isRtl
-                            ? Icons.arrow_back_rounded
-                            : Icons.arrow_forward_rounded,
-                        size: 16,
-                        color: ink,
-                      ),
-                    ),
+                    const SizedBox(width: 8),
+                                        Container(
+                                          width: 30,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: DarbColors.surfaceAltOf(context),
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: DarbColors.borderOf(context)),
+                                          ),
+                                          child: Icon(
+                                            isRtl
+                                                ? Icons.arrow_back_rounded
+                                                : Icons.arrow_forward_rounded,
+                                            size: 16,
+                                            color: ink,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                   ],
                 ),
               ],
