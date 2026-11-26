@@ -73,7 +73,7 @@ jobs:
             cp "$section/index.html" ".pages/$section/index.html"
           done
           cat > .pages/404.html <<'EOF'
-          <!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الصفحة غير موجودة | دازريفو</title><body style="font-family:Tahoma,Arial;background:#f6f7f2;color:#102b26;display:grid;place-items:center;min-height:90vh;text-align:center"><main><h1>هذه الصفحة غير موجودة</h1><p>قد يكون الرابط غير صحيح أو تم نقل الصفحة.</p><a href="./">العودة إلى موقع دازريفو</a></main></body></html>
+          <!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#14171D"><title>الصفحة غير موجودة | DAZREVO</title><body style="font-family:Cairo,Tahoma,Arial;background:#FAF9F6;color:#141413;display:grid;place-items:center;min-height:90vh;text-align:center;padding:24px"><main><h1>هذه الصفحة غير موجودة</h1><p style="color:#636059">قد يكون الرابط غير صحيح أو تم نقل الصفحة.</p><a href="./" style="display:inline-block;margin-top:16px;padding:11px 20px;border-radius:12px;background:#D6B46C;color:#14171D;font-weight:800">العودة إلى موقع دازريفو</a></main></body></html>
           EOF
       - name: Attach latest Android release metadata
         shell: bash
