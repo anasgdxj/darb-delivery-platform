@@ -464,7 +464,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Verify release notification readiness
-        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
           DARB_RELEASE_WEBHOOK_TOKEN: ${{ secrets.DARB_RELEASE_WEBHOOK_TOKEN }}
         shell: bash
