@@ -450,7 +450,7 @@ jobs:
             exit 1
           fi
           ARM64_SIZE="$(stat -c '%s' "$APK")"
-          if [ "$ARM64_SIZE" -le $((49_000_000)) ]; then
+          if [ "$ARM64_SIZE" -le 49000000 ]; then
             "$APKSIGNER" verify --verbose "$APK"
             cp "$APK" "$APK_DIR/app-arm64-v8a-release.apk"
             ARM64_SHA256="$(sha256sum "$APK_DIR/app-arm64-v8a-release.apk" | cut -d' ' -f1)"
