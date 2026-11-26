@@ -868,7 +868,6 @@ class AppLocalizations {
     'النوع والكمية والمقاس أو أي مواصفات مهمة': 'Type, quantity, size, and any important details|Tür, miktar, beden ve önemli ayrıntılar',
     'اسم المتجر (اختياري)': 'Store name (optional)|Mağaza adı (isteğe bağlı)',
     'اتركه فارغاً ليقترح السائق متجراً': 'Leave blank and the courier can suggest a store|Kurye mağaza önerebilsin diye boş bırakın',
-    'عنوان المتجر (اختياري)': 'Store address (optional)|Mağaza adresi (isteğe bağlı)',
     'المنطقة أو الشارع أو أقرب معلم': 'Area, street, or nearest landmark|Semt, cadde veya en yakın bilinen yer',
     'الحد الأقصى لميزانية الشراء (اختياري)': 'Maximum shopping budget (optional)|Maksimum alışveriş bütçesi (isteğe bağlı)',
     'المبلغ بعملة المدينة': 'Amount in the city currency|Şehir para biriminde tutar',
