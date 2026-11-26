@@ -28,6 +28,12 @@ describe('NotificationsService', () => {
     service = new NotificationsService(prisma, config);
   });
 
+  it('reports whether Firebase Admin messaging is configured', () => {
+    expect(service.isMessagingConfigured()).toBe(false);
+    (service as any).messaging = { sendEachForMulticast: jest.fn() };
+    expect(service.isMessagingConfigured()).toBe(true);
+  });
+
   it('registers an FCM token for the authenticated user', async () => {
     await expect(service.register('user-1', 'fcm-token-long-enough', 'android')).resolves.toEqual({ id: 'device-1' });
     expect(prisma.userDevice.upsert).toHaveBeenCalled();
