@@ -510,9 +510,14 @@ jobs:
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
           DARB_RELEASE_WEBHOOK_TOKEN: ${{ secrets.DARB_RELEASE_WEBHOOK_TOKEN }}
+          MANIFEST: extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json
         shell: bash
         run: |
           set -euo pipefail
+          if [ ! -s "$MANIFEST" ]; then
+            echo "::error::The generated app-update.json manifest is missing."
+            exit 1
+          fi
           if [ -z "${DARB_RELEASE_WEBHOOK_TOKEN:-}" ]; then
             echo "::error::DARB_RELEASE_WEBHOOK_TOKEN is required; refusing to mark a published release as fully delivered."
             echo "Release push announcement: failed (missing GitHub secret)" >> "$GITHUB_STEP_SUMMARY"
