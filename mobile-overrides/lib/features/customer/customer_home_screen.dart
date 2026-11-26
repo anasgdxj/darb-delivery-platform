@@ -282,6 +282,237 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
+  Widget _buildCustomerHero(String? greetingName) {
+    final city = _selectedCityName;
+    final address = _primaryAddressLabel;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [Color(0xFF12302A), Color(0xFF1B5547), Color(0xFF24765B)],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF12302A).withValues(alpha: 0.20),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            left: -28,
+            top: -42,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.045),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            dt('مساحتك تبدأ من هنا'),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.76),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            greetingName != null
+                                ? '${dt('أهلاً')}، $greetingName'
+                                : dt('أهلاً بك في دازريفو'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 23,
+                              height: 1.2,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.13),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.16),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.route_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  dt('اطلب من المتاجر أو أرسل غرضك إلى أي مكان'),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.84),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 17),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.11),
+                    borderRadius: BorderRadius.circular(17),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.13),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        color: Color(0xFFB8E8D2),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              dt('مدينة التوصيل'),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.68),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedCityMap?['id']?.toString(),
+                                isExpanded: true,
+                                isDense: true,
+                                iconEnabledColor: Colors.white,
+                                dropdownColor: const Color(0xFF174238),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                items: [
+                                  for (final c in _cities)
+                                    DropdownMenuItem(
+                                      value: c['id'].toString(),
+                                      child: Text(_cityDisplayName(c)),
+                                    ),
+                                ],
+                                onChanged: (value) {
+                                  if (value != null && value != _selectedCityId) {
+                                    _switchCity(value);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 1,
+                        height: 34,
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          DarbHaptics.light();
+                          _openAddresses();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 6,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.bookmark_outline_rounded,
+                                color: Colors.white,
+                                size: 19,
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                dt('عناويني'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (address != null && address.trim().isNotEmpty) ...[
+                  const SizedBox(height: 11),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.near_me_rounded,
+                        size: 14,
+                        color: Colors.white.withValues(alpha: 0.78),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          address,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.82),
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading && _cities.isEmpty) return const DarbStateView.loading();
@@ -336,120 +567,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
             ),
 
-          // 1. Personalized Greeting Header + Saved Addresses Trigger
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        greetingName != null
-                            ? '${dt('أهلاً بك')}، $greetingName'
-                            : dt('مرحباً بك في دازريفو'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: DarbColors.inkOf(context),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        dt('جاهز لتوصيل طلبك أو غرضك بأسرع مسار'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: DarbColors.mutedOf(context),
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 40),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(DarbRadius.pill),
-                    ),
-                  ),
-                  onPressed: _openAddresses,
-                  icon: Icon(
-                    Icons.bookmarks_outlined,
-                    size: 16,
-                    color: DarbColors.primaryOf(context),
-                  ),
-                  label: Text(
-                    dt('العناوين'),
-                    style: const TextStyle(fontSize: 12.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Premium customer identity and city selector.
+          _buildCustomerHero(greetingName),
+          const SizedBox(height: 14),
 
-          // 2. Active City Selector
-          if (_cities.isNotEmpty) ...[
-            DarbGlassSurface(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: DarbColors.primaryOf(context).withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(11),
-                    ),
-                    child: Icon(
-                      Icons.location_city_rounded,
-                      size: 19,
-                      color: DarbColors.primaryOf(context),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedCityMap?['id']?.toString(),
-                        isExpanded: true,
-                        dropdownColor: DarbColors.surfaceElevatedOf(context),
-                        style: TextStyle(
-                          color: DarbColors.inkOf(context),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                        ),
-                        items: [
-                          for (final c in _cities)
-                            DropdownMenuItem(
-                              value: c['id'].toString(),
-                              child: Text(_cityDisplayName(c)),
-                            ),
-                        ],
-                        onChanged: (val) {
-                          if (val != null && val != _selectedCityId) {
-                            _switchCity(val);
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 3. Deterministic Animated City Scene Banner (Selected city ONLY)
+          // 3. Deterministic Animated City Scene Banner (Selected city ONLY)
             DarbCitySceneCard(
               cityCode: _selectedCityCode,
               cityName: _selectedCityName,
