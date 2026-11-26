@@ -133,7 +133,7 @@ export class TelegramAdminService implements OnModuleInit {
 
   private async sendLatestApk(chatId: number): Promise<void> {
     const release = await this.githubRequest<GitHubRelease>('/releases/latest');
-    const maxBytes = 50 * 1024 * 1024;
+    const maxBytes = 49_000_000;
     const arm64 = release.assets?.find((asset) => asset.name === 'app-arm64-v8a-release.apk');
     const universal = release.assets?.find((asset) => asset.name === 'app-release.apk');
     const asset = arm64 ?? (universal && (universal.size ?? Number.MAX_SAFE_INTEGER) <= maxBytes ? universal : undefined);
