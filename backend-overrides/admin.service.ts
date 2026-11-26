@@ -44,6 +44,10 @@ export class AdminService {
       ordersDelivered,
       ordersCancelled,
       revenueAgg,
+      ordersToday,
+      deliveredToday,
+      delayedOrders,
+      revenueToday,
     ] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.vendor.count({ where: { status: VendorStatus.APPROVED } }),
@@ -63,6 +67,22 @@ export class AdminService {
         where: { status: OrderStatus.DELIVERED },
         _sum: { total: true, deliveryFee: true },
       }),
+      this.prisma.order.count({
+        where: { createdAt: { gte: this.businessDayStart() } },
+      }),
+      this.prisma.order.count({
+        where: { status: OrderStatus.DELIVERED, updatedAt: { gte: this.businessDayStart() } },
+      }),
+      this.prisma.order.count({
+        where: {
+          status: { in: [OrderStatus.ACCEPTED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.ASSIGNED, OrderStatus.PICKED_UP] },
+          updatedAt: { lt: new Date(Date.now() - 45 * 60 * 1000) },
+        },
+      }),
+      this.prisma.order.aggregate({
+        where: { status: OrderStatus.DELIVERED, updatedAt: { gte: this.businessDayStart() } },
+        _sum: { total: true, deliveryFee: true },
+      }),
     ]);
 
     return {
@@ -80,7 +100,18 @@ export class AdminService {
       ordersCancelled,
       deliveredGrossTotal: Number(revenueAgg._sum.total ?? 0),
       deliveredDeliveryFees: Number(revenueAgg._sum.deliveryFee ?? 0),
+      ordersToday,
+      deliveredToday,
+      delayedOrders,
+      deliveredGrossToday: Number(revenueToday._sum.total ?? 0),
+      deliveredDeliveryFeesToday: Number(revenueToday._sum.deliveryFee ?? 0),
     };
+  }
+
+  private businessDayStart() {
+    const businessNow = new Date(Date.now() + 3 * 60 * 60 * 1000);
+    businessNow.setUTCHours(0, 0, 0, 0);
+    return new Date(businessNow.getTime() - 3 * 60 * 60 * 1000);
   }
 
   async orders(query: { status?: OrderStatus; type?: OrderType; page?: number; limit?: number }) {
