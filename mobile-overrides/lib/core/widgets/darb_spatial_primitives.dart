@@ -998,28 +998,37 @@ class DarbEditorialStoreCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isOpen
-                        ? Colors.white.withValues(alpha: 0.14)
-                        : DarbColors.surfaceOf(context),
-                    borderRadius: BorderRadius.circular(DarbRadius.pill),
-                  ),
-                  child: Text(
-                    category,
-                    style: TextStyle(
-                      color: isOpen ? Colors.white : ink,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isOpen
+                          ? Colors.white.withValues(alpha: 0.14)
+                          : DarbColors.surfaceOf(context),
+                      borderRadius: BorderRadius.circular(DarbRadius.pill),
+                    ),
+                    child: Text(
+                      category,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isOpen ? Colors.white : ink,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
-                const Spacer(),
-                DarbStatusBadge(status: isOpen ? 'OPEN' : 'CLOSED'),
+                const SizedBox(width: 8),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: DarbStatusBadge(
+                    status: isOpen ? 'OPEN' : 'CLOSED',
+                  ),
+                ),
               ],
             ),
           ),
@@ -1360,7 +1369,13 @@ class DarbTelemetryProductCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          actionDock,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 48),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: actionDock,
+            ),
+          ),
         ],
       ),
     );
