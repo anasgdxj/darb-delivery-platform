@@ -86,6 +86,7 @@ export class AdminService {
     ]);
 
     return {
+      snapshotAt: new Date().toISOString(),
       usersTotal,
       vendorsApproved,
       vendorsPending,
