@@ -93,7 +93,7 @@ export class TelegramAdminService implements OnModuleInit {
       this.logger.error(`Telegram command ${command} failed.`, error instanceof Error ? error.stack : undefined);
       const userMessage = message.includes('GitHub API rate limit exhausted')
         ? 'تجاوز GitHub حد الطلبات المتاح. أضف GITHUB_TOKEN بصلاحية قراءة Contents إلى Render ثم أعد المحاولة.'
-        : message.includes("50 MiB upload limit")
+        : message.includes("50 MB upload limit")
           ? 'حجم ملف APK يتجاوز حد تيليغرام للإرسال كمرفق. لم أرسل رابطاً بديلاً.'
           : 'تعذر تنفيذ الأمر الآن. تم تسجيل الخطأ في سجلات الخادم.';
       await this.sendMessage(chatId, userMessage);
@@ -142,7 +142,7 @@ export class TelegramAdminService implements OnModuleInit {
       throw new Error('No Telegram-compatible APK asset is published. The release must include app-arm64-v8a-release.apk.');
     }
     if (asset.size <= 0 || asset.size > maxBytes) {
-      throw new Error(`APK asset exceeds Telegram's 50 MiB upload limit (${asset.size} bytes).`);
+      throw new Error(`APK asset exceeds Telegram's 50 MB upload limit; the internal safety ceiling is 49 MB (${asset.size} bytes).`);
     }
 
     const assetUrl = new URL(asset.browser_download_url);
