@@ -65,6 +65,7 @@ jobs:
           for name in ['index.html', 'en/index.html', 'tr/index.html', 'faq/index.html', 'drivers/index.html', 'merchants/index.html', 'privacy/index.html', 'terms/index.html']:
               source = Path(name).read_text(encoding='utf-8')
               if 'viewBox="0 0 108 108"' not in source: raise SystemExit(f'Outdated DAZREVO brand mark in {name}.')
+              if '#423FD1BE' in source: raise SystemExit(f'Android ARGB color notation leaked into SVG in {name}.')
           print('Unified Obsidian / Champagne / Mineral Teal identity verified across public pages and admin.')
           PY
       - name: Validate shared JavaScript

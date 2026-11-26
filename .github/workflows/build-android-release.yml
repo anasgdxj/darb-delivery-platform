@@ -486,6 +486,7 @@ jobs:
           retention-days: 7
       # Release publication is gated by the [publish-apk] commit marker; APK and AAB artifacts must build and pass signature verification before latest is replaced.
       - name: Publish signed APK as the latest public release
+        id: publish_release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
           GH_TOKEN: ${{ github.token }}
@@ -605,7 +606,7 @@ jobs:
           fi
 
       - name: Send published APK to Telegram channel
-        if: success() && ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]')))
+        if: always() && steps.publish_release.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]')))
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: "@DAZREVO"
