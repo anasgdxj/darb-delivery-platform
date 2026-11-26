@@ -15,9 +15,10 @@ After the feature is merged and the Render service has deployed, add these envir
 | `GITHUB_TOKEN` | Fine-grained GitHub token limited to this repository with **Contents: Read-only** permission; used to avoid GitHub's unauthenticated API rate limit. |
 
 Use the same bot token already stored as the GitHub Actions `TELEGRAM_BOT_TOKEN` secret. Do not put the token in Git, source files, screenshots, or chat messages. Generate a fresh webhook secret in a password manager; do not reuse the bot token.
+
 Create a fine-grained personal access token restricted to `anasgdxj/darb-delivery-platform`, grant **Contents: Read-only**, and store it in Render as `GITHUB_TOKEN`. Never send it in chat or commit it to Git. The token is used only for read-only release metadata requests.
 
-The backend registers the webhook with Telegram on startup after all four variables are configured. No manual `setWebhook` request is required. A successful Render deploy and a startup log entry saying the webhook was registered are required before testing commands.
+The backend registers the webhook with Telegram on startup after the bot token, webhook URL, and webhook secret are configured. No manual `setWebhook` request is required. A successful Render deploy and a startup log entry saying the webhook was registered are required before testing commands.
 
 ## Find the numeric Telegram user ID
 
