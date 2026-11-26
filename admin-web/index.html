@@ -788,7 +788,9 @@ async function apiFetch(path, method = 'GET', body = null, auth = true) {
   const data = await res.json().catch(() => ({ message: 'استجابة غير مفهومة من الخادم' }));
   if (!res.ok) {
     const msg = Array.isArray(data.message) ? data.message.join('، ') : (data.message || 'فشل الطلب');
-    throw new Error(msg);
+    const error = new Error(msg);
+    error.status = res.status;
+    throw error;
   }
   return data;
 }
@@ -1622,7 +1624,14 @@ function loadCopilot(root) {
     }));
     loadCopilot(root);
     try {
-      const res = await apiFetch('/ai/assistant/ask', 'POST', { message: q, history });
+      let res;
+      try {
+        const payload = { message: q, ...(history.length ? { history } : {}) };
+        res = await apiFetch('/ai/assistant/ask', 'POST', payload);
+      } catch (requestError) {
+        if (requestError.status !== 400 || !history.length) throw requestError;
+        res = await apiFetch('/ai/assistant/ask', 'POST', { message: q });
+      }
       copilotMessages.push({ user: false, text: res.answer || res.reply || 'لا توجد استجابة نصية.' });
       persistCopilotHistory();
     } catch (e) {
