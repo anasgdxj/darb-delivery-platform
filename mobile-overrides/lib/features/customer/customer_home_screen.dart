@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_city_scene.dart';
 import '../../core/widgets/darb_components.dart';
+import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
 import '../../core/widgets/darb_spatial_primitives.dart';
 import 'addresses_screen.dart';
@@ -347,7 +348,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     : dt('مرحباً بك في دازريفو'),
                 subtitle: dt('جاهز لتوصيل طلبك أو غرضك بأسرع مسار'),
                 trailing: DarbPressScale(
-                  borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  borderRadius: DarbRadius.pill,
                   onTap: _openAddresses,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -492,7 +493,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 title: dt('المتاجر المتاحة'),
                 subtitle: dt('تصفح المتاجر والمنتجات واطلب إلى بابك'),
                 trailing: DarbPressScale(
-                  borderRadius: BorderRadius.circular(DarbRadius.pill),
+                  borderRadius: DarbRadius.pill,
                   onTap: () {
                     DarbHaptics.selection();
                     setState(() => _openOnly = !_openOnly);
