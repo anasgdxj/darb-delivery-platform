@@ -399,6 +399,7 @@ jobs:
             exit 1
           fi
           APK="build/app/outputs/flutter-apk/app-release.apk"
+          APK_DIR="$(dirname "$APK")"
           test -s "$APK"
           APK_SHA256="$(sha256sum "$APK" | cut -d' ' -f1)"
           python3 - "$BUILD_NUMBER" "$BUILD_NAME" "$APK_SHA256" > build/app/outputs/flutter-apk/app-update.json <<'PY'
