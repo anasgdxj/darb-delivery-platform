@@ -136,6 +136,13 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     );
   }
 
+  Future<void> _openShoppingQuoteSheet(String orderId, {num? maxBudget}) async {
+    await showDarbGlassModalSheet<void>(
+      context: context,
+      builder: (ctx) => _ShoppingQuoteSheet(orderId: orderId, maxBudget: maxBudget, onChanged: _load),
+    );
+  }
+
   Future<void> _openReviewSheet(String orderId) async {
     int rating = 5;
     final commentCtrl = TextEditingController();
@@ -239,6 +246,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   Future<void> _openOrderDetails(Map<String, dynamic> order) async {
     final status = order['status']?.toString() ?? 'PENDING';
     final isPeer = order['type'] == 'PEER_DELIVERY';
+    final isShopping = order['type'] == 'SHOPPING_DELIVERY';
     final currency = order['currency']?.toString() ?? 'SYP';
     final subtotal = num.tryParse(order['subtotal']?.toString() ?? '0') ?? 0;
     final deliveryFee =
@@ -280,7 +288,14 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
           const SizedBox(height: 12),
           DarbOrderTimeline(status: status, isPeer: isPeer),
           const SizedBox(height: 12),
-          if (!isPeer && vendorName.isNotEmpty) ...[
+          if (isShopping) ...[
+            Text('${dt('الغرض')}: ${order['shoppingItemName'] ?? ''}', style: TextStyle(color: DarbColors.inkOf(ctx), fontWeight: FontWeight.w900)),
+            const SizedBox(height: 5),
+            Text(order['shoppingDescription']?.toString() ?? '', style: TextStyle(color: DarbColors.mutedOf(ctx))),
+            if ((order['shoppingStoreName'] ?? '').toString().isNotEmpty) Text('${dt('المتجر المطلوب')}: ${order['shoppingStoreName']}', style: TextStyle(color: DarbColors.inkOf(ctx))),
+            const SizedBox(height: 8),
+          ],
+          if (!isPeer && !isShopping && vendorName.isNotEmpty) [
             Text(
               '${dt('متجر')}: $vendorName',
               style: TextStyle(
@@ -591,6 +606,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     final number = order['orderNumber']?.toString() ?? '';
     final status = order['status']?.toString() ?? 'PENDING';
     final isPeer = order['type'] == 'PEER_DELIVERY';
+    final isShopping = order['type'] == 'SHOPPING_DELIVERY';
     final total = num.tryParse(order['total']?.toString() ?? '0') ?? 0;
     final currency = order['currency']?.toString() ?? 'SYP';
     final items =
@@ -606,10 +622,8 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
 
     return DarbTicketPass(
       onTap: () => _openOrderDetails(order),
-      leadingIcon: isPeer
-          ? Icons.local_shipping_outlined
-          : Icons.shopping_bag_outlined,
-      title: '${isPeer ? dt('توصيل مستقل') : dt('طلب')} · $number',
+      leadingIcon: (isPeer || isShopping) ? Icons.local_shipping_outlined : Icons.shopping_bag_outlined,
+      title: '${isShopping ? dt('شراء وتوصيل') : (isPeer ? dt('توصيل مستقل') : dt('طلب'))} · $number',
       subtitle: order['address'] is Map
           ? (order['address'] as Map)['details']?.toString()
           : null,
@@ -713,7 +727,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (isPeer && status == 'PENDING')
+              if ((isPeer || isShopping) && status == 'PENDING')
                 FilledButton.tonal(
                   style: FilledButton.styleFrom(
                     backgroundColor: DarbColors.isDark(context)
@@ -726,6 +740,15 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                   ),
                   onPressed: isBusy ? null : () => _openOffersSheet(id),
                   child: Text(dt('عروض السائقين')),
+                ),
+              if (isShopping && status == 'ASSIGNED')
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 8),
+                  child: FilledButton.tonalIcon(
+                    onPressed: () => _openShoppingQuoteSheet(id, maxBudget: num.tryParse(order['shoppingMaxBudget']?.toString() ?? '')),
+                    icon: const Icon(Icons.receipt_long_rounded, size: 17),
+                    label: Text(dt('تكلفة المشتريات')),
+                  ),
                 ),
               if (canTrack)
                 Padding(
@@ -767,6 +790,76 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
         ],
       ),
     );
+  }
+}
+
+
+class _ShoppingQuoteSheet extends StatefulWidget {
+  const _ShoppingQuoteSheet({required this.orderId, required this.onChanged, this.maxBudget});
+  final String orderId;
+  final num? maxBudget;
+  final VoidCallback onChanged;
+  @override
+  State<_ShoppingQuoteSheet> createState() => _ShoppingQuoteSheetState();
+}
+
+class _ShoppingQuoteSheetState extends State<_ShoppingQuoteSheet> {
+  List<Map<String, dynamic>> _quotes = const [];
+  bool _loading = true;
+  bool _busy = false;
+  bool _allowBudgetOverride = false;
+  String? _error;
+  @override
+  void initState() { super.initState(); _load(); }
+  Future<void> _load() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      final rows = (await Api.instance.get('/orders/${widget.orderId}/shopping-quotes') as List? ?? []).whereType<Map<String, dynamic>>().toList();
+      if (mounted) setState(() => _quotes = rows);
+    } on ApiException catch (e) { if (mounted) setState(() => _error = e.message); }
+    catch (_) { if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً')); }
+    finally { if (mounted) setState(() => _loading = false); }
+  }
+  Future<void> _act(Map<String, dynamic> quote, bool approve) async {
+    if (_busy) return;
+    setState(() { _busy = true; _error = null; });
+    final id = quote['id'].toString();
+    try {
+      if (approve) {
+        await Api.instance.post('/orders/${widget.orderId}/shopping-quotes/$id/approve', {'allowBudgetOverride': _allowBudgetOverride});
+      } else {
+        await Api.instance.post('/orders/${widget.orderId}/shopping-quotes/$id/reject', {});
+      }
+      DarbHaptics.success();
+      widget.onChanged();
+      if (mounted) Navigator.pop(context);
+    } on ApiException catch (e) { if (mounted) setState(() => _error = e.message); }
+    catch (_) { if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً')); }
+    finally { if (mounted) setState(() => _busy = false); }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(dt('عروض تكلفة المشتريات'), style: TextStyle(color: DarbColors.inkOf(context), fontSize: 18, fontWeight: FontWeight.w900)),
+      const SizedBox(height: 10),
+      if (_loading) const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+      else if (_error != null) Text(_error!, style: TextStyle(color: DarbColors.dangerOf(context)))
+      else if (_quotes.isEmpty) Text(dt('لم يرسل السائق تكلفة الشراء بعد'), style: TextStyle(color: DarbColors.mutedOf(context)))
+      else for (final quote in _quotes) ...[
+        DarbGlassSurface(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Row(children: [Expanded(child: Text(quote['driver']?['user']?['name']?.toString() ?? dt('السائق'), style: const TextStyle(fontWeight: FontWeight.w900))), Text(formatDarbMoney(num.tryParse(quote['amount']?.toString() ?? '0') ?? 0, quote['currency']?.toString() ?? 'SYP'), style: TextStyle(color: DarbColors.primaryOf(context), fontWeight: FontWeight.w900))]),
+          const SizedBox(height: 6), Text(quote['details']?.toString() ?? '', style: TextStyle(color: DarbColors.mutedOf(context))),
+          const SizedBox(height: 8), DarbStatusBadge(status: quote['status']?.toString() ?? 'PENDING'),
+          if (quote['status'] == 'PENDING') ...[
+            if (widget.maxBudget != null && (num.tryParse(quote['amount']?.toString() ?? '0') ?? 0) > widget.maxBudget!)
+              CheckboxListTile(contentPadding: EdgeInsets.zero, value: _allowBudgetOverride, onChanged: _busy ? null : (value) => setState(() => _allowBudgetOverride = value == true), title: Text(dt('أوافق على تجاوز الميزانية المحددة')), subtitle: Text('${dt('الميزانية')}: ${formatDarbMoney(widget.maxBudget!, quote['currency']?.toString() ?? 'SYP')}'), controlAffinity: ListTileControlAffinity.leading),
+            Row(children: [Expanded(child: OutlinedButton(onPressed: _busy ? null : () => _act(quote, false), child: Text(dt('رفض التكلفة')))), const SizedBox(width: 8), Expanded(child: FilledButton(onPressed: _busy || (widget.maxBudget != null && (num.tryParse(quote['amount']?.toString() ?? '0') ?? 0) > widget.maxBudget! && !_allowBudgetOverride) ? null : () => _act(quote, true), child: Text(_busy ? dt('جارٍ التنفيذ') : dt('موافقة والشراء'))))]),
+          ],
+          if (quote['receiptReference'] != null) Text('${dt('مرجع الفاتورة')}: ${quote['receiptReference']}'),
+        ])),
+        const SizedBox(height: 8),
+      ],
+    ]);
   }
 }
 
