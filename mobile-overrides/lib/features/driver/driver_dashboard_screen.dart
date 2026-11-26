@@ -385,6 +385,80 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 104),
         children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [DarbColors.forest, DarbColors.primary],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: DarbColors.forest.withValues(alpha: 0.16),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        dt('أهلاً'),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        dt('ملخص النشاط والأرباح'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 21,
+                          height: 1.2,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        dt('رحلات اليوم'),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.13),
+                    borderRadius: BorderRadius.circular(19),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.18),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.route_rounded,
+                    color: Colors.white,
+                    size: 29,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
           DarbGlassSurface(
             padding: const EdgeInsets.all(18),
             tintColor: isOnline ? DarbColors.forest : null,
