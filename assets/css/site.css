@@ -63,7 +63,7 @@ html.dark .hero h1 span{color:var(--lime)}
 .art-panel{background:rgba(14,40,31,.86);border:1px solid rgba(231,211,163,.22);border-radius:16px;padding:14px 16px}
 .art-panel strong{display:block;font-size:13px;color:#F5F3EE}
 .art-panel small{display:block;margin-top:3px;font-size:12px;color:#A39E93}
-.art-panel.ai-accent{border-color:rgba(167,139,250,.4)}
+.art-panel.ai-accent{border-color:rgba(63,209,190),.4)}
 .art-panel.ai-accent small{color:#DDD6FE}
 @keyframes route-flow{to{stroke-dashoffset:-144}}
 

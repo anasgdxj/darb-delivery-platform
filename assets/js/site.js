@@ -172,7 +172,7 @@
       })
       .then((release) => {
         const officialApk = 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk';
-        if (release.apkUrl !== officialApk || !Number.isInteger(Number(release.versionCode)) || !/^1\\./.test(String(release.versionName || ''))) return;
+        if (release.apkUrl !== officialApk || !Number.isInteger(Number(release.versionCode)) || !/^1\./.test(String(release.versionName || ''))) return;
         if (downloadButton) downloadButton.href = officialApk;
         if (downloadStatus) downloadStatus.textContent = 'الإصدار الرسمي ' + release.versionName + ' · تحديث DAZREVO';
       })
