@@ -18,8 +18,8 @@ html.dark .content-section a{color:var(--lime)}
 .faq-trigger{width:100%;padding:18px 20px;background:transparent;border:0;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:start;font-weight:800;font-size:16px}
 .faq-body{padding:0 20px 18px;color:var(--muted);font-size:15px;line-height:1.9}
 .faq-body[hidden]{display:none}
-.page-cta{margin-top:32px;padding:28px;border-radius:22px;background:var(--forest);color:#F1F7F4;border:1px solid rgba(167,255,0,.22);display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap}
-.page-cta p{margin:6px 0 0;color:#C9DDD3}
+.page-cta{margin-top:32px;padding:28px;border-radius:22px;background:var(--forest);color:#F5F3EE;border:1px solid rgba(214,180,108,.24);display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap}
+.page-cta p{margin:6px 0 0;color:#E7D3A3}
 .page-cta .btn{background:var(--lime);color:var(--forest)}
 .page-nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .page-nav a{font-size:14px;color:var(--muted);font-weight:700;white-space:nowrap}
