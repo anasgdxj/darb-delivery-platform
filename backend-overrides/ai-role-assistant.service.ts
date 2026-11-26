@@ -6,7 +6,7 @@ import { AiTextProvider } from './ai-text-provider';
 type AssistantUser = { id: string; role: UserRole };
 type RoleContext = Record<string, unknown>;
 
-const ACTIVE_ORDER_STATUSES = ['ACCEPTED', 'PREPARING', 'READY', 'ASSIGNED', 'PICKED_UP'];
+const ACTIVE_ORDER_STATUSES = ['ACCEPTED', 'PREPARING', 'READY', 'ASSIGNED', 'PICKED_UP'] as const;
 
 @Injectable()
 export class AiRoleAssistantService {
