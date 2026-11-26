@@ -284,6 +284,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   Widget _buildCustomerHero(String? greetingName) {
     final address = _primaryAddressLabel;
+    final selectedCityId = _selectedCityMap?['id']?.toString();
+    final hasSelectedCity = selectedCityId != null &&
+        _cities.any((city) => city['id']?.toString() == selectedCityId);
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -410,7 +413,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                             ),
                             DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                value: _selectedCityMap?['id']?.toString(),
+                                value: hasSelectedCity ? selectedCityId : null,
                                 isExpanded: true,
                                 isDense: true,
                                 iconEnabledColor: Colors.white,
@@ -427,7 +430,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                                       child: Text(_cityDisplayName(c)),
                                     ),
                                 ],
-                                onChanged: (value) {
+                                onChanged: _cities.isEmpty ? null : (value) {
                                   if (value != null && value != _selectedCityId) {
                                     _switchCity(value);
                                   }
