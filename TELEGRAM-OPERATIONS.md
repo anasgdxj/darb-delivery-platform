@@ -33,7 +33,7 @@ The `/id` command only returns the sender's own numeric ID. It does not grant ad
 
 - `/status` — liveness and readiness summary for API, PostgreSQL, and Redis.
 - `/api` — detailed HTTP checks for `/api/v1/healthz` and `/api/v1/readyz`.
-- `/version` or `/apk` — downloads the latest published APK and sends it as a Telegram document attachment (ARM64 build, under Telegram's 50 MiB limit).
+- `/version` or `/apk` — downloads the latest published APK and sends it as a Telegram document attachment (ARM64 build, under Telegram's 49 MB limit).
 - `/releases` — latest five published GitHub releases.
 - `/help` — command list.
 
