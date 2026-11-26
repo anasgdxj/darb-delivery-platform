@@ -570,6 +570,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           _buildCustomerHero(greetingName),
           const SizedBox(height: 14),
 
+          if (_cities.isNotEmpty) ...[
           // 3. Deterministic Animated City Scene Banner (Selected city ONLY)
             DarbCitySceneCard(
               cityCode: _selectedCityCode,
