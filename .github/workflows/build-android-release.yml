@@ -424,6 +424,17 @@ jobs:
           "$APKSIGNER" verify --print-certs "$APK" | tee "$RUNNER_TEMP/apk-cert.txt"
           echo "Direct APK SHA-256: $APK_SHA256" >> "$GITHUB_STEP_SUMMARY"
 
+          # Telegram hosted Bot API accepts documents up to 50 MB. Preserve
+          # the universal release APK and build a smaller ARM64 variant for Telegram.
+          cp "$APK" "$RUNNER_TEMP/dazrevo-universal-app-release.apk"
+          flutter build apk --split-per-abi "${args[@]}" --dart-define=DARB_PLAY_STORE=false --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME"
+          TELEGRAM_APK="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
+          test -s "$TELEGRAM_APK"
+          "$APKSIGNER" verify --verbose "$TELEGRAM_APK"
+          cp "$RUNNER_TEMP/dazrevo-universal-app-release.apk" "$APK"
+          TELEGRAM_APK_SIZE="$(stat -c '%s' "$TELEGRAM_APK")"
+          echo "Telegram ARM64 APK size: $TELEGRAM_APK_SIZE bytes" >> "$GITHUB_STEP_SUMMARY"
+
           cd "$GITHUB_WORKSPACE/extracted-play/darb-project/mobile"
           aab_succeeded=false
           for attempt in 1 2 3; do
@@ -601,10 +612,16 @@ jobs:
               print("::warning::Telegram APK delivery skipped because TELEGRAM_BOT_TOKEN is not configured.")
               raise SystemExit(0)
 
-          apk_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk")
+          apk_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk")
           manifest_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json")
           if not apk_path.is_file() or apk_path.stat().st_size == 0:
-              raise SystemExit("The signed APK file is missing or empty; refusing to send an invalid Telegram document.")
+              raise SystemExit("The signed ARM64 APK file is missing or empty; refusing to send an invalid Telegram document.")
+          if apk_path.stat().st_size > 50 * 1024 * 1024:
+              summary.open("a", encoding="utf-8").write(
+                  "\nTelegram APK delivery: NOT SENT — ARM64 APK exceeds Telegram's 50 MB Bot API upload limit; universal APK remains available in GitHub Releases.\n"
+              )
+              print("::warning::ARM64 APK exceeds Telegram's 50 MB upload limit; use the GitHub release download.")
+              raise SystemExit(0)
 
           manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
           version = html.escape(str(manifest.get("versionName", "New version")))
