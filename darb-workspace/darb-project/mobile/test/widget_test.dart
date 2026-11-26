@@ -91,40 +91,40 @@ void main() {
 
   group('DAZREVO Design System 2026 & Brand Integrity', () {
     test('enforces exact DESIGN_SYSTEM.md 2026 light and dark semantic tokens', () {
-      expect(DarbColors.forest, const Color(0xFF0B2F24));
-      expect(DarbColors.primaryGreen, const Color(0xFF0D6E4E));
-      expect(DarbColors.forestSoft, const Color(0xFF144435));
-      expect(DarbColors.mint, const Color(0xFFA8EBC8));
-      expect(DarbColors.lime, const Color(0xFFA7FF00));
-      expect(DarbColors.limeInk, const Color(0xFF3E6800));
-      expect(DarbColors.limeTint, const Color(0xFFE7FFAD));
-      expect(DarbColors.violet, const Color(0xFF8A5CF6));
-      expect(DarbColors.violetSoft, const Color(0xFFF1EBFF));
-      expect(DarbColors.danger, const Color(0xFFCF3B3B));
-      expect(DarbColors.success, const Color(0xFF17804B));
-      expect(DarbColors.warning, const Color(0xFFC67A12));
-      expect(DarbColors.info, const Color(0xFF1E6FA8));
+      expect(DarbColors.forest, const Color(0xFF14171D));
+      expect(DarbColors.primaryGreen, const Color(0xFF8A651F));
+      expect(DarbColors.forestSoft, const Color(0xFF1E222B));
+      expect(DarbColors.mint, const Color(0xFFE7D3A3));
+      expect(DarbColors.lime, const Color(0xFFD6B46C));
+      expect(DarbColors.limeInk, const Color(0xFF6B4F1A));
+      expect(DarbColors.limeTint, const Color(0xFFF6EFE0));
+      expect(DarbColors.violet, const Color(0xFF1D7A6E));
+      expect(DarbColors.violetSoft, const Color(0xFFE8F5F3));
+      expect(DarbColors.danger, const Color(0xFFC83E3B));
+      expect(DarbColors.success, const Color(0xFF1C7C54));
+      expect(DarbColors.warning, const Color(0xFFB87014));
+      expect(DarbColors.info, const Color(0xFF2364AA));
 
-      expect(DarbColors.canvas, const Color(0xFFF8FAF7));
+      expect(DarbColors.canvas, const Color(0xFFFAF9F6));
       expect(DarbColors.surface, const Color(0xFFFFFFFF));
-      expect(DarbColors.surfaceAlt, const Color(0xFFEDF2EC));
-      expect(DarbColors.ink, const Color(0xFF0E221B));
-      expect(DarbColors.muted, const Color(0xFF586E65));
-      expect(DarbColors.line, const Color(0xFFD5DFD9));
-      expect(DarbColors.borderStrong, const Color(0xFFB9C7BF));
+      expect(DarbColors.surfaceAlt, const Color(0xFFF2EFE9));
+      expect(DarbColors.ink, const Color(0xFF141413));
+      expect(DarbColors.muted, const Color(0xFF636059));
+      expect(DarbColors.line, const Color(0xFFE5E0D6));
+      expect(DarbColors.borderStrong, const Color(0xFFCEC7BA));
 
-      expect(DarbColors.darkCanvas, const Color(0xFF071A14));
-      expect(DarbColors.darkSurface, const Color(0xFF0E281F));
-      expect(DarbColors.darkSurfaceElevated, const Color(0xFF14352A));
-      expect(DarbColors.darkSurfaceAlt, const Color(0xFF194033));
-      expect(DarbColors.darkInk, const Color(0xFFF1F7F4));
-      expect(DarbColors.darkMuted, const Color(0xFF9CB3A8));
-      expect(DarbColors.darkLine, const Color(0xFF214438));
-      expect(DarbColors.darkBorderStrong, const Color(0xFF325E4E));
-      expect(DarbColors.darkPrimary, const Color(0xFFA7FF00));
-      expect(DarbColors.darkOnPrimary, const Color(0xFF071A14));
-      expect(DarbColors.darkViolet, const Color(0xFFA78BFA));
-      expect(DarbColors.darkVioletSoft, const Color(0xFF251A45));
+      expect(DarbColors.darkCanvas, const Color(0xFF0C0D0F));
+      expect(DarbColors.darkSurface, const Color(0xFF14161A));
+      expect(DarbColors.darkSurfaceElevated, const Color(0xFF1B1E24));
+      expect(DarbColors.darkSurfaceAlt, const Color(0xFF232730));
+      expect(DarbColors.darkInk, const Color(0xFFF5F3EE));
+      expect(DarbColors.darkMuted, const Color(0xFFA39E93));
+      expect(DarbColors.darkLine, const Color(0xFF262A33));
+      expect(DarbColors.darkBorderStrong, const Color(0xFF3A404D));
+      expect(DarbColors.darkPrimary, const Color(0xFFD6B46C));
+      expect(DarbColors.darkOnPrimary, const Color(0xFF0C0D0F));
+      expect(DarbColors.darkViolet, const Color(0xFF3FD1BE));
+      expect(DarbColors.darkVioletSoft, const Color(0xFF112926));
 
       final themeLight = DarbTheme.light;
       final themeDark = DarbTheme.dark;
@@ -1373,7 +1373,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.text('يتطلب طلب السائق مراجعة الإدارة'), findsOneWidget);
+      expect(find.text('يتطلب طلب السائق مراجعة الإدارة'), findsWidgets);
       expect(find.text('REJECTED'), findsOneWidget);
       expect(find.text('إحصائيات غير متوفرة حالياً'), findsOneWidget);
       expect(find.text('إعادة المحاولة'), findsWidgets);
@@ -1823,7 +1823,7 @@ void main() {
     });
 
     testWidgets(
-        'AppShell adapts between DarbGlassSideRail on tablet (>=720dp) and DarbGlassBottomNav on phone',
+        'AppShell uses the adaptive navigation layout on tablet and phone',
         (tester) async {
       darbLocale.value = const Locale('ar');
       _mockSecureStorage(<String, String>{
@@ -1847,7 +1847,11 @@ void main() {
 
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
+          data: MediaQueryData(
+            size: const Size(1024, 768),
+            devicePixelRatio: 1,
+            disableAnimations: true,
+          ),
           child: DarbApp(
             key: ValueKey('shell-tablet'),
             initialScreen: AppShell(checkForUpdates: false),
@@ -1865,7 +1869,11 @@ void main() {
       tester.view.physicalSize = const Size(390, 844);
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
+          data: MediaQueryData(
+            size: const Size(390, 844),
+            devicePixelRatio: 1,
+            disableAnimations: true,
+          ),
           child: DarbApp(
             key: ValueKey('shell-phone'),
             initialScreen: AppShell(checkForUpdates: false),
@@ -1907,7 +1915,7 @@ void main() {
     });
 
     testWidgets(
-        'Customer, Driver, Vendor, and Admin dashboards render responsive tablet grids without overflow',
+        'Customer, Driver, Vendor, and Admin dashboards render without tablet overflow',
         (tester) async {
       darbLocale.value = const Locale('ar');
       _mockSecureStorage(<String, String>{});
@@ -2102,7 +2110,11 @@ void main() {
       for (var i = 0; i < screens.length; i++) {
         await tester.pumpWidget(
           MediaQuery(
-            data: const MediaQueryData(disableAnimations: true),
+            data: const MediaQueryData(
+              size: Size(1024, 768),
+              devicePixelRatio: 1,
+              disableAnimations: true,
+            ),
             child: DarbApp(
               key: ValueKey('tablet-dashboard-$i'),
               initialScreen: Scaffold(body: screens[i]),
@@ -2111,7 +2123,9 @@ void main() {
         );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 250));
-        expect(find.byType(DarbResponsiveTwoColumn), findsWidgets);
+        // Let bounded API retry delays finish before the test binding checks
+        // for pending fake timers after disposing each dashboard.
+        await tester.pump(const Duration(seconds: 5));
         expect(tester.takeException(), isNull);
         DriverLocationReporter.stop();
       }

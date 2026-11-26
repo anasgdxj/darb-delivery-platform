@@ -2,7 +2,7 @@
 
 **Product:** DAZREVO (دازريفو)  
 **Target Codebase:** `mobile-overrides/` (mirrored cleanly to `darb-workspace/darb-project/mobile/`)  
-**Design Language:** Spatial Command-Deck & Editorial 2026 (Obsidian Emerald, Volt Lime & Signal Violet)  
+**Design Language:** Spatial Command-Deck & Architectural 2026 (Obsidian & Champagne Brass + Mineral Teal)  
 **Compatibility:** `com.darb.darb` package identity, AR (`RTL`) / EN (`LTR`) / TR (`LTR`), Light & Dark themes, Glass & Standard visual modes, Phone & Tablet (`>=720dp`) adaptive breakpoints.
 
 ---
@@ -14,6 +14,8 @@ The presentation layer has been refactored away from repetitive stacked Material
 ```text
 mobile-overrides/
 ├── DESIGN_ARCHITECTURE_HANDOFF.md         # This technical handoff specification
+├── ic_launcher.xml                        # Unified chamfered D + Champagne Brass + Mineral Teal vector icon
+├── android-res/                           # Adaptive XMLs, launch splash, notification vector & mipmap PNG icons
 ├── lib/
 │   ├── core/
 │   │   ├── l10n/
@@ -59,15 +61,16 @@ Developers extending or adding screens should compose from these components inst
 
 | Component | Purpose | Key Props & Behavior |
 |---|---|---|
-| `DarbCommandStage` | Signature dark Obsidian Emerald architectural stage header with `_OrbitalStagePainter` rings | `title`, `eyebrow`, `subtitle`, `leading`, `trailing`, `bottom`, `accentColor`, `livePulse`, `padding` |
+| `DarbCommandStage` | Signature Smoked Obsidian architectural stage header with `_OrbitalStagePainter` rings | `title`, `eyebrow`, `subtitle`, `leading`, `trailing`, `bottom`, `accentColor`, `livePulse`, `padding` |
 | `DarbSegmentedDock<T>` | Horizontally scrollable tactile pill filter bar replacing default `ChoiceChip` rows | `options: List<DarbDockOption<T>>` (`value`, `label`, `count`, `icon`), `selectedValue`, `onSelected`, `accentColor`, `compact` |
 | `DarbCityOrbStrip` | Horizontal city selector capsules embedded in `DarbCommandStage` or light canvases | `cities: List<DarbCityOrbOption>`, `selectedCityId`, `onSelect`, `onDarkStage` |
 | `DarbTelemetryDeck` | High-density 4-cell (2x2 narrow, 1x4 wide `>=680px`) instrument cluster with `FontFeature.tabularFigures()` | `cells: List<DarbTelemetryCell>` (`label`, `value`, `icon`, `accentColor`, `subtitle`), `title`, `trailing` |
 | `DarbTicketPass` | Perforated dispatch ticket (`_TicketPerforationPainter` dashed seam + radial side notches) for orders & approvals | `title`, `status`, `body`, `subtitle`, `leadingIcon`, `accentColor`, `headerActions`, `footer`, `onTap` |
-| `DarbEditorialStoreCard` | Asymmetric store card with forest/muted gradient header band, pulse status dot, rating & product count pills | `name`, `category`, `isOpen`, `productsLabel`, `address`, `ratingAvg`, `reviewsCount`, `onTap` |
+| `DarbEditorialStoreCard` | Asymmetric store card with Obsidian/muted gradient header band, pulse status dot, rating & product count pills | `name`, `category`, `isOpen`, `productsLabel`, `address`, `ratingAvg`, `reviewsCount`, `onTap` |
 | `DarbTelemetryProductCard` | Split catalog/inventory row with leading icon badge, category chip, tabular price, stock ratio `LinearProgressIndicator`, and custom `actionDock` | `name`, `priceLabel`, `actionDock`, `description`, `category`, `stockLabel`, `stockRatio`, `outOfStock`, `highlighted`, `leadingIcon`, `onTap` |
 
-### Navigation Chrome Upgrades (`lib/core/widgets/darb_glass.dart`)
+### Navigation Chrome & Brand Crest (`lib/core/widgets/darb_glass.dart`, `darb_components.dart`)
+- **`DarbBrandMark`**: Chamfered ivory "D" crest intersected by a double-bevel Champagne Brass route chevron (`#D6B46C`) and a Mineral Teal telemetry nexus core (`#3FD1BE`) over Smoked Obsidian. Mirrors native `ic_launcher.xml` and `android-res/`.
 - **`DarbGlassBottomNav`**: Floating glass capsule bar with active pill highlight and unread numeric badges.
 - **`DarbGlassSideRail`**: Tablet/desktop (`>=720dp`) left/right rail featuring a top `DarbPulseDot` live status header, vertical active rail indicator bar, and bottom `DAZREVO` brand anchor.
 
@@ -75,35 +78,35 @@ Developers extending or adding screens should compose from these components inst
 
 ## 3. Design Tokens (`lib/core/theme/darb_design_system.dart`)
 
-> **Rule:** UI code must resolve semantic colors exclusively via `DarbColors.*Of(context)` / `Theme.of(context)`. Never hardcode `Colors.black` or `Colors.white` for adaptive text or card surfaces outside dark `DarbCommandStage` / Obsidian anchors.
+> **Rule:** UI code must resolve semantic colors exclusively via `DarbColors.*Of(context)` / `Theme.of(context)`. Never hardcode `Colors.black` or `Colors.white` for adaptive text or card surfaces outside dark `DarbCommandStage` / Smoked Obsidian anchors.
 
 ### Brand & Accent Anchors
 | Token | Hex | Usage |
 |---|---|---|
-| `DarbColors.forest` | `#0B2F24` | Obsidian Emerald command stages, hero cards, floating cart bar |
-| `DarbColors.primaryGreen` | `#0D6E4E` | Light-mode interactive primary |
-| `DarbColors.forestSoft` | `#144435` | Secondary emerald fills & stage gradient stop |
-| `DarbColors.mint` | `#A8EBC8` | Route highlights, subtle dark-stage accents |
-| `DarbColors.lime` | `#A7FF00` | Volt Lime kinetic CTA, active beacons (`DarbPulseDot`), dark-mode primary |
-| `DarbColors.limeInk` | `#3E6800` | Accessible lime text on light surfaces |
-| `DarbColors.limeTint` | `#E7FFAD` | Soft lime badge tint in Light mode |
-| `DarbColors.violet` | `#8A5CF6` | Signal Violet AI assistant accent (Light); `darkViolet` = `#A78BFA` |
-| `DarbColors.violetSoft` | `#F1EBFF` | Signal Violet container wash (Light); `darkVioletSoft` = `#251A45` |
+| `DarbColors.forest` | `#14171D` | Smoked Obsidian command stages, hero cards, floating cart bar |
+| `DarbColors.primaryGreen` | `#8A651F` | Burnished Champagne Bronze light-mode interactive primary (`>=5.3:1` AA) |
+| `DarbColors.forestSoft` | `#1E222B` | Elevated Obsidian Slate fills & stage gradient stop |
+| `DarbColors.mint` | `#E7D3A3` | Warm Champagne Mist route highlights, subtle dark-stage accents |
+| `DarbColors.lime` | `#D6B46C` | Luminous Champagne Gold kinetic CTA, active beacons (`DarbPulseDot`), dark-mode primary |
+| `DarbColors.limeInk` | `#6B4F1A` | Accessible Bronze text on light alabaster surfaces |
+| `DarbColors.limeTint` | `#F6EFE0` | Soft Champagne badge tint in Light mode |
+| `DarbColors.violet` | `#1D7A6E` | Imperial Mineral Teal smart/AI assistant accent (Light); `darkViolet` = `#3FD1BE` |
+| `DarbColors.violetSoft` | `#E8F5F3` | Mineral Teal container wash (Light); `darkVioletSoft` = `#112926` |
 
 ### Light vs. Dark Semantic Surface Tokens
 | Semantic Getter | Light Hex | Dark Hex |
 |---|---|---|
-| `canvasOf(ctx)` | `#F8FAF7` | `#071A14` |
-| `surfaceOf(ctx)` | `#FFFFFF` | `#0E281F` |
-| `surfaceElevatedOf(ctx)` | `#FFFFFF` | `#14352A` |
-| `surfaceAltOf(ctx)` | `#EDF2EC` | `#194033` |
-| `inkOf(ctx)` | `#0E221B` | `#F1F7F4` |
-| `mutedOf(ctx)` | `#586E65` | `#9CB3A8` |
-| `borderOf(ctx)` | `#D5DFD9` | `#214438` |
-| `borderStrongOf(ctx)` | `#B9C7BF` | `#325E4E` |
-| `primaryOf(ctx)` | `#0D6E4E` | `#A7FF00` |
-| `onPrimaryOf(ctx)` | `#FFFFFF` | `#071A14` |
-| `dangerOf(ctx)` / `successOf(ctx)` / `warningOf(ctx)` / `infoOf(ctx)` | `#CF3B3B` / `#17804B` / `#C67A12` / `#1E6FA8` | `#F06E6E` / `#5EE094` / `#F3BA52` / `#69B6EC` |
+| `canvasOf(ctx)` | `#FAF9F6` | `#0C0D0F` |
+| `surfaceOf(ctx)` | `#FFFFFF` | `#14161A` |
+| `surfaceElevatedOf(ctx)` | `#FFFFFF` | `#1B1E24` |
+| `surfaceAltOf(ctx)` | `#F2EFE9` | `#232730` |
+| `inkOf(ctx)` | `#141413` | `#F5F3EE` |
+| `mutedOf(ctx)` | `#636059` | `#A39E93` |
+| `borderOf(ctx)` | `#E5E0D6` | `#262A33` |
+| `borderStrongOf(ctx)` | `#CEC7BA` | `#3A404D` |
+| `primaryOf(ctx)` | `#8A651F` | `#D6B46C` |
+| `onPrimaryOf(ctx)` | `#FFFFFF` | `#0C0D0F` |
+| `dangerOf(ctx)` / `successOf(ctx)` / `warningOf(ctx)` / `infoOf(ctx)` | `#C83E3B` / `#1C7C54` / `#B87014` / `#2364AA` | `#F0716E` / `#4CD49A` / `#F0B857` / `#69AEF2` |
 
 ---
 

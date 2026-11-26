@@ -103,9 +103,9 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x28071A14),
-                    Color(0x880B2F24),
-                    Color(0xE80B2F24),
+                    Color(0x280C0D0F),
+                    Color(0x8814171D),
+                    Color(0xE814171D),
                   ],
                   stops: [0.0, 0.56, 1.0],
                 ),

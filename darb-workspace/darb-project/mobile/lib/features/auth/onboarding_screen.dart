@@ -524,7 +524,7 @@ class _SpatialOnboardingSlide extends StatelessWidget {
         Text(
           slide.subtitle,
           style: const TextStyle(
-            color: Color(0xFFD0E3D9),
+            color: Color(0xFFDCD7CC),
             fontSize: 14,
             fontWeight: FontWeight.w600,
             height: 1.5,

@@ -11,64 +11,64 @@ enum DarbVisualStyle { glass, standard }
 class DarbColors {
   DarbColors._();
 
-  // DAZREVO 2026 Unified Brand Anchors (Obsidian Emerald + Volt Lime + Signal Violet)
-  static const forest = Color(0xFF0B2F24); // Deep Emerald Anchor
-  static const primaryGreen = Color(0xFF0D6E4E); // High-Contrast Light Primary
-  static const forestSoft = Color(0xFF144435);
-  static const mint = Color(0xFFA8EBC8);
-  static const lime = Color(0xFFA7FF00); // Volt Lime Kinetic Action & Live Beacon
-  static const limeInk = Color(0xFF3E6800); // Accessible Lime Text on Light
-  static const limeTint = Color(0xFFE7FFAD);
-  static const violet = Color(0xFF8A5CF6); // Signal Violet AI & Smart Highlight
-  static const violetSoft = Color(0xFFF1EBFF);
-  static const danger = Color(0xFFCF3B3B); // Error
-  static const success = Color(0xFF17804B); // Success
-  static const warning = Color(0xFFC67A12);
-  static const info = Color(0xFF1E6FA8);
+  // DAZREVO 2026 Unified Brand Anchors (Obsidian & Champagne Brass + Mineral Teal)
+  static const forest = Color(0xFF14171D); // Smoked Obsidian Architectural Anchor
+  static const primaryGreen = Color(0xFF8A651F); // Burnished Bronze Light Primary (>=5.3:1 AA with white)
+  static const forestSoft = Color(0xFF1E222B); // Elevated Obsidian Slate
+  static const mint = Color(0xFFE7D3A3); // Warm Champagne Mist highlight
+  static const lime = Color(0xFFD6B46C); // Luminous Champagne Gold CTA & Dark Primary
+  static const limeInk = Color(0xFF6B4F1A); // High-contrast Bronze ink on light surfaces
+  static const limeTint = Color(0xFFF6EFE0); // Soft Champagne wash in Light mode
+  static const violet = Color(0xFF1D7A6E); // Imperial Mineral Teal AI & Smart Highlight
+  static const violetSoft = Color(0xFFE8F5F3); // Soft Mineral Teal wash in Light mode
+  static const danger = Color(0xFFC83E3B); // Error
+  static const success = Color(0xFF1C7C54); // Success
+  static const warning = Color(0xFFB87014);
+  static const info = Color(0xFF2364AA);
 
-  // Light Semantic Surfaces (Mineral Daylight Canvas)
-  static const canvas = Color(0xFFF8FAF7);
+  // Light Semantic Surfaces (Alabaster Stone Canvas)
+  static const canvas = Color(0xFFFAF9F6);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceAlt = Color(0xFFEDF2EC);
-  static const ink = Color(0xFF0E221B);
-  static const muted = Color(0xFF586E65);
-  static const line = Color(0xFFD5DFD9);
-  static const borderStrong = Color(0xFFB9C7BF);
-  static const scrim = Color(0x99071A14);
+  static const surfaceAlt = Color(0xFFF2EFE9);
+  static const ink = Color(0xFF141413);
+  static const muted = Color(0xFF636059);
+  static const line = Color(0xFFE5E0D6);
+  static const borderStrong = Color(0xFFCEC7BA);
+  static const scrim = Color(0x990C0D0F);
 
   // Compatibility aliases & soft semantic tints
   static const primary = primaryGreen;
   static const surfaceSoft = surfaceAlt;
   static const border = line;
-  static const mintTint = Color(0xFFE1F6EB);
+  static const mintTint = Color(0xFFF3ECE0);
   static const dangerSoft = Color(0xFFFDECEC);
   static const warningSoft = Color(0xFFFCF3E3);
-  static const infoSoft = Color(0xFFE9F4FC);
+  static const infoSoft = Color(0xFFE9F2FC);
 
-  // Dark Semantic Surfaces (Layered Obsidian Emerald Neo Dark — never inverted)
-  static const darkCanvas = Color(0xFF071A14);
-  static const darkSurface = Color(0xFF0E281F);
-  static const darkSurfaceElevated = Color(0xFF14352A);
+  // Dark Semantic Surfaces (Smoked Obsidian — layered, never inverted)
+  static const darkCanvas = Color(0xFF0C0D0F);
+  static const darkSurface = Color(0xFF14161A);
+  static const darkSurfaceElevated = Color(0xFF1B1E24);
   static const darkSurfaceHigh = darkSurfaceElevated;
-  static const darkSurfaceAlt = Color(0xFF194033);
-  static const darkInk = Color(0xFFF1F7F4);
-  static const darkMuted = Color(0xFF9CB3A8);
-  static const darkLine = Color(0xFF214438);
+  static const darkSurfaceAlt = Color(0xFF232730);
+  static const darkInk = Color(0xFFF5F3EE);
+  static const darkMuted = Color(0xFFA39E93);
+  static const darkLine = Color(0xFF262A33);
   static const darkBorder = darkLine;
-  static const darkBorderStrong = Color(0xFF325E4E);
+  static const darkBorderStrong = Color(0xFF3A404D);
   static const darkPrimary = lime;
-  static const darkOnPrimary = Color(0xFF071A14);
+  static const darkOnPrimary = Color(0xFF0C0D0F);
   static const darkAccent = lime;
-  static const darkViolet = Color(0xFFA78BFA);
-  static const darkVioletSoft = Color(0xFF251A45);
+  static const darkViolet = Color(0xFF3FD1BE);
+  static const darkVioletSoft = Color(0xFF112926);
   static const darkScrim = Color(0xC2000000);
-  static const darkDanger = Color(0xFFF06E6E);
-  static const darkDangerSoft = Color(0xFF3A1D21);
-  static const darkSuccess = Color(0xFF5EE094);
-  static const darkWarning = Color(0xFFF3BA52);
-  static const darkWarningSoft = Color(0xFF382914);
-  static const darkInfo = Color(0xFF69B6EC);
-  static const darkInfoSoft = Color(0xFF142D40);
+  static const darkDanger = Color(0xFFF0716E);
+  static const darkDangerSoft = Color(0xFF381C1E);
+  static const darkSuccess = Color(0xFF4CD49A);
+  static const darkWarning = Color(0xFFF0B857);
+  static const darkWarningSoft = Color(0xFF362814);
+  static const darkInfo = Color(0xFF69AEF2);
+  static const darkInfoSoft = Color(0xFF142B40);
 
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;

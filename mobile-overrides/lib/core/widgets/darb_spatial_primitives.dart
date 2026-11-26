@@ -134,7 +134,7 @@ class DarbCommandStage extends StatelessWidget {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  color: Color(0xFFD2E4DB),
+                                  color: Color(0xFFDCD7CC),
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w600,
                                   height: 1.4,

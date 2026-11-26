@@ -489,7 +489,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             l.t('welcomeSubtitle'),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: Color(0xFFD2E2DA),
+                              color: Color(0xFFDCD7CC),
                               fontSize: 13.5,
                               fontWeight: FontWeight.w600,
                               height: 1.42,
@@ -1006,7 +1006,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       l.t('welcomeSubtitle'),
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
-                                        color: Color(0xFFD2E2DA),
+                                        color: Color(0xFFDCD7CC),
                                         fontSize: 13.5,
                                         fontWeight: FontWeight.w600,
                                         height: 1.42,

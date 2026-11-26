@@ -69,12 +69,12 @@ class DarbAmbientBackground extends StatelessWidget {
                 colors: isDark
                     ? const [
                         DarbColors.darkCanvas,
-                        Color(0xFF0A241B),
+                        Color(0xFF111318),
                         DarbColors.darkCanvas,
                       ]
                     : const [
                         DarbColors.canvas,
-                        Color(0xFFEFF4EC),
+                        Color(0xFFF4F0E8),
                         DarbColors.canvas,
                       ],
               ),
@@ -176,7 +176,10 @@ class DarbGlassSurface extends StatelessWidget {
           border: Border.all(color: effectiveBorder),
           boxShadow: shadow,
         ),
-        child: child,
+        child: Material(
+          color: Colors.transparent,
+          child: child,
+        ),
       );
     }
 
@@ -231,7 +234,10 @@ class DarbGlassSurface extends StatelessWidget {
                   )
                 : null,
             padding: padding,
-            child: child,
+            child: Material(
+              color: Colors.transparent,
+              child: child,
+            ),
           ),
         ),
       ),

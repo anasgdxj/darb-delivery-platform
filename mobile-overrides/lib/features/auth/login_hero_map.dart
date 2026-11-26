@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/darb_design_system.dart';
 
-/// Obsidian-emerald abstract geometric architectural background with
-/// subtle coordinate grid lines, glowing Volt Lime & Signal Violet vector
+/// Smoked-obsidian abstract geometric architectural background with
+/// subtle coordinate grid lines, glowing Champagne Brass & Mineral Teal vector
 /// route path matching DAZREVO's brand curve, and pulsing origin/destination
 /// nodes. Uses zero city photos.
 class DarbLoginVectorMap extends StatefulWidget {
@@ -91,11 +91,11 @@ class _DarbVectorMapPainter extends CustomPainter {
   final double progress;
   final bool reducedMotion;
 
-  static const _bgBase = DarbColors.darkCanvas; // #071A14
-  static const _bgInnerGlow = DarbColors.forestSoft; // #144435
-  static const _sagePrimary = Color(0xFF285947);
-  static const _sageSecondary = Color(0xFF193C2F);
-  static const _sageBlock = Color(0xFF0E2B21);
+  static const _bgBase = DarbColors.darkCanvas; // #0C0D0F
+  static const _bgInnerGlow = DarbColors.forestSoft; // #1E222B
+  static const _sagePrimary = Color(0xFF333845);
+  static const _sageSecondary = Color(0xFF232732);
+  static const _sageBlock = Color(0xFF161920);
   static const _mint = DarbColors.mint;
   static const _lime = DarbColors.lime;
   static const _violet = DarbColors.violet;
@@ -107,7 +107,7 @@ class _DarbVectorMapPainter extends CustomPainter {
     final h = size.height;
     final rect = Offset.zero & size;
 
-    // 1. Deep Obsidian Emerald canvas with subtle radial depth
+    // 1. Deep Smoked Obsidian canvas with subtle radial depth
     canvas.drawRect(
       rect,
       Paint()
@@ -118,7 +118,7 @@ class _DarbVectorMapPainter extends CustomPainter {
         ),
     );
 
-    // Subtle secondary Signal Violet + Volt Lime ambient shimmer
+    // Subtle secondary Mineral Teal + Champagne Brass ambient shimmer
     canvas.drawCircle(
       Offset(w * 0.16, h * 0.72),
       w * 0.28,
@@ -315,7 +315,7 @@ class _DarbVectorMapPainter extends CustomPainter {
           canvas.drawPath(
             metric.extractPath(s, e),
             Paint()
-              ..color = const Color(0xFFF6FFFA).withValues(alpha: 0.95)
+              ..color = const Color(0xFFFAF6EB).withValues(alpha: 0.95)
               ..strokeWidth = 3.5
               ..strokeCap = StrokeCap.round
               ..style = PaintingStyle.stroke
@@ -388,7 +388,7 @@ class _DarbVectorMapPainter extends CustomPainter {
     canvas.drawCircle(
       center,
       3.3,
-      Paint()..color = const Color(0xFFF0FFF7),
+      Paint()..color = const Color(0xFFF7F4EC),
     );
   }
 

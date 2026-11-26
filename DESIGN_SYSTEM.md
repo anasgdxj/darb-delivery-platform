@@ -1,6 +1,6 @@
 # DAZREVO Design System
 
-Version: 2026.3 (Obsidian Emerald, Volt Lime & Signal Violet)  
+Version: 2026.4 (Obsidian & Champagne Brass + Mineral Teal)  
 Scope: Flutter mobile app (`mobile-overrides/` & `darb-workspace/darb-project/mobile/`), Public Website (`/`), and Admin Operations Portal (`admin-web/`)  
 Source of truth (Mobile): `mobile-overrides/lib/core/theme/darb_design_system.dart`
 
@@ -18,15 +18,16 @@ This document defines the unified visual, motion, typography, and structural arc
 
 ---
 
-## 2. Visual Direction: Obsidian Emerald, Volt Lime & Signal Violet
+## 2. Visual Direction: Obsidian & Champagne Brass + Mineral Teal
 
-DAZREVO feels like a precision urban logistics command platform: deep Obsidian Emerald anchors (`#0B2F24`), high-visibility Volt Lime kinetic CTAs and active beacons (`#A7FF00`), Mineral Daylight cards (`#F8FAF7` / `#FFFFFF`), layered Neo Dark surfaces (`#071A14` -> `#0E281F` -> `#14352A`), and dedicated Signal Violet AI surfaces (`#8A5CF6` / `#A78BFA`).
+DAZREVO feels like a flagship luxury urban mobility & commerce platform: Smoked Obsidian architectural stages (`#14171D`), Burnished Bronze light primary (`#8A651F`) paired with Luminous Champagne Gold CTAs and active beacons (`#D6B46C`), Alabaster Stone daylight cards (`#FAF9F6` / `#FFFFFF`), layered Smoked Obsidian dark surfaces (`#0C0D0F` -> `#14161A` -> `#1B1E24`), and Mineral Teal smart telemetry accents (`#1D7A6E` / `#3FD1BE`).
 
-- **Splash & Interactive Onboarding (`main.dart`, `onboarding_screen.dart`)**: Obsidian Emerald splash gate + 3-slide interactive `OnboardingScreen` persisted via `kDazrevoOnboardingSeenKey` (`onboarding_seen_v1`) and replayable from `LoginScreen` and `AccountScreen`.
-- **Authentication & Global Shell (`login_screen.dart`, `app_shell.dart`)**: Geometric vector network map (`DarbLoginVectorMap`, zero city photos), `DarbBrandMark`, `1 / 2 -> 2 / 2` auth step pill, LTR Syrian phone formatting + OTP countdown, custom Google emblem CTA, and Signal Violet AI command button in the shell app bar.
-- **Customer Experience (`customer_home_screen.dart`, `vendor_catalog_screen.dart`, `checkout_screen.dart`, `ai_order_assistant_screen.dart`)**: Abstract `DarbCitySceneCard` (zero city photos), 6:5 asymmetric Bento action split (`DarbBentoActionCard`), Signal Violet AI order assistant, Obsidian Emerald + Volt Lime floating cart dock, live `DarbOrderTimeline`, and spatial courier GPS tracking (`DriverTrackingScreen`).
-- **Account & Live Activity Ledger (`account_screen.dart`)**: Obsidian Emerald header card, live role-aware `DarbActivityLedgerStrip` (fetching `/orders/mine`, `/drivers/stats`, `/vendors/mine/stats`, or `/admin/stats`), dedicated `EditProfileScreen`, 5-step Driver & Vendor onboarding wizards (`DriverApplicationScreen`, `VendorApplicationScreen`), Signal Violet `AiRoleAssistantScreen`, and Glass/Standard + System/Light/Dark appearance controls.
-- **Driver, Vendor & Administration**: Unified token resolution across driver cockpit (`DarbPulseDot` + Volt Lime border when online), merchant order progression + product inventory, and multi-tab admin operations portal (`admin-web/index.html`) including an Admin AI Copilot (`POST /ai/assistant/ask`).
+- **Brand Crest & App Icon (`DarbBrandMark`, `ic_launcher.xml`, `android-res/`)**: Chamfered ivory "D" crest intersected by a double-bevel Champagne Brass route chevron (`#D6B46C` / `#E7D3A3`) and a Mineral Teal telemetry nexus core (`#3FD1BE`), set over a Smoked Obsidian surface.
+- **Splash & Interactive Onboarding (`main.dart`, `onboarding_screen.dart`)**: Smoked Obsidian splash gate + 3-slide interactive `OnboardingScreen` persisted via `kDazrevoOnboardingSeenKey` (`onboarding_seen_v1`) and replayable from `LoginScreen` and `AccountScreen`.
+- **Authentication & Global Shell (`login_screen.dart`, `app_shell.dart`)**: Geometric vector network map (`DarbLoginVectorMap`, zero city photos), `DarbBrandMark`, `1 / 2 -> 2 / 2` auth step pill, LTR Syrian phone formatting + OTP countdown, custom Google emblem CTA, and Mineral Teal AI command button in the shell app bar.
+- **Customer Experience (`customer_home_screen.dart`, `vendor_catalog_screen.dart`, `checkout_screen.dart`, `ai_order_assistant_screen.dart`)**: Abstract `DarbCitySceneCard` (zero city photos), 6:5 asymmetric Bento action split (`DarbBentoActionCard`), Mineral Teal AI order assistant, Smoked Obsidian + Champagne Brass floating cart dock, live `DarbOrderTimeline`, and spatial courier GPS tracking (`DriverTrackingScreen`).
+- **Account & Live Activity Ledger (`account_screen.dart`)**: Smoked Obsidian header card, live role-aware `DarbActivityLedgerStrip` (fetching `/orders/mine`, `/drivers/stats`, `/vendors/mine/stats`, or `/admin/stats`), dedicated `EditProfileScreen`, 5-step Driver & Vendor onboarding wizards (`DriverApplicationScreen`, `VendorApplicationScreen`), Mineral Teal `AiRoleAssistantScreen`, and Glass/Standard + System/Light/Dark appearance controls.
+- **Driver, Vendor & Administration**: Unified token resolution across driver cockpit (`DarbPulseDot` + Champagne Brass border when online), merchant order progression + product inventory, and multi-tab admin operations portal (`admin-web/index.html`) including an Admin AI Copilot (`POST /ai/assistant/ask`).
 
 ---
 
@@ -36,50 +37,50 @@ DAZREVO feels like a precision urban logistics command platform: deep Obsidian E
 
 | Token | Hex | Usage |
 |---|---|---|
-| `forest` | `#0B2F24` | Obsidian Emerald brand anchor, dark hero containers & floating cart dock |
-| `primaryGreen` | `#0D6E4E` | High-contrast interactive primary green in Light mode |
-| `forestSoft` | `#144435` | Secondary emerald containers and dark accent washes |
-| `mint` | `#A8EBC8` | Supportive highlights, selected states, map route accents |
-| `lime` | `#A7FF00` | Volt Lime kinetic CTA, active beacons (`DarbPulseDot`), dark primary |
-| `limeInk` | `#3E6800` | Accessible high-contrast lime ink on light mineral surfaces |
-| `limeTint` | `#E7FFAD` | Soft lime tint badge background on Light mode |
-| `violet` | `#8A5CF6` | Signal Violet AI assistant accent (Light mode) |
-| `violetSoft` | `#F1EBFF` | Signal Violet tinted containers (Light mode) |
-| `danger` | `#CF3B3B` | Destructive actions and error states |
-| `success` | `#17804B` | Confirmed and delivered states |
-| `warning` | `#C67A12` | Pending and review alerts |
-| `info` | `#1E6FA8` | Informational notices |
+| `forest` | `#14171D` | Smoked Obsidian brand anchor, dark hero containers & floating cart dock |
+| `primaryGreen` | `#8A651F` | Burnished Champagne Bronze interactive primary in Light mode (`>=5.3:1` AA with white) |
+| `forestSoft` | `#1E222B` | Elevated Obsidian Slate containers and dark accent washes |
+| `mint` | `#E7D3A3` | Warm Champagne Mist highlights, selected states, map route accents |
+| `lime` | `#D6B46C` | Luminous Champagne Gold CTA, active beacons (`DarbPulseDot`), dark primary |
+| `limeInk` | `#6B4F1A` | High-contrast Bronze ink on light alabaster surfaces |
+| `limeTint` | `#F6EFE0` | Soft Champagne wash background in Light mode |
+| `violet` | `#1D7A6E` | Imperial Mineral Teal smart/AI assistant accent (Light mode) |
+| `violetSoft` | `#E8F5F3` | Mineral Teal tinted containers (Light mode) |
+| `danger` | `#C83E3B` | Destructive actions and error states |
+| `success` | `#1C7C54` | Confirmed and delivered states |
+| `warning` | `#B87014` | Pending and review alerts |
+| `info` | `#2364AA` | Informational notices |
 
-### Light Semantic Surfaces (Mineral Daylight Canvas)
+### Light Semantic Surfaces (Alabaster Stone Canvas)
 
 | Token | Hex | Usage |
 |---|---|---|
-| `canvas` | `#F8FAF7` | Main light background canvas |
+| `canvas` | `#FAF9F6` | Main light background canvas |
 | `surface` | `#FFFFFF` | Cards, inputs, bottom sheets |
-| `surfaceAlt` | `#EDF2EC` | Secondary containers, pills, icon wells |
-| `ink` | `#0E221B` | Primary high-contrast typography |
-| `muted` | `#586E65` | Secondary metadata and hints |
-| `line` | `#D5DFD9` | Hairline dividers and card outlines |
-| `borderStrong` | `#B9C7BF` | Interactive focus/selected borders |
-| `scrim` | `#99071A14` | Modal overlay scrim |
+| `surfaceAlt` | `#F2EFE9` | Secondary containers, pills, icon wells |
+| `ink` | `#141413` | Primary high-contrast typography |
+| `muted` | `#636059` | Secondary metadata and hints |
+| `line` | `#E5E0D6` | Hairline dividers and card outlines |
+| `borderStrong` | `#CEC7BA` | Interactive focus/selected borders |
+| `scrim` | `#990C0D0F` | Modal overlay scrim |
 
-### Dark Semantic Surfaces (Obsidian Emerald Neo Dark)
+### Dark Semantic Surfaces (Smoked Obsidian Dark)
 
 | Semantic Role | Hex | Usage |
 |---|---|---|
-| `darkCanvas` | `#071A14` | App dark canvas background |
-| `darkSurface` | `#0E281F` | Primary dark cards and navigation bars |
-| `darkSurfaceElevated` | `#14352A` | Dialogs, sheets, elevated panels |
-| `darkSurfaceAlt` | `#194033` | Soft secondary containers and chips |
-| `darkInk` | `#F1F7F4` | Primary typography on dark |
-| `darkMuted` | `#9CB3A8` | Secondary labels on dark |
-| `darkLine` | `#214438` | Subtle hairline borders on dark |
-| `darkBorderStrong` | `#325E4E` | Focused dark boundaries |
-| `darkPrimary` | `#A7FF00` | Volt Lime primary action color in Dark mode |
-| `darkOnPrimary` | `#071A14` | Foreground ink on `darkPrimary` |
-| `darkViolet` | `#A78BFA` | Signal Violet AI foreground on dark |
-| `darkVioletSoft` | `#251A45` | Signal Violet AI container wash on dark |
-| `darkDanger` / `darkSuccess` / `darkWarning` / `darkInfo` | `#F06E6E` / `#5EE094` / `#F3BA52` / `#69B6EC` | Accessible semantic states on dark |
+| `darkCanvas` | `#0C0D0F` | App dark canvas background |
+| `darkSurface` | `#14161A` | Primary dark cards and navigation bars |
+| `darkSurfaceElevated` | `#1B1E24` | Dialogs, sheets, elevated panels |
+| `darkSurfaceAlt` | `#232730` | Soft secondary containers and chips |
+| `darkInk` | `#F5F3EE` | Primary typography on dark |
+| `darkMuted` | `#A39E93` | Secondary labels on dark |
+| `darkLine` | `#262A33` | Subtle hairline borders on dark |
+| `darkBorderStrong` | `#3A404D` | Focused dark boundaries |
+| `darkPrimary` | `#D6B46C` | Luminous Champagne Gold primary action color in Dark mode |
+| `darkOnPrimary` | `#0C0D0F` | Foreground ink on `darkPrimary` |
+| `darkViolet` | `#3FD1BE` | Mineral Teal smart/AI foreground on dark |
+| `darkVioletSoft` | `#112926` | Mineral Teal container wash on dark |
+| `darkDanger` / `darkSuccess` / `darkWarning` / `darkInfo` | `#F0716E` / `#4CD49A` / `#F0B857` / `#69AEF2` | Accessible semantic states on dark |
 
 All UI modules resolve colors exclusively via `DarbColors.*Of(context)` / `Theme.of(context)` in Flutter, and semantic CSS custom properties (`--canvas`, `--surface`, `--accent`, `--lime`, `--violet`, `--ink`) with `[data-theme="dark"]` on Web.
 
