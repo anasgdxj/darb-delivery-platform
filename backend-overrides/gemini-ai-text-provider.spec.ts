@@ -31,6 +31,10 @@ describe('GeminiAiTextProvider', () => {
     const answer = await provider.generate({
       systemPrompt: 'مساعد دازريفو',
       context: { activeOrders: 2 },
+      history: [
+        { role: 'user', content: 'مرحبا' },
+        { role: 'assistant', content: 'أهلاً بك' },
+      ],
       message: 'كم طلباً لدي؟',
     });
 
@@ -41,8 +45,10 @@ describe('GeminiAiTextProvider', () => {
     expect(options.headers['x-goog-api-key']).toBe('test-gemini-key');
     const requestBody = JSON.parse(options.body);
     const systemInstruction = requestBody.systemInstruction.parts[0].text as string;
-    const userMessage = requestBody.contents[0].parts[0].text as string;
+    const userMessage = requestBody.contents[2].parts[0].text as string;
     expect(systemInstruction).toContain('"activeOrders":2');
+    expect(requestBody.contents[0]).toEqual({ role: 'user', parts: [{ text: 'مرحبا' }] });
+    expect(requestBody.contents[1]).toEqual({ role: 'model', parts: [{ text: 'أهلاً بك' }] });
     expect(userMessage).toBe('كم طلباً لدي؟');
     expect(requestBody.generationConfig.temperature).toBeUndefined();
   });
