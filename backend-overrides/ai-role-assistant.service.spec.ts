@@ -79,10 +79,12 @@ describe('AiRoleAssistantService role isolation', () => {
 
   it('sends the role-scoped context and question to the configured provider', async () => {
     prisma.order.count.mockResolvedValue(3);
-    const result = await service.ask({ id: 'customer-1', role: UserRole.CUSTOMER }, 'كم طلباً لدي؟');
+    const history = [{ role: 'user' as const, content: 'مرحبا' }, { role: 'assistant' as const, content: 'أهلاً بك' }];
+    const result = await service.ask({ id: 'customer-1', role: UserRole.CUSTOMER }, 'كم طلباً لدي؟', history);
     expect(aiProvider.generate).toHaveBeenCalledWith(expect.objectContaining({
       context: { activeOrders: 3, deliveredOrders: 3 },
       message: 'كم طلباً لدي؟',
+      history,
     }));
     expect(result).toEqual(expect.objectContaining({
       role: UserRole.CUSTOMER,
