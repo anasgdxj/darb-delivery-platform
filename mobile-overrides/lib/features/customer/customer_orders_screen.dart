@@ -286,7 +286,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          DarbOrderTimeline(status: status, isPeer: isPeer),
+          DarbOrderTimeline(status: status, isPeer: isPeer || isShopping),
           const SizedBox(height: 12),
           if (isShopping) ...[
             Text('${dt('الغرض')}: ${order['shoppingItemName'] ?? ''}', style: TextStyle(color: DarbColors.inkOf(ctx), fontWeight: FontWeight.w900)),
