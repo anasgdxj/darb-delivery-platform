@@ -575,10 +575,10 @@ jobs:
 
           summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
           if targeted == 0:
-              summary.open("a", encoding="utf-8").write("Release push announcement: no registered devices; no push was sent.\\n")
+              summary.open("a", encoding="utf-8").write("Release push announcement: no registered devices; no push was sent.\n")
           else:
               summary.open("a", encoding="utf-8").write(
-                  f"Release push announcement: FCM accepted {sent} notifications for {targeted} registered devices; actionable failures: 0.\\n"
+                  f"Release push announcement: FCM accepted {sent} notifications for {targeted} registered devices; actionable failures: 0.\n"
               )
           print(f"Release notification confirmed: {sent}/{targeted} devices.")
           PY
