@@ -399,6 +399,7 @@ jobs:
             exit 1
           fi
           APK="build/app/outputs/flutter-apk/app-release.apk"
+          APK_DIR="$(dirname "$APK")"
           test -s "$APK"
           APK_SHA256="$(sha256sum "$APK" | cut -d' ' -f1)"
           python3 - "$BUILD_NUMBER" "$BUILD_NAME" "$APK_SHA256" > build/app/outputs/flutter-apk/app-update.json <<'PY'
@@ -423,6 +424,59 @@ jobs:
           "$APKSIGNER" verify --verbose "$APK"
           "$APKSIGNER" verify --print-certs "$APK" | tee "$RUNNER_TEMP/apk-cert.txt"
           echo "Direct APK SHA-256: $APK_SHA256" >> "$GITHUB_STEP_SUMMARY"
+
+          # Keep the universal APK for the in-app updater. Build a smaller ARM64
+          # variant for Telegram's 49 MB document-upload limit.
+          UNIVERSAL_APK="$RUNNER_TEMP/darb-universal-app-release.apk"
+          UNIVERSAL_MANIFEST="$RUNNER_TEMP/darb-universal-app-update.json"
+          cp "$APK" "$UNIVERSAL_APK"
+          cp "$APK_DIR/app-update.json" "$UNIVERSAL_MANIFEST"
+          arm64_succeeded=false
+          for attempt in 1 2 3; do
+            arm64_log="$RUNNER_TEMP/darb-android-arm64-build-$attempt.log"
+            if flutter build apk "${args[@]}" --target-platform android-arm64 --dart-define=DARB_PLAY_STORE=false --build-number "$BUILD_NUMBER" --build-name "$BUILD_NAME" 2>&1 | tee "$arm64_log"; then
+              arm64_succeeded=true
+              break
+            fi
+            if ! grep -Eiq '429|Too Many Requests|Could not GET|502|503|504|Connection reset|timed out' "$arm64_log"; then
+              echo "::warning::ARM64-only APK build failed for a non-transient reason; continuing with the universal APK."
+              break
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::Transient dependency failure; retrying ARM64 APK build (attempt $((attempt + 1))/3)."
+              sleep $((attempt * 30))
+            fi
+          done
+          if [ "$arm64_succeeded" = true ] && [ ! -s "$APK" ]; then
+            echo "::warning::ARM64 build reported success but produced no APK; continuing with the universal APK."
+            arm64_succeeded=false
+          fi
+          if [ "$arm64_succeeded" = true ]; then
+            ARM64_SIZE="$(stat -c '%s' "$APK")"
+            if [ "$ARM64_SIZE" -le 49000000 ]; then
+              if "$APKSIGNER" verify --verbose "$APK"; then
+                cp "$APK" "$APK_DIR/app-arm64-v8a-release.apk"
+                ARM64_SHA256="$(sha256sum "$APK_DIR/app-arm64-v8a-release.apk" | cut -d' ' -f1)"
+                echo "Telegram ARM64 APK SHA-256: $ARM64_SHA256" >> "$GITHUB_STEP_SUMMARY"
+                echo "Telegram ARM64 APK size: $ARM64_SIZE bytes (within 49 MB)." >> "$GITHUB_STEP_SUMMARY"
+              else
+                rm -f "$APK_DIR/app-arm64-v8a-release.apk"
+                echo "::warning::ARM64 APK signing verification failed; continuing with the verified universal APK."
+                echo "Telegram ARM64 APK: not attached; ARM64 signing verification failed." >> "$GITHUB_STEP_SUMMARY"
+              fi
+            else
+              rm -f "$APK_DIR/app-arm64-v8a-release.apk"
+              echo "::warning::ARM64 APK is $ARM64_SIZE bytes and exceeds Telegram's 49 MB upload limit; the universal release remains available."
+              echo "Telegram ARM64 APK: not attached; generated size $ARM64_SIZE bytes exceeds 49 MB." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            rm -f "$APK_DIR/app-arm64-v8a-release.apk"
+            echo "::warning::ARM64 APK unavailable after build retries; continuing with the verified universal APK."
+            echo "Telegram ARM64 APK: not attached; ARM64-only build failed. Universal APK release is unaffected." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          mkdir -p "$APK_DIR"
+          cp "$UNIVERSAL_APK" "$APK"
+          cp "$UNIVERSAL_MANIFEST" "$APK_DIR/app-update.json"
 
           cd "$GITHUB_WORKSPACE/extracted-play/darb-project/mobile"
           aab_succeeded=false
@@ -456,6 +510,13 @@ jobs:
           path: extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 7
+      - name: Upload Telegram-compatible ARM64 APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darb-android-arm64-telegram
+          path: extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload signed Play Store AAB artifact
         uses: actions/upload-artifact@v4
         with:
@@ -465,6 +526,7 @@ jobs:
           retention-days: 7
       # Release publication is deliberately gated by the [publish-apk] commit marker; artifacts are uploaded first.
       - name: Publish signed APK as the latest public release
+        id: publish_apk
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
           GH_TOKEN: ${{ github.token }}
@@ -473,16 +535,19 @@ jobs:
           set -euo pipefail
           APK="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk"
           APK_DIR="$(dirname "$APK")"
+          assets=("$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json")
+          if [ -s "$APK_DIR/app-arm64-v8a-release.apk" ]; then
+            assets+=("$APK_DIR/app-arm64-v8a-release.apk#app-arm64-v8a-release.apk")
+          fi
           if gh release view latest >/dev/null 2>&1; then
-            # Explicitly delete stale assets before uploading. `--clobber` uses
-            # GitHub's replace path, which returned HTTP 500 for the existing
-            # APK asset and prevented the release notification from running.
+            # Delete stale assets explicitly before uploading replacements.
             gh release delete-asset latest app-release.apk --yes || true
             gh release delete-asset latest app-update.json --yes || true
-            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json"
-            gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
+            gh release delete-asset latest app-arm64-v8a-release.apk --yes || true
+            gh release upload latest "${assets[@]}"
+            gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). يتوفر APK عام ونسخة ARM64 للإرسال عبر تيليغرام عند توافق الحجم."
           else
-            gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
+            gh release create latest "${assets[@]}" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
           fi
 
       - name: Notify DARB users about the published release
@@ -572,8 +637,8 @@ jobs:
             echo "Release push announcement: FCM accepted $SENT notifications for $TARGETED registered devices; actionable failures: $FAILED." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Announce published release in Telegram channel
-        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+      - name: Send the signed APK file to Telegram channel
+        if: always() && steps.publish_apk.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]')))
         continue-on-error: true
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -586,75 +651,126 @@ jobs:
           import json
           import os
           import pathlib
+          import secrets
           import time
           import urllib.error
-          import urllib.parse
           import urllib.request
 
           summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
           token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
           chat_id = os.environ.get("TELEGRAM_CHAT_ID", "@DAZREVO").strip()
-          if not token:
-              summary.open("a", encoding="utf-8").write(
-                  "\nTelegram channel announcement: NOT SENT — add the TELEGRAM_BOT_TOKEN repository secret.\n"
-              )
-              print("::warning::Telegram announcement skipped because TELEGRAM_BOT_TOKEN is not configured.")
-              raise SystemExit(0)
-
+          apk_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk")
           manifest_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json")
+
+          def fail(message):
+              summary.open("a", encoding="utf-8").write(
+                  "\nTelegram APK delivery: FAILED — " + message + "\n"
+              )
+              print("::error::Telegram APK delivery failed: " + message)
+              raise SystemExit(1)
+
+          if not token:
+              fail("TELEGRAM_BOT_TOKEN repository secret is missing.")
+          if not apk_path.is_file() or apk_path.stat().st_size <= 0:
+              fail("A signed ARM64 APK under Telegram's upload limit was not produced.")
+          if not manifest_path.is_file():
+              fail("The release manifest is missing.")
+
+          apk_size = apk_path.stat().st_size
+          telegram_limit = 49_000_000
+          if apk_size > telegram_limit:
+              fail(f"ARM64 APK is {apk_size} bytes; Telegram's sendDocument limit is 49 MB.")
+
           manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-          version = html.escape(str(manifest.get("versionName", "New version")))
+          version = html.escape(str(manifest.get("versionName", "إصدار جديد")))
           build = html.escape(str(manifest.get("versionCode", "")))
-          notes = str(manifest.get("releaseNotes", "")).strip()
-          notes_html = html.escape(notes[:2500]) if notes else "تحسينات وإصلاحات عامة"
-          apk_url = "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk"
+          notes = str(manifest.get("releaseNotes", "")).strip() or "تحسينات وإصلاحات عامة"
           release_url = "https://github.com/anasgdxj/darb-delivery-platform/releases/tag/latest"
-          message = (
+          caption = (
               "🚀 <b>صدر تحديث جديد لتطبيق DAZREVO</b>\n\n"
               f"📦 الإصدار: <b>{version}</b>\n"
-              f"🔢 رقم البناء: <code>{build}</code>\n\n"
-              f"📝 <b>أبرز التحديثات</b>\n{notes_html}\n\n"
-              f"⬇️ <a href=\"{apk_url}\">تحميل APK الرسمي</a>\n"
-              f"📋 <a href=\"{release_url}\">تفاصيل الإصدار</a>\n\n"
-              "DAZREVO — طريقك الأسرع للتوصيل."
+              f"🔢 رقم البناء: <code>{build}</code>\n"
+              "📱 نسخة Android ARM64\n\n"
+              f"📝 <b>أبرز التحديثات</b>\n{html.escape(notes[:560])}\n\n"
+              f'<a href="{release_url}">تفاصيل الإصدار</a>\n'
+              "⬇️ ملف APK الرسمي مرفق بهذه الرسالة."
           )
-          payload = urllib.parse.urlencode({
-              "chat_id": chat_id,
-              "text": message,
-              "parse_mode": "HTML",
-              "disable_web_page_preview": "false",
-          }).encode("utf-8")
-          endpoint = "https://api.telegram.org/bot" + token + "/sendMessage"
+          if len(caption) > 1024:
+              caption = caption[:1000]
+
+          boundary = "----DAZREVO" + secrets.token_hex(16)
+          filename = "DAZREVO-" + "".join(c for c in version if c.isalnum() or c in ".-_") + "-arm64.apk"
+          fields = [
+              ("chat_id", chat_id.encode("utf-8")),
+              ("parse_mode", b"HTML"),
+              ("caption", caption.encode("utf-8")),
+          ]
+          chunks = []
+          for name, value in fields:
+              chunks.extend([
+                  f"--{boundary}\r\n".encode(),
+                  f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode(),
+                  value,
+                  b"\r\n",
+              ])
+          chunks.extend([
+              f"--{boundary}\r\n".encode(),
+              f'Content-Disposition: form-data; name="document"; filename="{filename}"\r\n'.encode(),
+              b"Content-Type: application/vnd.android.package-archive\r\n\r\n",
+              apk_path.read_bytes(),
+              b"\r\n",
+              f"--{boundary}--\r\n".encode(),
+          ])
+          body = b"".join(chunks)
+          endpoint = "https://api.telegram.org/bot" + token + "/sendDocument"
           last_error = None
+
           for attempt in range(1, 4):
-              request = urllib.request.Request(endpoint, data=payload, method="POST")
+              request = urllib.request.Request(
+                  endpoint,
+                  data=body,
+                  headers={"Content-Type": "multipart/form-data; boundary=" + boundary},
+                  method="POST",
+              )
               try:
-                  with urllib.request.urlopen(request, timeout=30) as response:
+                  with urllib.request.urlopen(request, timeout=180) as response:
                       result = json.loads(response.read().decode("utf-8"))
                   if not result.get("ok"):
-                      raise RuntimeError("Telegram API rejected the channel message")
-                  message_id = result.get("result", {}).get("message_id", "unknown")
+                      raise RuntimeError("Telegram API rejected the APK document.")
+                  sent = result.get("result", {})
+                  document = sent.get("document", {})
+                  if not document.get("file_id"):
+                      raise RuntimeError("Telegram accepted the request without returning a document file_id.")
+                  message_id = sent.get("message_id", "unknown")
+                  delivered_size = int(document.get("file_size", 0) or 0)
+                  if delivered_size and delivered_size != apk_size:
+                      raise RuntimeError(
+                          f"Telegram document size mismatch: expected {apk_size}, received {delivered_size}."
+                      )
                   summary.open("a", encoding="utf-8").write(
-                      f"\nTelegram channel announcement: SENT to {chat_id}; message ID {message_id}.\n"
+                      f"\nTelegram APK delivery: SENT as a document to {chat_id}; "
+                      f"message ID {message_id}; file size {apk_size} bytes.\n"
                   )
-                  print(f"Telegram release announcement delivered to {chat_id}.")
+                  print(f"Signed DAZREVO ARM64 APK document delivered to {chat_id}; message ID {message_id}.")
+                  last_error = None
                   break
               except urllib.error.HTTPError as error:
                   response_body = error.read().decode("utf-8", "replace")[:500]
                   last_error = RuntimeError(f"Telegram API HTTP {error.code}: {response_body}")
                   if error.code not in (429, 500, 502, 503, 504) or attempt == 3:
                       break
+                  retry_after = 0
+                  try:
+                      retry_after = int(json.loads(response_body).get("parameters", {}).get("retry_after", 0))
+                  except (ValueError, TypeError, AttributeError):
+                      pass
+                  time.sleep(max(retry_after, attempt * 3))
               except (urllib.error.URLError, TimeoutError, OSError, ValueError, RuntimeError) as error:
                   last_error = error
                   if attempt == 3:
                       break
-              time.sleep(attempt * 3)
-          else:
-              last_error = RuntimeError("Telegram announcement retry loop ended unexpectedly")
+                  time.sleep(attempt * 5)
+
           if last_error is not None:
-              summary.open("a", encoding="utf-8").write(
-                  "\nTelegram channel announcement: FAILED — see workflow warning; APK release remains published.\n"
-              )
-              print(f"::warning::Telegram announcement failed; APK release remains published: {last_error}")
-              raise SystemExit(0)
+              fail(str(last_error))
           PY

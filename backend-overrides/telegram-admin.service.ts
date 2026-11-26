@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -7,7 +8,7 @@ export interface TelegramUpdate { update_id?: number; message?: TelegramMessage;
 interface TelegramApiResponse<T> { ok: boolean; result?: T; description?: string; }
 interface TelegramBotIdentity { id: number; is_bot: boolean; username?: string; }
 interface TelegramWebhookInfo { url: string; pending_update_count: number; last_error_date?: number; last_error_message?: string; allowed_updates?: string[]; }
-interface GitHubRelease { tag_name?: string; name?: string; html_url?: string; published_at?: string; body?: string; assets?: Array<{ name?: string; browser_download_url?: string }>; }
+interface GitHubRelease { tag_name?: string; name?: string; html_url?: string; published_at?: string; body?: string; assets?: Array<{ name?: string; browser_download_url?: string; size?: number; digest?: string }>; }
 
 @Injectable()
 export class TelegramAdminService implements OnModuleInit {
@@ -78,14 +79,24 @@ export class TelegramAdminService implements OnModuleInit {
         case '/help': response = this.helpMessage(); break;
         case '/status': response = await this.statusReport(); break;
         case '/api': response = await this.apiReport(); break;
-        case '/version': response = await this.versionReport(); break;
+        case '/version':
+        case '/apk':
+          await this.sendLatestApk(chatId);
+          this.audit(senderId, command, 'apk-sent');
+          return;
         case '/releases': response = await this.releasesReport(); break;
         default: response = 'الأمر غير معروف. أرسل /help لعرض الأوامر المتاحة.';
       }
       await this.sendMessage(chatId, response);
     } catch (error) {
+      const message = error instanceof Error ? error.message : '';
       this.logger.error(`Telegram command ${command} failed.`, error instanceof Error ? error.stack : undefined);
-      await this.sendMessage(chatId, 'تعذر تنفيذ الأمر الآن. تم تسجيل الخطأ في سجلات الخادم.');
+      const userMessage = message.includes('GitHub API rate limit exhausted')
+        ? 'تجاوز GitHub حد الطلبات المتاح. أضف GITHUB_TOKEN بصلاحية قراءة Contents إلى Render ثم أعد المحاولة.'
+        : message.includes("50 MB upload limit")
+          ? 'حجم ملف APK يتجاوز حد تيليغرام للإرسال كمرفق. لم أرسل رابطاً بديلاً.'
+          : 'تعذر تنفيذ الأمر الآن. تم تسجيل الخطأ في سجلات الخادم.';
+      await this.sendMessage(chatId, userMessage);
     }
   }
 
@@ -97,7 +108,7 @@ export class TelegramAdminService implements OnModuleInit {
   }
 
   private helpMessage(): string {
-    return ['🤖 DAZREVO — مركز مراقبة العمليات', '', '/status — حالة API وقاعدة البيانات وRedis', '/api — فحص نقاط الصحة بالتفصيل', '/version — أحدث إصدار منشور', '/releases — آخر خمسة إصدارات', '/help — عرض هذه القائمة', '', 'هذه المرحلة للقراءة والمراقبة فقط. لا توجد أوامر تغيّر البيانات أو تنشر إصداراً.'].join('\n');
+    return ['🤖 DAZREVO — مركز مراقبة العمليات', '', '/status — حالة API وقاعدة البيانات وRedis', '/api — فحص نقاط الصحة بالتفصيل', '/version أو /apk — إرسال ملف APK الرسمي كمرفق', '/releases — آخر خمسة إصدارات', '/help — عرض هذه القائمة', '', 'هذه المرحلة للقراءة والمراقبة فقط. لا توجد أوامر تغيّر البيانات أو تنشر إصداراً.'].join('\n');
   }
 
   private async statusReport(): Promise<string> {
@@ -120,10 +131,96 @@ export class TelegramAdminService implements OnModuleInit {
     }
   }
 
-  private async versionReport(): Promise<string> {
+  private async sendLatestApk(chatId: number): Promise<void> {
     const release = await this.githubRequest<GitHubRelease>('/releases/latest');
-    const apk = release.assets?.find((asset) => asset.name === 'app-release.apk');
-    return ['📦 أحدث إصدار DAZREVO', `الإصدار: ${release.name || release.tag_name || 'غير محدد'}`, `الوسم: ${release.tag_name || 'غير محدد'}`, `تاريخ النشر: ${release.published_at || 'غير متاح'}`, apk?.browser_download_url ? `APK: ${apk.browser_download_url}` : 'APK: لم يُعثر على أصل app-release.apk', release.html_url ? `التفاصيل: ${release.html_url}` : ''].filter(Boolean).join('\n');
+    const maxBytes = 49_000_000;
+    const arm64 = release.assets?.find((asset) => asset.name === 'app-arm64-v8a-release.apk');
+    const universal = release.assets?.find((asset) => asset.name === 'app-release.apk');
+    const asset = arm64 && typeof arm64.size === 'number' && arm64.size > 0 && arm64.size <= maxBytes
+      ? arm64
+      : universal && typeof universal.size === 'number' && universal.size > 0 && universal.size <= maxBytes
+        ? universal
+        : undefined;
+
+    if (!asset?.browser_download_url || !asset.name || typeof asset.size !== 'number') {
+      throw new Error('No Telegram-compatible APK asset is published. The release must include app-arm64-v8a-release.apk.');
+    }
+    if (asset.size <= 0 || asset.size > maxBytes) {
+      throw new Error(`APK asset exceeds Telegram's 50 MB upload limit; the internal safety ceiling is 49 MB (${asset.size} bytes).`);
+    }
+
+    const assetUrl = new URL(asset.browser_download_url);
+    if (
+      assetUrl.protocol !== 'https:' ||
+      assetUrl.hostname !== 'github.com' ||
+      !assetUrl.pathname.startsWith('/anasgdxj/darb-delivery-platform/releases/download/')
+    ) {
+      throw new Error('The published APK URL is not an approved DAZREVO GitHub release asset.');
+    }
+
+    const download = await fetch(assetUrl, { signal: AbortSignal.timeout(120000) });
+    if (!download.ok) throw new Error(`GitHub APK download failed with HTTP ${download.status}.`);
+    const bytes = Buffer.from(await download.arrayBuffer());
+    if (bytes.length !== asset.size) {
+      throw new Error(`Downloaded APK size mismatch: expected ${asset.size}, received ${bytes.length}.`);
+    }
+    if (asset.digest?.startsWith('sha256:')) {
+      const actualDigest = `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+      if (actualDigest !== asset.digest) throw new Error('Downloaded APK SHA-256 does not match the GitHub release asset.');
+    }
+
+    const version = this.escapeHtml(release.name || release.tag_name || 'أحدث إصدار');
+    const caption = [
+      '🚀 <b>أحدث إصدار من DAZREVO</b>',
+      `📦 الإصدار: <b>${version}</b>`,
+      `📱 توافق الملف: <b>Android ARM64</b>`,
+      `📅 تاريخ النشر: ${this.escapeHtml(release.published_at || 'غير متاح')}`,
+      '⬇️ ملف APK الرسمي مرفق بهذه الرسالة.',
+    ].join('\n');
+
+    const form = new FormData();
+    form.append('chat_id', String(chatId));
+    form.append('caption', caption.slice(0, 1024));
+    form.append('parse_mode', 'HTML');
+    form.append(
+      'document',
+      new Blob([bytes], { type: 'application/vnd.android.package-archive' }),
+      asset.name,
+    );
+
+    const response = await fetch(`https://api.telegram.org/bot${this.botToken}/sendDocument`, {
+      method: 'POST',
+      body: form,
+      signal: AbortSignal.timeout(180000),
+    });
+    const result = await response.json() as TelegramApiResponse<{
+      message_id?: number;
+      document?: { file_id?: string; file_size?: number };
+    }>;
+    if (!response.ok || !result.ok || !result.result?.document?.file_id) {
+      throw new Error(`Telegram sendDocument failed: ${result.description || response.statusText}`);
+    }
+    const deliveredSize = result.result.document.file_size;
+    if (deliveredSize !== undefined && deliveredSize !== bytes.length) {
+      throw new Error(`Telegram APK size mismatch: expected ${bytes.length}, received ${deliveredSize}.`);
+    }
+    this.logger.log(JSON.stringify({
+      event: 'telegram_apk_sent',
+      chatId,
+      assetName: asset.name,
+      fileSize: bytes.length,
+      messageId: result.result.message_id ?? null,
+    }));
+  }
+
+  private escapeHtml(value: string): string {
+    return value.replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    })[character] ?? character);
   }
 
   private async releasesReport(): Promise<string> {
@@ -133,8 +230,28 @@ export class TelegramAdminService implements OnModuleInit {
   }
 
   private async githubRequest<T>(path: string): Promise<T> {
-    const response = await fetch(`${this.githubApi}${path}`, { headers: { accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28' }, signal: AbortSignal.timeout(12000) });
-    if (!response.ok) throw new Error(`GitHub API returned HTTP ${response.status}`);
+    const token = this.config.get<string>('GITHUB_TOKEN')?.trim();
+    const headers: Record<string, string> = {
+      accept: 'application/vnd.github+json',
+      'x-github-api-version': '2022-11-28',
+    };
+    if (token) headers.authorization = `Bearer ${token}`;
+
+    const response = await fetch(`${this.githubApi}${path}`, {
+      headers,
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!response.ok) {
+      const rateLimitRemaining = response.headers.get('x-ratelimit-remaining');
+      const rateLimitReset = response.headers.get('x-ratelimit-reset');
+      if (response.status === 403 && rateLimitRemaining === '0') {
+        const resetAt = rateLimitReset
+          ? new Date(Number(rateLimitReset) * 1000).toISOString()
+          : 'unknown';
+        throw new Error(`GitHub API rate limit exhausted; configure GITHUB_TOKEN on Render. Limit resets at ${resetAt}.`);
+      }
+      throw new Error(`GitHub API returned HTTP ${response.status}`);
+    }
     return response.json() as Promise<T>;
   }
 

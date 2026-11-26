@@ -51,7 +51,12 @@ export class TelegramAdminController {
       hasText: typeof message?.text === 'string',
     }));
 
-    await this.telegram.handleUpdate(update);
+    void this.telegram.handleUpdate(update).catch((error) => {
+      this.logger.error(
+        'Telegram update processing failed after webhook acknowledgement.',
+        error instanceof Error ? error.stack : undefined,
+      );
+    });
     return { ok: true };
   }
 }
