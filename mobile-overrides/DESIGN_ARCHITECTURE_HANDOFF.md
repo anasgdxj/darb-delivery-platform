@@ -138,3 +138,7 @@ Uses the platform font stack (system Arabic/Latin sans) scaled dynamically by `D
    - `VendorOrdersScreen` preserves exact `MISSING`/`PENDING` empty states; `DriverDashboardScreen` preserves `REJECTED` review messages and non-fatal `statsError` banner recovery; `AccountScreen` preserves `ListView` + 3 `DarbGroupedSection` blocks and `SettingsScreen` navigation.
 3. **Localization Completeness**: All 619+ static `dt('...')` UI strings have explicit English and Turkish pairs in `app_localizations.dart` (`_sourceValues`), plus dynamic prefix/suffix handlers for stock counts, distances, and product totals.
 4. **Verification Note**: CI workflows (`.github/workflows/validate-mobile-overrides.yml` and `.github/workflows/build-android-release.yml`) should be executed via `flutter analyze lib` and `flutter test` in an environment with Flutter SDK installed to verify runtime widget tests (`widget_test.dart`).
+
+## Release Provenance
+
+The Android release must be built from the current `main` branch after all Google AI synchronized changes have landed. The visual identity source of truth is `mobile-overrides/lib/core/theme/darb_design_system.dart`; Android launcher artwork is maintained under `mobile-overrides/android-res/` and `mobile-overrides/ic_launcher.xml`. Release CI must apply these overrides before running Flutter tests and producing the signed APK/AAB.
