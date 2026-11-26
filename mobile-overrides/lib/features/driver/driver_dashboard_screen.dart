@@ -591,6 +591,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   Widget _buildAvailableCard(Map<String, dynamic> order) {
     final id = order['id'].toString();
     final isPeer = order['type'] == 'PEER_DELIVERY';
+    final isShopping = order['type'] == 'SHOPPING_DELIVERY';
     final dist = order['distanceKm'];
     final distLabel = dist is num ? '${dist.toStringAsFixed(1)} km' : null;
     final storeName = order['vendor']?['translations'] is List &&
@@ -616,7 +617,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       leadingIcon: isPeer
           ? Icons.local_shipping_outlined
           : Icons.storefront_outlined,
-      title: isPeer ? dt('طلب توصيل مستقل') : (storeName ?? dt('متجر')),
+      title: isShopping ? '${dt('شراء وتوصيل')}: ${order['shoppingItemName'] ?? dt('غرض')}' : (isPeer ? dt('طلب توصيل مستقل') : (storeName ?? dt('متجر'))),
       subtitle: (totalAmount != null && totalAmount > 0)
           ? formatDarbMoney(totalAmount, orderCurrency)
           : null,
@@ -644,9 +645,13 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (isShopping) ...[
+            Text(order['shoppingDescription']?.toString() ?? '', style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w700)),
+            if ((order['shoppingStoreAddress'] ?? '').toString().isNotEmpty) Text(order['shoppingStoreAddress'].toString(), style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 12)),
+          ],
           DarbRouteConnector(
             pickupLabel: dt('الاستلام'),
-            pickupAddress: isPeer
+            pickupAddress: isShopping ? ((order['shoppingStoreName'] ?? '').toString().isNotEmpty ? order['shoppingStoreName'].toString() : dt('متجر يحدده السائق')) : (isPeer
                 ? (order['pickupAddress']?.toString() ?? dt('الاستلام'))
                 : (storeName ?? dt('متجر')),
             dropoffLabel: dt('التسليم'),
@@ -698,7 +703,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                     onPressed: isBusy
                         ? null
                         : () =>
-                            isPeer ? _submitOffer(order) : _claimOrder(id),
+                            (isPeer || isShopping) ? _submitOffer(order) : _claimOrder(id),
                     child: isBusy
                         ? const SizedBox(
                             width: 17,
@@ -706,7 +711,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : Text(
-                            isPeer
+                            (isPeer || isShopping)
                                 ? dt('تقديم أجرة التوصيل')
                                 : dt('استلام الطلب'),
                           ),
