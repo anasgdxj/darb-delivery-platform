@@ -1,7 +1,13 @@
+export type AiConversationTurn = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
 export type AiTextRequest = {
   systemPrompt: string;
   context: Record<string, unknown>;
   message: string;
+  history?: AiConversationTurn[];
 };
 
 /**
