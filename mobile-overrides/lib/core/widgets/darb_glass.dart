@@ -176,7 +176,10 @@ class DarbGlassSurface extends StatelessWidget {
           border: Border.all(color: effectiveBorder),
           boxShadow: shadow,
         ),
-        child: child,
+        child: Material(
+          color: Colors.transparent,
+          child: child,
+        ),
       );
     }
 
@@ -231,7 +234,10 @@ class DarbGlassSurface extends StatelessWidget {
                   )
                 : null,
             padding: padding,
-            child: child,
+            child: Material(
+              color: Colors.transparent,
+              child: child,
+            ),
           ),
         ),
       ),
