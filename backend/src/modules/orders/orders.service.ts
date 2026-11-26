@@ -61,6 +61,42 @@ export class OrdersService {
     });
   }
 
+  async createShoppingRequest(
+    customerId: string,
+    dto: { cityId: string; addressId: string; itemName: string; description: string; storeName?: string; storeAddress?: string; maxPurchaseBudget?: number },
+  ) {
+    const itemName = dto.itemName.trim();
+    const description = dto.description.trim();
+    const storeName = dto.storeName?.trim() || null;
+    const storeAddress = dto.storeAddress?.trim() || null;
+    if (itemName.length < 2 || itemName.length > 180) throw new BadRequestException('اسم الغرض غير صالح');
+    if (description.length < 5 || description.length > 3000) throw new BadRequestException('أضف وصفاً واضحاً للغرض');
+    if (storeName && storeName.length > 180) throw new BadRequestException('اسم المتجر طويل جداً');
+    if (storeAddress && storeAddress.length > 1000) throw new BadRequestException('عنوان المتجر طويل جداً');
+    if (dto.maxPurchaseBudget !== undefined && (!Number.isFinite(dto.maxPurchaseBudget) || dto.maxPurchaseBudget <= 0 || dto.maxPurchaseBudget > 1000000000)) {
+      throw new BadRequestException('الميزانية القصوى غير صالحة');
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const [address, city] = await Promise.all([
+        tx.address.findFirst({ where: { id: dto.addressId, userId: customerId }, select: { id: true } }),
+        tx.city.findFirst({ where: { id: dto.cityId, isActive: true }, select: { id: true, defaultCurrency: true } }),
+      ]);
+      if (!address) throw new BadRequestException('عنوان التسليم غير صالح');
+      if (!city) throw new BadRequestException('المدينة غير متاحة');
+      return tx.order.create({
+        data: {
+          orderNumber: `DRB-${Date.now().toString(36).toUpperCase()}-${randomBytes(2).toString('hex').toUpperCase()}`,
+          type: 'SHOPPING_DELIVERY', status: 'PENDING', cityId: city.id, customerId, addressId: address.id,
+          shoppingItemName: itemName, shoppingDescription: description, shoppingStoreName: storeName,
+          shoppingStoreAddress: storeAddress, shoppingMaxBudget: dto.maxPurchaseBudget ?? null,
+          currency: city.defaultCurrency, subtotal: 0, deliveryFee: 0, total: 0, notes: 'SHOPPING_REQUEST',
+          payment: { create: { method: 'CASH_ON_DELIVERY', amount: 0, currency: city.defaultCurrency } },
+          statusHistory: { create: { status: 'PENDING', changedBy: customerId } },
+        },
+        include: { payment: true, address: true },
+      });
+    });
+  }
   async estimate(
     customerId: string,
     dto: { cityId: string; addressId: string; vendorId: string; items: { productId: string; quantity: number }[] },
@@ -284,6 +320,7 @@ export class OrdersService {
         driver: { select: { id: true, vehicleType: true, user: { select: { name: true, phone: true } } } },
         reviews: { where: { authorId: userId }, select: { id: true, rating: true, comment: true, createdAt: true } },
         statusHistory: { orderBy: { createdAt: 'asc' } },
+        shoppingPurchaseQuotes: { orderBy: { createdAt: 'desc' }, include: { driver: { select: { user: { select: { name: true } } } } } },
       },
     });
   }
@@ -314,6 +351,7 @@ export class OrdersService {
         address: true,
         customer: { select: { name: true, phone: true } },
         vendor: { include: { location: true, translations: true } },
+        shoppingPurchaseQuotes: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
     });
   }
@@ -333,7 +371,7 @@ export class OrdersService {
         dismissedByDrivers: { none: { driverId: driver.id } },
         OR: [
           { type: 'VENDOR_ORDER', status: 'READY' },
-          { type: 'PEER_DELIVERY', status: 'PENDING' },
+          { type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] }, status: 'PENDING' },
         ],
       },
       orderBy: { createdAt: 'asc' },
@@ -373,7 +411,7 @@ export class OrdersService {
           WHERE ddo."orderId" = o."id" AND ddo."driverId" = ${driver.id}
         )
         AND ((o."type" = 'VENDOR_ORDER' AND o."status" = 'READY')
-          OR (o."type" = 'PEER_DELIVERY' AND o."status" = 'PENDING'))
+          OR (o."type" IN ('PEER_DELIVERY', 'SHOPPING_DELIVERY') AND o."status" = 'PENDING'))
     `;
     const distanceByOrder = new Map(distances.map((row) => [row.orderId, row.distanceKm]));
     return orders
@@ -496,7 +534,7 @@ export class OrdersService {
     return this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${orderId} FOR UPDATE`;
       const order = await tx.order.findFirst({
-        where: { id: orderId, cityId: driver.cityId, type: 'PEER_DELIVERY', status: 'PENDING', driverId: null },
+        where: { id: orderId, cityId: driver.cityId, type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] }, status: 'PENDING', driverId: null },
         select: { id: true, currency: true },
       });
       if (!order) throw new BadRequestException('الطلب لم يعد متاحاً لتقديم عرض');
@@ -510,7 +548,7 @@ export class OrdersService {
 
   async deliveryOffersForCustomer(userId: string, orderId: string) {
     const order = await this.prisma.order.findFirst({
-      where: { id: orderId, customerId: userId, type: 'PEER_DELIVERY' },
+      where: { id: orderId, customerId: userId, type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] } },
       select: { id: true, status: true },
     });
     if (!order) throw new NotFoundException('الطلب غير موجود');
@@ -521,11 +559,78 @@ export class OrdersService {
     });
   }
 
+  async shoppingQuotesForCustomer(userId: string, orderId: string) {
+    const order = await this.prisma.order.findFirst({ where: { id: orderId, customerId: userId, type: 'SHOPPING_DELIVERY' }, select: { id: true } });
+    if (!order) throw new NotFoundException('الطلب غير موجود');
+    return this.prisma.shoppingPurchaseQuote.findMany({
+      where: { orderId }, orderBy: { createdAt: 'desc' },
+      include: { driver: { select: { vehicleType: true, user: { select: { name: true } } } } },
+    });
+  }
+
+  async submitShoppingPurchaseQuote(driverUserId: string, orderId: string, amount: number, details: string) {
+    const cleanDetails = details.trim();
+    if (!Number.isFinite(amount) || amount <= 0 || amount > 1000000000) throw new BadRequestException('أدخل تكلفة شراء صحيحة');
+    if (cleanDetails.length < 3 || cleanDetails.length > 2000) throw new BadRequestException('أضف تفاصيل واضحة للأصناف والسعر');
+    const driver = await this.prisma.driver.findUnique({ where: { userId: driverUserId }, select: { id: true, status: true } });
+    if (!driver || driver.status !== 'APPROVED') throw new ForbiddenException('حساب السائق غير معتمد');
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${orderId} FOR UPDATE`;
+      const order = await tx.order.findFirst({ where: { id: orderId, type: 'SHOPPING_DELIVERY', driverId: driver.id, status: 'ASSIGNED' }, select: { id: true, currency: true } });
+      if (!order) throw new BadRequestException('لا يمكن إرسال تكلفة الشراء لهذا الطلب');
+      const purchased = await tx.shoppingPurchaseQuote.findFirst({ where: { orderId, purchasedAt: { not: null } }, select: { id: true } });
+      if (purchased) throw new BadRequestException('تم تسجيل شراء هذا الطلب بالفعل');
+      await tx.shoppingPurchaseQuote.updateMany({ where: { orderId, status: { in: ['PENDING', 'APPROVED'] } }, data: { status: 'SUPERSEDED' } });
+      return tx.shoppingPurchaseQuote.create({ data: { orderId, driverId: driver.id, amount, currency: order.currency, details: cleanDetails, status: 'PENDING' } });
+    });
+  }
+
+  async approveShoppingPurchaseQuote(userId: string, orderId: string, quoteId: string, allowBudgetOverride: boolean) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${orderId} FOR UPDATE`;
+      const order = await tx.order.findFirst({ where: { id: orderId, customerId: userId, type: 'SHOPPING_DELIVERY', status: 'ASSIGNED' }, select: { id: true, shoppingMaxBudget: true } });
+      if (!order) throw new BadRequestException('لا يمكن اعتماد تكلفة هذا الطلب');
+      const quote = await tx.shoppingPurchaseQuote.findFirst({ where: { id: quoteId, orderId, status: 'PENDING' }, select: { id: true, amount: true } });
+      if (!quote) throw new BadRequestException('عرض الشراء لم يعد متاحاً');
+      if (order.shoppingMaxBudget !== null && Number(quote.amount) > Number(order.shoppingMaxBudget) && !allowBudgetOverride) throw new BadRequestException('التكلفة تتجاوز ميزانيتك؛ فعّل الموافقة على تجاوز الميزانية إذا كنت توافق');
+      await tx.shoppingPurchaseQuote.updateMany({ where: { orderId, status: { in: ['PENDING', 'APPROVED'] }, id: { not: quoteId } }, data: { status: 'SUPERSEDED' } });
+      return tx.shoppingPurchaseQuote.update({ where: { id: quoteId }, data: { status: 'APPROVED', approvedAt: new Date(), approvedByUserId: userId } });
+    });
+  }
+
+  async rejectShoppingPurchaseQuote(userId: string, orderId: string, quoteId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${orderId} FOR UPDATE`;
+      const order = await tx.order.findFirst({ where: { id: orderId, customerId: userId, type: 'SHOPPING_DELIVERY', status: 'ASSIGNED' }, select: { id: true } });
+      if (!order) throw new BadRequestException('لا يمكن رفض عرض هذا الطلب');
+      const changed = await tx.shoppingPurchaseQuote.updateMany({ where: { id: quoteId, orderId, status: 'PENDING' }, data: { status: 'REJECTED', rejectedAt: new Date() } });
+      if (!changed.count) throw new BadRequestException('عرض الشراء لم يعد بانتظار الموافقة');
+      return { rejected: true, orderId, quoteId };
+    });
+  }
+
+  async recordShoppingPurchaseProof(driverUserId: string, orderId: string, dto: { receiptReference: string; proofNote?: string; proofUrl?: string }) {
+    const receiptReference = dto.receiptReference.trim();
+    const proofNote = dto.proofNote?.trim() || null;
+    if (receiptReference.length < 2 || receiptReference.length > 180) throw new BadRequestException('أدخل رقم الفاتورة أو مرجع إثبات الشراء');
+    if (proofNote && proofNote.length > 2000) throw new BadRequestException('ملاحظة الإثبات طويلة جداً');
+    if (dto.proofUrl && (!/^https:\/\//i.test(dto.proofUrl) || dto.proofUrl.length > 2048)) throw new BadRequestException('رابط إثبات الشراء غير صالح');
+    const driver = await this.prisma.driver.findUnique({ where: { userId: driverUserId }, select: { id: true, status: true } });
+    if (!driver || driver.status !== 'APPROVED') throw new ForbiddenException('حساب السائق غير معتمد');
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${orderId} FOR UPDATE`;
+      const order = await tx.order.findFirst({ where: { id: orderId, type: 'SHOPPING_DELIVERY', driverId: driver.id, status: 'ASSIGNED' }, select: { id: true } });
+      if (!order) throw new BadRequestException('الطلب ليس مسنداً إليك أو لم يعد في مرحلة الشراء');
+      const quote = await tx.shoppingPurchaseQuote.findFirst({ where: { orderId, driverId: driver.id, status: 'APPROVED', purchasedAt: null }, orderBy: { approvedAt: 'desc' }, select: { id: true } });
+      if (!quote) throw new BadRequestException('يجب الحصول على موافقة العميل على تكلفة الشراء أولاً');
+      return tx.shoppingPurchaseQuote.update({ where: { id: quote.id }, data: { receiptReference, proofNote, proofUrl: dto.proofUrl ?? null, purchasedAt: new Date() } });
+    });
+  }
   async selectDeliveryOffer(userId: string, orderId: string, offerId: string) {
     return this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${orderId} FOR UPDATE`;
       const order = await tx.order.findFirst({
-        where: { id: orderId, customerId: userId, type: 'PEER_DELIVERY', status: 'PENDING', driverId: null },
+        where: { id: orderId, customerId: userId, type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] }, status: 'PENDING', driverId: null },
         select: { id: true },
       });
       if (!order) throw new BadRequestException('لا يمكن اختيار عرض لهذا الطلب');
@@ -593,6 +698,10 @@ export class OrdersService {
       if (role === 'DRIVER') ownershipWhere.driverId = order.driverId;
       const changed = await tx.order.updateMany({ where: ownershipWhere, data: { status } });
       if (!changed.count) throw new BadRequestException('تم تحديث الطلب من مستخدم آخر؛ أعد تحميله');
+      if (role === 'DRIVER' && status === OrderStatus.PICKED_UP && order.type === 'SHOPPING_DELIVERY') {
+        const proof = await tx.shoppingPurchaseQuote.findFirst({ where: { orderId, driverId: order.driverId!, status: 'APPROVED', purchasedAt: { not: null }, receiptReference: { not: null } }, select: { id: true } });
+        if (!proof) throw new BadRequestException('سجّل إثبات الشراء بعد موافقة العميل قبل استلام الطلب للتوصيل');
+      }
       if (status === OrderStatus.CANCELLED) {
         for (const item of order.items) {
           await tx.product.updateMany({
