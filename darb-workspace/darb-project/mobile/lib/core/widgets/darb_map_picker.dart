@@ -53,6 +53,7 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
   }
 
   void _selectPoint(LatLng point) {
+    DarbHaptics.selection();
     widget.onPointSelected(point.latitude, point.longitude);
     setState(() => _locationError = null);
   }
@@ -68,7 +69,7 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
       if (!mounted) return;
       final point = LatLng(position.latitude, position.longitude);
       _selectPoint(point);
-      if (_mapReady) _mapController.move(point, 15);
+      if (_mapReady) _mapController.move(point, 15.5);
     } on DarbLocationException catch (error) {
       if (mounted) setState(() => _locationError = error.message);
     } catch (_) {
@@ -87,23 +88,24 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
   @override
   Widget build(BuildContext context) {
     final point = _selectedPoint;
-    final hasSelection = widget.selectedLatitude != null &&
-        widget.selectedLongitude != null;
+    final hasSelection =
+        widget.selectedLatitude != null && widget.selectedLongitude != null;
     final accent = DarbColors.primaryOf(context);
+    final isDark = DarbColors.isDark(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AnimatedContainer(
           duration: DarbMotion.effectiveDuration(context, DarbMotion.fast),
-          height: 250,
+          height: 254,
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: DarbColors.softSurfaceOf(context),
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: hasSelection ? accent : DarbColors.borderOf(context),
-              width: hasSelection ? 1.5 : 1.0,
+              width: hasSelection ? 1.6 : 1.0,
             ),
           ),
           child: Stack(
@@ -120,7 +122,8 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.darb.darb',
                     maxZoom: 19,
                   ),
@@ -135,9 +138,13 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                           child: Icon(
                             Icons.location_on_rounded,
                             size: 48,
-                            color: accent,
+                            color: isDark ? DarbColors.lime : DarbColors.forest,
                             shadows: const [
-                              Shadow(color: Colors.black38, blurRadius: 8, offset: Offset(0, 2)),
+                              Shadow(
+                                color: Colors.black45,
+                                blurRadius: 10,
+                                offset: Offset(0, 3),
+                              ),
                             ],
                           ),
                         ),
@@ -162,9 +169,10 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                 top: 10,
                 right: 10,
                 child: Material(
-                  color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.94),
-                  borderRadius: BorderRadius.circular(12),
-                  elevation: 2,
+                  color: DarbColors.surfaceElevatedOf(context)
+                      .withValues(alpha: 0.94),
+                  borderRadius: BorderRadius.circular(14),
+                  elevation: 3,
                   child: Column(
                     children: [
                       IconButton(
@@ -173,7 +181,9 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                         onPressed: _mapReady
                             ? () => _mapController.move(
                                   _mapController.camera.center,
-                                  (_mapController.camera.zoom + 1).clamp(4, 19).toDouble(),
+                                  (_mapController.camera.zoom + 1)
+                                      .clamp(4, 19)
+                                      .toDouble(),
                                 )
                             : null,
                         icon: const Icon(Icons.add_rounded),
@@ -185,7 +195,9 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                         onPressed: _mapReady
                             ? () => _mapController.move(
                                   _mapController.camera.center,
-                                  (_mapController.camera.zoom - 1).clamp(4, 19).toDouble(),
+                                  (_mapController.camera.zoom - 1)
+                                      .clamp(4, 19)
+                                      .toDouble(),
                                 )
                             : null,
                         icon: const Icon(Icons.remove_rounded),
@@ -202,11 +214,17 @@ class _DarbMapPickerState extends State<DarbMapPicker> {
                   child: IgnorePointer(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.62),
-                        borderRadius: BorderRadius.circular(10),
+                        color: DarbColors.forest.withValues(alpha: 0.88),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: DarbColors.lime.withValues(alpha: 0.38),
+                        ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         child: Text(
                           dt('حرّك الخريطة واضغط لتحديد النقطة بدقة'),
                           textAlign: TextAlign.center,

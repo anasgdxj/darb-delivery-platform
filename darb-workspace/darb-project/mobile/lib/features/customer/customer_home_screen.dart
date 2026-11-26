@@ -39,8 +39,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   String _selectedType = '';
   bool _openOnly = false;
   bool _loading = true;
+  bool _loadingVendors = false;
   bool _offline = false;
   String? _error;
+  String? _vendorsError;
 
   @override
   void initState() {
@@ -104,18 +106,23 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _vendorsError = null;
     });
     try {
       final cityRes = await Api.instance.getWithCache('/cities', 'active_cities');
       final cities = (cityRes.data as List? ?? [])
           .whereType<Map<String, dynamic>>()
           .toList();
-      final chosenId = _selectedCityId ??
-          (cities.isNotEmpty ? cities.first['id']?.toString() : null);
+      final hasSelected = _selectedCityId != null &&
+          cities.any((c) => c['id']?.toString() == _selectedCityId);
+      final chosenId = hasSelected
+          ? _selectedCityId
+          : (cities.isNotEmpty ? cities.first['id']?.toString() : null);
 
       List<Map<String, dynamic>> vendors = const [];
       List<Map<String, dynamic>> orders = const [];
       List<Map<String, dynamic>> addresses = const [];
+      String? vendorsError;
       var usedCache = cityRes.fromCache;
 
       final secondaryFutures = <Future<void>>[
@@ -149,6 +156,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 .whereType<Map<String, dynamic>>()
                 .toList();
             usedCache = usedCache || vRes.fromCache;
+          }).catchError((Object err) {
+            vendorsError = err is ApiException
+                ? err.message
+                : dt('حدث خطأ غير متوقع، حاول مجدداً');
           }),
         );
       }
@@ -163,6 +174,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         _recentOrders = orders;
         _addresses = addresses;
         _offline = usedCache;
+        _vendorsError = vendorsError;
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -178,8 +190,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     setState(() {
       _selectedCityId = cityId;
       _selectedType = '';
-      _loading = true;
-      _error = null;
+      _loadingVendors = true;
+      _vendorsError = null;
     });
     try {
       final res = await Api.instance.getWithCache(
@@ -192,13 +204,16 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       setState(() {
         _vendors = vendors;
         _offline = res.fromCache;
+        _vendorsError = null;
       });
     } on ApiException catch (e) {
-      if (mounted) setState(() => _error = e.message);
+      if (mounted) setState(() => _vendorsError = e.message);
     } catch (_) {
-      if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+      if (mounted) {
+        setState(() => _vendorsError = dt('حدث خطأ غير متوقع، حاول مجدداً'));
+      }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loadingVendors = false);
     }
   }
 
@@ -273,8 +288,25 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     if (_error != null && _cities.isEmpty) {
       return DarbStateView.error(message: _error, onRetry: _bootstrap);
     }
+    if (!_loading && _cities.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _bootstrap,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: DarbStateView.empty(
+                message: dt('لا توجد بيانات متاحة حالياً'),
+                icon: Icons.location_city_outlined,
+                onRetry: _bootstrap,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
-    final isDark = DarbColors.isDark(context);
     final types = _vendorTypes;
     final filtered = _filteredVendors;
     final featuredOrder = _featuredOrder;
@@ -316,7 +348,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Text(
                         greetingName != null
                             ? '${dt('أهلاً بك')}، $greetingName'
-                            : dt('مرحباً بك في دَرْب'),
+                            : dt('مرحباً بك في دازريفو'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -389,7 +421,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   Expanded(
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: _selectedCityId,
+                        value: _selectedCityMap?['id']?.toString(),
                         isExpanded: true,
                         dropdownColor: DarbColors.surfaceElevatedOf(context),
                         style: TextStyle(
@@ -463,7 +495,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     flex: 5,
                     child: DarbBentoActionCard(
                       icon: Icons.auto_awesome_rounded,
-                      accentColor: DarbColors.primaryOf(context),
+                      accentColor: DarbColors.violetOf(context),
                       badge: 'AI',
                       title: dt('المساعد الذكي'),
                       subtitle: dt('اكتب طلبك وسيتم تجهيزه تلقائياً'),
@@ -552,14 +584,34 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             ),
           ],
           const SizedBox(height: 14),
-          if (_loading)
+          if (_loading || _loadingVendors)
             const DarbStateView.loading()
+          else if (_vendorsError != null)
+            DarbStateView.error(
+              message: _vendorsError,
+              onRetry: _selectedCityId != null
+                  ? () => _switchCity(_selectedCityId!)
+                  : _bootstrap,
+            )
           else if (filtered.isEmpty)
             DarbStateView.empty(
               message: _vendors.isEmpty
                   ? dt('لا توجد متاجر متاحة في هذه المدينة')
                   : dt('لم نعثر على نتائج مطابقة'),
-              icon: Icons.storefront_outlined,
+              icon: _vendors.isEmpty
+                  ? Icons.storefront_outlined
+                  : Icons.search_off_rounded,
+              onRetry: _vendors.isEmpty
+                  ? (_selectedCityId != null
+                      ? () => _switchCity(_selectedCityId!)
+                      : _bootstrap)
+                  : () {
+                      _searchController.clear();
+                      setState(() {
+                        _selectedType = '';
+                        _openOnly = false;
+                      });
+                    },
             )
           else
             for (var i = 0; i < filtered.length; i++)

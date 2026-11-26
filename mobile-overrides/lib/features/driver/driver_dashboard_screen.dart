@@ -27,6 +27,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   bool _togglingOnline = false;
   bool _sendingLocation = false;
   String? _error;
+  String? _statsError;
   String? _availableError;
   final Set<String> _busyOrderIds = <String>{};
 
@@ -40,18 +41,28 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _statsError = null;
       _availableError = null;
     });
     try {
-      final driver =
-          await Api.instance.get('/drivers/me') as Map<String, dynamic>;
+      final rawDriver = await Api.instance.get('/drivers/me');
+      if (rawDriver is! Map<String, dynamic>) {
+        throw const ApiException('تعذر تحميل بيانات السائق');
+      }
+      final driver = rawDriver;
       Map<String, dynamic>? stats;
+      String? statsError;
       List<Map<String, dynamic>> available = const [];
       String? availableError;
 
       try {
-        stats = await Api.instance.get('/drivers/stats') as Map<String, dynamic>;
-      } catch (_) {}
+        final rawStats = await Api.instance.get('/drivers/stats');
+        if (rawStats is Map<String, dynamic>) stats = rawStats;
+      } on ApiException catch (e) {
+        statsError = e.message;
+      } catch (_) {
+        statsError = dt('تعذر تحميل بعض البيانات الثانوية. أعد المحاولة لتحديثها.');
+      }
 
       if (driver['status'] == 'APPROVED' && driver['isOnline'] == true) {
         try {
@@ -71,6 +82,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
       setState(() {
         _driver = driver;
         _stats = stats;
+        _statsError = statsError;
         _available = available;
         _availableError = availableError;
       });
@@ -361,7 +373,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
     if (_error != null) return DarbStateView.error(message: _error, onRetry: _load);
 
     final driver = _driver ?? {};
-    final isApproved = driver['status'] == 'APPROVED';
+    final driverStatus = driver['status']?.toString() ?? 'PENDING';
+    final isApproved = driverStatus == 'APPROVED';
+    final isPending = driverStatus == 'PENDING';
     final isOnline = driver['isOnline'] == true;
     final stats = _stats ?? {};
     final statsCurrency = stats['currency']?.toString() ?? 'SYP';
@@ -401,7 +415,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                                 ? (isOnline
                                     ? dt('متصل لاستلام الطلبات')
                                     : dt('غير متصل'))
-                                : dt('حساب السائق بانتظار اعتماد الإدارة'),
+                                : (isPending
+                                    ? dt('حساب السائق بانتظار اعتماد الإدارة')
+                                    : dt('يتطلب طلب السائق مراجعة الإدارة')),
                             style: TextStyle(
                               color: isOnline
                                   ? Colors.white
@@ -414,7 +430,9 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                           Text(
                             isApproved
                                 ? dt('فعّل الحالة لتظهر لك الطلبات الجاهزة')
-                                : dt('قيد مراجعة الإدارة'),
+                                : (isPending
+                                    ? dt('قيد مراجعة الإدارة')
+                                    : driverStatus),
                             style: TextStyle(
                               color: isOnline
                                   ? DarbColors.mint
@@ -486,6 +504,37 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             ),
           ),
           const SizedBox(height: 14),
+          if (_statsError != null) ...[
+            DarbGlassSurface(
+              tintColor: DarbColors.warningSoftOf(context),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 18,
+                    color: DarbColors.warningOf(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _statsError!,
+                      style: TextStyle(
+                        color: DarbColors.warningOf(context),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _load,
+                    child: Text(dt('إعادة المحاولة')),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -533,13 +582,17 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
           const SizedBox(height: 10),
           if (!isApproved)
             DarbStateView.empty(
-              message: dt('حساب السائق بانتظار اعتماد الإدارة'),
+              message: isPending
+                  ? dt('حساب السائق بانتظار اعتماد الإدارة')
+                  : dt('يتطلب طلب السائق مراجعة الإدارة'),
               icon: Icons.hourglass_bottom_rounded,
+              onRetry: _load,
             )
           else if (!isOnline)
             DarbStateView.empty(
               message: dt('فعّل الحالة لتظهر لك الطلبات الجاهزة'),
               icon: Icons.power_settings_new_rounded,
+              onRetry: () => _toggleOnline(true),
             )
           else if (_availableError != null && _available.isEmpty)
             DarbStateView.error(
@@ -550,6 +603,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
             DarbStateView.empty(
               message: dt('لا توجد طلبات متاحة حالياً'),
               icon: Icons.delivery_dining_outlined,
+              onRetry: _load,
             )
           else
             for (final order in _available)

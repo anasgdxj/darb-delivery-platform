@@ -12,10 +12,12 @@ import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
 import '../auth/login_screen.dart';
+import '../auth/onboarding_screen.dart';
 import '../customer/addresses_screen.dart';
 import 'ai_role_assistant_screen.dart';
 import 'driver_application_screen.dart';
 import 'edit_profile_screen.dart';
+import 'settings_screen.dart';
 import 'vendor_application_screen.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -35,11 +37,129 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   bool _preferenceSaved = false;
   Timer? _savedTimer;
+  _ActivitySummary? _activity;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadActivitySummary());
+  }
+
+  @override
+  void didUpdateWidget(covariant AccountScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user['role'] != widget.user['role'] ||
+        oldWidget.user['id'] != widget.user['id']) {
+      unawaited(_loadActivitySummary());
+    }
+  }
 
   @override
   void dispose() {
     _savedTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _loadActivitySummary() async {
+    if (Api.instance.accessToken == null) return;
+    final role = widget.user['role']?.toString().toUpperCase() ?? 'CUSTOMER';
+    try {
+      if (role == 'DRIVER') {
+        final stats = await Api.instance.get('/drivers/stats');
+        if (stats is Map && mounted) {
+          final currency = stats['currency']?.toString() ?? 'SYP';
+          final completed = (stats['completedTrips'] as num?)?.toInt() ?? 0;
+          final totalEarnings = (stats['totalEarnings'] as num?) ?? 0;
+          final todayEarnings = (stats['todayEarnings'] as num?) ?? 0;
+          setState(() {
+            _activity = _ActivitySummary(
+              title: dt('ملخص النشاط والأرباح'),
+              primaryLabel: dt('الأرباح المحققة'),
+              primaryValue: formatDarbMoney(totalEarnings, currency),
+              secondaryLabel: dt('أرباح اليوم'),
+              secondaryValue: formatDarbMoney(todayEarnings, currency),
+              tertiaryLabel: dt('الرحلات المكتملة'),
+              tertiaryValue: '$completed',
+              icon: Icons.insights_rounded,
+            );
+          });
+        }
+      } else if (role == 'VENDOR') {
+        final stats = await Api.instance.get('/vendors/mine/stats');
+        if (stats is Map && mounted) {
+          final currency = stats['currency']?.toString() ?? 'SYP';
+          final todaySales = (stats['todayRevenue'] as num?) ?? 0;
+          final activeOrders = (stats['activeOrders'] as num?)?.toInt() ?? 0;
+          final todayOrders = (stats['todayOrders'] as num?)?.toInt() ?? 0;
+          setState(() {
+            _activity = _ActivitySummary(
+              title: dt('ملخص المتجر والمبيعات'),
+              primaryLabel: dt('مبيعات اليوم'),
+              primaryValue: formatDarbMoney(todaySales, currency),
+              secondaryLabel: dt('طلبات اليوم'),
+              secondaryValue: '$todayOrders',
+              tertiaryLabel: dt('قيد التنفيذ'),
+              tertiaryValue: '$activeOrders',
+              icon: Icons.storefront_rounded,
+            );
+          });
+        }
+      } else if (role == 'ADMIN') {
+        final stats = await Api.instance.get('/admin/stats');
+        if (stats is Map && mounted) {
+          final gmv =
+              num.tryParse(stats['deliveredGrossTotal']?.toString() ?? '0') ??
+                  0;
+          final totalOrders = (stats['ordersTotal'] as num?)?.toInt() ?? 0;
+          final online = (stats['driversOnline'] as num?)?.toInt() ?? 0;
+          setState(() {
+            _activity = _ActivitySummary(
+              title: dt('ملخص التشغيل العام'),
+              primaryLabel: dt('إجمالي المبيعات'),
+              primaryValue: formatDarbMoney(gmv),
+              secondaryLabel: dt('إجمالي الطلبات'),
+              secondaryValue: '$totalOrders',
+              tertiaryLabel: dt('سائقون متصلون'),
+              tertiaryValue: '$online',
+              icon: Icons.analytics_outlined,
+            );
+          });
+        }
+      } else {
+        final ordersRes = await Api.instance.get('/orders/mine');
+        if (ordersRes is List && mounted) {
+          final list = ordersRes.whereType<Map<String, dynamic>>().toList();
+          final delivered = list
+              .where((o) => o['status']?.toString().toUpperCase() == 'DELIVERED')
+              .toList();
+          final active = list
+              .where((o) {
+                final s = o['status']?.toString().toUpperCase() ?? '';
+                return s != 'DELIVERED' && s != 'CANCELLED' && s != 'REJECTED';
+              })
+              .length;
+          num totalSpent = 0;
+          var currency = 'SYP';
+          for (final o in delivered) {
+            totalSpent += num.tryParse(o['total']?.toString() ?? '0') ?? 0;
+            final c = o['currency']?.toString();
+            if (c != null && c.isNotEmpty) currency = c;
+          }
+          setState(() {
+            _activity = _ActivitySummary(
+              title: dt('ملخص الطلبات والمدفوعات'),
+              primaryLabel: dt('إجمالي المدفوع'),
+              primaryValue: formatDarbMoney(totalSpent, currency),
+              secondaryLabel: dt('طلبات مكتملة'),
+              secondaryValue: '${delivered.length}',
+              tertiaryLabel: dt('طلبات نشطة'),
+              tertiaryValue: '$active',
+              icon: Icons.receipt_long_rounded,
+            );
+          });
+        }
+      }
+    } catch (_) {}
   }
 
   void _notifyPreferenceSaved() {
@@ -64,6 +184,19 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+  Future<void> _openSettings() async {
+    DarbHaptics.selection();
+    await Navigator.push<void>(
+      context,
+      DarbPageRoute(
+        builder: (_) => SettingsScreen(
+          user: widget.user,
+          onRefreshUser: widget.onRefreshUser,
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickLanguage() async {
     final current = darbLocale.value.languageCode;
     final selected = await showDarbGlassModalSheet<String>(
@@ -74,7 +207,11 @@ class _AccountScreenState extends State<AccountScreen> {
         children: [
           Text(
             AppLocalizations.of(ctx).t('languageTitle'),
-            style: TextStyle(color: DarbColors.inkOf(ctx), fontSize: 18, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: DarbColors.inkOf(ctx),
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 10),
           for (final item in [
@@ -83,8 +220,16 @@ class _AccountScreenState extends State<AccountScreen> {
             ('tr', 'Türkçe'),
           ])
             ListTile(
-              title: Text(item.$2, style: const TextStyle(fontWeight: FontWeight.w800)),
-              trailing: current == item.$1 ? Icon(Icons.check_circle_rounded, color: DarbColors.primaryOf(ctx)) : null,
+              title: Text(
+                item.$2,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              trailing: current == item.$1
+                  ? Icon(
+                      Icons.check_circle_rounded,
+                      color: DarbColors.primaryOf(ctx),
+                    )
+                  : null,
               onTap: () => Navigator.pop(ctx, item.$1),
             ),
         ],
@@ -132,7 +277,10 @@ class _AccountScreenState extends State<AccountScreen> {
         title: Text(dt('تسجيل الخروج؟')),
         content: Text(dt('ستحتاج إلى تسجيل الدخول مجدداً للوصول إلى حسابك.')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dt('إلغاء'))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(dt('إلغاء')),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: DarbColors.dangerOf(ctx),
@@ -163,11 +311,12 @@ class _AccountScreenState extends State<AccountScreen> {
     final driverApplication = widget.user['driverApplication']?.toString();
     final vendorApplication = widget.user['vendorApplication']?.toString();
     final roleLabel = switch (role) {
-      'ADMIN' => dt('إدارة دَرْب'),
+      'ADMIN' => dt('إدارة دازريفو'),
       'DRIVER' => dt('حساب سائق'),
       'VENDOR' => dt('حساب تاجر'),
       _ => dt('حساب عميل'),
     };
+    final activity = _activity;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 108),
@@ -179,15 +328,19 @@ class _AccountScreenState extends State<AccountScreen> {
               begin: AlignmentDirectional.topStart,
               end: AlignmentDirectional.bottomEnd,
               colors: [
+                DarbColors.darkCanvas,
                 DarbColors.forest,
                 DarbColors.forestSoft,
               ],
             ),
             borderRadius: BorderRadius.circular(DarbRadius.xl),
             border: Border.all(
-              color: DarbColors.mint.withValues(alpha: 0.24),
+              color: DarbColors.lime.withValues(alpha: 0.34),
             ),
-            boxShadow: DarbElevation.glow(DarbColors.forest, isDark: DarbColors.isDark(context)),
+            boxShadow: DarbElevation.glow(
+              DarbColors.forest,
+              isDark: DarbColors.isDark(context),
+            ),
           ),
           child: Row(
             children: [
@@ -200,7 +353,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     Text(
                       widget.user['name']?.toString().isNotEmpty == true
                           ? widget.user['name'].toString()
-                          : dt('مرحباً بك في دَرْب'),
+                          : dt('مرحباً بك في دازريفو'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -213,7 +366,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           widget.user['email']?.toString() ??
                           roleLabel,
                       style: TextStyle(
-                        color: DarbColors.mint.withValues(alpha: 0.9),
+                        color: DarbColors.lime.withValues(alpha: 0.90),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -224,17 +377,46 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton.filledTonal(
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.14),
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: _openEditProfile,
-                icon: const Icon(Icons.edit_outlined, size: 20),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton.filledTonal(
+                    tooltip: dt('الإعدادات والتخصيص'),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.14),
+                      foregroundColor: DarbColors.lime,
+                    ),
+                    onPressed: _openSettings,
+                    icon: const Icon(Icons.tune_rounded, size: 20),
+                  ),
+                  const SizedBox(height: 6),
+                  IconButton.filledTonal(
+                    tooltip: dt('تعديل الملف الشخصي'),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.14),
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: _openEditProfile,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                  ),
+                ],
               ),
             ],
           ),
         ),
+        if (activity != null) ...[
+          const SizedBox(height: 14),
+          DarbActivityLedgerStrip(
+            title: activity.title,
+            primaryLabel: activity.primaryLabel,
+            primaryValue: activity.primaryValue,
+            secondaryLabel: activity.secondaryLabel,
+            secondaryValue: activity.secondaryValue,
+            tertiaryLabel: activity.tertiaryLabel,
+            tertiaryValue: activity.tertiaryValue,
+            icon: activity.icon,
+          ),
+        ],
         const SizedBox(height: 14),
         DarbGlassSurface(
           padding: const EdgeInsets.all(16),
@@ -350,159 +532,159 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 14),
-        DarbGlassSurface(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            children: [
-              _AccountActionTile(
-                icon: Icons.manage_accounts_outlined,
-                accentColor: DarbColors.primaryOf(context),
-                title: dt('تعديل الملف الشخصي'),
-                subtitle: dt('تحديث الاسم ولغة الواجهة ومراجعة بيانات التوثيق'),
-                onTap: _openEditProfile,
+        const SizedBox(height: 16),
+        DarbGroupedSection(
+          title: dt('الحساب والخدمات'),
+          children: [
+            DarbSettingsTile(
+              icon: Icons.manage_accounts_outlined,
+              accentColor: DarbColors.primaryOf(context),
+              title: dt('تعديل الملف الشخصي'),
+              subtitle: dt('تحديث الاسم ولغة الواجهة ومراجعة بيانات التوثيق'),
+              onTap: _openEditProfile,
+            ),
+            DarbSettingsTile(
+              icon: Icons.auto_awesome_rounded,
+              accentColor: DarbColors.violetOf(context),
+              title: dt('مساعد دازريفو الشخصي'),
+              onTap: () => Navigator.push(
+                context,
+                DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
               ),
-              _AccountActionTile(
-                icon: Icons.auto_awesome_rounded,
-                accentColor: DarbColors.primaryOf(context),
-                title: dt('مساعد دَرْب الشخصي'),
+            ),
+            if (role == 'CUSTOMER') ...[
+              DarbSettingsTile(
+                icon: Icons.location_on_outlined,
+                accentColor: DarbColors.infoOf(context),
+                title: dt('عناوين التوصيل'),
                 onTap: () => Navigator.push(
                   context,
-                  DarbPageRoute(builder: (_) => const AiRoleAssistantScreen()),
+                  DarbPageRoute(builder: (_) => const AddressesScreen()),
                 ),
               ),
-              if (role == 'CUSTOMER') ...[
-                _AccountActionTile(
-                  icon: Icons.location_on_outlined,
-                  accentColor: DarbColors.infoOf(context),
-                  title: dt('عناوين التوصيل'),
-                  onTap: () => Navigator.push(
-                    context,
-                    DarbPageRoute(builder: (_) => const AddressesScreen()),
-                  ),
-                ),
-                _AccountActionTile(
-                  icon: Icons.delivery_dining_outlined,
-                  accentColor: DarbColors.successOf(context),
-                  title: dt('كن سائقاً في دَرْب'),
-                  subtitle: driverApplication != null
-                      ? dt('متابعة حالة طلب السائق المسجّل')
-                      : dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء'),
-                  trailing: driverApplication != null
-                      ? DarbStatusBadge(status: driverApplication)
-                      : null,
-                  onTap: _openDriverApplication,
-                ),
-                _AccountActionTile(
-                  icon: Icons.storefront_outlined,
-                  accentColor: DarbColors.warningOf(context),
-                  title: dt('انضم بمتجرك'),
-                  subtitle: vendorApplication != null
-                      ? dt('متابعة حالة طلب المتجر المسجّل')
-                      : dt('اعرض منتجات متجرك واستقبل طلبات العملاء'),
-                  trailing: vendorApplication != null
-                      ? DarbStatusBadge(status: vendorApplication)
-                      : null,
-                  onTap: _openVendorApplication,
-                ),
-              ],
-              _AccountActionTile(
-                icon: Icons.language_rounded,
-                accentColor: DarbColors.primaryOf(context),
-                title: dt('لغة التطبيق'),
-                trailing: Text(
-                  darbLocale.value.languageCode.toUpperCase(),
-                  style: TextStyle(
-                    color: DarbColors.primaryOf(context),
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                onTap: _pickLanguage,
+              DarbSettingsTile(
+                icon: Icons.delivery_dining_outlined,
+                accentColor: DarbColors.successOf(context),
+                title: dt('كن سائقاً في دازريفو'),
+                subtitle: driverApplication != null
+                    ? dt('متابعة حالة طلب السائق المسجّل')
+                    : dt('استقبل طلبات التوصيل وقدّم عروض الأجرة للعملاء'),
+                trailing: driverApplication != null
+                    ? DarbStatusBadge(status: driverApplication)
+                    : null,
+                onTap: _openDriverApplication,
               ),
-              if (!kDarbPlayStoreBuild)
-                _AccountActionTile(
-                  icon: Icons.system_update_rounded,
-                  accentColor: DarbColors.infoOf(context),
-                  title: dt('تحديث التطبيق'),
-                  onTap: () async {
-                    await DarbUpdater.instance.checkForUpdate(force: true);
-                    if (!context.mounted) return;
-                    final update = DarbUpdater.instance.availableUpdate.value;
-                    if (update != null) {
-                      showDialog<void>(
-                        context: context,
-                        builder: (_) => DarbUpdateDialog(info: update),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            DarbUpdater.instance.checkFailed
-                                ? dt('تعذر التحقق من التحديث')
-                                : dt('تطبيقك محدّث إلى آخر إصدار'),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              _AccountActionTile(
-                icon: Icons.logout_rounded,
-                accentColor: DarbColors.dangerOf(context),
-                title: dt('تسجيل الخروج'),
-                isDanger: true,
-                onTap: _logout,
+              DarbSettingsTile(
+                icon: Icons.storefront_outlined,
+                accentColor: DarbColors.warningOf(context),
+                title: dt('انضم بمتجرك'),
+                subtitle: vendorApplication != null
+                    ? dt('متابعة حالة طلب المتجر المسجّل')
+                    : dt('اعرض منتجات متجرك واستقبل طلبات العملاء'),
+                trailing: vendorApplication != null
+                    ? DarbStatusBadge(status: vendorApplication)
+                    : null,
+                onTap: _openVendorApplication,
               ),
             ],
-          ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        DarbGroupedSection(
+          title: dt('التخصيص واللغة'),
+          children: [
+            DarbSettingsTile(
+              icon: Icons.tune_rounded,
+              accentColor: DarbColors.primaryOf(context),
+              title: dt('الإعدادات والتخصيص'),
+              subtitle: dt('حجم النصوص، تقليل الحركة، تفضيلات الإشعارات، والخصوصية'),
+              onTap: _openSettings,
+            ),
+            DarbSettingsTile(
+              icon: Icons.language_rounded,
+              accentColor: DarbColors.primaryOf(context),
+              title: dt('لغة التطبيق'),
+              valueLabel: darbLocale.value.languageCode.toUpperCase(),
+              onTap: _pickLanguage,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        DarbGroupedSection(
+          title: dt('التطبيق والأمان'),
+          children: [
+            DarbSettingsTile(
+              icon: Icons.auto_stories_outlined,
+              accentColor: DarbColors.primaryOf(context),
+              title: dt('جولة تعريفية'),
+              onTap: () => Navigator.push<void>(
+                context,
+                DarbPageRoute(
+                  builder: (_) => OnboardingScreen(
+                    onFinished: () => Navigator.pop(context),
+                  ),
+                ),
+              ),
+            ),
+            if (!kDarbPlayStoreBuild)
+              DarbSettingsTile(
+                icon: Icons.system_update_rounded,
+                accentColor: DarbColors.infoOf(context),
+                title: dt('تحديث التطبيق'),
+                onTap: () async {
+                  await DarbUpdater.instance.checkForUpdate(force: true);
+                  if (!context.mounted) return;
+                  final update = DarbUpdater.instance.availableUpdate.value;
+                  if (update != null) {
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => DarbUpdateDialog(info: update),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          DarbUpdater.instance.checkFailed
+                              ? dt('تعذر التحقق من التحديث')
+                              : dt('تطبيقك محدّث إلى آخر إصدار'),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            DarbSettingsTile(
+              icon: Icons.logout_rounded,
+              accentColor: DarbColors.dangerOf(context),
+              title: dt('تسجيل الخروج'),
+              isDanger: true,
+              onTap: _logout,
+            ),
+          ],
         ),
       ],
     );
   }
 }
 
-class _AccountActionTile extends StatelessWidget {
-  const _AccountActionTile({
-    required this.icon,
-    required this.accentColor,
+class _ActivitySummary {
+  const _ActivitySummary({
     required this.title,
-    required this.onTap,
-    this.subtitle,
-    this.trailing,
-    this.isDanger = false,
+    required this.primaryLabel,
+    required this.primaryValue,
+    required this.secondaryLabel,
+    required this.secondaryValue,
+    required this.tertiaryLabel,
+    required this.tertiaryValue,
+    required this.icon,
   });
 
-  final IconData icon;
-  final Color accentColor;
   final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final bool isDanger;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: accentColor.withValues(alpha: 0.13),
-          borderRadius: BorderRadius.circular(11),
-        ),
-        child: Icon(icon, size: 20, color: accentColor),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isDanger ? accentColor : DarbColors.inkOf(context),
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-      subtitle: subtitle == null ? null : Text(subtitle!),
-      trailing: trailing ??
-          (isDanger ? null : const Icon(Icons.chevron_right_rounded)),
-      onTap: onTap,
-    );
-  }
+  final String primaryLabel;
+  final String primaryValue;
+  final String secondaryLabel;
+  final String secondaryValue;
+  final String tertiaryLabel;
+  final String tertiaryValue;
+  final IconData icon;
 }

@@ -232,7 +232,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   String _roleLabel(String role) => switch (role.toUpperCase()) {
-        'ADMIN' => dt('إدارة دَرْب'),
+        'ADMIN' => dt('إدارة دازريفو'),
         'DRIVER' => dt('حساب سائق'),
         'VENDOR' => dt('حساب تاجر'),
         _ => dt('حساب عميل'),
@@ -259,7 +259,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ? _nameCtrl.text.trim()
         : (_profile['name']?.toString().trim().isNotEmpty == true
             ? _profile['name'].toString().trim()
-            : dt('مرحباً بك في دَرْب'));
+            : dt('مرحباً بك في دازريفو'));
 
     return Scaffold(
       appBar: DarbGlassAppBar(
@@ -478,7 +478,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               textInputAction: TextInputAction.done,
                               decoration: InputDecoration(
                                 labelText: dt('الاسم الكامل'),
-                                hintText: dt('أدخل اسمك كما تحب أن يظهر في دَرْب'),
+                                hintText: dt('أدخل اسمك كما تحب أن يظهر في دازريفو'),
                                 prefixIcon: Icon(
                                   Icons.person_outline_rounded,
                                   color: primary,
@@ -622,7 +622,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    dt('لتغيير رقم الهاتف أو البريد المرتبط بحسابك تواصل مع دعم دَرْب لحماية أمان حسابك.'),
+                                    dt('لتغيير رقم الهاتف أو البريد المرتبط بحسابك تواصل مع دعم دازريفو لحماية أمان حسابك.'),
                                     style: TextStyle(
                                       color: muted,
                                       fontSize: 11.5,

@@ -76,9 +76,9 @@ jobs:
           home = Path("index.html").read_text(encoding="utf-8")
           required_home = [
               'lang="ar" dir="rtl"', 'rel="canonical"', 'application/ld+json',
-              'hreflang="en"', 'hreflang="tr"', 'href="./faq/"',
-              'href="./drivers/"', 'href="./merchants/"', 'href="./privacy/"',
-              'href="./terms/"',
+              'hreflang="ar-SY"', 'hreflang="en"', 'hreflang="tr"',
+              'hreflang="x-default"', 'href="./"', 'href="./en/"', 'href="./tr/"',
+              'href="#services"', 'href="#coverage"', 'href="#how"', 'href="#download"',
               'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk'
           ]
           missing = [item for item in required_home if item not in home]

@@ -7,12 +7,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/services/notifications_service.dart';
+import '../../core/storage/local_cache.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
 import '../shell/app_shell.dart';
 import 'login_hero_map.dart';
+import 'onboarding_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -169,6 +171,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ? Map<String, dynamic>.from(data['tokens'] as Map)
           : data;
       await Api.instance.saveTokens(tokens);
+      if (data['user'] is Map) {
+        try {
+          await DarbLocalCache.instance.writeJson(
+            'auth_me_profile',
+            Map<String, dynamic>.from(data['user'] as Map),
+          );
+        } catch (_) {}
+      }
       await DarbNotifications.register();
       if (!mounted) return;
       setState(() {
@@ -248,6 +258,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ? Map<String, dynamic>.from(data['tokens'] as Map)
           : data;
       await Api.instance.saveTokens(tokens);
+      if (data['user'] is Map) {
+        try {
+          await DarbLocalCache.instance.writeJson(
+            'auth_me_profile',
+            Map<String, dynamic>.from(data['user'] as Map),
+          );
+        } catch (_) {}
+      }
       await DarbNotifications.register();
       if (!mounted) return;
       setState(() {
@@ -317,10 +335,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: DarbRadius.pill,
                                   blurSigma: 14,
                                   elevated: false,
-                                  tintColor: const Color(0xFF0E211A)
-                                      .withValues(alpha: 0.62),
+                                  tintColor: DarbColors.darkCanvas
+                                      .withValues(alpha: 0.72),
                                   borderColor:
-                                      DarbColors.mint.withValues(alpha: 0.28),
+                                      DarbColors.lime.withValues(alpha: 0.34),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 11,
                                     vertical: 6,
@@ -345,12 +363,58 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 const Spacer(),
+                                Tooltip(
+                                  message: dt('جولة تعريفية'),
+                                  child: DarbPressScale(
+                                    borderRadius: DarbRadius.pill,
+                                    onTap: () {
+                                      Navigator.of(context).pushReplacement(
+                                        DarbPageRoute(
+                                          builder: (_) => const OnboardingScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: DarbGlassSurface(
+                                      borderRadius: DarbRadius.pill,
+                                      blurSigma: 14,
+                                      elevated: false,
+                                      tintColor: DarbColors.darkCanvas
+                                          .withValues(alpha: 0.72),
+                                      borderColor:
+                                          Colors.white.withValues(alpha: 0.24),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.auto_stories_outlined,
+                                            size: 14.5,
+                                            color: DarbColors.lime,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            dt('جولة تعريفية'),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
                                 DarbGlassSurface(
                                   borderRadius: DarbRadius.pill,
                                   blurSigma: 14,
                                   elevated: false,
-                                  tintColor: const Color(0xFF0E211A)
-                                      .withValues(alpha: 0.62),
+                                  tintColor: DarbColors.darkCanvas
+                                      .withValues(alpha: 0.72),
                                   borderColor:
                                       Colors.white.withValues(alpha: 0.24),
                                   padding: const EdgeInsets.symmetric(
@@ -363,12 +427,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       const Icon(
                                         Icons.language_rounded,
                                         size: 14,
-                                        color: DarbColors.mint,
+                                        color: DarbColors.lime,
                                       ),
                                       const SizedBox(width: 4),
                                       DropdownButtonHideUnderline(
                                         child: DropdownButton<String>(
-                                          value: darbLocale.value.languageCode,
+                                          value: const ['ar', 'en', 'tr'].contains(
+                                            darbLocale.value.languageCode,
+                                          )
+                                              ? darbLocale.value.languageCode
+                                              : 'ar',
                                           isDense: true,
                                           dropdownColor: DarbColors.forest,
                                           iconEnabledColor: Colors.white,
@@ -422,16 +490,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(16),
                                             boxShadow: DarbElevation.glow(
-                                              DarbColors.mint,
+                                              DarbColors.lime,
                                               isDark: true,
                                             ),
                                           ),
                                           child: const DarbBrandMark(size: 46),
                                         ),
                                         const SizedBox(width: 11),
-                                        const Text(
-                                          'دَرْب • DARB',
-                                          style: TextStyle(
+                                        Text(
+                                          dt('دازريفو · DAZREVO'),
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,
                                             fontWeight: FontWeight.w900,
@@ -449,7 +517,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 27,
+                                        fontSize: 26,
                                         fontWeight: FontWeight.w900,
                                         height: 1.18,
                                       ),
@@ -910,12 +978,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: _error == null
                                     ? const SizedBox.shrink()
                                     : Padding(
-                                        padding: const EdgeInsets.only(top: 14),
+                                        padding: const EdgeInsets.only(top: 12),
                                         child: DarbShakeBox(
                                           trigger: _primaryErrorTrigger +
                                               _googleErrorTrigger,
                                           child: Container(
-                                            padding: const EdgeInsets.all(12),
+                                            padding: const EdgeInsets.all(11),
                                             decoration: BoxDecoration(
                                               color: DarbColors.dangerSoftOf(
                                                   context),
@@ -1055,7 +1123,7 @@ class _HeroFeatureChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(DarbRadius.pill),
-        border: Border.all(color: DarbColors.mint.withValues(alpha: 0.28)),
+        border: Border.all(color: DarbColors.lime.withValues(alpha: 0.34)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

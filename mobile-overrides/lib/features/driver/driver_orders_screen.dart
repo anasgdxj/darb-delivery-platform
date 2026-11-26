@@ -73,8 +73,39 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
 
   Future<void> _openInMaps(num? lat, num? lng) async {
     if (lat == null || lng == null) return;
-    final uri = Uri.parse('https://maps.google.com/?q=$lat,$lng');
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      final uri = Uri.parse('https://maps.google.com/?q=$lat,$lng');
+      final launched =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    }
+  }
+
+  Future<void> _callPhone(String phone) async {
+    try {
+      final launched = await launchUrl(Uri.parse('tel:$phone'));
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    }
   }
 
   List<Map<String, dynamic>> get _filteredOrders {
@@ -102,42 +133,57 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final f in [
-                  ('ALL', dt('الكل')),
-                  ('ACTIVE', dt('نشطة')),
-                  ('COMPLETED', dt('مكتملة')),
-                ]) ...[
-                  ChoiceChip(
-                    label: Text(f.$2),
-                    selected: _filter == f.$1,
-                    onSelected: (_) => setState(() => _filter = f.$1),
+      child: _orders.isEmpty
+          ? LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: DarbStateView.empty(
+                    message: dt('لا توجد توصيلات حالياً'),
+                    icon: Icons.route_outlined,
+                    onRetry: _load,
                   ),
-                  const SizedBox(width: 8),
-                ],
+                ),
+              ),
+            )
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final f in [
+                        ('ALL', dt('الكل')),
+                        ('ACTIVE', dt('نشطة')),
+                        ('COMPLETED', dt('مكتملة')),
+                      ]) ...[
+                        ChoiceChip(
+                          label: Text(f.$2),
+                          selected: _filter == f.$1,
+                          onSelected: (_) => setState(() => _filter = f.$1),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                if (filtered.isEmpty)
+                  DarbStateView.empty(
+                    message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+                    icon: Icons.filter_list_off_rounded,
+                    onRetry: () => setState(() => _filter = 'ALL'),
+                  )
+                else
+                  for (final o in filtered)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildOrderCard(o),
+                    ),
               ],
             ),
-          ),
-          const SizedBox(height: 14),
-          if (filtered.isEmpty)
-            DarbStateView.empty(
-              message: dt('لا توجد توصيلات حالياً'),
-              icon: Icons.route_outlined,
-            )
-          else
-            for (final o in filtered)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildOrderCard(o),
-              ),
-        ],
-      ),
     );
   }
 
@@ -205,7 +251,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                 ),
                 if (customerPhone != null && customerPhone.isNotEmpty)
                   TextButton.icon(
-                    onPressed: () => launchUrl(Uri.parse('tel:$customerPhone')),
+                    onPressed: () => _callPhone(customerPhone),
                     icon: const Icon(Icons.call_rounded, size: 16),
                     label: Text(dt('اتصال بالعميل')),
                   ),

@@ -24,6 +24,7 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
   bool _loading = true;
   bool _togglingOpen = false;
   String? _error;
+  String? _statsError;
   final Set<String> _busyOrderIds = <String>{};
 
   @override
@@ -36,24 +37,40 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _statsError = null;
     });
     try {
-      final results = await Future.wait([
-        Api.instance.get('/vendors/mine'),
-        Api.instance.get('/orders/vendor'),
-      ]);
+      final rawMine = await Api.instance.get('/vendors/mine');
+      final mine = rawMine is Map<String, dynamic> ? rawMine : null;
+      if (mine == null || mine['status'] != 'APPROVED') {
+        if (!mounted) return;
+        setState(() {
+          _vendor = mine;
+          _orders = const [];
+          _stats = null;
+        });
+        return;
+      }
+
+      final ordersRaw = await Api.instance.get('/orders/vendor');
       Map<String, dynamic>? stats;
+      String? statsError;
       try {
         final s = await Api.instance.get('/vendors/mine/stats');
         if (s is Map<String, dynamic>) stats = s;
-      } catch (_) {}
+      } on ApiException catch (e) {
+        statsError = e.message;
+      } catch (_) {
+        statsError = dt('تعذر تحميل بعض البيانات الثانوية. أعد المحاولة لتحديثها.');
+      }
 
       if (!mounted) return;
       setState(() {
-        _vendor = results[0] as Map<String, dynamic>?;
+        _vendor = mine;
         _orders =
-            (results[1] as List? ?? []).whereType<Map<String, dynamic>>().toList();
+            (ordersRaw as List? ?? []).whereType<Map<String, dynamic>>().toList();
         _stats = stats;
+        _statsError = statsError;
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -61,6 +78,23 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
       if (mounted) setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _callPhone(String phone) async {
+    try {
+      final launched = await launchUrl(Uri.parse('tel:$phone'));
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
     }
   }
 
@@ -102,90 +136,105 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
     double? lat = (loc?['latitude'] as num?)?.toDouble();
     double? lng = (loc?['longitude'] as num?)?.toDouble();
     String? err;
+    var saving = false;
 
     await showDarbGlassModalSheet<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        builder: (ctx, setSheet) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              dt('تعديل بيانات المتجر'),
+              style: TextStyle(
+                color: DarbColors.inkOf(ctx),
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: nameCtrl,
+              decoration: InputDecoration(labelText: dt('اسم المتجر')),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: typeCtrl,
+              decoration: InputDecoration(labelText: dt('نوع النشاط')),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: descCtrl,
+              maxLines: 2,
+              decoration: InputDecoration(labelText: dt('الوصف')),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: addrCtrl,
+              decoration: InputDecoration(labelText: dt('عنوان المتجر (اختياري)')),
+            ),
+            const SizedBox(height: 12),
+            DarbMapPicker(
+              selectedLatitude: lat,
+              selectedLongitude: lng,
+              onPointSelected: (pickedLat, pickedLng) => setSheet(() {
+                lat = pickedLat;
+                lng = pickedLng;
+                err = null;
+              }),
+            ),
+            if (err != null) ...[
+              const SizedBox(height: 8),
               Text(
-                dt('تعديل بيانات المتجر'),
+                err!,
                 style: TextStyle(
-                  color: DarbColors.inkOf(ctx),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
+                  color: DarbColors.dangerOf(ctx),
+                  fontWeight: FontWeight.w700,
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: nameCtrl,
-                decoration: InputDecoration(labelText: dt('اسم المتجر')),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: typeCtrl,
-                decoration: InputDecoration(labelText: dt('نوع النشاط')),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: descCtrl,
-                maxLines: 2,
-                decoration: InputDecoration(labelText: dt('الوصف')),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: addrCtrl,
-                decoration: InputDecoration(labelText: dt('عنوان المتجر (اختياري)')),
-              ),
-              const SizedBox(height: 12),
-              DarbMapPicker(
-                selectedLatitude: lat,
-                selectedLongitude: lng,
-                onPointSelected: (pickedLat, pickedLng) => setSheet(() {
-                  lat = pickedLat;
-                  lng = pickedLng;
-                  err = null;
-                }),
-              ),
-              if (err != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  err!,
-                  style: TextStyle(
-                    color: DarbColors.dangerOf(ctx),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 14),
-              FilledButton(
-                onPressed: () async {
-                  try {
-                    await Api.instance.patch('/vendors/mine', {
-                      if (nameCtrl.text.trim().isNotEmpty)
-                        'name': nameCtrl.text.trim(),
-                      if (typeCtrl.text.trim().isNotEmpty)
-                        'type': typeCtrl.text.trim(),
-                      'description': descCtrl.text.trim(),
-                      'address': addrCtrl.text.trim(),
-                      if (lat != null && lng != null)
-                        ...{'latitude': lat, 'longitude': lng},
-                    });
-                    if (ctx.mounted) Navigator.pop(ctx);
-                    await _load();
-                  } on ApiException catch (e) {
-                    setSheet(() => err = e.message);
-                  } catch (_) {
-                    setSheet(() => err = dt('حدث خطأ غير متوقع، حاول مجدداً'));
-                  }
-                },
-                child: Text(dt('حفظ التغييرات')),
               ),
             ],
-          ),
+            const SizedBox(height: 14),
+            FilledButton(
+              onPressed: saving
+                  ? null
+                  : () async {
+                      final trimmedName = nameCtrl.text.trim();
+                      if (trimmedName.isNotEmpty && trimmedName.length < 2) {
+                        setSheet(() => err = dt('أدخل اسم المتجر (حرفان على الأقل)'));
+                        return;
+                      }
+                      setSheet(() {
+                        saving = true;
+                        err = null;
+                      });
+                      try {
+                        await Api.instance.patch('/vendors/mine', {
+                          if (trimmedName.isNotEmpty) 'name': trimmedName,
+                          if (typeCtrl.text.trim().isNotEmpty)
+                            'type': typeCtrl.text.trim(),
+                          'description': descCtrl.text.trim(),
+                          'address': addrCtrl.text.trim(),
+                          if (lat != null && lng != null)
+                            ...{'latitude': lat, 'longitude': lng},
+                        });
+                        if (ctx.mounted) Navigator.pop(ctx);
+                        await _load();
+                      } on ApiException catch (e) {
+                        setSheet(() {
+                          saving = false;
+                          err = e.message;
+                        });
+                      } catch (_) {
+                        setSheet(() {
+                          saving = false;
+                          err = dt('حدث خطأ غير متوقع، حاول مجدداً');
+                        });
+                      }
+                    },
+              child: Text(saving ? dt('جارٍ الحفظ') : dt('حفظ التغييرات')),
+            ),
+          ],
         ),
       ),
     );
@@ -264,8 +313,7 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
                 ),
                 if (customerPhone != null && customerPhone.isNotEmpty)
                   TextButton.icon(
-                    onPressed: () =>
-                        launchUrl(Uri.parse('tel:$customerPhone')),
+                    onPressed: () => _callPhone(customerPhone),
                     icon: const Icon(Icons.call_rounded, size: 17),
                     label: Text(dt('اتصال بالعميل')),
                   ),
@@ -295,8 +343,7 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
                   ),
                   if (driverPhone != null && driverPhone.isNotEmpty)
                     IconButton(
-                      onPressed: () =>
-                          launchUrl(Uri.parse('tel:$driverPhone')),
+                      onPressed: () => _callPhone(driverPhone),
                       icon: Icon(
                         Icons.call_rounded,
                         color: DarbColors.primaryOf(ctx),
@@ -359,6 +406,30 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
   Widget build(BuildContext context) {
     if (_loading) return const DarbStateView.loading();
     if (_error != null) return DarbStateView.error(message: _error, onRetry: _load);
+    final vendorStatus = _vendor?['status']?.toString();
+    if (_vendor == null || vendorStatus != 'APPROVED') {
+      final statusMsg = _vendor == null
+          ? dt('ملف المتجر غير مكتمل بعد. تواصل مع الإدارة أو أعد المحاولة.')
+          : (vendorStatus == 'PENDING'
+              ? dt('طلب متجرك قيد المراجعة')
+              : dt('حالة المتجر: $vendorStatus'));
+      return RefreshIndicator(
+        onRefresh: _load,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: DarbStateView.empty(
+                message: statusMsg,
+                icon: Icons.store_mall_directory_outlined,
+                onRetry: _load,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     final vendorName = _vendor?['translations'] is List &&
             (_vendor!['translations'] as List).isNotEmpty
@@ -377,67 +448,125 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 104),
         children: [
-          DarbGlassSurface(
-            padding: const EdgeInsets.all(16),
-            borderColor: isOpen
-                ? DarbColors.primaryOf(context).withValues(alpha: 0.24)
-                : null,
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: DarbColors.primaryOf(context).withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.storefront_rounded,
-                    color: DarbColors.primaryOf(context),
-                    size: 24,
-                  ),
+          Container(
+            padding: const EdgeInsets.all(17),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [DarbColors.forest, Color(0xFF071A14)],
+              ),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: DarbColors.lime.withValues(alpha: 0.22),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: DarbColors.forest.withValues(alpha: 0.18),
+                  blurRadius: 22,
+                  offset: const Offset(0, 9),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const DarbBrandMark(size: 43),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            vendorName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              DarbPulseDot(
+                                active: isOpen,
+                                color: isOpen
+                                    ? DarbColors.lime
+                                    : Colors.white54,
+                                size: 8,
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                isOpen
+                                    ? dt('المتجر يستقبل الطلبات')
+                                    : dt('المتجر متوقف مؤقتاً'),
+                                style: TextStyle(
+                                  color: isOpen
+                                      ? DarbColors.lime
+                                      : Colors.white70,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: dt('تعديل بيانات المتجر'),
+                      onPressed: _editVendorProfile,
+                      style: IconButton.styleFrom(
+                        foregroundColor: DarbColors.lime,
+                        backgroundColor: Colors.white.withValues(alpha: 0.09),
+                      ),
+                      icon: const Icon(Icons.tune_rounded, size: 20),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Container(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 13,
+                    end: 10,
+                    top: 8,
+                    bottom: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.07),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.10),
+                    ),
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        vendorName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: DarbColors.inkOf(context),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
+                      const Icon(
+                        Icons.store_mall_directory_outlined,
+                        color: DarbColors.lime,
+                        size: 19,
+                      ),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Text(
+                          dt('حالة استقبال الطلبات'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          DarbPulseDot(
-                            active: isOpen,
-                            color: isOpen
-                                ? DarbColors.successOf(context)
-                                : DarbColors.dangerOf(context),
-                            size: 7.5,
-                          ),
-                          const SizedBox(width: 6),
-                          DarbStatusBadge(status: isOpen ? 'OPEN' : 'CLOSED'),
-                        ],
+                      Switch(
+                        value: isOpen,
+                        onChanged: _togglingOpen ? null : _toggleOpen,
                       ),
                     ],
                   ),
-                ),
-                Switch(
-                  value: isOpen,
-                  onChanged: _togglingOpen ? null : _toggleOpen,
-                ),
-                const SizedBox(width: 4),
-                IconButton.filledTonal(
-                  tooltip: dt('تعديل'),
-                  onPressed: _editVendorProfile,
-                  icon: const Icon(Icons.edit_outlined, size: 19),
                 ),
               ],
             ),
@@ -481,6 +610,37 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
               ],
             ),
           ],
+          if (_statsError != null) ...[
+            const SizedBox(height: 12),
+            DarbGlassSurface(
+              tintColor: DarbColors.warningSoftOf(context),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 18,
+                    color: DarbColors.warningOf(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _statsError!,
+                      style: TextStyle(
+                        color: DarbColors.warningOf(context),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _load,
+                    child: Text(dt('إعادة المحاولة')),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -510,8 +670,15 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
           const SizedBox(height: 14),
           if (filtered.isEmpty)
             DarbStateView.empty(
-              message: dt('لا توجد طلبات واردة'),
-              icon: Icons.receipt_long_outlined,
+              message: _orders.isEmpty
+                  ? dt('لا توجد طلبات واردة')
+                  : dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+              icon: _orders.isEmpty
+                  ? Icons.receipt_long_outlined
+                  : Icons.filter_list_off_rounded,
+              onRetry: _orders.isEmpty
+                  ? _load
+                  : () => setState(() => _statusFilter = ''),
             )
           else
             for (final o in filtered)

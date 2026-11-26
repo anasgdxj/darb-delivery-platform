@@ -185,22 +185,26 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
             DarbFadeSlide(
               child: DarbGlassSurface(
                 padding: const EdgeInsets.all(18),
+                borderColor: DarbColors.violetOf(context).withValues(alpha: 0.34),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Row(
                       children: [
                         Container(
-                          width: 40,
-                          height: 40,
+                          width: 42,
+                          height: 42,
                           decoration: BoxDecoration(
-                            color: DarbColors.primaryOf(context)
-                                .withValues(alpha: 0.14),
+                            color: DarbColors.violetSoftOf(context),
                             borderRadius: BorderRadius.circular(13),
+                            border: Border.all(
+                              color: DarbColors.violetOf(context)
+                                  .withValues(alpha: 0.35),
+                            ),
                           ),
                           child: Icon(
                             Icons.auto_awesome_rounded,
-                            color: DarbColors.primaryOf(context),
+                            color: DarbColors.violetOf(context),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -229,7 +233,7 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                             avatar: Icon(
                               Icons.bolt_rounded,
                               size: 15,
-                              color: DarbColors.primaryOf(context),
+                              color: DarbColors.violetOf(context),
                             ),
                             label: Text(
                               sample,

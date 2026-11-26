@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -16,6 +17,8 @@ class Api {
   );
   static const _storage = FlutterSecureStorage();
 
+  final ValueNotifier<int> sessionExpiredNotifier = ValueNotifier<int>(0);
+
   String? _accessToken;
   Future<bool>? _refreshing;
   bool _sessionInvalidated = false;
@@ -23,10 +26,56 @@ class Api {
   String? get accessToken => _accessToken;
   bool get sessionInvalidated => _sessionInvalidated;
 
+  @visibleForTesting
+  http.Client? httpClientOverride;
+
+  @visibleForTesting
+  void setSessionForTest({
+    String? accessToken,
+    bool sessionInvalidated = false,
+  }) {
+    _accessToken = accessToken;
+    _sessionInvalidated = sessionInvalidated;
+  }
+
+  Future<http.Response> _postPublicJson(
+    Uri uri,
+    Map<String, dynamic> body,
+    Duration timeout,
+  ) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    final encoded = jsonEncode(body);
+    final client = httpClientOverride;
+    if (client != null) {
+      return client.post(uri, headers: headers, body: encoded).timeout(timeout);
+    }
+    return http.post(uri, headers: headers, body: encoded).timeout(timeout);
+  }
+
+  Future<String?> _safeReadStorage(String key) async {
+    try {
+      return await _storage.read(key: key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _safeDeleteStorage(String key) async {
+    try {
+      await _storage.delete(key: key);
+    } catch (_) {}
+  }
+
   Future<void> restore() async {
     _sessionInvalidated = false;
-    _accessToken = await _storage.read(key: 'accessToken');
-    if (_accessToken == null) await _refreshAccessToken();
+    _accessToken = await _safeReadStorage('accessToken');
+    if (_accessToken == null || _accessToken!.isEmpty) {
+      _accessToken = null;
+      await _refreshAccessToken(notifyOnInvalid: false);
+    }
   }
 
   Future<void> saveTokens(Map<String, dynamic> tokens) async {
@@ -38,29 +87,31 @@ class Api {
     _sessionInvalidated = false;
     // Persist the rotated refresh token first so an interrupted write cannot
     // leave the client holding a refresh token that the server already revoked.
-    await _storage.write(key: 'refreshToken', value: refresh);
-    await _storage.write(key: 'accessToken', value: access);
+    try {
+      await _storage.write(key: 'refreshToken', value: refresh);
+      await _storage.write(key: 'accessToken', value: access);
+    } catch (_) {}
     _accessToken = access;
   }
 
   Future<void> clear() async {
-    final refreshToken = await _storage.read(key: 'refreshToken');
+    final refreshToken = await _safeReadStorage('refreshToken');
     if (refreshToken != null && refreshToken.isNotEmpty) {
       try {
-        await http
-            .post(
-              Uri.parse('$baseUrl/auth/logout'),
-              headers: const {'Content-Type': 'application/json', 'Accept': 'application/json'},
-              body: jsonEncode({'refreshToken': refreshToken}),
-            )
-            .timeout(const Duration(seconds: 8));
+        await _postPublicJson(
+          Uri.parse('$baseUrl/auth/logout'),
+          {'refreshToken': refreshToken},
+          const Duration(seconds: 8),
+        );
       } catch (_) {}
     }
     _accessToken = null;
     _sessionInvalidated = false;
-    await _storage.delete(key: 'accessToken');
-    await _storage.delete(key: 'refreshToken');
-    await DarbLocalCache.instance.clearAll();
+    await _safeDeleteStorage('accessToken');
+    await _safeDeleteStorage('refreshToken');
+    try {
+      await DarbLocalCache.instance.clearAll();
+    } catch (_) {}
   }
 
   Future<dynamic> get(String path) => _request('GET', path, retryOnTransient: true);
@@ -69,13 +120,17 @@ class Api {
     try {
       final data = await get(path);
       if (data != null) {
-        await DarbLocalCache.instance.writeJson(cacheKey, data);
+        try {
+          await DarbLocalCache.instance.writeJson(cacheKey, data);
+        } catch (_) {}
       }
       return (data: data, fromCache: false);
     } on ApiException catch (e) {
       if (e.isNetworkError) {
-        final cached = await DarbLocalCache.instance.readJson(cacheKey);
-        if (cached != null) return (data: cached, fromCache: true);
+        try {
+          final cached = await DarbLocalCache.instance.readJson(cacheKey);
+          if (cached != null) return (data: cached, fromCache: true);
+        } catch (_) {}
       }
       rethrow;
     }
@@ -93,9 +148,15 @@ class Api {
   Future<dynamic> delete(String path, [Map<String, dynamic>? body]) =>
       _request('DELETE', path, body: body);
 
-  Future<bool> _refreshAccessToken() async {
-    if (_refreshing != null) return _refreshing!;
-    _refreshing = _performRefresh();
+  Future<bool> _refreshAccessToken({bool notifyOnInvalid = false}) async {
+    if (_refreshing != null) {
+      final ok = await _refreshing!;
+      if (!ok && notifyOnInvalid && _sessionInvalidated) {
+        sessionExpiredNotifier.value++;
+      }
+      return ok;
+    }
+    _refreshing = _performRefresh(notifyOnInvalid: notifyOnInvalid);
     try {
       return await _refreshing!;
     } finally {
@@ -105,26 +166,31 @@ class Api {
 
   static const Duration _coldStartTimeout = Duration(seconds: 55);
 
-  Future<bool> _performRefresh() async {
-    final refreshToken = await _storage.read(key: 'refreshToken');
+  Future<bool> _performRefresh({required bool notifyOnInvalid}) async {
+    final refreshToken = await _safeReadStorage('refreshToken');
     if (refreshToken == null || refreshToken.isEmpty) {
       _sessionInvalidated = true;
+      _accessToken = null;
+      if (notifyOnInvalid) {
+        sessionExpiredNotifier.value++;
+      }
       return false;
     }
     try {
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/auth/refresh'),
-            headers: const {'Content-Type': 'application/json', 'Accept': 'application/json'},
-            body: jsonEncode({'refreshToken': refreshToken}),
-          )
-          .timeout(_coldStartTimeout);
+      final response = await _postPublicJson(
+        Uri.parse('$baseUrl/auth/refresh'),
+        {'refreshToken': refreshToken},
+        _coldStartTimeout,
+      );
 
       if (response.statusCode == 401 || response.statusCode == 403) {
         _sessionInvalidated = true;
         _accessToken = null;
-        await _storage.delete(key: 'accessToken');
-        await _storage.delete(key: 'refreshToken');
+        await _safeDeleteStorage('accessToken');
+        await _safeDeleteStorage('refreshToken');
+        if (notifyOnInvalid) {
+          sessionExpiredNotifier.value++;
+        }
         return false;
       }
       if (response.statusCode < 200 || response.statusCode >= 300) return false;
@@ -146,7 +212,9 @@ class Api {
     if (_accessToken != null) headers['Authorization'] = 'Bearer $_accessToken';
     final request = http.Request(method, uri)..headers.addAll(headers);
     if (body != null) request.body = jsonEncode(body);
-    final streamed = await request.send().timeout(_coldStartTimeout);
+    final client = httpClientOverride;
+    final streamed = await (client != null ? client.send(request) : request.send())
+        .timeout(_coldStartTimeout);
     return http.Response.fromStream(streamed).timeout(_coldStartTimeout);
   }
 
@@ -165,7 +233,7 @@ class Api {
         response = await _send(method, uri, body);
         if (response.statusCode == 401 &&
             (path == '/auth/me' || !path.startsWith('/auth/'))) {
-          if (await _refreshAccessToken()) {
+          if (await _refreshAccessToken(notifyOnInvalid: true)) {
             response = await _send(method, uri, body);
           }
         }

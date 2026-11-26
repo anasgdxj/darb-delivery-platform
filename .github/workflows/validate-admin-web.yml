@@ -35,12 +35,12 @@ jobs:
           from pathlib import Path
           html = Path("admin-web/index.html").read_text()
           required = [
-              "me.role!=='ADMIN'",
+              "me.role !== 'ADMIN'",
               "/auth/google",
               "GOOGLE_WEB_CLIENT_ID",
               "/admin/drivers/pending",
               "/admin/vendors/pending",
-              "Authorization='Bearer '+token()",
+              "headers.Authorization = 'Bearer ' + token();",
           ]
           missing = [item for item in required if item not in html]
           if missing:

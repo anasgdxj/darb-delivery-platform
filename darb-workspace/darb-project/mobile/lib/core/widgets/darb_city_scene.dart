@@ -74,7 +74,7 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
     return ClipRRect(
       borderRadius: BorderRadius.circular(DarbRadius.xl),
       child: SizedBox(
-        height: 178,
+        height: 176,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -103,9 +103,9 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x28081814),
-                    Color(0x8812302A),
-                    Color(0xE012302A),
+                    Color(0x28071A14),
+                    Color(0x880B2F24),
+                    Color(0xE80B2F24),
                   ],
                   stops: [0.0, 0.56, 1.0],
                 ),
@@ -123,8 +123,8 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                         borderRadius: DarbRadius.pill,
                         blurSigma: 14,
                         elevated: false,
-                        tintColor: DarbColors.forest.withValues(alpha: 0.72),
-                        borderColor: DarbColors.mint.withValues(alpha: 0.35),
+                        tintColor: DarbColors.forest.withValues(alpha: 0.78),
+                        borderColor: DarbColors.lime.withValues(alpha: 0.38),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 11,
                           vertical: 5,
@@ -154,7 +154,7 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                           borderRadius: DarbRadius.pill,
                           blurSigma: 14,
                           elevated: false,
-                          tintColor: DarbColors.forest.withValues(alpha: 0.72),
+                          tintColor: DarbColors.forest.withValues(alpha: 0.78),
                           borderColor: Colors.white.withValues(alpha: 0.22),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 11,
@@ -166,7 +166,7 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                               const Icon(
                                 Icons.storefront_rounded,
                                 size: 13.5,
-                                color: DarbColors.mint,
+                                color: DarbColors.lime,
                               ),
                               const SizedBox(width: 5),
                               Text(
@@ -224,7 +224,7 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                               borderRadius:
                                   BorderRadius.circular(DarbRadius.pill),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.20),
+                                color: DarbColors.lime.withValues(alpha: 0.30),
                               ),
                             ),
                             child: Row(
@@ -233,7 +233,7 @@ class _DarbCitySceneCardState extends State<DarbCitySceneCard>
                                 const Icon(
                                   Icons.home_outlined,
                                   size: 13.5,
-                                  color: DarbColors.mint,
+                                  color: DarbColors.lime,
                                 ),
                                 const SizedBox(width: 5),
                                 Flexible(
@@ -291,7 +291,6 @@ class _AbstractCityNetworkPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // 1. Deep Obsidian Emerald gradient canvas
     canvas.drawRect(
       Offset.zero & size,
       Paint()
@@ -299,23 +298,22 @@ class _AbstractCityNetworkPainter extends CustomPainter {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF0E2620),
+            DarbColors.darkCanvas,
             DarbColors.forest,
             DarbColors.forestSoft,
           ],
         ).createShader(Offset.zero & size),
     );
 
-    // 2. Ambient radial emerald bloom
-    final bloomX = w * (0.68 + math.sin(progress * math.pi * 2) * 0.04);
+    final bloomX = w * (0.72 + math.sin(progress * math.pi * 2) * 0.04);
     canvas.drawCircle(
       Offset(bloomX, h * 0.34),
       w * 0.42,
       Paint()
         ..shader = RadialGradient(
           colors: [
-            DarbColors.primaryGreen.withValues(alpha: 0.36),
-            DarbColors.mint.withValues(alpha: 0.08),
+            DarbColors.primaryGreen.withValues(alpha: 0.40),
+            DarbColors.violet.withValues(alpha: 0.14),
             Colors.transparent,
           ],
           stops: const [0.0, 0.55, 1.0],
@@ -325,9 +323,8 @@ class _AbstractCityNetworkPainter extends CustomPainter {
         )),
     );
 
-    // 3. Subtle geometric topographic grid
     final gridPaint = Paint()
-      ..color = DarbColors.mint.withValues(alpha: 0.10)
+      ..color = DarbColors.mint.withValues(alpha: 0.09)
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
@@ -340,7 +337,6 @@ class _AbstractCityNetworkPainter extends CustomPainter {
       canvas.drawLine(Offset(x, 0), Offset(x, h), gridPaint);
     }
 
-    // 4. Abstract geometric prism facets & concentric orbital rings
     final rng = math.Random(seed);
     final facetPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.035)
@@ -361,7 +357,7 @@ class _AbstractCityNetworkPainter extends CustomPainter {
 
     final ringCenter = Offset(w * 0.78, h * 0.34);
     final ringPaint = Paint()
-      ..color = DarbColors.mint.withValues(alpha: 0.14)
+      ..color = DarbColors.mint.withValues(alpha: 0.16)
       ..strokeWidth = 1.1
       ..style = PaintingStyle.stroke;
     canvas.drawCircle(ringCenter, 36, ringPaint);
@@ -370,12 +366,11 @@ class _AbstractCityNetworkPainter extends CustomPainter {
       ringCenter,
       92,
       Paint()
-        ..color = DarbColors.mint.withValues(alpha: 0.07)
+        ..color = DarbColors.violet.withValues(alpha: 0.16)
         ..strokeWidth = 1.0
         ..style = PaintingStyle.stroke,
     );
 
-    // 5. Kinetic delivery arc & travelling pulse
     final start = Offset(w * 0.14, h * 0.66);
     final end = Offset(w * 0.86, h * 0.30);
     final route = Path()
@@ -392,7 +387,7 @@ class _AbstractCityNetworkPainter extends CustomPainter {
     canvas.drawPath(
       route,
       Paint()
-        ..color = DarbColors.mint.withValues(alpha: 0.20)
+        ..color = DarbColors.lime.withValues(alpha: 0.16)
         ..strokeWidth = 7.0
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
@@ -401,7 +396,7 @@ class _AbstractCityNetworkPainter extends CustomPainter {
     canvas.drawPath(
       route,
       Paint()
-        ..color = DarbColors.mint.withValues(alpha: 0.52)
+        ..color = DarbColors.mint.withValues(alpha: 0.55)
         ..strokeWidth = 2.0
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke,
@@ -419,8 +414,8 @@ class _AbstractCityNetworkPainter extends CustomPainter {
           canvas.drawPath(
             metric.extractPath(s, e),
             Paint()
-              ..color = DarbColors.lime.withValues(alpha: 0.88)
-              ..strokeWidth = 2.6
+              ..color = DarbColors.lime.withValues(alpha: 0.92)
+              ..strokeWidth = 2.8
               ..strokeCap = StrokeCap.round
               ..style = PaintingStyle.stroke,
           );
@@ -428,7 +423,7 @@ class _AbstractCityNetworkPainter extends CustomPainter {
       }
     }
 
-    canvas.drawCircle(start, 4.5, Paint()..color = DarbColors.mint);
+    canvas.drawCircle(start, 4.5, Paint()..color = DarbColors.violet);
     canvas.drawCircle(end, 5.2, Paint()..color = DarbColors.lime);
   }
 

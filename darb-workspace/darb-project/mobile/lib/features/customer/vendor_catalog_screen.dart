@@ -121,6 +121,18 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
     }).toList();
   }
 
+  String get _cartCurrency {
+    for (final entry in _cart.entries) {
+      final prod = _products.cast<Map<String, dynamic>?>().firstWhere(
+            (p) => p?['id']?.toString() == entry.key,
+            orElse: () => null,
+          );
+      final currency = prod?['currency']?.toString();
+      if (currency != null && currency.isNotEmpty) return currency;
+    }
+    return 'SYP';
+  }
+
   double get _cartSubtotal {
     var total = 0.0;
     for (final entry in _cart.entries) {
@@ -393,8 +405,18 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                     DarbStateView.error(message: _error, onRetry: _loadProducts)
                   else if (filtered.isEmpty)
                     DarbStateView.empty(
-                      message: dt('لا توجد منتجات متاحة'),
-                      icon: Icons.inventory_2_outlined,
+                      message: _products.isEmpty
+                          ? dt('لا توجد منتجات متاحة')
+                          : dt('لم نعثر على نتائج مطابقة'),
+                      icon: _products.isEmpty
+                          ? Icons.inventory_2_outlined
+                          : Icons.search_off_rounded,
+                      onRetry: _products.isEmpty
+                          ? _loadProducts
+                          : () {
+                              _searchController.clear();
+                              setState(() => _selectedCategory = '');
+                            },
                     )
                   else
                     for (final prod in filtered)
@@ -412,8 +434,8 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                 bottom: 14 + MediaQuery.paddingOf(context).bottom,
                 child: DarbGlassSurface(
                   borderRadius: DarbRadius.xl,
-                  tintColor: DarbColors.forest.withValues(alpha: 0.95),
-                  borderColor: DarbColors.mint.withValues(alpha: 0.35),
+                  tintColor: DarbColors.forest.withValues(alpha: 0.96),
+                  borderColor: DarbColors.lime.withValues(alpha: 0.40),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Row(
@@ -424,7 +446,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: DarbColors.mint,
+                          color: DarbColors.lime,
                           borderRadius: BorderRadius.circular(DarbRadius.pill),
                         ),
                         child: AnimatedSwitcher(
@@ -440,7 +462,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                             '$_cartCount',
                             key: ValueKey(_cartCount),
                             style: const TextStyle(
-                              color: DarbColors.forest,
+                              color: DarbColors.darkCanvas,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -460,9 +482,9 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                               ),
                             ),
                             Text(
-                              formatDarbMoney(_cartSubtotal),
+                              formatDarbMoney(_cartSubtotal, _cartCurrency),
                               style: const TextStyle(
-                                color: DarbColors.mint,
+                                color: DarbColors.lime,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 13,
                               ),
@@ -473,7 +495,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                       FilledButton(
                         style: FilledButton.styleFrom(
                           backgroundColor: DarbColors.lime,
-                          foregroundColor: DarbColors.forest,
+                          foregroundColor: DarbColors.darkCanvas,
                           minimumSize: const Size(0, 42),
                         ),
                         onPressed: _openCheckout,

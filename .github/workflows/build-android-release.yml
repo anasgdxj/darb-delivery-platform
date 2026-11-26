@@ -1,5 +1,5 @@
-# Manual verification run: build signed artifacts without replacing the public latest release.
-name: Build signed DARB Android release
+# Signed Android release pipeline. Main commits marked [publish-apk] publish latest and notify registered devices.
+name: Build signed DAZREVO Android release
 on:
   push:
     branches: [main]
@@ -65,6 +65,7 @@ jobs:
           mkdir -p "$M/android/app/src/main/res/drawable"
           cp "$ROOT/mobile-overrides/ic_launcher.xml" "$M/android/app/src/main/res/drawable/ic_launcher.xml"
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|' "$M/android/app/src/main/AndroidManifest.xml"
+          sed -i 's|android:label="darb"|android:label="دازريفو"|' "$M/android/app/src/main/AndroidManifest.xml"
           python3 - "$M/pubspec.yaml" "$M/android/app/src/main/AndroidManifest.xml" <<'PY'
           from pathlib import Path
           import re
@@ -82,9 +83,9 @@ jobs:
           pubspec.write_text("\n".join(lines) + "\n")
           m = manifest.read_text()
           internet = '<uses-permission android:name="android.permission.INTERNET" />'
-          if internet not in m:
+          if "android.permission.INTERNET" not in m:
               m = m.replace("<application", internet + "\n    <application", 1)
-          if internet not in m:
+          if "android.permission.INTERNET" not in m:
               raise SystemExit("Could not add INTERNET permission to Android manifest")
           for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
               tag = f'<uses-permission android:name="android.permission.{p}" />'
@@ -180,12 +181,47 @@ jobs:
           printf '%s\n' "- Release signing SHA-1: $SHA1" >> "$GITHUB_STEP_SUMMARY"
           python3 - <<'PY'
           from pathlib import Path
-          p=Path("android/app/build.gradle.kts")
-          if not p.exists(): raise SystemExit("Expected android/app/build.gradle.kts was not generated")
-          s=p.read_text()
-          if 'create("release")' not in s:
-              marker='    buildTypes {'
-              block='''    signingConfigs {
+          import re
+
+          p = Path("android/app/build.gradle.kts")
+          source = p.read_text()
+
+          def block_bounds(value, opening):
+              depth = 0
+              for pos in range(opening, len(value)):
+                  if value[pos] == "{":
+                      depth += 1
+                  elif value[pos] == "}":
+                      depth -= 1
+                      if depth == 0:
+                          return pos
+              return None
+
+          def locate_block(value, pattern, start_at=0):
+              match = re.search(pattern, value[start_at:])
+              if not match:
+                  return None
+              match_start = start_at + match.start()
+              opening = value.find("{", match_start)
+              closing = block_bounds(value, opening)
+              if closing is None:
+                  raise SystemExit("Unbalanced Gradle block: " + pattern)
+              return match_start, opening, closing
+
+          android = locate_block(source, r'(?m)^android\s*\{')
+          if not android:
+              raise SystemExit("Could not locate Android configuration block")
+          _, android_open, android_close = android
+
+          # Remove a generated signingConfigs block, if one exists.
+          existing = locate_block(source, r'(?m)^\s*signingConfigs\s*\{', android_open + 1)
+          if existing and existing[2] < android_close:
+              source = source[:existing[0]] + source[existing[2] + 1:]
+              android = locate_block(source, r'(?m)^android\s*\{')
+              _, android_open, android_close = android
+
+          signing_block = """ 
+              signingConfigs {
                   create("release") {
                       storeFile = file(System.getenv("DARB_KEYSTORE_PATH"))
                       storePassword = System.getenv("DARB_KEYSTORE_PASSWORD")
@@ -194,12 +230,45 @@ jobs:
                   }
               }
 
-          '''
-              if marker not in s: raise SystemExit("Could not locate Android buildTypes block")
-              s=s.replace(marker,block+marker,1)
-          s=s.replace('signingConfig = signingConfigs.getByName("debug")','signingConfig = signingConfigs.getByName("release")')
-          if 'signingConfig = signingConfigs.getByName("release")' not in s: raise SystemExit("Release signing config not applied")
-          p.write_text(s)
+          """
+          source = source[:android_open + 1] + "\n" + signing_block + source[android_open + 1:]
+
+          android = locate_block(source, r'(?m)^android\s*\{')
+          _, android_open, android_close = android
+          build_types = locate_block(source, r'(?m)^\s*buildTypes\s*\{', android_open + 1)
+
+          if not build_types or build_types[2] > android_close:
+              source = source[:android_close] + """
+              buildTypes {
+                  release {
+                      signingConfig = signingConfigs.getByName("release")
+                  }
+              }
+          """ + source[android_close:]
+          else:
+              _, build_open, build_close = build_types
+              release = locate_block(source, r'(?m)^\s*(?:release|getByName\("release"\))\s*\{', build_open + 1)
+              if not release or release[2] > build_close:
+                  source = source[:build_close] + """
+                  release {
+                      signingConfig = signingConfigs.getByName("release")
+                  }
+              """ + source[build_close:]
+              else:
+                  _, release_open, release_close = release
+                  body = source[release_open + 1:release_close]
+                  body = re.sub(r'(?m)^\s*signingConfig\s*=.*(?:\n|$)', '', body)
+                  body = '\n                signingConfig = signingConfigs.getByName("release")\n' + body.lstrip('\n')
+                  source = source[:release_open + 1] + body + source[release_close:]
+
+          android = locate_block(source, r'(?m)^android\s*\{')
+          _, android_open, android_close = android
+          android_body = source[android_open:android_close]
+          if 'create("release")' not in android_body:
+              raise SystemExit("Release signing configuration was not created inside android{}")
+          if 'signingConfig = signingConfigs.getByName("release")' not in android_body:
+              raise SystemExit("Release build type is not connected to release signing")
+          p.write_text(source)
           PY
           rm -rf "$GITHUB_WORKSPACE/extracted-play"
           cp -a "$GITHUB_WORKSPACE/extracted" "$GITHUB_WORKSPACE/extracted-play"
@@ -278,8 +347,34 @@ jobs:
           flutter test --no-pub
           echo "Flutter tests: passed" >> "$GITHUB_STEP_SUMMARY"
           COMMIT_COUNT="$(git rev-list --count HEAD)"
-          # Installed customer baseline is versionCode 1300; every new build must be higher.
+          # The currently installed customer build is versionCode 1677.
+          # Never generate a downgrade, even if the published manifest is unavailable.
           BUILD_NUMBER=$((1301 + COMMIT_COUNT))
+          LATEST_MANIFEST="$RUNNER_TEMP/darb-latest-app-update.json"
+          PUBLISHED_CODE=1677
+          if curl --fail --silent --show-error --location --retry 2 \
+            "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json" \
+            --output "$LATEST_MANIFEST"; then
+            PUBLISHED_CODE_FROM_MANIFEST="$(python3 - "$LATEST_MANIFEST" <<'PY'
+          import json, pathlib, sys
+          try:
+              value = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")).get("versionCode", 0)
+              print(int(value) if str(value).isdigit() else 0)
+          except Exception:
+              print(0)
+          PY
+          )"
+            if [ "$PUBLISHED_CODE_FROM_MANIFEST" -gt "$PUBLISHED_CODE" ]; then
+              PUBLISHED_CODE="$PUBLISHED_CODE_FROM_MANIFEST"
+            fi
+          fi
+          if [ "$PUBLISHED_CODE" -ge "$BUILD_NUMBER" ]; then
+            BUILD_NUMBER=$((PUBLISHED_CODE + 1))
+          fi
+          if [ "$BUILD_NUMBER" -le "$PUBLISHED_CODE" ]; then
+            echo "::error::Generated Android versionCode is not greater than the installed/published release."
+            exit 1
+          fi
           BUILD_NAME="1.0.$BUILD_NUMBER"
           echo "- Android versionCode: $BUILD_NUMBER" >> "$GITHUB_STEP_SUMMARY"
           echo "- Android versionName: $BUILD_NAME" >> "$GITHUB_STEP_SUMMARY"
@@ -368,6 +463,7 @@ jobs:
           path: extracted-play/darb-project/mobile/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 7
+      # Release publication is deliberately gated by the [publish-apk] commit marker; artifacts are uploaded first.
       - name: Publish signed APK as the latest public release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
@@ -378,10 +474,15 @@ jobs:
           APK="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk"
           APK_DIR="$(dirname "$APK")"
           if gh release view latest >/dev/null 2>&1; then
-            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --clobber
-            gh release edit latest --title "دَرْب — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دَرْب. تحقق من SHA-256 في ملخص عملية البناء."
+            # Explicitly delete stale assets before uploading. `--clobber` uses
+            # GitHub's replace path, which returned HTTP 500 for the existing
+            # APK asset and prevented the release notification from running.
+            gh release delete-asset latest app-release.apk --yes || true
+            gh release delete-asset latest app-update.json --yes || true
+            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json"
+            gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
           else
-            gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دَرْب — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دَرْب."
+            gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
           fi
 
       - name: Notify DARB users about the published release
@@ -398,12 +499,65 @@ jobs:
           fi
           MANIFEST="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json"
           jq --arg releaseTag "latest" '. + {releaseTag: $releaseTag}' "$MANIFEST" > "$RUNNER_TEMP/darb-release-notification.json"
-          curl --fail-with-body --silent --show-error --retry 3 --retry-all-errors \
-            -X POST "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/publish" \
-            -H "Authorization: Bearer $DARB_RELEASE_WEBHOOK_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data-binary @"$RUNNER_TEMP/darb-release-notification.json" \
-            --output "$RUNNER_TEMP/darb-release-notification-result.json"
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import time
+          import urllib.error
+          import urllib.request
+
+          token = os.environ.get("DARB_RELEASE_WEBHOOK_TOKEN", "").strip()
+          payload_path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "darb-release-notification.json"
+          result_path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "darb-release-notification-result.json"
+          payload = payload_path.read_bytes()
+          url = "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/publish"
+          last_error = None
+
+          for attempt in range(1, 5):
+              request = urllib.request.Request(
+                  url,
+                  data=payload,
+                  headers={
+                      "Authorization": "Bearer " + token,
+                      "Content-Type": "application/json",
+                      "Accept": "application/json",
+                  },
+                  method="POST",
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=45) as response:
+                      result_path.write_bytes(response.read())
+                      if response.status < 200 or response.status >= 300:
+                          raise RuntimeError(f"Notification endpoint returned HTTP {response.status}")
+                  break
+              except urllib.error.HTTPError as error:
+                  body = error.read().decode("utf-8", "replace")
+                  last_error = RuntimeError(f"Notification endpoint returned HTTP {error.code}: {body[:1000]}")
+                  if error.code not in (429, 500, 502, 503, 504) or attempt == 4:
+                      raise last_error
+              except (urllib.error.URLError, TimeoutError, OSError) as error:
+                  last_error = error
+                  if attempt == 4:
+                      raise RuntimeError(f"Could not reach notification endpoint after 4 attempts: {error}") from error
+              time.sleep(attempt * 5)
+
+          result = json.loads(result_path.read_text(encoding="utf-8"))
+          if result.get("pushSkipped") is not False or int(result.get("pushFailed", 0) or 0) != 0:
+              raise SystemExit("FCM delivery was not confirmed: " + json.dumps(result, ensure_ascii=False))
+          targeted = int(result.get("targetedDevices", 0) or 0)
+          sent = int(result.get("pushSent", 0) or 0)
+          if targeted > 0 and sent <= 0:
+              raise SystemExit("FCM accepted no notifications for registered devices: " + json.dumps(result, ensure_ascii=False))
+          summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
+          if targeted == 0:
+              summary.open("a", encoding="utf-8").write("Release push announcement: no registered devices; no push was sent.\\n")
+          else:
+              summary.open("a", encoding="utf-8").write(
+                  f"Release push announcement: FCM accepted {sent} notifications for {targeted} registered devices; actionable failures: 0.\\n"
+              )
+          print(f"Release notification confirmed: {sent}/{targeted} devices.")
+          PY
           if ! jq -e '.pushSkipped == false and (.pushFailed // 0) == 0 and ((.targetedDevices // 0) == 0 or (.pushSent // 0) > 0)' "$RUNNER_TEMP/darb-release-notification-result.json" >/dev/null; then
             echo "::error::FCM delivery was not confirmed for the registered DARB devices."
             cat "$RUNNER_TEMP/darb-release-notification-result.json"
@@ -417,3 +571,90 @@ jobs:
           else
             echo "Release push announcement: FCM accepted $SENT notifications for $TARGETED registered devices; actionable failures: $FAILED." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Announce published release in Telegram channel
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: "@DAZREVO"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import html
+          import json
+          import os
+          import pathlib
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
+          token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+          chat_id = os.environ.get("TELEGRAM_CHAT_ID", "@DAZREVO").strip()
+          if not token:
+              summary.open("a", encoding="utf-8").write(
+                  "\nTelegram channel announcement: NOT SENT — add the TELEGRAM_BOT_TOKEN repository secret.\n"
+              )
+              print("::warning::Telegram announcement skipped because TELEGRAM_BOT_TOKEN is not configured.")
+              raise SystemExit(0)
+
+          manifest_path = pathlib.Path("extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          version = html.escape(str(manifest.get("versionName", "New version")))
+          build = html.escape(str(manifest.get("versionCode", "")))
+          notes = str(manifest.get("releaseNotes", "")).strip()
+          notes_html = html.escape(notes[:2500]) if notes else "تحسينات وإصلاحات عامة"
+          apk_url = "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk"
+          release_url = "https://github.com/anasgdxj/darb-delivery-platform/releases/tag/latest"
+          message = (
+              "🚀 <b>صدر تحديث جديد لتطبيق DAZREVO</b>\n\n"
+              f"📦 الإصدار: <b>{version}</b>\n"
+              f"🔢 رقم البناء: <code>{build}</code>\n\n"
+              f"📝 <b>أبرز التحديثات</b>\n{notes_html}\n\n"
+              f"⬇️ <a href=\"{apk_url}\">تحميل APK الرسمي</a>\n"
+              f"📋 <a href=\"{release_url}\">تفاصيل الإصدار</a>\n\n"
+              "DAZREVO — طريقك الأسرع للتوصيل."
+          )
+          payload = urllib.parse.urlencode({
+              "chat_id": chat_id,
+              "text": message,
+              "parse_mode": "HTML",
+              "disable_web_page_preview": "false",
+          }).encode("utf-8")
+          endpoint = "https://api.telegram.org/bot" + token + "/sendMessage"
+          last_error = None
+          for attempt in range(1, 4):
+              request = urllib.request.Request(endpoint, data=payload, method="POST")
+              try:
+                  with urllib.request.urlopen(request, timeout=30) as response:
+                      result = json.loads(response.read().decode("utf-8"))
+                  if not result.get("ok"):
+                      raise RuntimeError("Telegram API rejected the channel message")
+                  message_id = result.get("result", {}).get("message_id", "unknown")
+                  summary.open("a", encoding="utf-8").write(
+                      f"\nTelegram channel announcement: SENT to {chat_id}; message ID {message_id}.\n"
+                  )
+                  print(f"Telegram release announcement delivered to {chat_id}.")
+                  break
+              except urllib.error.HTTPError as error:
+                  response_body = error.read().decode("utf-8", "replace")[:500]
+                  last_error = RuntimeError(f"Telegram API HTTP {error.code}: {response_body}")
+                  if error.code not in (429, 500, 502, 503, 504) or attempt == 3:
+                      break
+              except (urllib.error.URLError, TimeoutError, OSError, ValueError, RuntimeError) as error:
+                  last_error = error
+                  if attempt == 3:
+                      break
+              time.sleep(attempt * 3)
+          else:
+              last_error = RuntimeError("Telegram announcement retry loop ended unexpectedly")
+          if last_error is not None:
+              summary.open("a", encoding="utf-8").write(
+                  "\nTelegram channel announcement: FAILED — see workflow warning; APK release remains published.\n"
+              )
+              print(f"::warning::Telegram announcement failed; APK release remains published: {last_error}")
+              raise SystemExit(0)
+          PY

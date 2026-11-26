@@ -55,6 +55,23 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     }
   }
 
+  Future<void> _callPhone(String phone) async {
+    try {
+      final launched = await launchUrl(Uri.parse('tel:$phone'));
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(dt('حدث خطأ غير متوقع، حاول مجدداً'))),
+        );
+      }
+    }
+  }
+
   Future<void> _cancelPendingOrder(String orderId) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -303,8 +320,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                   if (driverPhone != null && driverPhone.isNotEmpty)
                     IconButton(
                       tooltip: dt('اتصال بالسائق'),
-                      onPressed: () =>
-                          launchUrl(Uri.parse('tel:$driverPhone')),
+                      onPressed: () => _callPhone(driverPhone),
                       icon: Icon(
                         Icons.call_rounded,
                         color: DarbColors.primaryOf(ctx),
@@ -481,13 +497,18 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     return RefreshIndicator(
       onRefresh: _load,
       child: _orders.isEmpty
-          ? ListView(
-              children: [
-                DarbStateView.empty(
-                  message: dt('لا توجد طلبات حتى الآن'),
-                  icon: Icons.receipt_long_outlined,
+          ? LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: DarbStateView.empty(
+                    message: dt('لا توجد طلبات حتى الآن'),
+                    icon: Icons.receipt_long_outlined,
+                    onRetry: _load,
+                  ),
                 ),
-              ],
+              ),
             )
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 98),
@@ -538,6 +559,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                   DarbStateView.empty(
                     message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
                     icon: Icons.filter_list_off_rounded,
+                    onRetry: () => setState(() => _filter = 'ALL'),
                   )
                 else
                   for (var i = 0; i < filtered.length; i++)

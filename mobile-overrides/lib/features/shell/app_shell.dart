@@ -28,7 +28,9 @@ import '../vendor/vendor_orders_screen.dart';
 import '../vendor/vendor_products_screen.dart';
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  const AppShell({super.key, this.checkForUpdates = true});
+
+  final bool checkForUpdates;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -50,29 +52,50 @@ class _AppShellState extends State<AppShell> {
   ({String title, String body, Map<String, dynamic> data})? _bannerNotification;
   Map<String, dynamic>? _pendingNotificationData;
   bool _handlingNotification = false;
+  bool _redirectingToLogin = false;
 
   @override
   void initState() {
     super.initState();
+    Api.instance.sessionExpiredNotifier.addListener(_onSessionExpired);
     _loadUser();
     _setupNotifications();
-    if (!kDarbPlayStoreBuild) {
+    if (!kDarbPlayStoreBuild && widget.checkForUpdates) {
       DarbUpdater.instance.checkForUpdate();
     }
   }
 
   @override
   void dispose() {
+    Api.instance.sessionExpiredNotifier.removeListener(_onSessionExpired);
     _bannerTimer?.cancel();
     _fgSub?.cancel();
     _openSub?.cancel();
     super.dispose();
   }
 
+  Future<void> _onSessionExpired() async {
+    if (!mounted || _redirectingToLogin) return;
+    await _redirectToLogin();
+  }
+
+  Future<void> _redirectToLogin() async {
+    if (_redirectingToLogin) return;
+    _redirectingToLogin = true;
+    DriverLocationReporter.stop();
+    await Api.instance.clear();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      DarbPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
+  }
+
   void _setupNotifications() {
     _fgSub = DarbNotifications.listenForeground((title, body, data) {
       if (!mounted) return;
       _refreshUnreadCount();
+      if (!DarbAppearanceController.instance.inAppBannersEnabled) return;
       final resolvedTitle =
           (title != null && title.trim().isNotEmpty) ? title.trim() : dt('إشعار جديد');
       final resolvedBody = body?.trim() ?? '';
@@ -368,24 +391,31 @@ class _AppShellState extends State<AppShell> {
       if (data is! Map<String, dynamic>) {
         throw const ApiException('بيانات الجلسة غير صالحة');
       }
-      await DarbLocalCache.instance.writeJson(_profileCacheKey, data);
+      // Cache persistence is best-effort and must not delay the first frame
+      // of an authenticated session.
+      unawaited(DarbLocalCache.instance.writeJson(_profileCacheKey, data));
       final localeCode = data['locale']?.toString();
       if (localeCode != null && ['ar', 'en', 'tr'].contains(localeCode)) {
         darbLocale.value = Locale(localeCode);
       }
-      await DarbNotifications.register();
+      // Push registration is best-effort: an unavailable Firebase plugin or
+      // denied notification permission must never prevent account access.
+      // Device registration is deliberately non-blocking. Account content
+      // must render even if FCM permission/token negotiation is slow.
+      unawaited(DarbNotifications.register());
       if (data['role']?.toString().toUpperCase() == 'DRIVER') {
         DriverLocationReporter.start();
       } else {
         DriverLocationReporter.stop();
       }
-      await _refreshUnreadCount();
       if (!mounted) return;
       setState(() {
         _user = data;
         _offline = false;
         _error = null;
       });
+      // Badge refresh must never block account navigation or first paint.
+      unawaited(_refreshUnreadCount());
       final pending = _pendingNotificationData;
       if (pending != null) {
         _pendingNotificationData = null;
@@ -396,18 +426,16 @@ class _AppShellState extends State<AppShell> {
       if (e.statusCode == 401 ||
           e.statusCode == 403 ||
           Api.instance.sessionInvalidated) {
-        await Api.instance.clear();
-        if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          DarbPageRoute(builder: (_) => const LoginScreen()),
-          (_) => false,
-        );
+        await _redirectToLogin();
         return;
       }
       if (e.isNetworkError &&
           e.statusCode == null &&
           !Api.instance.sessionInvalidated) {
-        final cached = await DarbLocalCache.instance.readJson(_profileCacheKey);
+        dynamic cached;
+        try {
+          cached = await DarbLocalCache.instance.readJson(_profileCacheKey);
+        } catch (_) {}
         if (cached is Map && mounted) {
           final profile = Map<String, dynamic>.from(cached);
           final localeCode = profile['locale']?.toString();
@@ -657,7 +685,7 @@ class _AppShellState extends State<AppShell> {
     };
 
     final roleSubtitle = switch (role) {
-      'ADMIN' => dt('إدارة دَرْب'),
+      'ADMIN' => dt('إدارة دازريفو'),
       'VENDOR' => dt('حساب تاجر'),
       'DRIVER' => dt('حساب سائق'),
       _ => dt('حساب عميل'),
@@ -727,6 +755,7 @@ class _AppShellState extends State<AppShell> {
           _ShellActionWell(
             tooltip: dt('المساعد الذكي'),
             highlighted: true,
+            violetAccent: true,
             onTap: () {
               DarbHaptics.light();
               Navigator.push(
@@ -737,7 +766,7 @@ class _AppShellState extends State<AppShell> {
             child: Icon(
               Icons.auto_awesome_rounded,
               size: 19,
-              color: DarbColors.primaryOf(context),
+              color: DarbColors.violetOf(context),
             ),
           ),
         ],
@@ -903,16 +932,19 @@ class _ShellActionWell extends StatelessWidget {
     required this.onTap,
     required this.child,
     this.highlighted = false,
+    this.violetAccent = false,
   });
 
   final String tooltip;
   final VoidCallback onTap;
   final Widget child;
   final bool highlighted;
+  final bool violetAccent;
 
   @override
   Widget build(BuildContext context) {
-    final primary = DarbColors.primaryOf(context);
+    final accent =
+        violetAccent ? DarbColors.violetOf(context) : DarbColors.primaryOf(context);
     final isDark = DarbColors.isDark(context);
 
     return Padding(
@@ -929,12 +961,12 @@ class _ShellActionWell extends StatelessWidget {
               height: 38,
               decoration: BoxDecoration(
                 color: highlighted
-                    ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
+                    ? accent.withValues(alpha: isDark ? 0.22 : 0.12)
                     : DarbColors.softSurfaceOf(context).withValues(alpha: 0.78),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: highlighted
-                      ? primary.withValues(alpha: 0.30)
+                      ? accent.withValues(alpha: 0.34)
                       : DarbColors.borderOf(context),
                 ),
               ),

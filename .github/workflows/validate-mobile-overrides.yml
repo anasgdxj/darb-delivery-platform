@@ -1,4 +1,4 @@
-name: Validate DARB mobile overrides
+name: Validate DAZREVO mobile overrides
 
 on:
   pull_request:
@@ -52,6 +52,7 @@ jobs:
           mkdir -p "$M/android/app/src/main/res/drawable"
           cp mobile-overrides/ic_launcher.xml "$M/android/app/src/main/res/drawable/ic_launcher.xml"
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|' "$M/android/app/src/main/AndroidManifest.xml"
+          sed -i 's|android:label="darb"|android:label="دازريفو"|' "$M/android/app/src/main/AndroidManifest.xml"
           python3 - "$M/android/app/src/main/AndroidManifest.xml" <<'PY'
           from pathlib import Path
           import sys

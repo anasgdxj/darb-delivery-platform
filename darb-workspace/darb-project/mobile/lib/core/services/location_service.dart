@@ -112,7 +112,7 @@ class DriverLocationReporter {
         distanceFilter: 20,
         intervalDuration: const Duration(seconds: 30),
         foregroundNotificationConfig: const ForegroundNotificationConfig(
-          notificationTitle: 'دَرْب - مشاركة موقع المندوب',
+          notificationTitle: 'دازريفو - مشاركة موقع المندوب',
           notificationText: 'يتم تحديث موقعك أثناء تنفيذ التوصيل',
           enableWakeLock: true,
           setOngoing: true,

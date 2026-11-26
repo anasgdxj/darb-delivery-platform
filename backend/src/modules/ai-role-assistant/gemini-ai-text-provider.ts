@@ -19,7 +19,7 @@ export class GeminiAiTextProvider extends AiTextProvider {
   async generate(request: AiTextRequest): Promise<string> {
     const apiKey = this.config.get<string>('GEMINI_API_KEY');
     if (!apiKey) {
-      throw new ServiceUnavailableException('مساعد دَرْب الذكي غير مهيأ حالياً');
+      throw new ServiceUnavailableException('مساعد دازريفو الذكي غير مهيأ حالياً');
     }
 
     const configuredModel = this.config.get<string>('GEMINI_MODEL')?.trim();
@@ -60,12 +60,12 @@ export class GeminiAiTextProvider extends AiTextProvider {
         },
       );
     } catch {
-      throw new ServiceUnavailableException('تعذر الاتصال بمساعد دَرْب الذكي حالياً');
+      throw new ServiceUnavailableException('تعذر الاتصال بمساعد دازريفو الذكي حالياً');
     }
 
     if (!response.ok) {
       // Do not expose provider response bodies, which may contain request metadata.
-      throw new ServiceUnavailableException('مساعد دَرْب غير متاح حالياً');
+      throw new ServiceUnavailableException('مساعد دازريفو غير متاح حالياً');
     }
 
     let payload: GeminiResponse;

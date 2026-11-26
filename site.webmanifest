@@ -1,14 +1,14 @@
 {
-  "name": "دَرْب | Darb",
-  "short_name": "دَرْب",
-  "description": "منصة توصيل وطلبات المتاجر في سوريا",
+  "name": "دازريفو | DAZREVO",
+  "short_name": "دازريفو",
+  "description": "منصة التوصيل وطلبات المتاجر والتوصيل المستقل في سوريا",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#F6F6F1",
-  "theme_color": "#12302A",
+  "background_color": "#F8FAF7",
+  "theme_color": "#0B2F24",
   "icons": [
     {
       "src": "./assets/favicon.svg",

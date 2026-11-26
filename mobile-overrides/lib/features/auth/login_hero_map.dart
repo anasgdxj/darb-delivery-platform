@@ -5,11 +5,14 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/darb_design_system.dart';
 
-/// Minimalist dark-emerald abstract geometric architectural background with
-/// subtle coordinate grid lines, glowing route vector path matching DARB's
-/// brand curve, and pulsing origin/destination nodes. Uses zero city photos.
+/// Obsidian-emerald abstract geometric architectural background with
+/// subtle coordinate grid lines, glowing Volt Lime & Signal Violet vector
+/// route path matching DAZREVO's brand curve, and pulsing origin/destination
+/// nodes. Uses zero city photos.
 class DarbLoginVectorMap extends StatefulWidget {
-  const DarbLoginVectorMap({super.key});
+  const DarbLoginVectorMap({super.key, this.height});
+
+  final double? height;
 
   @override
   State<DarbLoginVectorMap> createState() => _DarbLoginVectorMapState();
@@ -50,9 +53,9 @@ class _DarbLoginVectorMapState extends State<DarbLoginVectorMap>
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    final map = DecoratedBox(
       decoration: const BoxDecoration(
-        color: Color(0xFF0E211A),
+        color: DarbColors.darkCanvas,
       ),
       child: AnimatedBuilder(
         animation: _controller,
@@ -67,6 +70,15 @@ class _DarbLoginVectorMapState extends State<DarbLoginVectorMap>
         },
       ),
     );
+
+    if (widget.height != null) {
+      return SizedBox(
+        height: widget.height,
+        width: double.infinity,
+        child: map,
+      );
+    }
+    return map;
   }
 }
 
@@ -79,14 +91,15 @@ class _DarbVectorMapPainter extends CustomPainter {
   final double progress;
   final bool reducedMotion;
 
-  static const _bgBase = Color(0xFF0E211A);
-  static const _bgInnerGlow = Color(0xFF1A3C2F);
-  static const _sagePrimary = Color(0xFF2D5544);
-  static const _sageSecondary = Color(0xFF1F3D31);
-  static const _sageBlock = Color(0xFF152D23);
+  static const _bgBase = DarbColors.darkCanvas; // #071A14
+  static const _bgInnerGlow = DarbColors.forestSoft; // #144435
+  static const _sagePrimary = Color(0xFF285947);
+  static const _sageSecondary = Color(0xFF193C2F);
+  static const _sageBlock = Color(0xFF0E2B21);
   static const _mint = DarbColors.mint;
   static const _lime = DarbColors.lime;
-  static const _pinCore = Color(0xFF0C1D16);
+  static const _violet = DarbColors.violet;
+  static const _pinCore = DarbColors.darkCanvas;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -94,27 +107,40 @@ class _DarbVectorMapPainter extends CustomPainter {
     final h = size.height;
     final rect = Offset.zero & size;
 
-    // 1. Deep Obsidian Emerald canvas with warm radial depth
+    // 1. Deep Obsidian Emerald canvas with subtle radial depth
     canvas.drawRect(
       rect,
       Paint()
         ..shader = ui.Gradient.radial(
           Offset(w * 0.5, h * 0.42),
-          math.max(w, h) * 0.78,
+          math.max(w, h) * 0.80,
           [_bgInnerGlow, _bgBase],
         ),
     );
 
-    // Subtle secondary emerald ambient shimmer near top-end
+    // Subtle secondary Signal Violet + Volt Lime ambient shimmer
     canvas.drawCircle(
-      Offset(w * 0.82, h * 0.24),
+      Offset(w * 0.16, h * 0.72),
+      w * 0.28,
+      Paint()
+        ..shader = ui.Gradient.radial(
+          Offset(w * 0.16, h * 0.72),
+          w * 0.28,
+          [
+            _violet.withValues(alpha: 0.20),
+            Colors.transparent,
+          ],
+        ),
+    );
+    canvas.drawCircle(
+      Offset(w * 0.84, h * 0.24),
       w * 0.34,
       Paint()
         ..shader = ui.Gradient.radial(
-          Offset(w * 0.82, h * 0.24),
+          Offset(w * 0.84, h * 0.24),
           w * 0.34,
           [
-            DarbColors.primaryGreen.withValues(alpha: 0.26),
+            DarbColors.primaryGreen.withValues(alpha: 0.32),
             Colors.transparent,
           ],
         ),
@@ -122,7 +148,7 @@ class _DarbVectorMapPainter extends CustomPainter {
 
     // 2. Abstract architectural geometric planes
     final blockPaint = Paint()
-      ..color = _sageBlock.withValues(alpha: 0.78)
+      ..color = _sageBlock.withValues(alpha: 0.84)
       ..style = PaintingStyle.fill;
     final blocks = [
       RRect.fromRectAndRadius(
@@ -156,7 +182,7 @@ class _DarbVectorMapPainter extends CustomPainter {
 
     // 3. Secondary coordinate grid lines
     final minorStreetPaint = Paint()
-      ..color = _sageSecondary.withValues(alpha: 0.58)
+      ..color = _sageSecondary.withValues(alpha: 0.62)
       ..strokeWidth = 1.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -188,7 +214,7 @@ class _DarbVectorMapPainter extends CustomPainter {
 
     // 4. Primary diagonal geometric vectors
     final majorStreetPaint = Paint()
-      ..color = _sagePrimary.withValues(alpha: 0.62)
+      ..color = _sagePrimary.withValues(alpha: 0.66)
       ..strokeWidth = 1.75
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -210,13 +236,13 @@ class _DarbVectorMapPainter extends CustomPainter {
 
     // Subtle geometric orbital junction rings
     final junctionPaint = Paint()
-      ..color = _sagePrimary.withValues(alpha: 0.58)
+      ..color = _sagePrimary.withValues(alpha: 0.60)
       ..strokeWidth = 1.4
       ..style = PaintingStyle.stroke;
     canvas.drawCircle(Offset(w * 0.24, h * 0.22), 7.5, junctionPaint);
     canvas.drawCircle(Offset(w * 0.74, h * 0.64), 9.0, junctionPaint);
 
-    // 5. Glowing kinetic S-route path matching DARB brand identity
+    // 5. Glowing kinetic Z-route path matching DAZREVO brand identity
     final startPin = Offset(w * 0.14, h * 0.74);
     final endPin = Offset(w * 0.86, h * 0.26);
 
@@ -242,7 +268,7 @@ class _DarbVectorMapPainter extends CustomPainter {
     canvas.drawPath(
       routePath,
       Paint()
-        ..color = _mint.withValues(alpha: 0.22)
+        ..color = _lime.withValues(alpha: 0.20)
         ..strokeWidth = 13
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
@@ -251,7 +277,7 @@ class _DarbVectorMapPainter extends CustomPainter {
     canvas.drawPath(
       routePath,
       Paint()
-        ..color = _mint.withValues(alpha: 0.45)
+        ..color = _mint.withValues(alpha: 0.44)
         ..strokeWidth = 5.0
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
@@ -264,13 +290,13 @@ class _DarbVectorMapPainter extends CustomPainter {
           startPin,
           endPin,
           [
-            _mint.withValues(alpha: 0.85),
-            const Color(0xFFE6FFF3),
-            _lime.withValues(alpha: 0.90),
+            _violet.withValues(alpha: 0.92),
+            _mint,
+            _lime,
           ],
-          const [0.0, 0.5, 1.0],
+          const [0.0, 0.48, 1.0],
         )
-        ..strokeWidth = 2.3
+        ..strokeWidth = 2.4
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke,
     );
@@ -290,7 +316,7 @@ class _DarbVectorMapPainter extends CustomPainter {
             metric.extractPath(s, e),
             Paint()
               ..color = const Color(0xFFF6FFFA).withValues(alpha: 0.95)
-              ..strokeWidth = 3.4
+              ..strokeWidth = 3.5
               ..strokeCap = StrokeCap.round
               ..style = PaintingStyle.stroke
               ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
@@ -305,10 +331,10 @@ class _DarbVectorMapPainter extends CustomPainter {
       Paint()
         ..shader = ui.Gradient.radial(
           Offset(w * 0.5, h * 0.50),
-          w * 0.46,
+          w * 0.48,
           [
-            _bgBase.withValues(alpha: 0.74),
-            _bgBase.withValues(alpha: 0.34),
+            _bgBase.withValues(alpha: 0.78),
+            _bgBase.withValues(alpha: 0.36),
             Colors.transparent,
           ],
           const [0.0, 0.56, 1.0],
@@ -316,7 +342,7 @@ class _DarbVectorMapPainter extends CustomPainter {
     );
 
     // 7. Pulsing start & destination pins
-    _drawPulsingNode(canvas, startPin, progress, _mint);
+    _drawPulsingNode(canvas, startPin, progress, _violet);
     _drawPulsingNode(canvas, endPin, (progress + 0.5) % 1.0, _lime);
   }
 
