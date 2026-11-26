@@ -496,6 +496,13 @@ jobs:
           path: extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 7
+      - name: Upload Telegram-compatible ARM64 APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darb-android-arm64-telegram
+          path: extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload signed Play Store AAB artifact
         uses: actions/upload-artifact@v4
         with:
@@ -505,24 +512,28 @@ jobs:
           retention-days: 7
       # Release publication is deliberately gated by the [publish-apk] commit marker; artifacts are uploaded first.
       - name: Publish signed APK as the latest public release
+        id: publish_apk
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: \${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
           APK="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-release.apk"
           APK_DIR="$(dirname "$APK")"
+          assets=("$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json")
+          if [ -s "$APK_DIR/app-arm64-v8a-release.apk" ]; then
+            assets+=("$APK_DIR/app-arm64-v8a-release.apk#app-arm64-v8a-release.apk")
+          fi
           if gh release view latest >/dev/null 2>&1; then
-            # Explicitly delete stale assets before uploading. `--clobber` uses
-            # GitHub's replace path, which returned HTTP 500 for the existing
-            # APK asset and prevented the release notification from running.
+            # Delete stale assets explicitly before uploading replacements.
             gh release delete-asset latest app-release.apk --yes || true
             gh release delete-asset latest app-update.json --yes || true
-            gh release upload latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json"
-            gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). تحقق من SHA-256 في ملخص عملية البناء."
+            gh release delete-asset latest app-arm64-v8a-release.apk --yes || true
+            gh release upload latest "\${assets[@]}"
+            gh release edit latest --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO). يتوفر APK عام ونسخة ARM64 للإرسال عبر تيليغرام عند توافق الحجم."
           else
-            gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
+            gh release create latest "\${assets[@]}" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
           fi
 
       - name: Notify DARB users about the published release
