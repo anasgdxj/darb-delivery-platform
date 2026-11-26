@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
@@ -34,10 +36,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _complete() async {
-    DarbHaptics.medium();
-    try {
-      await DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true);
-    } catch (_) {}
+    DarbHaptics.success();
+    // Persist onboarding completion without blocking the transition to login.
+    // Secure storage may be slow or temporarily unavailable on first launch.
+    unawaited(
+      DarbLocalCache.instance.writeJson(kDazrevoOnboardingSeenKey, true),
+    );
     if (!mounted) return;
     if (widget.onFinished != null) {
       widget.onFinished!.call();
@@ -54,8 +58,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return;
     }
     DarbHaptics.selection();
+    final duration =
+        DarbMotion.effectiveDuration(context, DarbMotion.standard);
+    if (duration == Duration.zero) {
+      _pageController.jumpToPage(_index + 1);
+      return;
+    }
     _pageController.nextPage(
-      duration: DarbMotion.effectiveDuration(context, DarbMotion.standard),
+      duration: duration,
       curve: DarbMotion.enter,
     );
   }
@@ -64,6 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final slides = [
       _OnboardingSlideData(
+        stepCode: '01',
         badge: dt('متاجر مدينتك'),
         title: dt('اطلب من متاجر مدينتك في ثوانٍ'),
         subtitle: dt(
@@ -71,7 +82,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
         icon: Icons.storefront_rounded,
         accent: DarbColors.lime,
-        secondaryAccent: DarbColors.mint,
         highlights: [
           (Icons.flash_on_rounded, dt('طلب سريع ومباشر')),
           (Icons.payments_outlined, dt('الدفع عند الاستلام')),
@@ -79,6 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ],
       ),
       _OnboardingSlideData(
+        stepCode: '02',
         badge: dt('التوصيل المستقل'),
         title: dt('أرسل أغراضك بحرية مع عروض السائقين'),
         subtitle: dt(
@@ -86,7 +97,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
         icon: Icons.local_shipping_rounded,
         accent: DarbColors.mint,
-        secondaryAccent: DarbColors.lime,
         highlights: [
           (Icons.swap_horiz_rounded, dt('من نقطة إلى نقطة')),
           (Icons.local_offer_outlined, dt('عروض متعددة من المناديب')),
@@ -94,6 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ],
       ),
       _OnboardingSlideData(
+        stepCode: '03',
         badge: dt('الذكاء والمسار الحي'),
         title: dt('مساعد ذكي وتتبّع لحظي على الخريطة'),
         subtitle: dt(
@@ -101,7 +112,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
         icon: Icons.auto_awesome_rounded,
         accent: DarbColors.darkViolet,
-        secondaryAccent: DarbColors.lime,
         isAiSlide: true,
         highlights: [
           (Icons.auto_awesome_rounded, dt('صياغة ذكية للطلبات')),
@@ -112,39 +122,88 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ];
 
     final current = slides[_index];
+    final isTablet = DarbAdaptiveLayout.isTablet(context);
 
     return Scaffold(
       backgroundColor: DarbColors.darkCanvas,
       body: Stack(
         children: [
-          const Positioned.fill(
-            child: DarbAmbientBackground(child: SizedBox.expand()),
+          // Full-bleed atmospheric architectural backdrop with zero bitmap assets.
+          Positioned.fill(
+            child: CityShowcaseBanner(
+              height: MediaQuery.sizeOf(context).height,
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    DarbColors.darkCanvas.withValues(alpha: 0.78),
+                    DarbColors.forest.withValues(alpha: 0.62),
+                    DarbColors.darkCanvas.withValues(alpha: 0.94),
+                  ],
+                  stops: const [0.0, 0.42, 1.0],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: -80,
+            right: -60,
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: DarbMotion.effectiveDuration(
+                  context,
+                  DarbMotion.expressive,
+                ),
+                width: 260,
+                height: 260,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      current.accent.withValues(alpha: 0.24),
+                      current.accent.withValues(alpha: 0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Floating spatial header bar
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                   child: Row(
                     children: [
-                      const DarbBrandMark(size: 38),
+                      const DarbBrandMark(size: 40),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           dt('دازريفو · DAZREVO'),
-                          style: TextStyle(
-                            color: DarbColors.inkOf(context),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w900,
-                            letterSpacing: 0.2,
+                            letterSpacing: 0.25,
                           ),
                         ),
                       ),
                       DarbGlassSurface(
                         borderRadius: DarbRadius.pill,
-                        blurSigma: 12,
+                        blurSigma: 14,
                         elevated: false,
+                        tintColor:
+                            DarbColors.darkSurface.withValues(alpha: 0.72),
+                        borderColor: Colors.white.withValues(alpha: 0.18),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 2,
@@ -157,9 +216,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 ? darbLocale.value.languageCode
                                 : 'ar',
                             isDense: true,
-                            dropdownColor: DarbColors.surfaceElevatedOf(context),
-                            style: TextStyle(
-                              color: DarbColors.inkOf(context),
+                            dropdownColor: DarbColors.forest,
+                            iconEnabledColor: Colors.white,
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
                             ),
@@ -177,14 +237,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: DarbColors.mint,
+                          backgroundColor: Colors.white.withValues(alpha: 0.08),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(DarbRadius.pill),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                        ),
                         onPressed: _complete,
-                        child: Text(dt('تخطي')),
+                        child: Text(
+                          dt('تخطي'),
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
                       ),
                     ],
                   ),
                 ),
+
+                // Main interactive stage
                 Expanded(
                   child: PageView.builder(
                     controller: _pageController,
@@ -193,60 +269,88 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       DarbHaptics.selection();
                       setState(() => _index = value);
                     },
-                    itemBuilder: (context, i) => _OnboardingSlideView(
+                    itemBuilder: (context, i) => _SpatialOnboardingSlide(
                       slide: slides[i],
+                      isTablet: isTablet,
                     ),
                   ),
                 ),
+
+                // Bottom floating control dock
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  padding: const EdgeInsets.fromLTRB(18, 6, 18, 18),
                   child: Center(
                     heightFactor: 1,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth:
-                            DarbAdaptiveLayout.isTablet(context) ? 560 : 520,
+                        maxWidth: isTablet ? 600 : 520,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(slides.length, (i) {
-                              final active = i == _index;
-                              return AnimatedContainer(
-                                duration: DarbMotion.effectiveDuration(
-                                  context,
-                                  DarbMotion.interactive,
+                      child: DarbGlassSurface(
+                        borderRadius: DarbRadius.xl,
+                        blurSigma: 24,
+                        tintColor:
+                            DarbColors.darkSurface.withValues(alpha: 0.86),
+                        borderColor:
+                            current.accent.withValues(alpha: 0.34),
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                Row(
+                                  children: List.generate(slides.length, (i) {
+                                    final active = i == _index;
+                                    return AnimatedContainer(
+                                      duration: DarbMotion.effectiveDuration(
+                                        context,
+                                        DarbMotion.interactive,
+                                      ),
+                                      curve: DarbMotion.enter,
+                                      margin: const EdgeInsetsDirectional.only(
+                                        end: 6,
+                                      ),
+                                      width: active ? 28 : 8,
+                                      height: 7,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                          DarbRadius.pill,
+                                        ),
+                                        color: active
+                                            ? current.accent
+                                            : Colors.white
+                                                .withValues(alpha: 0.24),
+                                      ),
+                                    );
+                                  }),
                                 ),
-                                curve: DarbMotion.enter,
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                width: active ? 28 : 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(DarbRadius.pill),
-                                  color: active
-                                      ? (current.isAiSlide
-                                          ? DarbColors.violetOf(context)
-                                          : DarbColors.primaryOf(context))
-                                      : DarbColors.borderStrongOf(context),
+                                const Spacer(),
+                                Text(
+                                  '${_index + 1} / ${slides.length}',
+                                  style: TextStyle(
+                                    color: current.accent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w900,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
                                 ),
-                              );
-                            }),
-                          ),
-                          const SizedBox(height: 16),
-                          DarbActionButton(
-                            label: _index == slides.length - 1
-                                ? dt('ابدأ الآن')
-                                : dt('التالي'),
-                            icon: _index == slides.length - 1
-                                ? Icons.arrow_forward_rounded
-                                : Icons.chevron_right_rounded,
-                            onPressed: () => _next(slides.length),
-                          ),
-                        ],
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            DarbActionButton(
+                              label: _index == slides.length - 1
+                                  ? dt('ابدأ الآن')
+                                  : dt('التالي'),
+                              icon: _index == slides.length - 1
+                                  ? Icons.arrow_forward_rounded
+                                  : Icons.chevron_right_rounded,
+                              onPressed: () => _next(slides.length),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -262,208 +366,227 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _OnboardingSlideData {
   const _OnboardingSlideData({
+    required this.stepCode,
     required this.badge,
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.accent,
-    required this.secondaryAccent,
     required this.highlights,
     this.isAiSlide = false,
   });
 
+  final String stepCode;
   final String badge;
   final String title;
   final String subtitle;
   final IconData icon;
   final Color accent;
-  final Color secondaryAccent;
   final List<(IconData, String)> highlights;
   final bool isAiSlide;
 }
 
-class _OnboardingSlideView extends StatelessWidget {
-  const _OnboardingSlideView({required this.slide});
+class _SpatialOnboardingSlide extends StatelessWidget {
+  const _SpatialOnboardingSlide({
+    required this.slide,
+    required this.isTablet,
+  });
 
   final _OnboardingSlideData slide;
+  final bool isTablet;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = DarbColors.isDark(context);
-    final isTablet = DarbAdaptiveLayout.isTablet(context);
-
-    final heroBanner = ClipRRect(
-      borderRadius: BorderRadius.circular(DarbRadius.xl),
-      child: SizedBox(
-        height: isTablet ? 310 : 224,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            CityShowcaseBanner(height: isTablet ? 310 : 224),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    DarbColors.darkCanvas.withValues(alpha: 0.16),
-                    DarbColors.forest.withValues(alpha: 0.74),
-                  ],
-                ),
+    final emblemCluster = Center(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: isTablet ? 190 : 148,
+            height: isTablet ? 190 : 148,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: slide.accent.withValues(alpha: 0.26),
+                width: 1.5,
+              ),
+              gradient: RadialGradient(
+                colors: [
+                  slide.accent.withValues(alpha: 0.22),
+                  Colors.transparent,
+                ],
               ),
             ),
-            Center(
-              child: Column(
+          ),
+          Container(
+            width: isTablet ? 116 : 92,
+            height: isTablet ? 116 : 92,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  DarbColors.forestSoft,
+                  DarbColors.darkCanvas,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: slide.accent.withValues(alpha: 0.72),
+                width: 1.6,
+              ),
+              boxShadow: DarbElevation.glow(slide.accent, isDark: true),
+            ),
+            child: Icon(
+              slide.icon,
+              size: isTablet ? 48 : 40,
+              color: slide.accent,
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: DarbColors.darkCanvas.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(DarbRadius.pill),
+                border: Border.all(
+                  color: slide.accent.withValues(alpha: 0.45),
+                ),
+              ),
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 76,
-                    height: 76,
-                    decoration: BoxDecoration(
-                      color: slide.isAiSlide
-                          ? DarbColors.violet.withValues(alpha: 0.24)
-                          : DarbColors.forest.withValues(alpha: 0.85),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: slide.accent.withValues(alpha: 0.78),
-                        width: 1.5,
-                      ),
-                      boxShadow: DarbElevation.glow(
-                        slide.accent,
-                        isDark: true,
-                      ),
-                    ),
-                    child: Icon(
-                      slide.icon,
-                      size: 38,
-                      color: slide.accent,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: DarbColors.darkCanvas.withValues(alpha: 0.72),
-                      borderRadius: BorderRadius.circular(DarbRadius.pill),
-                      border: Border.all(
-                        color: slide.accent.withValues(alpha: 0.45),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        DarbPulseDot(color: slide.accent, size: 7),
-                        const SizedBox(width: 6),
-                        Text(
-                          slide.badge,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
+                  DarbPulseDot(color: slide.accent, size: 7),
+                  const SizedBox(width: 6),
+                  Text(
+                    slide.badge,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final editorialBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: slide.accent.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(DarbRadius.pill),
+                border: Border.all(
+                  color: slide.accent.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Text(
+                slide.stepCode,
+                style: TextStyle(
+                  color: slide.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Container(
+                height: 1,
+                color: Colors.white.withValues(alpha: 0.12),
               ),
             ),
           ],
         ),
-      ),
-    );
-
-    final detailsCard = DarbGlassSurface(
-      borderRadius: DarbRadius.xl,
-      padding: const EdgeInsets.all(20),
-      borderColor: slide.isAiSlide
-          ? DarbColors.violetOf(context).withValues(alpha: 0.36)
-          : null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            slide.title,
-            style: TextStyle(
-              color: DarbColors.inkOf(context),
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              height: 1.24,
-            ),
+        const SizedBox(height: 14),
+        Text(
+          slide.title,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: isTablet ? 30 : 25,
+            fontWeight: FontWeight.w900,
+            height: 1.18,
+            letterSpacing: -0.4,
           ),
-          const SizedBox(height: 8),
-          Text(
-            slide.subtitle,
-            style: TextStyle(
-              color: DarbColors.mutedOf(context),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              height: 1.5,
-            ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          slide.subtitle,
+          style: const TextStyle(
+            color: Color(0xFFD0E3D9),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            height: 1.5,
           ),
-          const SizedBox(height: 16),
-          for (var i = 0; i < slide.highlights.length; i++) ...[
-            if (i > 0) const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
+        ),
+        const SizedBox(height: 18),
+        for (var i = 0; i < slide.highlights.length; i++) ...[
+          if (i > 0) const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            decoration: BoxDecoration(
+              color: DarbColors.darkSurfaceElevated.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(DarbRadius.md),
+              border: Border.all(
+                color: slide.accent.withValues(alpha: 0.24),
               ),
-              decoration: BoxDecoration(
-                color: slide.isAiSlide
-                    ? DarbColors.violetSoftOf(context)
-                        .withValues(alpha: isDark ? 0.55 : 0.70)
-                    : DarbColors.surfaceAltOf(context),
-                borderRadius: BorderRadius.circular(DarbRadius.md),
-                border: Border.all(
-                  color: slide.isAiSlide
-                      ? DarbColors.violetOf(context).withValues(alpha: 0.25)
-                      : DarbColors.borderOf(context),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    slide.highlights[i].$1,
-                    size: 18,
-                    color: slide.isAiSlide
-                        ? DarbColors.violetOf(context)
-                        : DarbColors.primaryOf(context),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: slide.accent.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(9),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      slide.highlights[i].$2,
-                      style: TextStyle(
-                        color: DarbColors.inkOf(context),
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w800,
-                      ),
+                  child: Icon(
+                    slide.highlights[i].$1,
+                    size: 16,
+                    color: slide.accent,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    slide.highlights[i].$2,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ],
-      ),
+      ],
     );
 
     if (isTablet) {
       return Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 960),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(flex: 5, child: heroBanner),
-                const SizedBox(width: 22),
-                Expanded(flex: 6, child: detailsCard),
+                Expanded(flex: 4, child: emblemCluster),
+                const SizedBox(width: 28),
+                Expanded(flex: 6, child: editorialBlock),
               ],
             ),
           ),
@@ -471,17 +594,17 @@ class _OnboardingSlideView extends StatelessWidget {
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-      child: Center(
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              heroBanner,
-              const SizedBox(height: 20),
-              detailsCard,
+              emblemCluster,
+              const SizedBox(height: 22),
+              editorialBlock,
             ],
           ),
         ),

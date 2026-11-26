@@ -6,6 +6,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -156,7 +157,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final totalOrders = _stats['ordersTotal'] ?? 0;
     final activeOrders = _stats['ordersActive'] ?? 0;
     final driversOnline = _stats['driversOnline'] ?? 0;
-    final gmv = num.tryParse(_stats['deliveredGrossTotal']?.toString() ?? '0') ?? 0;
+    final gmv =
+        num.tryParse(_stats['deliveredGrossTotal']?.toString() ?? '0') ?? 0;
+    final pendingTotal = _pendingVendors.length + _pendingDrivers.length;
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -164,22 +167,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         builder: (context, constraints) {
           final maxW = constraints.maxWidth;
           final hInset = maxW > 1120 ? (maxW - 1120) / 2 + 16 : 16.0;
-          final bodyWidth = maxW - (hInset * 2);
-          final metricCols = DarbAdaptiveLayout.metricColumns(
-            context,
-            availableWidth: bodyWidth,
-          );
 
           return ListView(
             padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 108),
             children: [
-              DarbSectionHeader(
+              DarbCommandStage(
+                livePulse: (driversOnline is num && driversOnline > 0),
+                eyebrow: dt('إدارة دازريفو'),
                 title: dt('لوحة المؤشرات'),
+                subtitle: '${dt('قيد الانتظار')}: $pendingTotal',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DarbContextMenuButton<String>(
                       tooltip: dt('خيارات'),
+                      iconColor: DarbColors.lime,
+                      backgroundColor: Colors.white.withValues(alpha: 0.12),
                       onSelected: (action) {
                         switch (action) {
                           case 'refresh':
@@ -215,74 +218,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(width: 8),
-                    IconButton(
+                    const SizedBox(width: 6),
+                    IconButton.filledTonal(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.12),
+                        foregroundColor: Colors.white,
+                      ),
                       onPressed: _load,
-                      icon: const Icon(Icons.refresh_rounded),
+                      icon: const Icon(Icons.refresh_rounded, size: 20),
                     ),
                   ],
                 ),
               ),
               if (_partialError != null) ...[
                 const SizedBox(height: 10),
-                DarbGlassSurface(
-                  tintColor: DarbColors.warningSoftOf(context),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        size: 18,
-                        color: DarbColors.warningOf(context),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _partialError!,
-                          style: TextStyle(
-                            color: DarbColors.warningOf(context),
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: _load,
-                        child: Text(dt('إعادة المحاولة')),
-                      ),
-                    ],
-                  ),
+                DarbFeedbackBanner(
+                  kind: DarbFeedbackKind.warning,
+                  message: _partialError!,
+                  actionLabel: dt('إعادة المحاولة'),
+                  onAction: _load,
                 ),
               ],
-              const SizedBox(height: 10),
-              GridView.count(
-                crossAxisCount: metricCols,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: metricCols == 4 ? 1.28 : 1.48,
-                children: [
-                  DarbMetricCard(
+              const SizedBox(height: 12),
+              DarbTelemetryDeck(
+                cells: [
+                  DarbTelemetryCell(
                     label: dt('إجمالي الطلبات'),
                     value: '$totalOrders',
                     icon: Icons.receipt_long_rounded,
                     accentColor: DarbColors.primaryOf(context),
                   ),
-                  DarbMetricCard(
+                  DarbTelemetryCell(
                     label: dt('قيد التنفيذ'),
                     value: '$activeOrders',
                     icon: Icons.local_shipping_outlined,
                     accentColor: DarbColors.infoOf(context),
                   ),
-                  DarbMetricCard(
+                  DarbTelemetryCell(
                     label: dt('سائقون متصلون'),
                     value: '$driversOnline',
                     icon: Icons.sensors_rounded,
                     accentColor: DarbColors.successOf(context),
                   ),
-                  DarbMetricCard(
+                  DarbTelemetryCell(
                     label: dt('إجمالي المبيعات'),
                     value: formatDarbMoney(gmv),
                     icon: Icons.account_balance_wallet_outlined,
@@ -291,35 +269,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    ChoiceChip(
-                      label: Text(
-                        '${dt('قيد الانتظار')} (${_pendingVendors.length + _pendingDrivers.length})',
-                      ),
-                      selected: _directoryMode == 0,
-                      onSelected: (_) => setState(() => _directoryMode = 0),
-                    ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                      label:
-                          Text('${dt('سجل المتاجر')} (${_allVendors.length})'),
-                      selected: _directoryMode == 1,
-                      onSelected: (_) => setState(() => _directoryMode = 1),
-                    ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                      label:
-                          Text('${dt('سجل السائقين')} (${_allDrivers.length})'),
-                      selected: _directoryMode == 2,
-                      onSelected: (_) => setState(() => _directoryMode = 2),
-                    ),
-                  ],
-                ),
+              DarbSegmentedDock<int>(
+                selectedValue: _directoryMode,
+                onSelected: (val) => setState(() => _directoryMode = val),
+                options: [
+                  DarbDockOption(
+                    value: 0,
+                    label: dt('قيد الانتظار'),
+                    count: pendingTotal,
+                    icon: Icons.pending_actions_rounded,
+                  ),
+                  DarbDockOption(
+                    value: 1,
+                    label: dt('سجل المتاجر'),
+                    count: _allVendors.length,
+                    icon: Icons.storefront_outlined,
+                  ),
+                  DarbDockOption(
+                    value: 2,
+                    label: dt('سجل السائقين'),
+                    count: _allDrivers.length,
+                    icon: Icons.delivery_dining_outlined,
+                  ),
+                ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               if (_directoryMode == 0) ...[
                 DarbSectionHeader(
                   title: '${dt('طلبات المتاجر')} (${_pendingVendors.length})',
@@ -340,7 +314,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       for (final v in _pendingVendors) _buildVendorCard(v),
                     ],
                   ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 DarbSectionHeader(
                   title: '${dt('طلبات السائقين')} (${_pendingDrivers.length})',
                 ),
@@ -409,88 +383,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         : (status == 'PENDING'
             ? DarbColors.warningOf(context)
             : DarbColors.primaryOf(context));
-    return DarbInteractiveCard(
-      padding: const EdgeInsets.all(15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+
+    return DarbTicketPass(
+      leadingIcon: Icons.storefront_rounded,
+      accentColor: accent,
+      title: '$name · ${v['type'] ?? ''}',
+      subtitle:
+          '${v['user']?['name'] ?? ''} · ${v['user']?['phone'] ?? v['user']?['email'] ?? ''}',
+      status: status,
+      body: const SizedBox.shrink(),
+      footer: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: accent.withValues(alpha: 0.25)),
-                ),
-                child: Icon(
-                  Icons.storefront_rounded,
-                  size: 20,
-                  color: accent,
-                ),
+          if (status != 'APPROVED')
+            Expanded(
+              child: FilledButton(
+                onPressed:
+                    isBusy ? null : () => _setVendorStatus(id, 'APPROVED'),
+                child: isBusy
+                    ? const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(dt('اعتماد')),
               ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$name · ${v['type'] ?? ''}',
-                      style: TextStyle(
-                        color: DarbColors.inkOf(context),
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${v['user']?['name'] ?? ''} · ${v['user']?['phone'] ?? v['user']?['email'] ?? ''}',
-                      style: TextStyle(
-                        color: DarbColors.mutedOf(context),
-                        fontSize: 12.2,
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+          if (status != 'APPROVED' && status != 'SUSPENDED')
+            const SizedBox(width: 8),
+          if (status != 'SUSPENDED')
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: DarbColors.dangerOf(context),
               ),
-              const SizedBox(width: 8),
-              DarbStatusBadge(status: status),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              if (status != 'APPROVED')
-                Expanded(
-                  child: FilledButton(
-                    onPressed:
-                        isBusy ? null : () => _setVendorStatus(id, 'APPROVED'),
-                    child: isBusy
-                        ? const SizedBox(
-                            width: 17,
-                            height: 17,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(dt('اعتماد')),
-                  ),
-                ),
-              if (status != 'APPROVED' && status != 'SUSPENDED')
-                const SizedBox(width: 8),
-              if (status != 'SUSPENDED')
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: DarbColors.dangerOf(context),
-                  ),
-                  onPressed: isBusy
-                      ? null
-                      : () => _setVendorStatus(
-                            id,
-                            status == 'PENDING' ? 'REJECTED' : 'SUSPENDED',
-                          ),
-                  child: Text(status == 'PENDING' ? dt('رفض') : dt('تعليق')),
-                ),
-            ],
-          ),
+              onPressed: isBusy
+                  ? null
+                  : () => _setVendorStatus(
+                        id,
+                        status == 'PENDING' ? 'REJECTED' : 'SUSPENDED',
+                      ),
+              child: Text(status == 'PENDING' ? dt('رفض') : dt('تعليق')),
+            ),
         ],
       ),
     );
@@ -511,85 +443,43 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         : (status == 'PENDING'
             ? DarbColors.warningOf(context)
             : DarbColors.infoOf(context));
-    return DarbInteractiveCard(
-      padding: const EdgeInsets.all(15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+
+    return DarbTicketPass(
+      leadingIcon: vehicleIcon,
+      accentColor: accent,
+      title: d['user']?['name']?.toString() ?? dt('سائق جديد'),
+      subtitle:
+          '$vehicle · ${d['city']?['code'] ?? ''} · ${d['user']?['phone'] ?? d['user']?['email'] ?? ''}',
+      status: status,
+      body: const SizedBox.shrink(),
+      footer: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: accent.withValues(alpha: 0.25)),
-                ),
-                child: Icon(
-                  vehicleIcon,
-                  size: 20,
-                  color: accent,
-                ),
+          if (status != 'APPROVED')
+            Expanded(
+              child: FilledButton(
+                onPressed:
+                    isBusy ? null : () => _setDriverStatus(id, 'APPROVED'),
+                child: isBusy
+                    ? const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(dt('اعتماد')),
               ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      d['user']?['name']?.toString() ?? dt('سائق جديد'),
-                      style: TextStyle(
-                        color: DarbColors.inkOf(context),
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$vehicle · ${d['city']?['code'] ?? ''} · ${d['user']?['phone'] ?? d['user']?['email'] ?? ''}',
-                      style: TextStyle(
-                        color: DarbColors.mutedOf(context),
-                        fontSize: 12.2,
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+          if (status != 'APPROVED' && status != 'SUSPENDED')
+            const SizedBox(width: 8),
+          if (status != 'SUSPENDED')
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: DarbColors.dangerOf(context),
               ),
-              const SizedBox(width: 8),
-              DarbStatusBadge(status: status),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              if (status != 'APPROVED')
-                Expanded(
-                  child: FilledButton(
-                    onPressed:
-                        isBusy ? null : () => _setDriverStatus(id, 'APPROVED'),
-                    child: isBusy
-                        ? const SizedBox(
-                            width: 17,
-                            height: 17,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(dt('اعتماد')),
-                  ),
-                ),
-              if (status != 'APPROVED' && status != 'SUSPENDED')
-                const SizedBox(width: 8),
-              if (status != 'SUSPENDED')
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: DarbColors.dangerOf(context),
-                  ),
-                  onPressed: isBusy
-                      ? null
-                      : () => _setDriverStatus(id, 'SUSPENDED'),
-                  child: Text(dt('تعليق')),
-                ),
-            ],
-          ),
+              onPressed: isBusy
+                  ? null
+                  : () => _setDriverStatus(id, 'SUSPENDED'),
+              child: Text(dt('تعليق')),
+            ),
         ],
       ),
     );

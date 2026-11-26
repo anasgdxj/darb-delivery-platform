@@ -11,6 +11,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 import '../auth/login_screen.dart';
 import '../auth/onboarding_screen.dart';
 import '../customer/addresses_screen.dart';
@@ -321,85 +322,60 @@ class _AccountScreenState extends State<AccountScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 108),
       children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              end: AlignmentDirectional.bottomEnd,
-              colors: [
-                DarbColors.darkCanvas,
-                DarbColors.forest,
-                DarbColors.forestSoft,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(DarbRadius.xl),
-            border: Border.all(
-              color: DarbColors.lime.withValues(alpha: 0.34),
-            ),
-            boxShadow: DarbElevation.glow(
-              DarbColors.forest,
-              isDark: DarbColors.isDark(context),
-            ),
-          ),
-          child: Row(
+        DarbCommandStage(
+          livePulse: true,
+          leading: const DarbBrandMark(size: 56),
+          eyebrow: roleLabel,
+          title: widget.user['name']?.toString().isNotEmpty == true
+              ? widget.user['name'].toString()
+              : dt('مرحباً بك في دازريفو'),
+          subtitle: widget.user['phone']?.toString() ??
+              widget.user['email']?.toString() ??
+              roleLabel,
+          trailing: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const DarbBrandMark(size: 56),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.user['name']?.toString().isNotEmpty == true
-                          ? widget.user['name'].toString()
-                          : dt('مرحباً بك في دازريفو'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.user['phone']?.toString() ??
-                          widget.user['email']?.toString() ??
-                          roleLabel,
-                      style: TextStyle(
-                        color: DarbColors.lime.withValues(alpha: 0.90),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    DarbStatusBadge(status: role),
-                  ],
+              IconButton.filledTonal(
+                tooltip: dt('الإعدادات والتخصيص'),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withValues(alpha: 0.14),
+                  foregroundColor: DarbColors.lime,
                 ),
+                onPressed: _openSettings,
+                icon: const Icon(Icons.tune_rounded, size: 20),
               ),
-              const SizedBox(width: 8),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton.filledTonal(
-                    tooltip: dt('الإعدادات والتخصيص'),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.14),
-                      foregroundColor: DarbColors.lime,
-                    ),
-                    onPressed: _openSettings,
-                    icon: const Icon(Icons.tune_rounded, size: 20),
+              const SizedBox(height: 6),
+              IconButton.filledTonal(
+                tooltip: dt('تعديل الملف الشخصي'),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withValues(alpha: 0.14),
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _openEditProfile,
+                icon: const Icon(Icons.edit_outlined, size: 18),
+              ),
+            ],
+          ),
+          bottom: Row(
+            children: [
+              DarbStatusBadge(status: role),
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(DarbRadius.pill),
+                ),
+                child: Text(
+                  darbLocale.value.languageCode.toUpperCase(),
+                  style: const TextStyle(
+                    color: DarbColors.lime,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.6,
                   ),
-                  const SizedBox(height: 6),
-                  IconButton.filledTonal(
-                    tooltip: dt('تعديل الملف الشخصي'),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.14),
-                      foregroundColor: Colors.white,
-                    ),
-                    onPressed: _openEditProfile,
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
@@ -597,7 +573,8 @@ class _AccountScreenState extends State<AccountScreen> {
               icon: Icons.tune_rounded,
               accentColor: DarbColors.primaryOf(context),
               title: dt('الإعدادات والتخصيص'),
-              subtitle: dt('حجم النصوص، تقليل الحركة، تفضيلات الإشعارات، والخصوصية'),
+              subtitle:
+                  dt('حجم النصوص، تقليل الحركة، تفضيلات الإشعارات، والخصوصية'),
               onTap: _openSettings,
             ),
             DarbSettingsTile(

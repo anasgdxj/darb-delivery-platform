@@ -5,7 +5,9 @@ import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
+import '../../core/widgets/darb_copy_order_number_button.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 
 class DriverOrdersScreen extends StatefulWidget {
   const DriverOrdersScreen({super.key});
@@ -107,6 +109,14 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
     }
   }
 
+  int get _activeCount => _orders
+      .where((o) => o['status'] == 'ASSIGNED' || o['status'] == 'PICKED_UP')
+      .length;
+
+  int get _completedCount => _orders
+      .where((o) => o['status'] == 'DELIVERED' || o['status'] == 'CANCELLED')
+      .length;
+
   List<Map<String, dynamic>> get _filteredOrders {
     if (_filter == 'ACTIVE') {
       return _orders
@@ -146,49 +156,67 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                 ),
               ),
             )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-              children: [
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      for (final f in [
-                        ('ALL', dt('الكل')),
-                        ('ACTIVE', dt('نشطة')),
-                        ('COMPLETED', dt('مكتملة')),
-                      ]) ...[
-                        ChoiceChip(
-                          label: Text(f.$2),
-                          selected: _filter == f.$1,
-                          onSelected: (_) => setState(() => _filter = f.$1),
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final maxW = constraints.maxWidth;
+                final hInset = maxW > 1080 ? (maxW - 1080) / 2 + 16 : 16.0;
+                return ListView(
+                  padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 100),
+                  children: [
+                    DarbSegmentedDock<String>(
+                      selectedValue: _filter,
+                      onSelected: (val) => setState(() => _filter = val),
+                      options: [
+                        DarbDockOption(
+                          value: 'ALL',
+                          label: dt('الكل'),
+                          count: _orders.length,
                         ),
-                        const SizedBox(width: 8),
+                        DarbDockOption(
+                          value: 'ACTIVE',
+                          label: dt('نشطة'),
+                          count: _activeCount,
+                          icon: Icons.route_rounded,
+                        ),
+                        DarbDockOption(
+                          value: 'COMPLETED',
+                          label: dt('مكتملة'),
+                          count: _completedCount,
+                          icon: Icons.task_alt_rounded,
+                        ),
                       ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                if (filtered.isEmpty)
-                  DarbStateView.empty(
-                    message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
-                    icon: Icons.filter_list_off_rounded,
-                    onRetry: () => setState(() => _filter = 'ALL'),
-                  )
-                else
-                  for (final o in filtered)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildOrderCard(o),
                     ),
-              ],
+                    const SizedBox(height: 14),
+                    if (filtered.isEmpty)
+                      DarbStateView.empty(
+                        message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+                        icon: Icons.filter_list_off_rounded,
+                        onRetry: () => setState(() => _filter = 'ALL'),
+                      )
+                    else
+                      DarbResponsiveTwoColumn(
+                        children: [
+                          for (var i = 0; i < filtered.length; i++)
+                            i < 6
+                                ? DarbFadeSlide(
+                                    delay: DarbMotion.staggerDelay(i),
+                                    child: _buildOrderCard(filtered[i]),
+                                  )
+                                : _buildOrderCard(filtered[i]),
+                        ],
+                      ),
+                  ],
+                );
+              },
             ),
     );
   }
 
   Widget _buildOrderCard(Map<String, dynamic> o) {
     final id = o['id'].toString();
+    final orderNumber = o['orderNumber']?.toString() ?? '';
     final status = o['status']?.toString() ?? 'ASSIGNED';
+    final isPeer = o['type'] == 'PEER_DELIVERY';
     final total = num.tryParse(o['total']?.toString() ?? '0') ?? 0;
     final fee = num.tryParse(o['deliveryFee']?.toString() ?? '0') ?? 0;
     final currency = o['currency']?.toString() ?? 'SYP';
@@ -200,34 +228,26 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
     final dropLat = addr?['latitude'] as num?;
     final dropLng = addr?['longitude'] as num?;
 
-    return DarbInteractiveCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    return DarbTicketPass(
+      leadingIcon:
+          isPeer ? Icons.local_shipping_outlined : Icons.route_rounded,
+      title: orderNumber,
+      subtitle: customerName,
+      status: status,
+      headerActions: [
+        DarbCopyOrderNumberButton(value: orderNumber),
+        const SizedBox(width: 4),
+      ],
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  o['orderNumber']?.toString() ?? '',
-                  style: TextStyle(
-                    color: DarbColors.inkOf(context),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-              DarbStatusBadge(status: status),
-            ],
-          ),
-          const SizedBox(height: 10),
           DarbOrderTimeline(
             status: status,
-            isPeer: o['type'] == 'PEER_DELIVERY',
+            isPeer: isPeer,
             compact: true,
           ),
           if (customerName != null && customerName.isNotEmpty) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Icon(
@@ -255,7 +275,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
               ],
             ),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           DarbRouteConnector(
             pickupLabel: dt('الاستلام'),
             pickupAddress: o['pickupAddress']?.toString() ??
@@ -269,7 +289,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
             dropoffLabel: dt('التسليم'),
             dropoffAddress: addr?['details']?.toString() ?? dt('غير محدد'),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -285,6 +305,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                     color: DarbColors.primaryOf(context),
                     fontWeight: FontWeight.w900,
                     fontSize: 13,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
                 Text(
@@ -293,50 +314,50 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                     color: DarbColors.inkOf(context),
                     fontWeight: FontWeight.w900,
                     fontSize: 13.5,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              if (pickupLat != null && pickupLng != null)
-                OutlinedButton.icon(
-                  onPressed: () => _openInMaps(pickupLat, pickupLng),
-                  icon: const Icon(Icons.navigation_outlined, size: 17),
-                  label: Text(dt('موقع الاستلام')),
-                ),
-              if (dropLat != null && dropLng != null)
-                OutlinedButton.icon(
-                  onPressed: () => _openInMaps(dropLat, dropLng),
-                  icon: const Icon(Icons.place_outlined, size: 17),
-                  label: Text(dt('موقع التسليم')),
-                ),
-              if (status == 'ASSIGNED' || status == 'PICKED_UP')
-                FilledButton(
-                  onPressed: _updatingOrders.contains(id)
-                      ? null
-                      : () => _advanceStatus(
-                            id,
-                            status == 'ASSIGNED' ? 'PICKED_UP' : 'DELIVERED',
-                          ),
-                  child: _updatingOrders.contains(id)
-                      ? const SizedBox(
-                          width: 17,
-                          height: 17,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          status == 'ASSIGNED'
-                              ? dt('تم الاستلام')
-                              : dt('تم التسليم'),
-                        ),
-                ),
-            ],
-          ),
+        ],
+      ),
+      footer: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          if (pickupLat != null && pickupLng != null)
+            OutlinedButton.icon(
+              onPressed: () => _openInMaps(pickupLat, pickupLng),
+              icon: const Icon(Icons.navigation_outlined, size: 17),
+              label: Text(dt('موقع الاستلام')),
+            ),
+          if (dropLat != null && dropLng != null)
+            OutlinedButton.icon(
+              onPressed: () => _openInMaps(dropLat, dropLng),
+              icon: const Icon(Icons.place_outlined, size: 17),
+              label: Text(dt('موقع التسليم')),
+            ),
+          if (status == 'ASSIGNED' || status == 'PICKED_UP')
+            FilledButton(
+              onPressed: _updatingOrders.contains(id)
+                  ? null
+                  : () => _advanceStatus(
+                        id,
+                        status == 'ASSIGNED' ? 'PICKED_UP' : 'DELIVERED',
+                      ),
+              child: _updatingOrders.contains(id)
+                  ? const SizedBox(
+                      width: 17,
+                      height: 17,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      status == 'ASSIGNED'
+                          ? dt('تم الاستلام')
+                          : dt('تم التسليم'),
+                    ),
+            ),
         ],
       ),
     );

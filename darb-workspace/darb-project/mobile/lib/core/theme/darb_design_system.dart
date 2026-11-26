@@ -221,9 +221,9 @@ class DarbAppearanceController extends ChangeNotifier {
   static const _textScaleKey = 'darb_text_scale';
   static const _reduceMotionKey = 'darb_reduce_motion';
   static const _hapticsKey = 'darb_haptics_enabled';
-  static const _inAppBannersKey = 'darb_notif_in_app_banners';
-  static const _orderAlertsKey = 'darb_notif_orders';
-  static const _promoAlertsKey = 'darb_notif_promo';
+  static const _inAppBannersKey = 'darb_in_app_banners';
+  static const _orderAlertsKey = 'darb_order_alerts';
+  static const _promoAlertsKey = 'darb_promo_alerts';
 
   ThemeMode _themeMode = ThemeMode.system;
   DarbVisualStyle _visualStyle = DarbVisualStyle.glass;

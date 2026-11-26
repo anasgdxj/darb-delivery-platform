@@ -857,6 +857,12 @@ class AppLocalizations {
     'المتجر يستقبل الطلبات': 'Store is accepting orders|Mağaza sipariş alıyor',
     'المتجر متوقف مؤقتاً': 'Store is temporarily paused|Mağaza geçici olarak duraklatıldı',
     'حالة استقبال الطلبات': 'Order intake status|Sipariş kabul durumu',
+    'أرباح اليوم': 'Today\'s earnings|Bugünkü kazanç',
+    'رحلات اليوم': 'Today\'s trips|Bugünkü seferler',
+    'طلبات اليوم': 'Today\'s orders|Bugünkü siparişler',
+    'مبيعات اليوم': 'Today\'s sales|Bugünkü satışlar',
+    'ما الجديد في هذا التحديث؟': 'What\'s new in this update?|Bu güncellemede neler var?',
+    'ما حالة طلباتي اليوم؟': 'What is the status of my orders today?|Bugün siparişlerimin durumu nedir?',
   };
 
   static const Map<String, Map<String, String>> _values = {

@@ -391,26 +391,31 @@ class _AppShellState extends State<AppShell> {
       if (data is! Map<String, dynamic>) {
         throw const ApiException('بيانات الجلسة غير صالحة');
       }
-      try {
-        await DarbLocalCache.instance.writeJson(_profileCacheKey, data);
-      } catch (_) {}
+      // Cache persistence is best-effort and must not delay the first frame
+      // of an authenticated session.
+      unawaited(DarbLocalCache.instance.writeJson(_profileCacheKey, data));
       final localeCode = data['locale']?.toString();
       if (localeCode != null && ['ar', 'en', 'tr'].contains(localeCode)) {
         darbLocale.value = Locale(localeCode);
       }
-      await DarbNotifications.register();
+      // Push registration is best-effort: an unavailable Firebase plugin or
+      // denied notification permission must never prevent account access.
+      // Device registration is deliberately non-blocking. Account content
+      // must render even if FCM permission/token negotiation is slow.
+      unawaited(DarbNotifications.register());
       if (data['role']?.toString().toUpperCase() == 'DRIVER') {
         DriverLocationReporter.start();
       } else {
         DriverLocationReporter.stop();
       }
-      await _refreshUnreadCount();
       if (!mounted) return;
       setState(() {
         _user = data;
         _offline = false;
         _error = null;
       });
+      // Badge refresh must never block account navigation or first paint.
+      unawaited(_refreshUnreadCount());
       final pending = _pendingNotificationData;
       if (pending != null) {
         _pendingNotificationData = null;
@@ -694,43 +699,11 @@ class _AppShellState extends State<AppShell> {
         if (_offline)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: DarbGlassSurface(
-              tintColor: DarbColors.warningSoftOf(context),
-              borderColor:
-                  DarbColors.warningOf(context).withValues(alpha: 0.32),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.cloud_off_rounded,
-                    size: 16,
-                    color: DarbColors.warningOf(context),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'),
-                      style: TextStyle(
-                        color: DarbColors.warningOf(context),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(0, 28),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: _loadUser,
-                    child: Text(dt('تحديث')),
-                  ),
-                ],
-              ),
+            child: DarbFeedbackBanner(
+              kind: DarbFeedbackKind.warning,
+              message: dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'),
+              actionLabel: dt('تحديث'),
+              onAction: _loadUser,
             ),
           ),
         Expanded(

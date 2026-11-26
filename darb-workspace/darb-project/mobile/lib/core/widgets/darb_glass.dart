@@ -462,18 +462,21 @@ class DarbGlassBottomNav extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        14,
+        12,
         0,
-        14,
-        bottomPadding > 0 ? bottomPadding + 2 : 12,
+        12,
+        bottomPadding > 0 ? bottomPadding + 4 : 12,
       ),
       child: Center(
         heightFactor: 1,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
           child: DarbGlassSurface(
-            borderRadius: DarbRadius.xl + 4,
+            borderRadius: DarbRadius.hero,
             blurSigma: 28,
+            borderColor: DarbColors.isDark(context)
+                ? DarbColors.lime.withValues(alpha: 0.22)
+                : Colors.white.withValues(alpha: 0.95),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: itemsRow,
           ),
@@ -505,14 +508,14 @@ class DarbGlassSideRail extends StatelessWidget {
     final muted = DarbColors.mutedOf(context);
     final ink = DarbColors.inkOf(context);
     final activeTint = isDark
-        ? DarbColors.forestSoft.withValues(alpha: 0.94)
-        : DarbColors.limeTint.withValues(alpha: 0.78);
+        ? DarbColors.forestSoft.withValues(alpha: 0.96)
+        : DarbColors.limeTint.withValues(alpha: 0.82);
     final activeForeground = isDark ? DarbColors.lime : DarbColors.forest;
 
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 8, 16),
       child: SizedBox(
-        width: 218,
+        width: 222,
         child: DarbGlassSurface(
           borderRadius: DarbRadius.xl,
           blurSigma: 26,
@@ -521,18 +524,43 @@ class DarbGlassSideRail extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (roleLabel != null && roleLabel!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
-                  child: Text(
-                    roleLabel!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: muted,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.3,
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: (isDark ? DarbColors.lime : primary)
+                        .withValues(alpha: isDark ? 0.12 : 0.08),
+                    borderRadius: BorderRadius.circular(DarbRadius.md),
+                    border: Border.all(
+                      color: (isDark ? DarbColors.lime : primary)
+                          .withValues(alpha: 0.22),
                     ),
+                  ),
+                  child: Row(
+                    children: [
+                      DarbPulseDot(
+                        active: true,
+                        color: isDark ? DarbColors.lime : primary,
+                        size: 7,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          roleLabel!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: isDark ? DarbColors.lime : primary,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               for (var i = 0; i < destinations.length; i++) ...[
@@ -560,7 +588,7 @@ class DarbGlassSideRail extends StatelessWidget {
                           ),
                           curve: DarbMotion.enter,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
+                            horizontal: 10,
                             vertical: 11,
                           ),
                           decoration: BoxDecoration(
@@ -569,12 +597,31 @@ class DarbGlassSideRail extends StatelessWidget {
                             border: active
                                 ? Border.all(
                                     color: (isDark ? DarbColors.lime : primary)
-                                        .withValues(alpha: 0.28),
+                                        .withValues(alpha: 0.30),
                                   )
                                 : null,
                           ),
                           child: Row(
                             children: [
+                              AnimatedContainer(
+                                duration: DarbMotion.effectiveDuration(
+                                  context,
+                                  DarbMotion.fast,
+                                ),
+                                width: 3.5,
+                                height: active ? 20 : 0,
+                                margin: const EdgeInsetsDirectional.only(
+                                  end: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: active
+                                      ? activeForeground
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(
+                                    DarbRadius.pill,
+                                  ),
+                                ),
+                              ),
                               Icon(
                                 active ? item.selectedIcon : item.icon,
                                 size: 20,
@@ -605,6 +652,32 @@ class DarbGlassSideRail extends StatelessWidget {
                   },
                 ),
               ],
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: primary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      'DAZREVO',
+                      style: TextStyle(
+                        color: muted,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

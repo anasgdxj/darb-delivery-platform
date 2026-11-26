@@ -9,6 +9,7 @@ import 'package:darb/core/widgets/darb_components.dart';
 import 'package:darb/core/widgets/darb_copy_order_number_button.dart';
 import 'package:darb/core/widgets/darb_glass.dart';
 import 'package:darb/core/widgets/darb_motion_components.dart';
+import 'package:darb/core/widgets/darb_spatial_primitives.dart';
 import 'package:darb/features/account/account_screen.dart';
 import 'package:darb/features/account/driver_application_screen.dart';
 import 'package:darb/features/account/edit_profile_screen.dart';
@@ -2006,7 +2007,8 @@ void main() {
             200,
           );
         }
-        if (path.endsWith('/orders/available')) {
+        if (path.endsWith('/orders/available') ||
+            path.endsWith('/orders/driver/available')) {
           return http.Response(
             jsonEncode([
               {
@@ -2127,6 +2129,194 @@ void main() {
         expect(tester.takeException(), isNull);
         DriverLocationReporter.stop();
       }
+    });
+  });
+
+  group('Spatial Primitives & Complete Redesign 2026', () {
+    testWidgets(
+        'DarbCommandStage, DarbSegmentedDock, and DarbCityOrbStrip render and fire callbacks across AR/EN/TR',
+        (tester) async {
+      var selectedDock = 'ALL';
+      var selectedCity = 'c1';
+
+      for (final lang in ['ar', 'en', 'tr']) {
+        darbLocale.value = Locale(lang);
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: lang == 'tr' ? DarbTheme.dark : DarbTheme.light,
+            home: Directionality(
+              textDirection:
+                  lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+              child: MediaQuery(
+                data: const MediaQueryData(disableAnimations: true),
+                child: Scaffold(
+                  body: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      DarbCommandStage(
+                        livePulse: true,
+                        eyebrow: 'DAZREVO',
+                        title: 'مركز القيادة',
+                        subtitle: 'شبكة التوصيل المباشر',
+                        bottom: DarbCityOrbStrip(
+                          onDarkStage: true,
+                          selectedCityId: selectedCity,
+                          cities: const [
+                            DarbCityOrbOption(
+                              id: 'c1',
+                              name: 'دمشق',
+                              code: 'damascus',
+                            ),
+                            DarbCityOrbOption(
+                              id: 'c2',
+                              name: 'حلب',
+                              code: 'aleppo',
+                            ),
+                          ],
+                          onSelect: (id) => selectedCity = id,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DarbSegmentedDock<String>(
+                        selectedValue: selectedDock,
+                        onSelected: (v) => selectedDock = v,
+                        options: const [
+                          DarbDockOption(value: 'ALL', label: 'الكل', count: 5),
+                          DarbDockOption(
+                            value: 'ACTIVE',
+                            label: 'نشطة',
+                            count: 2,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.byType(DarbCommandStage), findsOneWidget);
+        expect(find.byType(DarbCityOrbStrip), findsOneWidget);
+        expect(find.byType(DarbSegmentedDock<String>), findsOneWidget);
+        expect(find.byType(Image), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
+
+      await tester.tap(find.text('حلب'));
+      await tester.pump();
+      expect(selectedCity, 'c2');
+
+      await tester.tap(find.text('نشطة'));
+      await tester.pump();
+      expect(selectedDock, 'ACTIVE');
+
+      darbLocale.value = const Locale('ar');
+    });
+
+    testWidgets(
+        'DarbTelemetryDeck, DarbTicketPass, DarbEditorialStoreCard, and DarbTelemetryProductCard render cleanly on 320px and 900px viewports',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      var storeTapped = false;
+      var productTapped = false;
+
+      for (final size in const [Size(320, 640), Size(900, 760)]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: size.width < 500 ? DarbTheme.dark : DarbTheme.light,
+            home: MediaQuery(
+              data: const MediaQueryData(disableAnimations: true),
+              child: Scaffold(
+                body: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    const DarbTelemetryDeck(
+                      cells: [
+                        DarbTelemetryCell(
+                          label: 'طلبات اليوم',
+                          value: '14',
+                          icon: Icons.today_rounded,
+                        ),
+                        DarbTelemetryCell(
+                          label: 'مبيعات اليوم',
+                          value: '85,000 ل.س',
+                          icon: Icons.trending_up_rounded,
+                        ),
+                        DarbTelemetryCell(
+                          label: 'المكتملة',
+                          value: '11',
+                          icon: Icons.task_alt_rounded,
+                        ),
+                        DarbTelemetryCell(
+                          label: 'النشطة',
+                          value: '3',
+                          icon: Icons.bolt_rounded,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    DarbTicketPass(
+                      leadingIcon: Icons.receipt_long_rounded,
+                      title: 'DRB-2026-990',
+                      subtitle: 'متجر الشام',
+                      status: 'READY',
+                      body: const Text('تفاصيل التذكرة'),
+                      footer: const Text('جاهز للاستلام'),
+                    ),
+                    const SizedBox(height: 12),
+                    DarbEditorialStoreCard(
+                      name: 'مقهى دازريفو',
+                      category: 'مشروبات',
+                      isOpen: true,
+                      productsLabel: '12 منتج متاح',
+                      address: 'المالكي',
+                      ratingAvg: 4.8,
+                      reviewsCount: 24,
+                      onTap: () => storeTapped = true,
+                    ),
+                    const SizedBox(height: 12),
+                    DarbTelemetryProductCard(
+                      name: 'قهوة مختصة',
+                      category: 'مشروبات',
+                      description: 'محمصة طازجة',
+                      priceLabel: '12,000 ل.س',
+                      stockLabel: 'المتبقي: 10',
+                      stockRatio: 0.5,
+                      highlighted: true,
+                      onTap: () => productTapped = true,
+                      actionDock: const Icon(Icons.add_rounded),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.byType(DarbTelemetryDeck), findsOneWidget);
+        expect(find.byType(DarbTicketPass), findsOneWidget);
+        expect(find.byType(DarbEditorialStoreCard), findsOneWidget);
+        expect(find.byType(DarbTelemetryProductCard), findsOneWidget);
+        expect(find.byType(Image), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
+
+      await tester.tap(find.text('مقهى دازريفو'));
+      await tester.pump();
+      expect(storeTapped, isTrue);
+
+      await tester.ensureVisible(find.text('قهوة مختصة'));
+      await tester.tap(find.text('قهوة مختصة'));
+      await tester.pump();
+      expect(productTapped, isTrue);
+
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
   });
 }

@@ -8,6 +8,7 @@ import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_copy_order_number_button.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 import 'driver_tracking_screen.dart';
 
 class CustomerOrdersScreen extends StatefulWidget {
@@ -110,7 +111,8 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (_) {
       if (mounted) {
@@ -428,7 +430,10 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                     ),
                     Text(
                       (step['createdAt']?.toString() ?? '').length >= 16
-                          ? step['createdAt'].toString().substring(0, 16).replaceFirst('T', ' ')
+                          ? step['createdAt']
+                              .toString()
+                              .substring(0, 16)
+                              .replaceFirst('T', ' ')
                           : '',
                       style: TextStyle(
                         color: DarbColors.mutedOf(ctx),
@@ -470,6 +475,14 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     );
   }
 
+  int get _activeCount => _orders
+      .where((o) => o['status'] != 'DELIVERED' && o['status'] != 'CANCELLED')
+      .length;
+
+  int get _completedCount => _orders
+      .where((o) => o['status'] == 'DELIVERED' || o['status'] == 'CANCELLED')
+      .length;
+
   List<Map<String, dynamic>> get _filteredOrders {
     if (_filter == 'ACTIVE') {
       return _orders
@@ -491,7 +504,6 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     if (_loading) return const DarbStateView.loading();
     if (_error != null) return DarbStateView.error(message: _error, onRetry: _load);
 
-    final isDark = DarbColors.isDark(context);
     final filtered = _filteredOrders;
 
     return RefreshIndicator(
@@ -510,69 +522,66 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                 ),
               ),
             )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 98),
-              children: [
-                if (_offline)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: DarbGlassSurface(
-                      tintColor: DarbColors.warningOf(context)
-                          .withValues(alpha: isDark ? 0.18 : 0.12),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      child: Text(
-                        dt('بيانات مخزنة محلياً لضعف الاتصال'),
-                        style: TextStyle(
-                          color: DarbColors.warningOf(context),
-                          fontWeight: FontWeight.w700,
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final maxW = constraints.maxWidth;
+                final hInset = maxW > 1080 ? (maxW - 1080) / 2 + 16 : 16.0;
+                return ListView(
+                  padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 98),
+                  children: [
+                    if (_offline)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: DarbFeedbackBanner(
+                          kind: DarbFeedbackKind.warning,
+                          message: dt('بيانات مخزنة محلياً لضعف الاتصال'),
                         ),
                       ),
-                    ),
-                  ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      for (final f in [
-                        ('ALL', dt('الكل')),
-                        ('ACTIVE', dt('نشطة')),
-                        ('COMPLETED', dt('مكتملة')),
-                      ]) ...[
-                        ChoiceChip(
-                          label: Text(f.$2),
-                          selected: _filter == f.$1,
-                          onSelected: (_) {
-                            DarbHaptics.selection();
-                            setState(() => _filter = f.$1);
-                          },
+                    DarbSegmentedDock<String>(
+                      selectedValue: _filter,
+                      onSelected: (val) => setState(() => _filter = val),
+                      options: [
+                        DarbDockOption(
+                          value: 'ALL',
+                          label: dt('الكل'),
+                          count: _orders.length,
                         ),
-                        const SizedBox(width: 8),
+                        DarbDockOption(
+                          value: 'ACTIVE',
+                          label: dt('نشطة'),
+                          count: _activeCount,
+                          icon: Icons.bolt_rounded,
+                        ),
+                        DarbDockOption(
+                          value: 'COMPLETED',
+                          label: dt('مكتملة'),
+                          count: _completedCount,
+                          icon: Icons.task_alt_rounded,
+                        ),
                       ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                if (filtered.isEmpty)
-                  DarbStateView.empty(
-                    message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
-                    icon: Icons.filter_list_off_rounded,
-                    onRetry: () => setState(() => _filter = 'ALL'),
-                  )
-                else
-                  for (var i = 0; i < filtered.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: i < 6
-                          ? DarbFadeSlide(
-                              delay: DarbMotion.staggerDelay(i),
-                              child: _buildOrderCard(filtered[i]),
-                            )
-                          : _buildOrderCard(filtered[i]),
                     ),
-              ],
+                    const SizedBox(height: 14),
+                    if (filtered.isEmpty)
+                      DarbStateView.empty(
+                        message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+                        icon: Icons.filter_list_off_rounded,
+                        onRetry: () => setState(() => _filter = 'ALL'),
+                      )
+                    else
+                      DarbResponsiveTwoColumn(
+                        children: [
+                          for (var i = 0; i < filtered.length; i++)
+                            i < 6
+                                ? DarbFadeSlide(
+                                    delay: DarbMotion.staggerDelay(i),
+                                    child: _buildOrderCard(filtered[i]),
+                                  )
+                                : _buildOrderCard(filtered[i]),
+                        ],
+                      ),
+                  ],
+                );
+              },
             ),
     );
   }
@@ -595,64 +604,57 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     final isActive = status != 'DELIVERED' && status != 'CANCELLED';
     final isBusy = _busyOrderIds.contains(id);
 
-    return DarbInteractiveCard(
+    return DarbTicketPass(
       onTap: () => _openOrderDetails(order),
-      child: Column(
+      leadingIcon: isPeer
+          ? Icons.local_shipping_outlined
+          : Icons.shopping_bag_outlined,
+      title: '${isPeer ? dt('توصيل مستقل') : dt('طلب')} · $number',
+      subtitle: order['address'] is Map
+          ? (order['address'] as Map)['details']?.toString()
+          : null,
+      status: status,
+      headerActions: [
+        DarbCopyOrderNumberButton(value: number),
+        const SizedBox(width: 4),
+      ],
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${isPeer ? dt('توصيل مستقل') : dt('طلب')} · $number',
-                      style: TextStyle(
-                        color: DarbColors.inkOf(context),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    if (order['address'] is Map)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          (order['address'] as Map)['details']?.toString() ??
-                              '',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: DarbColors.mutedOf(context),
-                            fontSize: 12.5,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              DarbCopyOrderNumberButton(value: number),
-              const SizedBox(width: 4),
-              DarbStatusBadge(status: status),
-            ],
-          ),
           if (isActive) ...[
-            const SizedBox(height: 12),
             DarbOrderTimeline(status: status, isPeer: isPeer),
+            const SizedBox(height: 10),
           ],
           if (items.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            for (final item in items.take(3))
-              Text(
-                '• ${item['nameSnapshot']} × ${item['quantity']}',
-                style: TextStyle(
-                  color: DarbColors.mutedOf(context),
-                  fontSize: 13,
-                ),
-              ),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final item in items.take(3))
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: DarbColors.surfaceAltOf(context),
+                      borderRadius: BorderRadius.circular(DarbRadius.pill),
+                      border: Border.all(color: DarbColors.borderOf(context)),
+                    ),
+                    child: Text(
+                      '${item['nameSnapshot']} × ${item['quantity']}',
+                      style: TextStyle(
+                        color: DarbColors.inkOf(context),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 6),
           ],
           if (isPeer && order['pickupAddress'] != null) ...[
-            const SizedBox(height: 10),
             DarbRouteConnector(
               pickupLabel: dt('الاستلام'),
               pickupAddress: order['pickupAddress'].toString(),
@@ -662,9 +664,9 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                       dt('غير محدد'))
                   : dt('غير محدد'),
             ),
+            const SizedBox(height: 6),
           ],
-          if (myReview != null) ...[
-            const SizedBox(height: 8),
+          if (myReview != null)
             Row(
               children: [
                 Text(
@@ -689,79 +691,77 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                 ),
               ],
             ),
-          ],
-          const Divider(height: 20),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            alignment: WrapAlignment.spaceBetween,
+        ],
+      ),
+      footer: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        alignment: WrapAlignment.spaceBetween,
+        children: [
+          Text(
+            total > 0
+                ? formatDarbMoney(total, currency)
+                : dt('بانتظار العروض'),
+            style: TextStyle(
+              color: DarbColors.primaryOf(context),
+              fontWeight: FontWeight.w900,
+              fontSize: 15,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                total > 0
-                    ? formatDarbMoney(total, currency)
-                    : dt('بانتظار العروض'),
-                style: TextStyle(
-                  color: DarbColors.primaryOf(context),
-                  fontWeight: FontWeight.w900,
-                  fontSize: 15,
+              if (isPeer && status == 'PENDING')
+                FilledButton.tonal(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: DarbColors.isDark(context)
+                        ? DarbColors.forestSoft
+                        : DarbColors.mintTint,
+                    foregroundColor: DarbColors.isDark(context)
+                        ? DarbColors.mint
+                        : DarbColors.forest,
+                    minimumSize: const Size(0, 38),
+                  ),
+                  onPressed: isBusy ? null : () => _openOffersSheet(id),
+                  child: Text(dt('عروض السائقين')),
                 ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isPeer && status == 'PENDING')
-                    FilledButton.tonal(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: DarbColors.isDark(context)
-                            ? DarbColors.forestSoft
-                            : DarbColors.mintTint,
-                        foregroundColor: DarbColors.isDark(context)
-                            ? DarbColors.mint
-                            : DarbColors.forest,
-                        minimumSize: const Size(0, 38),
-                      ),
-                      onPressed: isBusy ? null : () => _openOffersSheet(id),
-                      child: Text(dt('عروض السائقين')),
+              if (canTrack)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 8),
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 38),
                     ),
-                  if (canTrack)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 8),
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(0, 38),
-                        ),
-                        onPressed: () => _openDriverLocation(order),
-                        icon: const Icon(Icons.map_outlined, size: 17),
-                        label: Text(dt('موقع السائق')),
-                      ),
+                    onPressed: () => _openDriverLocation(order),
+                    icon: const Icon(Icons.map_outlined, size: 17),
+                    label: Text(dt('موقع السائق')),
+                  ),
+                ),
+              if (canReview)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 8),
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 38),
                     ),
-                  if (canReview)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 8),
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(0, 38),
-                        ),
-                        onPressed: () => _openReviewSheet(id),
-                        icon: const Icon(Icons.star_outline_rounded, size: 17),
-                        label: Text(dt('تقييم الطلب')),
-                      ),
+                    onPressed: () => _openReviewSheet(id),
+                    icon: const Icon(Icons.star_outline_rounded, size: 17),
+                    label: Text(dt('تقييم الطلب')),
+                  ),
+                ),
+              if (status == 'PENDING')
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 8),
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: DarbColors.dangerOf(context),
                     ),
-                  if (status == 'PENDING')
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 8),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: DarbColors.dangerOf(context),
-                        ),
-                        onPressed:
-                            isBusy ? null : () => _cancelPendingOrder(id),
-                        child: Text(dt('إلغاء الطلب')),
-                      ),
-                    ),
-                ],
-              ),
+                    onPressed: isBusy ? null : () => _cancelPendingOrder(id),
+                    child: Text(dt('إلغاء الطلب')),
+                  ),
+                ),
             ],
           ),
         ],

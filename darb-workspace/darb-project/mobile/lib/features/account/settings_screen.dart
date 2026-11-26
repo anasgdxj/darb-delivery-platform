@@ -559,27 +559,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               constraints: const BoxConstraints(maxWidth: 620),
               child: AnimatedBuilder(
                 animation: appearance,
-                builder: (context, _) => ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
+                builder: (context, _) => Stack(
+                  fit: StackFit.expand,
                   children: [
-                    AnimatedSwitcher(
-                      duration: DarbMotion.effectiveDuration(
-                        context,
-                        DarbMotion.fast,
-                      ),
-                      child: _feedbackMessage == null
-                          ? const SizedBox.shrink(key: ValueKey('no_feedback'))
-                          : Padding(
-                              key: ValueKey(_feedbackMessage),
-                              padding: const EdgeInsets.only(bottom: 14),
-                              child: DarbFeedbackBanner(
-                                kind: _feedbackKind,
-                                message: _feedbackMessage!,
-                                onDismiss: () =>
-                                    setState(() => _feedbackMessage = null),
-                              ),
-                            ),
-                    ),
+                    ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
+                      children: [
                     DarbGroupedSection(
                       title: dt('المظهر والعرض'),
                       subtitle: dt('خصص الألوان ونمط البطاقات ولغة التطبيق'),
@@ -992,6 +977,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
+                      ],
+                    ),
+                    if (_feedbackMessage != null)
+                      Positioned(
+                        top: 12,
+                        left: 16,
+                        right: 16,
+                        child: AnimatedSwitcher(
+                          duration: DarbMotion.effectiveDuration(
+                            context,
+                            DarbMotion.fast,
+                          ),
+                          child: DarbFeedbackBanner(
+                            key: ValueKey(_feedbackMessage),
+                            kind: _feedbackKind,
+                            message: _feedbackMessage!,
+                            onDismiss: () =>
+                                setState(() => _feedbackMessage = null),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

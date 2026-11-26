@@ -6,6 +6,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 
 class VendorProductsScreen extends StatefulWidget {
   const VendorProductsScreen({super.key});
@@ -219,11 +220,14 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                       final stock =
                           stockText.isEmpty ? null : int.tryParse(stockText);
                       if (name.length < 2 || price == null || price < 0) {
-                        setSheet(() => err = dt('أدخل اسم المنتج وسعراً صحيحاً'));
+                        setSheet(
+                            () => err = dt('أدخل اسم المنتج وسعراً صحيحاً'));
                         return;
                       }
-                      if (stockText.isNotEmpty && (stock == null || stock < 0)) {
-                        setSheet(() => err = dt('أدخل كمية مخزون صحيحة (0 أو أكثر)'));
+                      if (stockText.isNotEmpty &&
+                          (stock == null || stock < 0)) {
+                        setSheet(() =>
+                            err = dt('أدخل كمية مخزون صحيحة (0 أو أكثر)'));
                         return;
                       }
                       setSheet(() {
@@ -393,79 +397,97 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
       if (q.isEmpty) return true;
       return _productTitle(p).toLowerCase().contains(q);
     }).toList();
+    final availableCount =
+        _products.where((p) => p['isAvailable'] != false).length;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: RefreshIndicator(
         onRefresh: _load,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
-          children: [
-            Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final maxW = constraints.maxWidth;
+            final hInset = maxW > 1080 ? (maxW - 1080) / 2 + 16 : 16.0;
+            return ListView(
+              padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 110),
               children: [
-                Expanded(
-                  child: DarbSearchBar(
-                    controller: _searchCtrl,
-                    hintText: dt('ابحث عن منتج...'),
-                    onChanged: (_) => setState(() {}),
+                DarbCommandStage(
+                  livePulse: availableCount > 0,
+                  eyebrow: dt('متاح للبيع'),
+                  title: dt('المنتجات'),
+                  subtitle: dt('$availableCount منتج متاح'),
+                  trailing: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: DarbColors.lime,
+                      foregroundColor: DarbColors.darkCanvas,
+                      minimumSize: const Size(0, 40),
+                    ),
+                    onPressed: () => _openProductSheet(),
+                    icon: const Icon(Icons.add_rounded, size: 19),
+                    label: Text(dt('إضافة منتج')),
                   ),
                 ),
-                const SizedBox(width: 10),
-                FilledButton.icon(
-                  onPressed: () => _openProductSheet(),
-                  icon: const Icon(Icons.add_rounded, size: 19),
-                  label: Text(dt('إضافة منتج')),
+                const SizedBox(height: 12),
+                DarbSearchBar(
+                  controller: _searchCtrl,
+                  hintText: dt('ابحث عن منتج...'),
+                  onChanged: (_) => setState(() {}),
                 ),
-              ],
-            ),
-            if (categories.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    ChoiceChip(
-                      label: Text(dt('الكل')),
-                      selected: _selectedCategory.isEmpty,
-                      onSelected: (_) =>
-                          setState(() => _selectedCategory = ''),
-                    ),
-                    for (final c in categories) ...[
-                      const SizedBox(width: 8),
-                      ChoiceChip(
-                        label: Text(c),
-                        selected: _selectedCategory == c,
-                        onSelected: (_) =>
-                            setState(() => _selectedCategory = c),
+                if (categories.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  DarbSegmentedDock<String>(
+                    compact: true,
+                    selectedValue: _selectedCategory,
+                    onSelected: (val) =>
+                        setState(() => _selectedCategory = val),
+                    options: [
+                      DarbDockOption(
+                        value: '',
+                        label: dt('الكل'),
+                        count: _products.length,
                       ),
+                      for (final c in categories)
+                        DarbDockOption(
+                          value: c,
+                          label: c,
+                          count: _products
+                              .where((p) => p['category']?.toString() == c)
+                              .length,
+                        ),
                     ],
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 14),
-            if (filtered.isEmpty)
-              DarbStateView.empty(
-                message: _products.isEmpty
-                    ? dt('لم تضف أي منتجات بعد')
-                    : dt('لم نعثر على نتائج مطابقة'),
-                icon: _products.isEmpty
-                    ? Icons.inventory_2_outlined
-                    : Icons.search_off_rounded,
-                onRetry: _products.isEmpty
-                    ? () => _openProductSheet()
-                    : () {
-                        _searchCtrl.clear();
-                        setState(() => _selectedCategory = '');
-                      },
-              )
-            else
-              for (final p in filtered)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildProductRow(p),
-                ),
-          ],
+                  ),
+                ],
+                const SizedBox(height: 14),
+                if (filtered.isEmpty)
+                  DarbStateView.empty(
+                    message: _products.isEmpty
+                        ? dt('لم تضف أي منتجات بعد')
+                        : dt('لم نعثر على نتائج مطابقة'),
+                    icon: _products.isEmpty
+                        ? Icons.inventory_2_outlined
+                        : Icons.search_off_rounded,
+                    onRetry: _products.isEmpty
+                        ? () => _openProductSheet()
+                        : () {
+                            _searchCtrl.clear();
+                            setState(() => _selectedCategory = '');
+                          },
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    children: [
+                      for (var i = 0; i < filtered.length; i++)
+                        i < 6
+                            ? DarbFadeSlide(
+                                delay: DarbMotion.staggerDelay(i),
+                                child: _buildProductRow(filtered[i]),
+                              )
+                            : _buildProductRow(filtered[i]),
+                    ],
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -474,130 +496,64 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
   Widget _buildProductRow(Map<String, dynamic> p) {
     final id = p['id'].toString();
     final name = _productTitle(p);
+    final desc = _productDesc(p);
     final category = p['category']?.toString();
     final price = num.tryParse(p['basePrice']?.toString() ?? '0') ?? 0;
     final currency = p['currency']?.toString() ?? 'SYP';
     final available = p['isAvailable'] != false;
-    final stock = p['stockQty'];
-
+    final stock = (p['stockQty'] as num?)?.toInt();
+    final outOfStock = stock != null && stock <= 0;
     final isBusy = _busyProductIds.contains(id);
 
-    return DarbInteractiveCard(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DarbTelemetryProductCard(
+          name: name,
+          description: desc.trim().isNotEmpty ? desc : null,
+          category: category,
+          priceLabel: formatDarbMoney(price, currency),
+          stockLabel: stock != null
+              ? (outOfStock ? dt('نفد المخزون') : dt('المتبقي: $stock'))
+              : null,
+          stockRatio: stock != null ? (stock / 25).clamp(0.0, 1.0) : null,
+          outOfStock: outOfStock || !available,
+          highlighted: available,
+          leadingIcon: Icons.inventory_2_outlined,
+          actionDock: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: available
-                      ? DarbColors.primaryOf(context).withValues(alpha: 0.12)
-                      : DarbColors.softSurfaceOf(context),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.inventory_2_outlined,
-                  color: available
-                      ? DarbColors.primaryOf(context)
-                      : DarbColors.mutedOf(context),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: DarbColors.inkOf(context),
-                        fontSize: 15.5,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          formatDarbMoney(price, currency),
-                          style: TextStyle(
-                            color: DarbColors.primaryOf(context),
-                            fontWeight: FontWeight.w900,
-                            fontSize: 13.5,
-                          ),
-                        ),
-                        if (category != null && category.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: DarbColors.softSurfaceOf(context),
-                              borderRadius:
-                                  BorderRadius.circular(DarbRadius.pill),
-                            ),
-                            child: Text(
-                              category,
-                              style: TextStyle(
-                                color: DarbColors.mutedOf(context),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        if (stock != null)
-                          Text(
-                            dt('المتبقي: $stock'),
-                            style: TextStyle(
-                              color: DarbColors.mutedOf(context),
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
               Switch(
                 value: available,
                 onChanged: isBusy ? null : (v) => _toggleAvailable(id, v),
               ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: dt('تعديل المنتج'),
+                    onPressed:
+                        isBusy ? null : () => _openProductSheet(existing: p),
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: dt('حذف المنتج'),
+                    onPressed: isBusy ? null : () => _deleteProduct(id),
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      size: 18,
+                      color: DarbColors.dangerOf(context),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
-          const Divider(height: 18),
-          Row(
-            children: [
-              DarbStatusBadge(status: available ? 'OPEN' : 'CLOSED'),
-              const Spacer(),
-              TextButton.icon(
-                onPressed:
-                    isBusy ? null : () => _openProductSheet(existing: p),
-                icon: const Icon(Icons.edit_outlined, size: 17),
-                label: Text(dt('تعديل المنتج')),
-              ),
-              TextButton.icon(
-                style: TextButton.styleFrom(
-                  foregroundColor: DarbColors.dangerOf(context),
-                ),
-                onPressed: isBusy ? null : () => _deleteProduct(id),
-                icon: const Icon(Icons.delete_outline_rounded, size: 17),
-                label: Text(dt('حذف المنتج')),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

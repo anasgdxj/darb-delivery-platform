@@ -6,8 +6,10 @@ import 'package:darb/core/services/location_service.dart';
 import 'package:darb/core/theme/darb_design_system.dart';
 import 'package:darb/core/widgets/darb_city_scene.dart';
 import 'package:darb/core/widgets/darb_components.dart';
+import 'package:darb/core/widgets/darb_copy_order_number_button.dart';
 import 'package:darb/core/widgets/darb_glass.dart';
 import 'package:darb/core/widgets/darb_motion_components.dart';
+import 'package:darb/core/widgets/darb_spatial_primitives.dart';
 import 'package:darb/features/account/account_screen.dart';
 import 'package:darb/features/account/driver_application_screen.dart';
 import 'package:darb/features/account/edit_profile_screen.dart';
@@ -31,6 +33,61 @@ import 'package:http/testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('Order reference copy action', () {
+    testWidgets('copies a trimmed order number and confirms the action',
+        (tester) async {
+      final clipboardCalls = <MethodCall>[];
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardCalls.add(call);
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+
+      darbLocale.value = const Locale('ar');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DarbCopyOrderNumberButton(
+              value: '  DRB-2026-0042  ',
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byTooltip('نسخ رقم الطلب'));
+      await tester.pump();
+
+      expect(clipboardCalls, hasLength(1));
+      expect(
+        clipboardCalls.single.arguments,
+        {'text': 'DRB-2026-0042'},
+      );
+      expect(find.text('تم نسخ رقم الطلب'), findsOneWidget);
+    });
+
+    testWidgets('does not render a copy action for an empty order number',
+        (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DarbCopyOrderNumberButton(value: '   '),
+          ),
+        ),
+      );
+
+      expect(find.byType(IconButton), findsNothing);
+    });
+  });
 
   group('DAZREVO Design System 2026 & Brand Integrity', () {
     test('enforces exact DESIGN_SYSTEM.md 2026 light and dark semantic tokens', () {
@@ -152,6 +209,9 @@ void main() {
       darbLocale.value = const Locale('en');
       expect(dt('إلغاء الطلب'), 'Cancel order');
       expect(dt('الإشعارات'), 'Notifications');
+      expect(dt('نسخ رقم الطلب'), 'Copy order number');
+      expect(dt('تم نسخ رقم الطلب'), 'Order number copied');
+      expect(dt('تعذر نسخ رقم الطلب'), 'Could not copy order number');
       expect(dt('وضع عدم الاتصال — يتم عرض البيانات المحفوظة مؤقتاً'), 'Offline mode — showing cached data');
       expect(dt('حدد الموقع على خريطة دمشق'), 'Pin location on the map for دمشق');
       expect(dt('5 منتج متاح'), '5 products available');
@@ -162,6 +222,9 @@ void main() {
       darbLocale.value = const Locale('tr');
       expect(dt('إلغاء الطلب'), 'Siparişi iptal et');
       expect(dt('الإشعارات'), 'Bildirimler');
+      expect(dt('نسخ رقم الطلب'), 'Sipariş numarasını kopyala');
+      expect(dt('تم نسخ رقم الطلب'), 'Sipariş numarası kopyalandı');
+      expect(dt('تعذر نسخ رقم الطلب'), 'Sipariş numarası kopyalanamadı');
       expect(dt('تحديث التطبيق'), 'Uygulamayı güncelle');
       expect(dt('3 منتج متاح'), '3 ürün mevcut');
       expect(dt('سريع'), 'Hızlı');
@@ -935,12 +998,12 @@ void main() {
       Api.instance.setSessionForTest(accessToken: 'expired-access-token');
       Api.instance.httpClientOverride = MockClient((request) async {
         if (request.url.path.endsWith('/auth/refresh')) {
-          return http.Response(
+          return _utf8Response(
             jsonEncode({'message': 'Refresh token revoked'}),
             401,
           );
         }
-        return http.Response(jsonEncode({'message': 'Unauthorized'}), 401);
+        return _utf8Response(jsonEncode({'message': 'Unauthorized'}), 401);
       });
       addTearDown(() async {
         _clearSecureStorageMock();
@@ -979,7 +1042,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 450));
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle();
 
       expect(find.byType(OnboardingScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -1054,7 +1117,7 @@ void main() {
         role: 'CUSTOMER',
         onAuthMe: () async {
           if (failAuthMe) {
-            return http.Response(jsonEncode({'message': 'خطأ مؤقت بالخادم'}), 500);
+            return _utf8Response(jsonEncode({'message': 'خطأ مؤقت بالخادم'}), 500);
           }
           return null;
         },
@@ -1193,13 +1256,13 @@ void main() {
       var vendorOrdersCalls = 0;
       Api.instance.httpClientOverride = MockClient((request) async {
         if (request.url.path.endsWith('/vendors/mine')) {
-          return http.Response('null', 200);
+          return _utf8Response('null', 200);
         }
         if (request.url.path.endsWith('/orders/vendor')) {
           vendorOrdersCalls++;
-          return http.Response('[]', 200);
+          return _utf8Response('[]', 200);
         }
-        return http.Response('[]', 200);
+        return _utf8Response('[]', 200);
       });
       addTearDown(() async {
         _clearSecureStorageMock();
@@ -1243,12 +1306,12 @@ void main() {
 
       Api.instance.httpClientOverride = MockClient((request) async {
         if (request.url.path.endsWith('/vendors/mine')) {
-          return http.Response(
+          return _utf8Response(
             jsonEncode({'id': 'v1', 'status': 'PENDING'}),
             200,
           );
         }
-        return http.Response('[]', 200);
+        return _utf8Response('[]', 200);
       });
 
       await tester.pumpWidget(
@@ -1274,7 +1337,7 @@ void main() {
       Api.instance.setSessionForTest(accessToken: 'valid-token');
       Api.instance.httpClientOverride = MockClient((request) async {
         if (request.url.path.endsWith('/drivers/me')) {
-          return http.Response(
+          return _utf8Response(
             jsonEncode({
               'id': 'drv-1',
               'status': 'REJECTED',
@@ -1285,12 +1348,12 @@ void main() {
           );
         }
         if (request.url.path.endsWith('/drivers/stats')) {
-          return http.Response(
+          return _utf8Response(
             jsonEncode({'message': 'إحصائيات غير متوفرة حالياً'}),
             404,
           );
         }
-        return http.Response('[]', 200);
+        return _utf8Response('[]', 200);
       });
       addTearDown(() async {
         DriverLocationReporter.stop();
@@ -1573,14 +1636,30 @@ void main() {
       // Sync device notifications
       final syncTile = find.text('Sync device push notifications');
       await tester.ensureVisible(syncTile);
-      await tester.tap(syncTile);
+      final syncTileSurface = find.ancestor(
+        of: syncTile,
+        matching: find.byType(DarbSettingsTile),
+      );
+      final syncTileWidget = tester.widget<DarbSettingsTile>(syncTileSurface);
+      expect(syncTileWidget.enabled, isTrue);
+      expect(syncTileWidget.onTap, isNotNull);
+      syncTileWidget.onTap!.call();
       await tester.pumpAndSettle();
+      // Clear temporary cache dialog -> confirm
       expect(find.text('Notification sync updated for this device'), findsOneWidget);
 
-      // Clear temporary cache dialog -> confirm
+      await tester.drag(find.byType(ListView).first, const Offset(0, -1200));
+      await tester.pumpAndSettle();
       final clearTile = find.text('Clear cached data');
       await tester.ensureVisible(clearTile);
-      await tester.tap(clearTile);
+      final clearTileSurface = find.ancestor(
+        of: clearTile,
+        matching: find.byType(DarbSettingsTile),
+      );
+      final clearTileWidget = tester.widget<DarbSettingsTile>(clearTileSurface);
+      expect(clearTileWidget.enabled, isTrue);
+      expect(clearTileWidget.onTap, isNotNull);
+      clearTileWidget.onTap!.call();
       await tester.pumpAndSettle();
       await tester.tap(find.text('Clear cache'));
       await tester.pumpAndSettle();
@@ -1618,8 +1697,9 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
-
       expect(find.text('الحساب والخدمات'), findsOneWidget);
+      await tester.drag(find.byType(ListView).first, const Offset(0, -900));
+      await tester.pumpAndSettle();
       expect(find.text('التخصيص واللغة'), findsOneWidget);
 
       final settingsTile = find.text('الإعدادات والتخصيص');
@@ -1919,7 +1999,8 @@ void main() {
             200,
           );
         }
-        if (path.endsWith('/orders/available')) {
+        if (path.endsWith('/orders/available') ||
+            path.endsWith('/orders/driver/available')) {
           return http.Response(
             jsonEncode([
               {
@@ -2036,6 +2117,194 @@ void main() {
       }
     });
   });
+
+  group('Spatial Primitives & Complete Redesign 2026', () {
+    testWidgets(
+        'DarbCommandStage, DarbSegmentedDock, and DarbCityOrbStrip render and fire callbacks across AR/EN/TR',
+        (tester) async {
+      var selectedDock = 'ALL';
+      var selectedCity = 'c1';
+
+      for (final lang in ['ar', 'en', 'tr']) {
+        darbLocale.value = Locale(lang);
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: lang == 'tr' ? DarbTheme.dark : DarbTheme.light,
+            home: Directionality(
+              textDirection:
+                  lang == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+              child: MediaQuery(
+                data: const MediaQueryData(disableAnimations: true),
+                child: Scaffold(
+                  body: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      DarbCommandStage(
+                        livePulse: true,
+                        eyebrow: 'DAZREVO',
+                        title: 'مركز القيادة',
+                        subtitle: 'شبكة التوصيل المباشر',
+                        bottom: DarbCityOrbStrip(
+                          onDarkStage: true,
+                          selectedCityId: selectedCity,
+                          cities: const [
+                            DarbCityOrbOption(
+                              id: 'c1',
+                              name: 'دمشق',
+                              code: 'damascus',
+                            ),
+                            DarbCityOrbOption(
+                              id: 'c2',
+                              name: 'حلب',
+                              code: 'aleppo',
+                            ),
+                          ],
+                          onSelect: (id) => selectedCity = id,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DarbSegmentedDock<String>(
+                        selectedValue: selectedDock,
+                        onSelected: (v) => selectedDock = v,
+                        options: const [
+                          DarbDockOption(value: 'ALL', label: 'الكل', count: 5),
+                          DarbDockOption(
+                            value: 'ACTIVE',
+                            label: 'نشطة',
+                            count: 2,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.byType(DarbCommandStage), findsOneWidget);
+        expect(find.byType(DarbCityOrbStrip), findsOneWidget);
+        expect(find.byType(DarbSegmentedDock<String>), findsOneWidget);
+        expect(find.byType(Image), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
+
+      await tester.tap(find.text('حلب'));
+      await tester.pump();
+      expect(selectedCity, 'c2');
+
+      await tester.tap(find.text('نشطة'));
+      await tester.pump();
+      expect(selectedDock, 'ACTIVE');
+
+      darbLocale.value = const Locale('ar');
+    });
+
+    testWidgets(
+        'DarbTelemetryDeck, DarbTicketPass, DarbEditorialStoreCard, and DarbTelemetryProductCard render cleanly on 320px and 900px viewports',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      var storeTapped = false;
+      var productTapped = false;
+
+      for (final size in const [Size(320, 640), Size(900, 760)]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: size.width < 500 ? DarbTheme.dark : DarbTheme.light,
+            home: MediaQuery(
+              data: const MediaQueryData(disableAnimations: true),
+              child: Scaffold(
+                body: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    const DarbTelemetryDeck(
+                      cells: [
+                        DarbTelemetryCell(
+                          label: 'طلبات اليوم',
+                          value: '14',
+                          icon: Icons.today_rounded,
+                        ),
+                        DarbTelemetryCell(
+                          label: 'مبيعات اليوم',
+                          value: '85,000 ل.س',
+                          icon: Icons.trending_up_rounded,
+                        ),
+                        DarbTelemetryCell(
+                          label: 'المكتملة',
+                          value: '11',
+                          icon: Icons.task_alt_rounded,
+                        ),
+                        DarbTelemetryCell(
+                          label: 'النشطة',
+                          value: '3',
+                          icon: Icons.bolt_rounded,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    DarbTicketPass(
+                      leadingIcon: Icons.receipt_long_rounded,
+                      title: 'DRB-2026-990',
+                      subtitle: 'متجر الشام',
+                      status: 'READY',
+                      body: const Text('تفاصيل التذكرة'),
+                      footer: const Text('جاهز للاستلام'),
+                    ),
+                    const SizedBox(height: 12),
+                    DarbEditorialStoreCard(
+                      name: 'مقهى دازريفو',
+                      category: 'مشروبات',
+                      isOpen: true,
+                      productsLabel: '12 منتج متاح',
+                      address: 'المالكي',
+                      ratingAvg: 4.8,
+                      reviewsCount: 24,
+                      onTap: () => storeTapped = true,
+                    ),
+                    const SizedBox(height: 12),
+                    DarbTelemetryProductCard(
+                      name: 'قهوة مختصة',
+                      category: 'مشروبات',
+                      description: 'محمصة طازجة',
+                      priceLabel: '12,000 ل.س',
+                      stockLabel: 'المتبقي: 10',
+                      stockRatio: 0.5,
+                      highlighted: true,
+                      onTap: () => productTapped = true,
+                      actionDock: const Icon(Icons.add_rounded),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.byType(DarbTelemetryDeck), findsOneWidget);
+        expect(find.byType(DarbTicketPass), findsOneWidget);
+        expect(find.byType(DarbEditorialStoreCard), findsOneWidget);
+        expect(find.byType(DarbTelemetryProductCard), findsOneWidget);
+        expect(find.byType(Image), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
+
+      await tester.tap(find.text('مقهى دازريفو'));
+      await tester.pump();
+      expect(storeTapped, isTrue);
+
+      await tester.ensureVisible(find.text('قهوة مختصة'));
+      await tester.tap(find.text('قهوة مختصة'));
+      await tester.pump();
+      expect(productTapped, isTrue);
+
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+  });
 }
 
 class _CounterTestTab extends StatefulWidget {
@@ -2101,6 +2370,13 @@ void _clearSecureStorageMock() {
       .setMockMethodCallHandler(channel, null);
 }
 
+http.Response _utf8Response(String body, int statusCode) =>
+    http.Response.bytes(
+      utf8.encode(body),
+      statusCode,
+      headers: const {'content-type': 'application/json; charset=utf-8'},
+    );
+
 MockClient _createRoleMockClient({
   required String role,
   String? localeOverride,
@@ -2115,7 +2391,7 @@ MockClient _createRoleMockClient({
         final custom = await onAuthMe();
         if (custom != null) return custom;
       }
-      return http.Response(
+      return _utf8Response(
         jsonEncode({
           'id': 'u-$role',
           'name': 'أنس',
@@ -2128,18 +2404,18 @@ MockClient _createRoleMockClient({
     }
 
     if (path.endsWith('/auth/logout')) {
-      return http.Response('{}', 200);
+      return _utf8Response('{}', 200);
     }
 
     if (path.endsWith('/notifications')) {
-      return http.Response(
+      return _utf8Response(
         jsonEncode({'items': <Object>[], 'unreadCount': 0}),
         200,
       );
     }
 
     if (path.endsWith('/cities')) {
-      return http.Response(
+      return _utf8Response(
         jsonEncode([
           {
             'id': 'city-1',
@@ -2157,13 +2433,13 @@ MockClient _createRoleMockClient({
 
     if (path.endsWith('/vendors')) {
       if (failVendors) {
-        return http.Response(jsonEncode({'message': 'خطأ مؤقت بالخادم'}), 500);
+        return _utf8Response(jsonEncode({'message': 'خطأ مؤقت بالخادم'}), 500);
       }
-      return http.Response('[]', 200);
+      return _utf8Response('[]', 200);
     }
 
     if (path.endsWith('/vendors/mine')) {
-      return http.Response(
+      return _utf8Response(
         jsonEncode({
           'id': 'v-1',
           'status': 'APPROVED',
@@ -2177,7 +2453,7 @@ MockClient _createRoleMockClient({
     }
 
     if (path.endsWith('/drivers/me')) {
-      return http.Response(
+      return _utf8Response(
         jsonEncode({
           'id': 'd-1',
           'status': 'PENDING',
@@ -2192,13 +2468,13 @@ MockClient _createRoleMockClient({
         path.endsWith('/vendors/mine/stats') ||
         path.endsWith('/admin/stats') ||
         path.endsWith('/admin/settings')) {
-      return http.Response('{}', 200);
+      return _utf8Response('{}', 200);
     }
 
     if (path.endsWith('/admin/orders')) {
-      return http.Response(jsonEncode({'items': <Object>[]}), 200);
+      return _utf8Response(jsonEncode({'items': <Object>[]}), 200);
     }
 
-    return http.Response('[]', 200);
+    return _utf8Response('[]', 200);
   });
 }

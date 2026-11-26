@@ -6,6 +6,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 import 'checkout_screen.dart';
 
 class VendorCatalogScreen extends StatefulWidget {
@@ -178,7 +179,8 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
   Future<void> _openCheckout() async {
     if (!_vendorOpen) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(dt('هذا المتجر غير متاح لاستقبال الطلبات حالياً.'))),
+        SnackBar(
+            content: Text(dt('هذا المتجر غير متاح لاستقبال الطلبات حالياً.'))),
       );
       return;
     }
@@ -244,187 +246,175 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
           children: [
             RefreshIndicator(
               onRefresh: _loadProducts,
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  12,
-                  16,
-                  _cartCount > 0 ? 115 : 28,
-                ),
-                children: [
-                  DarbGlassSurface(
-                    padding: const EdgeInsets.all(15),
-                    borderColor: _vendorOpen
-                        ? DarbColors.primaryOf(context).withValues(alpha: 0.24)
-                        : null,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    DarbColors.primaryOf(context)
-                                        .withValues(alpha: 0.18),
-                                    DarbColors.mint.withValues(alpha: 0.26),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Icon(
-                                Icons.storefront_rounded,
-                                color: DarbColors.primaryOf(context),
-                                size: 24,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final maxW = constraints.maxWidth;
+                  final hInset = maxW > 1080 ? (maxW - 1080) / 2 + 16 : 16.0;
+                  return ListView(
+                    padding: EdgeInsets.fromLTRB(
+                      hInset,
+                      12,
+                      hInset,
+                      _cartCount > 0 ? 115 : 28,
+                    ),
+                    children: [
+                      DarbCommandStage(
+                        livePulse: _vendorOpen,
+                        eyebrow: widget.vendor['type']?.toString() ?? dt('متجر'),
+                        title: _vendorName,
+                        subtitle: (_vendorDesc != null &&
+                                _vendorDesc!.trim().isNotEmpty)
+                            ? _vendorDesc
+                            : address,
+                        leading: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: DarbColors.lime.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: DarbColors.lime.withValues(alpha: 0.40),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.storefront_rounded,
+                            color: DarbColors.lime,
+                            size: 24,
+                          ),
+                        ),
+                        trailing: DarbPressScale(
+                          borderRadius: BorderRadius.circular(DarbRadius.pill),
+                          onTap: _openReviewsSheet,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              borderRadius:
+                                  BorderRadius.circular(DarbRadius.pill),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.22),
                               ),
                             ),
-                            if (_vendorOpen)
-                              const PositionedDirectional(
-                                top: -3,
-                                end: -3,
-                                child: DarbPulseDot(size: 7.5),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (address != null && address.isNotEmpty)
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.place_outlined,
-                                      size: 16,
-                                      color: DarbColors.primaryOf(context),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        address,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: DarbColors.inkOf(context),
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 13.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              if (_vendorDesc != null &&
-                                  _vendorDesc!.trim().isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    _vendorDesc!,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: DarbColors.mutedOf(context),
-                                      fontSize: 12.5,
-                                      height: 1.35,
-                                    ),
-                                  ),
-                                ),
-                              const SizedBox(height: 8),
-                              OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size(0, 34),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 11,
-                                    vertical: 5,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(DarbRadius.pill),
-                                  ),
-                                ),
-                                onPressed: _openReviewsSheet,
-                                icon: Icon(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
                                   Icons.star_rounded,
                                   size: 16,
                                   color: DarbColors.warningOf(context),
                                 ),
-                                label: Text(
+                                const SizedBox(width: 5),
+                                Text(
                                   ratingAvg > 0
                                       ? '${ratingAvg.toStringAsFixed(1)} ($reviewsCount)'
                                       : dt('تقييمات العملاء'),
-                                  style: const TextStyle(fontSize: 12),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  DarbSearchBar(
-                    controller: _searchController,
-                    hintText: dt('ابحث عن منتج...'),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  if (categories.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          ChoiceChip(
-                            label: Text(dt('الكل')),
-                            selected: _selectedCategory.isEmpty,
-                            onSelected: (_) =>
-                                setState(() => _selectedCategory = ''),
-                          ),
-                          for (final cat in categories) ...[
-                            const SizedBox(width: 8),
-                            ChoiceChip(
-                              label: Text(cat),
-                              selected: _selectedCategory == cat,
-                              onSelected: (_) =>
-                                  setState(() => _selectedCategory = cat),
+                        bottom: (address != null && address.isNotEmpty)
+                            ? Row(
+                                children: [
+                                  const Icon(
+                                    Icons.place_outlined,
+                                    size: 15,
+                                    color: DarbColors.mint,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      address,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Color(0xFFD2E4DB),
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      DarbSearchBar(
+                        controller: _searchController,
+                        hintText: dt('ابحث عن منتج...'),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      if (categories.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        DarbSegmentedDock<String>(
+                          compact: true,
+                          selectedValue: _selectedCategory,
+                          onSelected: (val) =>
+                              setState(() => _selectedCategory = val),
+                          options: [
+                            DarbDockOption(
+                              value: '',
+                              label: dt('الكل'),
+                              count: _products.length,
                             ),
+                            for (final cat in categories)
+                              DarbDockOption(
+                                value: cat,
+                                label: cat,
+                                count: _products
+                                    .where((p) =>
+                                        p['category']?.toString() == cat)
+                                    .length,
+                              ),
                           ],
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 14),
-                  if (_loading)
-                    const DarbStateView.loading()
-                  else if (_error != null)
-                    DarbStateView.error(message: _error, onRetry: _loadProducts)
-                  else if (filtered.isEmpty)
-                    DarbStateView.empty(
-                      message: _products.isEmpty
-                          ? dt('لا توجد منتجات متاحة')
-                          : dt('لم نعثر على نتائج مطابقة'),
-                      icon: _products.isEmpty
-                          ? Icons.inventory_2_outlined
-                          : Icons.search_off_rounded,
-                      onRetry: _products.isEmpty
-                          ? _loadProducts
-                          : () {
-                              _searchController.clear();
-                              setState(() => _selectedCategory = '');
-                            },
-                    )
-                  else
-                    for (final prod in filtered)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildProductCard(prod),
-                      ),
-                ],
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      if (_loading)
+                        const DarbStateView.loading()
+                      else if (_error != null)
+                        DarbStateView.error(
+                          message: _error,
+                          onRetry: _loadProducts,
+                        )
+                      else if (filtered.isEmpty)
+                        DarbStateView.empty(
+                          message: _products.isEmpty
+                              ? dt('لا توجد منتجات متاحة')
+                              : dt('لم نعثر على نتائج مطابقة'),
+                          icon: _products.isEmpty
+                              ? Icons.inventory_2_outlined
+                              : Icons.search_off_rounded,
+                          onRetry: _products.isEmpty
+                              ? _loadProducts
+                              : () {
+                                  _searchController.clear();
+                                  setState(() => _selectedCategory = '');
+                                },
+                        )
+                      else
+                        DarbResponsiveTwoColumn(
+                          children: [
+                            for (var i = 0; i < filtered.length; i++)
+                              i < 6
+                                  ? DarbFadeSlide(
+                                      delay: DarbMotion.staggerDelay(i),
+                                      child: _buildProductCard(filtered[i]),
+                                    )
+                                  : _buildProductCard(filtered[i]),
+                          ],
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
             if (_cartCount > 0)
@@ -456,7 +446,8 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                           ),
                           transitionBuilder: (child, animation) => ScaleTransition(
                             scale: animation,
-                            child: FadeTransition(opacity: animation, child: child),
+                            child:
+                                FadeTransition(opacity: animation, child: child),
                           ),
                           child: Text(
                             '$_cartCount',
@@ -487,6 +478,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                                 color: DarbColors.lime,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 13,
+                                fontFeatures: [FontFeature.tabularFigures()],
                               ),
                             ),
                           ],
@@ -520,105 +512,25 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
     final desc = tr.isNotEmpty ? tr.first['description']?.toString() : null;
     final price = double.tryParse(prod['basePrice']?.toString() ?? '0') ?? 0;
     final currency = prod['currency']?.toString() ?? 'SYP';
+    final category = prod['category']?.toString();
     final stock = (prod['stockQty'] as num?)?.toInt();
     final outOfStock = stock != null && stock <= 0;
     final qty = _cart[id] ?? 0;
-
-    final isDark = DarbColors.isDark(context);
     final inCart = qty > 0;
 
-    return DarbInteractiveCard(
-      padding: const EdgeInsets.all(14),
-      borderColor: inCart
-          ? DarbColors.primaryOf(context).withValues(alpha: 0.55)
+    return DarbTelemetryProductCard(
+      name: name,
+      description: desc,
+      category: category,
+      priceLabel: formatDarbMoney(price, currency),
+      stockLabel: stock != null
+          ? (outOfStock ? dt('نفد المخزون') : dt('المتبقي: $stock'))
           : null,
-      tintColor: inCart
-          ? (isDark
-              ? DarbColors.forestSoft.withValues(alpha: 0.42)
-              : DarbColors.mintTint.withValues(alpha: 0.45))
-          : null,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: inCart
-                  ? DarbColors.primaryOf(context).withValues(alpha: 0.16)
-                  : DarbColors.softSurfaceOf(context),
-              borderRadius: BorderRadius.circular(16),
-              border: inCart
-                  ? Border.all(
-                      color:
-                          DarbColors.primaryOf(context).withValues(alpha: 0.32),
-                    )
-                  : null,
-            ),
-            child: Icon(
-              Icons.shopping_bag_outlined,
-              color: DarbColors.primaryOf(context),
-              size: 26,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    color: DarbColors.inkOf(context),
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                if (desc != null && desc.trim().isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      desc,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: DarbColors.mutedOf(context),
-                        fontSize: 12.5,
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Text(
-                      formatDarbMoney(price, currency),
-                      style: TextStyle(
-                        color: DarbColors.primaryOf(context),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 14,
-                      ),
-                    ),
-                    if (stock != null) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        outOfStock ? dt('نفد المخزون') : dt('المتبقي: $stock'),
-                        style: TextStyle(
-                          color: outOfStock
-                              ? DarbColors.dangerOf(context)
-                              : DarbColors.mutedOf(context),
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          if (qty == 0)
-            FilledButton.tonal(
+      stockRatio: stock != null ? (stock / 25).clamp(0.0, 1.0) : null,
+      outOfStock: outOfStock,
+      highlighted: inCart,
+      actionDock: qty == 0
+          ? FilledButton.tonal(
               style: FilledButton.styleFrom(
                 minimumSize: const Size(44, 40),
                 padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -633,8 +545,7 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                   (_vendorOpen && !outOfStock) ? () => _increment(prod) : null,
               child: const Icon(Icons.add_rounded, size: 20),
             )
-          else
-            Container(
+          : Container(
               decoration: BoxDecoration(
                 color: DarbColors.softSurfaceOf(context),
                 borderRadius: BorderRadius.circular(DarbRadius.pill),
@@ -678,8 +589,6 @@ class _VendorCatalogScreenState extends State<VendorCatalogScreen> {
                 ],
               ),
             ),
-        ],
-      ),
     );
   }
 }

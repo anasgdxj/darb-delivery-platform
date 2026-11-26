@@ -6,6 +6,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 
 class AdminOrdersScreen extends StatefulWidget {
   const AdminOrdersScreen({super.key});
@@ -61,33 +62,30 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
           return ListView(
             padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 108),
             children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (final f in [
-                      ('', dt('الكل')),
-                      ('PENDING', dt('قيد الانتظار')),
-                      ('ACCEPTED', dt('مقبول')),
-                      ('PREPARING', dt('قيد التحضير')),
-                      ('READY', dt('جاهز للاستلام')),
-                      ('ASSIGNED', dt('تم تعيين مندوب')),
-                      ('PICKED_UP', dt('في الطريق إليك')),
-                      ('DELIVERED', dt('تم التسليم')),
-                      ('CANCELLED', dt('ملغى')),
-                    ]) ...[
-                      ChoiceChip(
-                        label: Text(f.$2),
-                        selected: _statusFilter == f.$1,
-                        onSelected: (_) {
-                          setState(() => _statusFilter = f.$1);
-                          _load();
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                  ],
-                ),
+              DarbSegmentedDock<String>(
+                compact: true,
+                selectedValue: _statusFilter,
+                onSelected: (val) {
+                  setState(() => _statusFilter = val);
+                  _load();
+                },
+                options: [
+                  for (final f in [
+                    ('', dt('الكل')),
+                    ('PENDING', dt('قيد الانتظار')),
+                    ('ACCEPTED', dt('مقبول')),
+                    ('PREPARING', dt('قيد التحضير')),
+                    ('READY', dt('جاهز للاستلام')),
+                    ('ASSIGNED', dt('تم تعيين مندوب')),
+                    ('PICKED_UP', dt('في الطريق إليك')),
+                    ('DELIVERED', dt('تم التسليم')),
+                    ('CANCELLED', dt('ملغى')),
+                  ])
+                    DarbDockOption(
+                      value: f.$1,
+                      label: f.$2,
+                    ),
+                ],
               ),
               const SizedBox(height: 14),
               if (_orders.isEmpty)
@@ -109,114 +107,61 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 DarbResponsiveTwoColumn(
                   spacing: 10,
                   children: [
-                    for (final o in _orders)
-                      DarbInteractiveCard(
-                        padding: const EdgeInsets.all(15),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 38,
-                                  height: 38,
-                                  decoration: BoxDecoration(
-                                    color: DarbColors.primaryOf(context)
-                                        .withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(11),
-                                  ),
-                                  child: Icon(
-                                    o['type'] == 'PEER_DELIVERY'
-                                        ? Icons.local_shipping_rounded
-                                        : Icons.storefront_rounded,
-                                    size: 19,
-                                    color: DarbColors.primaryOf(context),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${o['orderNumber']} · ${o['city']?['code'] ?? ''}',
-                                        style: TextStyle(
-                                          color: DarbColors.inkOf(context),
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${o['customer']?['name'] ?? ''} · ${o['customer']?['phone'] ?? o['customer']?['email'] ?? ''}',
-                                        style: TextStyle(
-                                          color: DarbColors.mutedOf(context),
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                DarbStatusBadge(
-                                  status: o['status']?.toString() ?? 'PENDING',
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            DarbOrderTimeline(
-                              status: o['status']?.toString() ?? 'PENDING',
-                              isPeer: o['type'] == 'PEER_DELIVERY',
-                              compact: true,
-                            ),
-                            const SizedBox(height: 10),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: DarbColors.surfaceAltOf(context),
-                                borderRadius:
-                                    BorderRadius.circular(DarbRadius.sm),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    o['type'] == 'PEER_DELIVERY'
-                                        ? dt('توصيل مستقل')
-                                        : dt('طلب متجر'),
-                                    style: TextStyle(
-                                      color: DarbColors.mutedOf(context),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                  Text(
-                                    formatDarbMoney(
-                                      num.tryParse(
-                                              o['total']?.toString() ?? '0') ??
-                                          0,
-                                      o['currency']?.toString() ?? 'SYP',
-                                    ),
-                                    style: TextStyle(
-                                      color: DarbColors.primaryOf(context),
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    for (var i = 0; i < _orders.length; i++)
+                      i < 6
+                          ? DarbFadeSlide(
+                              delay: DarbMotion.staggerDelay(i),
+                              child: _buildAdminOrderCard(_orders[i]),
+                            )
+                          : _buildAdminOrderCard(_orders[i]),
                   ],
                 ),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildAdminOrderCard(Map<String, dynamic> o) {
+    final isPeer = o['type'] == 'PEER_DELIVERY';
+    final status = o['status']?.toString() ?? 'PENDING';
+    final total = num.tryParse(o['total']?.toString() ?? '0') ?? 0;
+    final currency = o['currency']?.toString() ?? 'SYP';
+
+    return DarbTicketPass(
+      leadingIcon: isPeer
+          ? Icons.local_shipping_rounded
+          : Icons.storefront_rounded,
+      title: '${o['orderNumber']} · ${o['city']?['code'] ?? ''}',
+      subtitle:
+          '${o['customer']?['name'] ?? ''} · ${o['customer']?['phone'] ?? o['customer']?['email'] ?? ''}',
+      status: status,
+      body: DarbOrderTimeline(
+        status: status,
+        isPeer: isPeer,
+        compact: true,
+      ),
+      footer: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            isPeer ? dt('توصيل مستقل') : dt('طلب متجر'),
+            style: TextStyle(
+              color: DarbColors.mutedOf(context),
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          Text(
+            formatDarbMoney(total, currency),
+            style: TextStyle(
+              color: DarbColors.primaryOf(context),
+              fontWeight: FontWeight.w900,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -306,8 +251,7 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
         if (s is Map<String, dynamic>) {
           settings = s;
           hasSettings = true;
-          _commissionCtrl.text =
-              s['commissionPercent']?.toString() ?? '10';
+          _commissionCtrl.text = s['commissionPercent']?.toString() ?? '10';
           _supportCtrl.text = s['supportContact']?.toString() ?? '';
         }
       } on ApiException catch (e) {
@@ -407,7 +351,8 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                 if (dlgError != null)
                   Text(
                     dlgError!,
-                    style: TextStyle(color: DarbColors.dangerOf(ctx), fontSize: 12),
+                    style:
+                        TextStyle(color: DarbColors.dangerOf(ctx), fontSize: 12),
                   ),
               ],
             ),
@@ -423,7 +368,8 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                   : () async {
                       if (codeCtrl.text.trim().length < 2 ||
                           arCtrl.text.trim().isEmpty) {
-                        setDlg(() => dlgError = dt('أدخل رمز المدينة واسمها العربي'));
+                        setDlg(() =>
+                            dlgError = dt('أدخل رمز المدينة واسمها العربي'));
                         return;
                       }
                       setDlg(() {
@@ -437,8 +383,7 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
                           if (enCtrl.text.trim().isNotEmpty)
                             'nameEn': enCtrl.text.trim(),
                           if (curCtrl.text.trim().isNotEmpty)
-                            'defaultCurrency':
-                                curCtrl.text.trim().toUpperCase(),
+                            'defaultCurrency': curCtrl.text.trim().toUpperCase(),
                         });
                         if (ctx.mounted) Navigator.pop(ctx);
                         await _load();
@@ -701,8 +646,7 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
     if (!_busyIds.add('user_$uid')) return;
     if (mounted) setState(() {});
     try {
-      await Api.instance
-          .patch('/admin/users/$uid/role', {'role': selected});
+      await Api.instance.patch('/admin/users/$uid/role', {'role': selected});
       if (mounted) DarbHaptics.success();
       await _load();
     } on ApiException catch (e) {
@@ -786,416 +730,400 @@ class _AdminOperationsScreenState extends State<AdminOperationsScreen> {
           return ListView(
             padding: EdgeInsets.fromLTRB(hInset, 12, hInset, 108),
             children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ChoiceChip(
-                  label: Text(dt('رسوم التوصيل')),
-                  selected: _section == 0,
-                  onSelected: (_) => setState(() => _section = 0),
+              DarbSegmentedDock<int>(
+                selectedValue: _section,
+                onSelected: (val) => setState(() => _section = val),
+                options: [
+                  DarbDockOption(
+                    value: 0,
+                    label: dt('رسوم التوصيل'),
+                    count: _zones.length,
+                    icon: Icons.route_rounded,
+                  ),
+                  DarbDockOption(
+                    value: 1,
+                    label: dt('المستخدمون والمدن'),
+                    count: _users.length,
+                    icon: Icons.people_outline_rounded,
+                  ),
+                  DarbDockOption(
+                    value: 2,
+                    label: dt('الإعدادات والسجلات'),
+                    count: _auditLogs.length,
+                    icon: Icons.tune_rounded,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              if (_partialError != null) ...[
+                DarbFeedbackBanner(
+                  kind: DarbFeedbackKind.warning,
+                  message: _partialError!,
+                  actionLabel: dt('إعادة المحاولة'),
+                  onAction: _load,
                 ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text(dt('المستخدمون والمدن')),
-                  selected: _section == 1,
-                  onSelected: (_) => setState(() => _section = 1),
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text(dt('الإعدادات والسجلات')),
-                  selected: _section == 2,
-                  onSelected: (_) => setState(() => _section = 2),
-                ),
+                const SizedBox(height: 12),
               ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          if (_partialError != null) ...[
-            DarbGlassSurface(
-              tintColor: DarbColors.warningSoftOf(context),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    size: 18,
-                    color: DarbColors.warningOf(context),
+              if (_section == 0) ...[
+                DarbSectionHeader(
+                  title: dt('إعداد رسوم التوصيل'),
+                  trailing: FilledButton.icon(
+                    style:
+                        FilledButton.styleFrom(minimumSize: const Size(0, 38)),
+                    onPressed: () => _openZoneDialog(),
+                    icon: const Icon(Icons.add_rounded, size: 17),
+                    label: Text(dt('إضافة')),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _partialError!,
-                      style: TextStyle(
-                        color: DarbColors.warningOf(context),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _load,
-                    child: Text(dt('إعادة المحاولة')),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-          if (_section == 0) ...[
-            DarbSectionHeader(
-              title: dt('إعداد رسوم التوصيل'),
-              trailing: FilledButton.icon(
-                style: FilledButton.styleFrom(minimumSize: const Size(0, 38)),
-                onPressed: () => _openZoneDialog(),
-                icon: const Icon(Icons.add_rounded, size: 17),
-                label: Text(dt('إضافة')),
-              ),
-            ),
-            const SizedBox(height: 10),
-            if (_zones.isEmpty)
-              DarbStateView.empty(
-                message: dt('لم تُضف رسوم توصيل بعد'),
-                icon: Icons.payments_outlined,
-                onRetry: _load,
-              )
-            else
-              DarbResponsiveTwoColumn(
-                spacing: 10,
-                children: [
-                  for (final z in _zones)
-                    DarbGlassSurface(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: DarbColors.primaryOf(context)
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(11),
-                            ),
-                            child: Icon(
-                              Icons.route_rounded,
-                              size: 19,
-                              color: DarbColors.primaryOf(context),
-                            ),
-                          ),
-                          const SizedBox(width: 11),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  z['name']?.toString() ?? '',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 10),
+                if (_zones.isEmpty)
+                  DarbStateView.empty(
+                    message: dt('لم تُضف رسوم توصيل بعد'),
+                    icon: Icons.payments_outlined,
+                    onRetry: _load,
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    spacing: 10,
+                    children: [
+                      for (final z in _zones)
+                        DarbGlassSurface(
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: DarbColors.primaryOf(context)
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(11),
                                 ),
-                                Text(
-                                  '${z['city']?['code'] ?? ''} · ${formatDarbMoney(num.tryParse(z['feeBase']?.toString() ?? '0') ?? 0)} + ${formatDarbMoney(num.tryParse(z['feePerKm']?.toString() ?? '0') ?? 0)}/km',
-                                  style: TextStyle(
-                                    color: DarbColors.mutedOf(context),
-                                    fontSize: 12.5,
-                                  ),
+                                child: Icon(
+                                  Icons.route_rounded,
+                                  size: 19,
+                                  color: DarbColors.primaryOf(context),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 11),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      z['name']?.toString() ?? '',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w900),
+                                    ),
+                                    Text(
+                                      '${z['city']?['code'] ?? ''} · ${formatDarbMoney(num.tryParse(z['feeBase']?.toString() ?? '0') ?? 0)} + ${formatDarbMoney(num.tryParse(z['feePerKm']?.toString() ?? '0') ?? 0)}/km',
+                                      style: TextStyle(
+                                        color: DarbColors.mutedOf(context),
+                                        fontSize: 12.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton.filledTonal(
+                                onPressed: () => _openZoneDialog(existing: z),
+                                icon: const Icon(Icons.edit_outlined, size: 19),
+                              ),
+                              const SizedBox(width: 6),
+                              IconButton(
+                                onPressed: () =>
+                                    _deleteZone(z['id'].toString()),
+                                icon: Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: DarbColors.dangerOf(context),
+                                ),
+                              ),
+                            ],
                           ),
-                          IconButton.filledTonal(
-                            onPressed: () => _openZoneDialog(existing: z),
-                            icon: const Icon(Icons.edit_outlined, size: 19),
-                          ),
-                          const SizedBox(width: 6),
-                          IconButton(
-                            onPressed: () => _deleteZone(z['id'].toString()),
-                            icon: Icon(
-                              Icons.delete_outline_rounded,
-                              color: DarbColors.dangerOf(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            const SizedBox(height: 16),
-            DarbSectionHeader(
-              title: dt('المدن المدعومة'),
-              trailing: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 36)),
-                onPressed: _openCreateCityDialog,
-                icon: const Icon(Icons.add_location_alt_outlined, size: 17),
-                label: Text(dt('إضافة مدينة')),
-              ),
-            ),
-            const SizedBox(height: 10),
-            DarbResponsiveTwoColumn(
-              spacing: 8,
-              children: [
-                for (final c in _cities)
-                  DarbGlassSurface(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    child: SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      secondary: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: DarbColors.infoOf(context)
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
-                          Icons.location_city_rounded,
-                          size: 18,
-                          color: DarbColors.infoOf(context),
+                    ],
+                  ),
+                const SizedBox(height: 18),
+                DarbSectionHeader(
+                  title: dt('المدن المدعومة'),
+                  trailing: OutlinedButton.icon(
+                    style:
+                        OutlinedButton.styleFrom(minimumSize: const Size(0, 36)),
+                    onPressed: _openCreateCityDialog,
+                    icon: const Icon(Icons.add_location_alt_outlined, size: 17),
+                    label: Text(dt('إضافة مدينة')),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                DarbResponsiveTwoColumn(
+                  spacing: 8,
+                  children: [
+                    for (final c in _cities)
+                      DarbGlassSurface(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
                         ),
-                      ),
-                      title: Text(
-                        _cityLabel(c),
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                      subtitle: Text(
-                        '${dt('رمز المدينة: ')}${c['code']} · ${c['defaultCurrency']}',
-                      ),
-                      value: c['isActive'] == true,
-                      onChanged: (v) =>
-                          _toggleCityActive(c['id'].toString(), v),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-          if (_section == 1) ...[
-            DarbSectionHeader(title: dt('المستخدمون والمدن')),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: DarbSearchBar(
-                    controller: _userSearchCtrl,
-                    hintText: dt('ابحث بالاسم أو الهاتف...'),
-                    onChanged: (_) => setState(() {}),
-                    onSubmitted: (_) => _load(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: _load,
-                  icon: const Icon(Icons.search_rounded),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (_users.isEmpty)
-              DarbStateView.empty(
-                message: dt('لا توجد بيانات متاحة حالياً'),
-                icon: Icons.people_outline_rounded,
-                onRetry: _load,
-              )
-            else
-              DarbResponsiveTwoColumn(
-                spacing: 8,
-                children: [
-                  for (final u in _users)
-                    DarbInteractiveCard(
-                      onTap: _busyIds.contains('user_${u['id']}')
-                          ? null
-                          : () => _changeUserRole(u),
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
+                        child: SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          secondary: Container(
+                            width: 36,
+                            height: 36,
                             decoration: BoxDecoration(
-                              color: DarbColors.primaryOf(context)
+                              color: DarbColors.infoOf(context)
                                   .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(11),
-                            ),
-                            child: Icon(
-                              Icons.person_outline_rounded,
-                              size: 20,
-                              color: DarbColors.primaryOf(context),
-                            ),
-                          ),
-                          const SizedBox(width: 11),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  u['name']?.toString() ?? dt('مستخدم'),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                Text(
-                                  u['phone']?.toString() ??
-                                      u['email']?.toString() ??
-                                      '',
-                                  style: TextStyle(
-                                    color: DarbColors.mutedOf(context),
-                                    fontSize: 12.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          DarbStatusBadge(
-                            status: u['role']?.toString() ?? 'CUSTOMER',
-                          ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.edit_outlined,
-                            size: 18,
-                            color: DarbColors.mutedOf(context),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-          ],
-          if (_section == 2) ...[
-            DarbGlassSurface(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    dt('الإعدادات والسجلات'),
-                    style: TextStyle(
-                      color: DarbColors.inkOf(context),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  if (!_hasExtendedSettings)
-                    Text(
-                      dt('الإعدادات المتقدمة تُدار من الخادم مباشرة.'),
-                      style: TextStyle(color: DarbColors.mutedOf(context)),
-                    )
-                  else ...[
-                    TextField(
-                      controller: _commissionCtrl,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration:
-                          InputDecoration(labelText: dt('نسبة العمولة (%)')),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _supportCtrl,
-                      decoration:
-                          InputDecoration(labelText: dt('تواصل الدعم')),
-                    ),
-                    const SizedBox(height: 10),
-                    FilledButton(
-                      onPressed: () {
-                        final pct =
-                            double.tryParse(_commissionCtrl.text.trim()) ?? 10;
-                        _updatePlatformSetting({
-                          'commissionPercent': pct.clamp(0, 50),
-                          'supportContact': _supportCtrl.text.trim(),
-                        });
-                      },
-                      child: Text(dt('حفظ التغييرات')),
-                    ),
-                    const Divider(height: 22),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(dt('توصيل مستقل')),
-                      value: _settings['peerDeliveryEnabled'] != false,
-                      onChanged: (v) =>
-                          _updatePlatformSetting({'peerDeliveryEnabled': v}),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(dt('المساعد الذكي')),
-                      value: _settings['aiAssistantEnabled'] != false,
-                      onChanged: (v) =>
-                          _updatePlatformSetting({'aiAssistantEnabled': v}),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(dt('وضع الصيانة')),
-                      value: _settings['maintenanceMode'] == true,
-                      onChanged: (v) =>
-                          _updatePlatformSetting({'maintenanceMode': v}),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            DarbSectionHeader(title: dt('سجل التدقيق')),
-            const SizedBox(height: 10),
-            if (_auditLogs.isEmpty)
-              DarbGlassSurface(
-                padding: const EdgeInsets.all(14),
-                child: Text(
-                  dt('لا توجد بيانات متاحة حالياً'),
-                  style: TextStyle(color: DarbColors.mutedOf(context)),
-                ),
-              )
-            else
-              DarbResponsiveTwoColumn(
-                spacing: 8,
-                children: [
-                  for (final l in _auditLogs)
-                    DarbGlassSurface(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 34,
-                            height: 34,
-                            decoration: BoxDecoration(
-                              color: DarbColors.surfaceAltOf(context),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
-                              Icons.history_rounded,
-                              size: 17,
-                              color: DarbColors.primaryOf(context),
+                              Icons.location_city_rounded,
+                              size: 18,
+                              color: DarbColors.infoOf(context),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${l['action'] ?? ''} · ${l['targetType'] ?? ''}',
-                                  style: TextStyle(
-                                    color: DarbColors.inkOf(context),
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 13.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${l['actorRole'] ?? ''} · ${(l['createdAt']?.toString() ?? '').replaceFirst('T', ' ').substring(0, (l['createdAt']?.toString().length ?? 0).clamp(0, 16))}',
-                                  style: TextStyle(
-                                    color: DarbColors.mutedOf(context),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          title: Text(
+                            _cityLabel(c),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
                           ),
-                        ],
+                          subtitle: Text(
+                            '${dt('رمز المدينة: ')}${c['code']} · ${c['defaultCurrency']}',
+                          ),
+                          value: c['isActive'] == true,
+                          onChanged: (v) =>
+                              _toggleCityActive(c['id'].toString(), v),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+              if (_section == 1) ...[
+                DarbSectionHeader(title: dt('المستخدمون والمدن')),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DarbSearchBar(
+                        controller: _userSearchCtrl,
+                        hintText: dt('ابحث بالاسم أو الهاتف...'),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => _load(),
                       ),
                     ),
-                ],
-              ),
-          ],
-        ],
-      );
+                    const SizedBox(width: 8),
+                    IconButton.filled(
+                      onPressed: _load,
+                      icon: const Icon(Icons.search_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (_users.isEmpty)
+                  DarbStateView.empty(
+                    message: dt('لا توجد بيانات متاحة حالياً'),
+                    icon: Icons.people_outline_rounded,
+                    onRetry: _load,
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    spacing: 8,
+                    children: [
+                      for (final u in _users)
+                        DarbInteractiveCard(
+                          onTap: _busyIds.contains('user_${u['id']}')
+                              ? null
+                              : () => _changeUserRole(u),
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: DarbColors.primaryOf(context)
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(11),
+                                ),
+                                child: Icon(
+                                  Icons.person_outline_rounded,
+                                  size: 20,
+                                  color: DarbColors.primaryOf(context),
+                                ),
+                              ),
+                              const SizedBox(width: 11),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      u['name']?.toString() ?? dt('مستخدم'),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    Text(
+                                      u['phone']?.toString() ??
+                                          u['email']?.toString() ??
+                                          '',
+                                      style: TextStyle(
+                                        color: DarbColors.mutedOf(context),
+                                        fontSize: 12.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              DarbStatusBadge(
+                                status: u['role']?.toString() ?? 'CUSTOMER',
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.edit_outlined,
+                                size: 18,
+                                color: DarbColors.mutedOf(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+              ],
+              if (_section == 2) ...[
+                DarbGlassSurface(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        dt('الإعدادات والسجلات'),
+                        style: TextStyle(
+                          color: DarbColors.inkOf(context),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (!_hasExtendedSettings)
+                        Text(
+                          dt('الإعدادات المتقدمة تُدار من الخادم مباشرة.'),
+                          style: TextStyle(color: DarbColors.mutedOf(context)),
+                        )
+                      else ...[
+                        TextField(
+                          controller: _commissionCtrl,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          decoration:
+                              InputDecoration(labelText: dt('نسبة العمولة (%)')),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _supportCtrl,
+                          decoration:
+                              InputDecoration(labelText: dt('تواصل الدعم')),
+                        ),
+                        const SizedBox(height: 10),
+                        FilledButton(
+                          onPressed: () {
+                            final pct =
+                                double.tryParse(_commissionCtrl.text.trim()) ??
+                                    10;
+                            _updatePlatformSetting({
+                              'commissionPercent': pct.clamp(0, 50),
+                              'supportContact': _supportCtrl.text.trim(),
+                            });
+                          },
+                          child: Text(dt('حفظ التغييرات')),
+                        ),
+                        const Divider(height: 22),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(dt('توصيل مستقل')),
+                          value: _settings['peerDeliveryEnabled'] != false,
+                          onChanged: (v) => _updatePlatformSetting(
+                              {'peerDeliveryEnabled': v}),
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(dt('المساعد الذكي')),
+                          value: _settings['aiAssistantEnabled'] != false,
+                          onChanged: (v) => _updatePlatformSetting(
+                              {'aiAssistantEnabled': v}),
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(dt('وضع الصيانة')),
+                          value: _settings['maintenanceMode'] == true,
+                          onChanged: (v) =>
+                              _updatePlatformSetting({'maintenanceMode': v}),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DarbSectionHeader(title: dt('سجل التدقيق')),
+                const SizedBox(height: 10),
+                if (_auditLogs.isEmpty)
+                  DarbGlassSurface(
+                    padding: const EdgeInsets.all(14),
+                    child: Text(
+                      dt('لا توجد بيانات متاحة حالياً'),
+                      style: TextStyle(color: DarbColors.mutedOf(context)),
+                    ),
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    spacing: 8,
+                    children: [
+                      for (final l in _auditLogs)
+                        DarbGlassSurface(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: DarbColors.surfaceAltOf(context),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  Icons.history_rounded,
+                                  size: 17,
+                                  color: DarbColors.primaryOf(context),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${l['action'] ?? ''} · ${l['targetType'] ?? ''}',
+                                      style: TextStyle(
+                                        color: DarbColors.inkOf(context),
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 13.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${l['actorRole'] ?? ''} · ${(l['createdAt']?.toString() ?? '').replaceFirst('T', ' ').substring(0, (l['createdAt']?.toString().length ?? 0).clamp(0, 16))}',
+                                      style: TextStyle(
+                                        color: DarbColors.mutedOf(context),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+              ],
+            ],
+          );
         },
       ),
     );

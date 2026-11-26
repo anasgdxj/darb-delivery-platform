@@ -192,6 +192,15 @@ class AppLocalizations {
   }
 
   static const Map<String, String> _sourceValues = {
+    'مساحتك تبدأ من هنا': 'Your space starts here|Alanınız burada başlar',
+    'أهلاً': 'Hello|Merhaba',
+    'أهلاً بك في دازريفو': 'Welcome to DAZREVO|DAZREVO\'ya hoş geldiniz',
+    'اطلب من المتاجر أو أرسل غرضك إلى أي مكان': 'Order from stores or send an item anywhere|Mağazalardan sipariş verin veya bir ürünü istediğiniz yere gönderin',
+    'مدينة التوصيل': 'Delivery city|Teslimat şehri',
+    'عناويني': 'My addresses|Adreslerim',
+    'نسخ رقم الطلب': 'Copy order number|Sipariş numarasını kopyala',
+    'تم نسخ رقم الطلب': 'Order number copied|Sipariş numarası kopyalandı',
+    'تعذر نسخ رقم الطلب': 'Could not copy order number|Sipariş numarası kopyalanamadı',
     'مظهر التطبيق': 'Appearance|Görünüm',
     'نمط الواجهة': 'Interface style|Arayüz stili',
     'زجاجي حديث (Glass)': 'Frosted Glass|Buzlu Cam (Glass)',
@@ -848,6 +857,12 @@ class AppLocalizations {
     'المتجر يستقبل الطلبات': 'Store is accepting orders|Mağaza sipariş alıyor',
     'المتجر متوقف مؤقتاً': 'Store is temporarily paused|Mağaza geçici olarak duraklatıldı',
     'حالة استقبال الطلبات': 'Order intake status|Sipariş kabul durumu',
+    'أرباح اليوم': 'Today\'s earnings|Bugünkü kazanç',
+    'رحلات اليوم': 'Today\'s trips|Bugünkü seferler',
+    'طلبات اليوم': 'Today\'s orders|Bugünkü siparişler',
+    'مبيعات اليوم': 'Today\'s sales|Bugünkü satışlar',
+    'ما الجديد في هذا التحديث؟': 'What\'s new in this update?|Bu güncellemede neler var?',
+    'ما حالة طلباتي اليوم؟': 'What is the status of my orders today?|Bugün siparişlerimin durumu nedir?',
   };
 
   static const Map<String, Map<String, String>> _values = {
