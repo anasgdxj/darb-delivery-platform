@@ -349,7 +349,7 @@ export class OrdersService {
       include: {
         items: true,
         address: true,
-        customer: { select: { name: true, phone: true } },
+        customer: { select: { id: true, name: true, phone: true } },
         vendor: { include: { location: true, translations: true } },
         shoppingPurchaseQuotes: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
@@ -441,7 +441,7 @@ export class OrdersService {
         driverId: null,
         OR: [
           { type: 'VENDOR_ORDER', status: 'READY' },
-          { type: 'PEER_DELIVERY', status: 'PENDING' },
+          { type: { in: ['PEER_DELIVERY', 'SHOPPING_DELIVERY'] }, status: 'PENDING' },
         ],
       },
       select: { id: true },
