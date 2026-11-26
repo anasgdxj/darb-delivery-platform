@@ -192,6 +192,12 @@ class AppLocalizations {
   }
 
   static const Map<String, String> _sourceValues = {
+    'مساحتك تبدأ من هنا': 'Your space starts here|Alanınız burada başlar',
+    'أهلاً': 'Hello|Merhaba',
+    'أهلاً بك في دازريفو': 'Welcome to DAZREVO|DAZREVO\'ya hoş geldiniz',
+    'اطلب من المتاجر أو أرسل غرضك إلى أي مكان': 'Order from stores or send an item anywhere|Mağazalardan sipariş verin veya bir ürünü istediğiniz yere gönderin',
+    'مدينة التوصيل': 'Delivery city|Teslimat şehri',
+    'عناويني': 'My addresses|Adreslerim',
     'نسخ رقم الطلب': 'Copy order number|Sipariş numarasını kopyala',
     'تم نسخ رقم الطلب': 'Order number copied|Sipariş numarası kopyalandı',
     'تعذر نسخ رقم الطلب': 'Could not copy order number|Sipariş numarası kopyalanamadı',
