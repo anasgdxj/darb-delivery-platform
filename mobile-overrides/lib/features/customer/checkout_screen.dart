@@ -692,8 +692,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     if (estTotal != null)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
                               dt('الإجمالي التقديري'),
@@ -703,15 +703,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
-                            Text(
-                              formatDarbMoney(estTotal, currency),
-                              style: TextStyle(
-                                color: DarbColors.primaryOf(context),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
+                            const SizedBox(height: 3),
+                            Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: Text(
+                                formatDarbMoney(estTotal, currency),
+                                textAlign: TextAlign.end,
+                                softWrap: true,
+                                style: TextStyle(
+                                  color: DarbColors.primaryOf(context),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
