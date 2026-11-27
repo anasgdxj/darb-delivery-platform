@@ -852,7 +852,9 @@ void main() {
       await tester.pump();
 
       expect(find.text('2 / 5'), findsOneWidget);
-      await tester.tap(find.text('سيارة'));
+      final carOption = find.text('سيارة');
+      await tester.ensureVisible(carOption);
+      await tester.tap(carOption);
       await tester.pump();
       await tester.tap(find.text('متابعة'));
       await tester.pump();
@@ -2427,7 +2429,8 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
       expect(find.byType(DarbCommandStage), findsOneWidget);
       expect(find.byType(DarbTicketPass), findsNWidgets(2));
       expect(find.text('المنزل'), findsOneWidget);
@@ -2764,7 +2767,11 @@ void main() {
       );
       expect(vendorTitle, findsOneWidget);
       final bookmarkButton = find.byIcon(Icons.bookmark_border_rounded).first;
-      await tester.ensureVisible(bookmarkButton);
+      await tester.scrollUntilVisible(
+        bookmarkButton,
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(bookmarkButton);
       await tester.pump();
       expect(find.byIcon(Icons.bookmark_rounded), findsOneWidget);
