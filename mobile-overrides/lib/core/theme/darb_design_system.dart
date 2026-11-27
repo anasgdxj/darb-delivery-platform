@@ -12,15 +12,15 @@ class DarbColors {
   DarbColors._();
 
   // DAZREVO 2026 Unified Brand Anchors (Obsidian & Champagne Brass + Mineral Teal)
-  static const forest = Color(0xFF14171D); // Smoked Obsidian Architectural Anchor
-  static const primaryGreen = Color(0xFF8A651F); // Burnished Bronze Light Primary (>=5.3:1 AA with white)
-  static const forestSoft = Color(0xFF1E222B); // Elevated Obsidian Slate
-  static const mint = Color(0xFFE7D3A3); // Warm Champagne Mist highlight
-  static const lime = Color(0xFFD6B46C); // Luminous Champagne Gold CTA & Dark Primary
-  static const limeInk = Color(0xFF6B4F1A); // High-contrast Bronze ink on light surfaces
-  static const limeTint = Color(0xFFF6EFE0); // Soft Champagne wash in Light mode
-  static const violet = Color(0xFF1D7A6E); // Imperial Mineral Teal AI & Smart Highlight
-  static const violetSoft = Color(0xFFE8F5F3); // Soft Mineral Teal wash in Light mode
+  static const forest = Color(0xFF171C20); // Smoked Obsidian architectural anchor
+  static const primaryGreen = Color(0xFF1D7A6E); // Mineral Teal primary (high-contrast on porcelain)
+  static const forestSoft = Color(0xFF222A2E); // Elevated Obsidian slate
+  static const mint = Color(0xFFE8D9B8); // Champagne highlight
+  static const lime = Color(0xFFC6A875); // Champagne Brass secondary accent
+  static const limeInk = Color(0xFF725629); // High-contrast brass ink on light surfaces
+  static const limeTint = Color(0xFFF5F0E6); // Soft Champagne wash in light mode
+  static const violet = Color(0xFF1D7A6E); // Mineral Teal interaction and smart highlight
+  static const violetSoft = Color(0xFFE8F4F1); // Soft Mineral Teal wash in light mode
   static const danger = Color(0xFFC83E3B); // Error
   static const success = Color(0xFF1C7C54); // Success
   static const warning = Color(0xFFB87014);
@@ -56,10 +56,10 @@ class DarbColors {
   static const darkLine = Color(0xFF262A33);
   static const darkBorder = darkLine;
   static const darkBorderStrong = Color(0xFF3A404D);
-  static const darkPrimary = lime;
-  static const darkOnPrimary = Color(0xFF0C0D0F);
-  static const darkAccent = lime;
-  static const darkViolet = Color(0xFF3FD1BE);
+  static const darkPrimary = Color(0xFF36B6A0);
+  static const darkOnPrimary = Color(0xFF071B18);
+  static const darkAccent = Color(0xFFC6A875);
+  static const darkViolet = Color(0xFF36B6A0);
   static const darkVioletSoft = Color(0xFF112926);
   static const darkScrim = Color(0xC2000000);
   static const darkDanger = Color(0xFFF0716E);
