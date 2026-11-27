@@ -44,6 +44,7 @@ class _AppShellState extends State<AppShell> {
   bool _offline = false;
   String? _error;
   int _tabIndex = 0;
+  int _customerOrdersRefreshKey = 0;
   int _unreadNotifications = 0;
 
   StreamSubscription<RemoteMessage>? _fgSub;
@@ -673,13 +674,18 @@ class _AppShellState extends State<AppShell> {
           CustomerHomeScreen(
             user: user,
             onOrderCreated: () {
-              if (mounted) setState(() => _tabIndex = 1);
+              if (mounted) {
+                setState(() {
+                  _customerOrdersRefreshKey++;
+                  _tabIndex = 1;
+                });
+              }
             },
             onOpenOrders: () {
               if (mounted) setState(() => _tabIndex = 1);
             },
           ),
-          const CustomerOrdersScreen(),
+          CustomerOrdersScreen(key: ValueKey<int>(_customerOrdersRefreshKey)),
           AccountScreen(user: user, onRefreshUser: _loadUser),
         ],
     };
