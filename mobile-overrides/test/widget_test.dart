@@ -2519,7 +2519,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       expect(find.byType(DarbCommandStage), findsOneWidget);
       expect(find.byType(DarbRouteConnector), findsOneWidget);
-      expect(find.text('قهوة مختصة × 2'), findsOneWidget);
+      expect(find.text('قهوة مختصة'), findsOneWidget);
+      expect(find.text('2×'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       // 3. AiOrderAssistantScreen
