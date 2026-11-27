@@ -2450,7 +2450,12 @@ void main() {
         isTrue,
         reason: 'The addresses request must receive the fixture response; captured: $addressRequestPaths',
       );
-      final addressScrollable = find.byType(Scrollable).first;
+      final addressScrollable = find
+          .descendant(
+            of: find.byType(ListView).first,
+            matching: find.byType(Scrollable),
+          )
+          .first;
       final addressScrollState = tester.state<ScrollableState>(addressScrollable);
       expect(
         addressScrollState.position.viewportDimension,
