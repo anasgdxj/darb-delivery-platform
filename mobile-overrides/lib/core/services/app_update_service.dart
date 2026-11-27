@@ -54,6 +54,60 @@ class DarbUpdater {
   bool _checking = false;
   bool checkFailed = false;
 
+  Future<Map<String, bool>> getAutomaticUpdateSettings() async {
+    if (kDarbPlayStoreBuild) {
+      return const {'enabled': false, 'wifiOnly': true};
+    }
+    try {
+      final value = await _channel.invokeMapMethod<String, dynamic>(
+        'getUpdatePreferences',
+      );
+      return {
+        'enabled': value?['enabled'] as bool? ?? true,
+        'wifiOnly': value?['wifiOnly'] as bool? ?? true,
+      };
+    } catch (_) {
+      return const {'enabled': true, 'wifiOnly': true};
+    }
+  }
+
+  Future<void> saveAutomaticUpdateSettings({
+    required bool enabled,
+    required bool wifiOnly,
+  }) async {
+    if (kDarbPlayStoreBuild) return;
+    await _channel.invokeMethod<void>('setUpdatePreferences', {
+      'enabled': enabled,
+      'wifiOnly': wifiOnly,
+    });
+  }
+
+  Future<void> runAutomaticUpdateCheck() async {
+    if (kDarbPlayStoreBuild) return;
+    try {
+      final settings = await getAutomaticUpdateSettings();
+      if (settings['enabled'] != true) return;
+
+      await checkForUpdate();
+      final info = availableUpdate.value;
+      if (info == null) return;
+
+      final state = await backgroundDownloadState();
+      final currentStatus = state['status']?.toString();
+      final queuedVersion = (state['versionCode'] as num?)?.toInt() ?? 0;
+      if (queuedVersion == info.versionCode &&
+          (currentStatus == 'downloading' || currentStatus == 'ready')) {
+        return;
+      }
+
+      // Android DownloadManager holds this request until the selected network
+      // type is available. With Wi-Fi-only enabled it never consumes mobile data.
+      await startBackgroundDownload(info);
+    } catch (_) {
+      // Update checks must never delay app startup or interrupt normal use.
+    }
+  }
+
   Future<void> checkForUpdate({bool force = false}) async {
     if (kDarbPlayStoreBuild) {
       availableUpdate.value = null;
