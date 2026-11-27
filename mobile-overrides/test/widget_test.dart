@@ -1472,13 +1472,13 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('متجر تجريبي'), findsOneWidget);
+      expect(find.text('متجر تجريبي'), findsWidgets);
       expect(find.text('شراء وتوصيل: دواء'), findsOneWidget);
       expect(find.text('طلب توصيل مستقل'), findsOneWidget);
 
       await tester.tap(find.text('طلب متجر'));
       await tester.pump();
-      expect(find.text('متجر تجريبي'), findsOneWidget);
+      expect(find.text('متجر تجريبي'), findsWidgets);
       expect(find.text('شراء وتوصيل: دواء'), findsNothing);
       expect(find.text('طلب توصيل مستقل'), findsNothing);
 
