@@ -60,7 +60,7 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
             }
             prefs.edit().putString(KEY_STATUS, "ready").putString(KEY_URI, uri.toString())
                 .putString(KEY_ERROR, "").apply()
-            notifyUser(context, "التحديث جاهز", "افتح دَرْب لإكمال تثبيت التحديث")
+            notifyUser(context, "التحديث جاهز", "اضغط هنا لفتح مُثبّت أندرويد وإكمال التحديث", uri)
         } catch (error: Exception) {
             Log.e(TAG, "Background APK verification failed", error)
             prefs.edit().putString(KEY_STATUS, "failed").putString(KEY_ERROR, error.message ?: error.javaClass.simpleName).apply()
@@ -68,15 +68,36 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun notifyUser(context: Context, title: String, message: String) {
+    private fun notifyUser(context: Context, title: String, message: String, installUri: Uri? = null) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             manager.createNotificationChannel(NotificationChannel(CHANNEL_ID, "تحديثات دَرْب", NotificationManager.IMPORTANCE_DEFAULT))
         }
-        val openApp = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val pending = openApp?.let {
-            PendingIntent.getActivity(context, 7301, it, PendingIntent.FLAG_UPDATE_CURRENT or
-                (if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0))
+        val tapIntent = if (installUri != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                !context.packageManager.canRequestPackageInstalls()
+            ) {
+                Intent(
+                    android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:${context.packageName}")
+                )
+            } else {
+                Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(installUri, "application/vnd.android.package-archive")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            }
+        } else {
+            context.packageManager.getLaunchIntentForPackage(context.packageName)
+        }
+        val pending = tapIntent?.let {
+            PendingIntent.getActivity(
+                context,
+                NOTIFICATION_ID,
+                it,
+                PendingIntent.FLAG_UPDATE_CURRENT or
+                    (if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0)
+            )
         }
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
