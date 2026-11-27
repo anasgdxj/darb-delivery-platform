@@ -1,25 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { DriverStatus, OrderStatus, OrderType, UserRole, VendorStatus } from '@prisma/client';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { DriverStatus, VendorStatus, UserRole, OrderStatus, OrderType } from '@prisma/client';
+import { IsEnum, IsInt, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { AdminService } from './admin.service';
-
-class VendorStatusDto {
-  @IsEnum(VendorStatus) status!: VendorStatus;
-}
-
-class DriverStatusDto {
-  @IsEnum(DriverStatus) status!: DriverStatus;
-}
-
-class UserRoleDto {
-  @IsEnum(UserRole) role!: UserRole;
-}
-
+import { PrismaService } from '../../prisma/prisma.service';
+class VendorStatusDto { @IsEnum(VendorStatus) status!: VendorStatus; }
 class AdminOrdersQueryDto {
   @IsOptional() @IsEnum(OrderStatus) status?: OrderStatus;
   @IsOptional() @IsEnum(OrderType) type?: OrderType;
@@ -27,12 +15,7 @@ class AdminOrdersQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(50) limit = 20;
 }
 
-class AdminUsersQueryDto {
-  @IsOptional() @IsEnum(UserRole) role?: UserRole;
-  @IsOptional() @IsString() @MaxLength(80) q?: string;
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) page = 1;
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(50) limit = 25;
-}
+class DriverStatusDto { @IsEnum(DriverStatus) status!: DriverStatus; }
 
 class CreateDeliveryZoneDto {
   @IsUUID() cityId!: string;
@@ -40,142 +23,75 @@ class CreateDeliveryZoneDto {
   @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) feeBase!: number;
   @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) feePerKm!: number;
 }
-
 class UpdateDeliveryZoneDto {
   @IsOptional() @IsString() @MaxLength(80) name?: string;
   @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) feeBase?: number;
   @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) feePerKm?: number;
 }
 
-class CreateCityDto {
-  @IsString() @MaxLength(24) code!: string;
-  @IsString() @MaxLength(80) nameAr!: string;
-  @IsOptional() @IsString() @MaxLength(80) nameEn?: string;
-  @IsOptional() @IsString() @MaxLength(80) nameTr?: string;
-  @IsOptional() @IsString() @MaxLength(3) defaultCurrency?: string;
-  @IsOptional() @IsBoolean() isActive?: boolean;
-}
-
-class UpdateCityDto {
-  @IsOptional() @IsBoolean() isActive?: boolean;
-  @IsOptional() @IsString() @MaxLength(3) defaultCurrency?: string;
-  @IsOptional() @IsString() @MaxLength(80) nameAr?: string;
-  @IsOptional() @IsString() @MaxLength(80) nameEn?: string;
-  @IsOptional() @IsString() @MaxLength(80) nameTr?: string;
-}
-
-class UpdateSettingsDto {
-  @IsOptional() @Type(() => Number) @IsNumber({ maxDecimalPlaces: 2 }) @Min(0) @Max(50) commissionPercent?: number;
-  @IsOptional() @IsString() @MaxLength(3) defaultCurrency?: string;
-  @IsOptional() @IsBoolean() peerDeliveryEnabled?: boolean;
-  @IsOptional() @IsBoolean() aiAssistantEnabled?: boolean;
-  @IsOptional() @IsBoolean() maintenanceMode?: boolean;
-  @IsOptional() @IsString() @MaxLength(160) supportContact?: string;
-}
-
-@Controller('admin')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Controller('admin') @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN)
 export class AdminController {
-  constructor(private readonly admin: AdminService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  @Get('stats')
-  stats() {
-    return this.admin.stats();
+  @Get('orders') async orders(@Query() query: AdminOrdersQueryDto) {
+    const where = {
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.type ? { type: query.type } : {}),
+    };
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.order.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          city: { select: { code: true, names: true } },
+          customer: { select: { name: true, phone: true, email: true } },
+          vendor: { include: { translations: true } },
+          driver: { include: { user: { select: { name: true, phone: true } } } },
+          payment: true,
+        },
+      }),
+      this.prisma.order.count({ where }),
+    ]);
+    return { items, total, page, limit, pages: Math.ceil(total / limit) };
   }
-
-  @Get('orders')
-  orders(@Query() query: AdminOrdersQueryDto) {
-    return this.admin.orders(query);
+  @Get('delivery-zones') deliveryZones() {
+    return this.prisma.deliveryZone.findMany({ orderBy: [{ cityId: 'asc' }, { name: 'asc' }], include: { city: { select: { id: true, code: true, names: true } } } });
   }
-
-  @Get('users')
-  users(@Query() query: AdminUsersQueryDto) {
-    return this.admin.users(query);
+  @Post('delivery-zones') async createDeliveryZone(@Body() dto: CreateDeliveryZoneDto) {
+    const city = await this.prisma.city.findFirst({ where: { id: dto.cityId, isActive: true }, select: { id: true } });
+    if (!city) throw new BadRequestException('المدينة غير متاحة');
+    if (await this.prisma.deliveryZone.findUnique({ where: { cityId: dto.cityId } })) throw new BadRequestException('تم إعداد رسوم هذه المدينة مسبقاً؛ عدّل الإعداد الموجود');
+    return this.prisma.deliveryZone.create({ data: dto });
   }
-
-  @Patch('users/:id/role')
-  setUserRole(@CurrentUser() actor: { id: string }, @Param('id') id: string, @Body() dto: UserRoleDto) {
-    return this.admin.setUserRole(actor.id, id, dto.role);
+  @Patch('delivery-zones/:id') updateDeliveryZone(@Param('id') id: string, @Body() dto: UpdateDeliveryZoneDto) {
+    return this.prisma.deliveryZone.update({ where: { id }, data: dto });
   }
-
-  @Get('delivery-zones')
-  deliveryZones() {
-    return this.admin.deliveryZones();
+  @Get('vendors/pending') pendingVendors() {
+    return this.prisma.vendor.findMany({ where: { status: VendorStatus.PENDING }, orderBy: { createdAt: 'asc' },
+      include: { user: { select: { id: true, name: true, phone: true, email: true } }, translations: true, cities: { include: { city: { select: { id: true, code: true, names: true } } } }, location: true } });
   }
-
-  @Post('delivery-zones')
-  createDeliveryZone(@CurrentUser() actor: { id: string }, @Body() dto: CreateDeliveryZoneDto) {
-    return this.admin.createDeliveryZone(actor.id, dto);
+  @Patch('vendors/:id/status') async setVendorStatus(@Param('id') id: string, @Body() dto: VendorStatusDto) {
+    return this.prisma.$transaction(async tx => {
+      const vendor = await tx.vendor.update({ where: { id }, data: { status: dto.status } });
+      if (dto.status === VendorStatus.APPROVED) await tx.user.update({ where: { id: vendor.userId }, data: { role: UserRole.VENDOR } });
+      else await tx.user.updateMany({ where: { id: vendor.userId, role: UserRole.VENDOR }, data: { role: UserRole.CUSTOMER } });
+      return vendor;
+    });
   }
-
-  @Patch('delivery-zones/:id')
-  updateDeliveryZone(@CurrentUser() actor: { id: string }, @Param('id') id: string, @Body() dto: UpdateDeliveryZoneDto) {
-    return this.admin.updateDeliveryZone(actor.id, id, dto);
+  @Get('drivers/pending') pendingDrivers() {
+    return this.prisma.driver.findMany({ where: { status: DriverStatus.PENDING }, orderBy: { createdAt: 'asc' },
+      include: { user: { select: { id: true, name: true, phone: true, email: true } }, city: { select: { id: true, code: true, names: true } } } });
   }
-
-  @Delete('delivery-zones/:id')
-  removeDeliveryZone(@CurrentUser() actor: { id: string }, @Param('id') id: string) {
-    return this.admin.removeDeliveryZone(actor.id, id);
-  }
-
-  @Get('vendors/pending')
-  pendingVendors() {
-    return this.admin.pendingVendors();
-  }
-
-  @Get('vendors')
-  allVendors(@Query('status') status?: VendorStatus) {
-    return this.admin.allVendors(status);
-  }
-
-  @Patch('vendors/:id/status')
-  setVendorStatus(@CurrentUser() actor: { id: string }, @Param('id') id: string, @Body() dto: VendorStatusDto) {
-    return this.admin.setVendorStatus(actor.id, id, dto.status);
-  }
-
-  @Get('drivers/pending')
-  pendingDrivers() {
-    return this.admin.pendingDrivers();
-  }
-
-  @Get('drivers')
-  allDrivers(@Query('status') status?: DriverStatus) {
-    return this.admin.allDrivers(status);
-  }
-
-  @Patch('drivers/:id/status')
-  setDriverStatus(@CurrentUser() actor: { id: string }, @Param('id') id: string, @Body() dto: DriverStatusDto) {
-    return this.admin.setDriverStatus(actor.id, id, dto.status);
-  }
-
-  @Get('cities')
-  cities() {
-    return this.admin.cities();
-  }
-
-  @Post('cities')
-  createCity(@CurrentUser() actor: { id: string }, @Body() dto: CreateCityDto) {
-    return this.admin.createCity(actor.id, dto);
-  }
-
-  @Patch('cities/:id')
-  updateCity(@CurrentUser() actor: { id: string }, @Param('id') id: string, @Body() dto: UpdateCityDto) {
-    return this.admin.updateCity(actor.id, id, dto);
-  }
-
-  @Get('settings')
-  getSettings() {
-    return this.admin.getSettings();
-  }
-
-  @Patch('settings')
-  updateSettings(@CurrentUser() actor: { id: string }, @Body() dto: UpdateSettingsDto) {
-    return this.admin.updateSettings(actor.id, dto);
-  }
-
-  @Get('audit-logs')
-  auditLogs(@Query('limit') limit?: string) {
-    return this.admin.auditLogs(Number(limit) || 50);
+  @Patch('drivers/:id/status') async setDriverStatus(@Param('id') id: string, @Body() dto: DriverStatusDto) {
+    return this.prisma.$transaction(async tx => {
+      const driver = await tx.driver.update({ where: { id }, data: { status: dto.status, ...(dto.status === DriverStatus.APPROVED ? {} : { isOnline: false }) } });
+      if (dto.status === DriverStatus.APPROVED) await tx.user.update({ where: { id: driver.userId }, data: { role: UserRole.DRIVER } });
+      else await tx.user.updateMany({ where: { id: driver.userId, role: UserRole.DRIVER }, data: { role: UserRole.CUSTOMER } });
+      return driver;
+    });
   }
 }

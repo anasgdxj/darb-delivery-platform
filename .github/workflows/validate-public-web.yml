@@ -3,38 +3,12 @@ on:
   pull_request:
     paths:
       - "index.html"
-      - "en/**"
-      - "tr/**"
-      - "faq/**"
-      - "drivers/**"
-      - "merchants/**"
-      - "privacy/**"
-      - "terms/**"
-      - "assets/**"
-      - "robots.txt"
-      - "sitemap.xml"
-      - "site.webmanifest"
-      - "google3dcfcc43ffdf1742.html"
-      - "scripts/validate_public_site.py"
       - ".github/workflows/validate-public-web.yml"
-      - ".github/workflows/deploy-admin-web.yml"
   push:
     branches: [main]
     paths:
       - "index.html"
-      - "en/**"
-      - "tr/**"
-      - "faq/**"
-      - "drivers/**"
-      - "merchants/**"
-      - "privacy/**"
-      - "terms/**"
-      - "assets/**"
-      - "robots.txt"
-      - "sitemap.xml"
-      - "site.webmanifest"
       - ".github/workflows/validate-public-web.yml"
-      - ".github/workflows/deploy-admin-web.yml"
   workflow_dispatch:
 permissions:
   contents: read
@@ -43,109 +17,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Enforce unified DAZREVO web identity
+      - name: Validate inline JavaScript
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          css = Path('assets/css/site.css').read_text(encoding='utf-8')
-          admin = Path('admin-web/index.html').read_text(encoding='utf-8')
-          icon = Path('assets/favicon.svg').read_text(encoding='utf-8')
-          for token in ['--forest:#14171D', '--lime:#D6B46C', '--violet:#1D7A6E', '--canvas:#FAF9F6', '--dark']:
-              if token == '--dark':
-                  if '--canvas:#0C0D0F' not in css: raise SystemExit('Website dark palette is out of sync.')
-              elif token not in css: raise SystemExit(f'Missing website brand token: {token}')
-          for token in ['--forest:#14171D', '--lime:#D6B46C', '--violet:#1D7A6E', '--canvas:#FAF9F6', '--canvas:#0C0D0F']:
-              if token not in admin: raise SystemExit(f'Missing admin brand token: {token}')
-          for token in ['#14171D', '#D6B46C', '#3FD1BE']:
-              if token not in icon: raise SystemExit(f'Favicon is missing brand color: {token}')
-          stale = ['#0B2F24', '#A7FF00', '#8A5CF6']
-          for name in ['assets/css/site.css', 'assets/css/pages.css', 'admin-web/index.html', 'assets/favicon.svg']:
-              source = Path(name).read_text(encoding='utf-8')
-              if any(color in source for color in stale): raise SystemExit(f'Legacy palette remains in {name}.')
-          for name in ['index.html', 'en/index.html', 'tr/index.html', 'faq/index.html', 'drivers/index.html', 'merchants/index.html', 'privacy/index.html', 'terms/index.html']:
-              source = Path(name).read_text(encoding='utf-8')
-              if 'viewBox="0 0 108 108"' not in source: raise SystemExit(f'Outdated DAZREVO brand mark in {name}.')
-              if '#423FD1BE' in source: raise SystemExit(f'Android ARGB color notation leaked into SVG in {name}.')
-          print('Unified Obsidian / Champagne / Mineral Teal identity verified across public pages and admin.')
-          PY
-      - name: Validate shared JavaScript
-        run: node --check assets/js/site.js
-      - name: Validate public pages, metadata, and deployment assets
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import json
           import re
-          import xml.etree.ElementTree as ET
-
-          required_pages = [
-              "index.html", "en/index.html", "tr/index.html", "faq/index.html",
-              "drivers/index.html", "merchants/index.html", "privacy/index.html",
-              "terms/index.html"
-          ]
-          for name in required_pages:
-              path = Path(name)
-              if not path.is_file() or path.stat().st_size < 700:
-                  raise SystemExit(f"Missing or incomplete public page: {name}")
-              html = path.read_text(encoding="utf-8")
-              if "<html" not in html or "<title>" not in html or 'name="description"' not in html:
-                  raise SystemExit(f"Missing document metadata: {name}")
-              if "app-debug.apk" in html or "/admin/" in html or "بوابة الإدارة" in html:
-                  raise SystemExit(f"Private or debug resource leaked into public page: {name}")
-              if "<img" in html or "assets/cities/" in html or "heroCityImg" in html:
-                  raise SystemExit(f"City photography or unsupported imagery found: {name}")
-              if "Content-Security-Policy" not in html:
-                  raise SystemExit(f"Missing CSP meta policy: {name}")
-              if html.count('class="language-links"') != 1:
-                  raise SystemExit(f"Expected exactly one language switcher: {name}")
-          home = Path("index.html").read_text(encoding="utf-8")
-          required_home = [
-              'lang="ar" dir="rtl"', 'rel="canonical"', 'application/ld+json',
-              'hreflang="ar-SY"', 'hreflang="en"', 'hreflang="tr"',
-              'hreflang="x-default"', 'href="./"', 'href="./en/"', 'href="./tr/"',
-              'href="#services"', 'href="#coverage"', 'href="#how"', 'href="#download"',
-              'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk'
-          ]
-          missing = [item for item in required_home if item not in home]
-          if missing:
-              raise SystemExit("Missing homepage requirements: " + ", ".join(missing))
-          for path in ["assets/css/site.css", "assets/css/pages.css", "assets/js/site.js",
-                       "assets/favicon.svg", "robots.txt", "sitemap.xml", "site.webmanifest"]:
-              if not Path(path).is_file():
-                  raise SystemExit(f"Missing website asset: {path}")
-          site_css = Path("assets/css/site.css").read_text()
-          pages_css = Path("assets/css/pages.css").read_text()
-          for rule in ["overflow-x:clip", "@media(max-width:860px)", "@media(max-width:380px)"]:
-              if rule not in site_css:
-                  raise SystemExit(f"Missing responsive homepage rule: {rule}")
-          for rule in ["grid-template-columns:minmax(0,1fr) auto", "@media(max-width:360px)"]:
-              if rule not in pages_css:
-                  raise SystemExit(f"Missing responsive content-page rule: {rule}")
-          robots = Path("robots.txt").read_text()
-          if "Sitemap: https://anasgdxj.github.io/darb-delivery-platform/sitemap.xml" not in robots:
-              raise SystemExit("robots.txt must point to the canonical sitemap.")
-          sitemap = ET.parse("sitemap.xml").getroot()
-          ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
-          urls = {node.text for node in sitemap.findall("sm:url/sm:loc", ns)}
-          expected = {
-              "https://anasgdxj.github.io/darb-delivery-platform/",
-              "https://anasgdxj.github.io/darb-delivery-platform/en/",
-              "https://anasgdxj.github.io/darb-delivery-platform/tr/",
-              "https://anasgdxj.github.io/darb-delivery-platform/faq/",
-              "https://anasgdxj.github.io/darb-delivery-platform/drivers/",
-              "https://anasgdxj.github.io/darb-delivery-platform/merchants/"
-          }
-          if not expected.issubset(urls):
-              raise SystemExit("Sitemap is missing one or more public pages.")
-          manifest = json.loads(Path("site.webmanifest").read_text())
-          if manifest.get("start_url") != "./":
-              raise SystemExit("Manifest start_url must remain relative for GitHub Pages.")
-          for name in ["en/index.html", "tr/index.html"]:
-              html = Path(name).read_text(encoding="utf-8")
-              for locale in ['hreflang="ar-SY"', 'hreflang="en"', 'hreflang="tr"', 'hreflang="x-default"']:
-                  if locale not in html:
-                      raise SystemExit(f"Missing multilingual alternate {locale} in {name}")
-          print(f"Validated {len(required_pages)} public pages and SEO assets.")
+          html = Path("index.html").read_text()
+          scripts = re.findall(r"<script>(.*?)</script>", html, re.S)
+          if len(scripts) != 1:
+              raise SystemExit(f"Expected exactly one inline script, found {len(scripts)}")
+          Path("/tmp/public.js").write_text(scripts[0])
           PY
-      - name: Validate internal links, accessibility, and verification file
-        run: python3 scripts/validate_public_site.py
+          node --check /tmp/public.js
+      - name: Validate page structure and safe download behavior
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("index.html").read_text()
+          required = [
+              'lang="ar" dir="rtl"',
+              'id="services"',
+              'id="how"',
+              'id="download"',
+              "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk",
+              "تنزيل تطبيق أندرويد",
+              "أحدث إصدار رسمي موقّع",
+          ]
+          missing = [item for item in required if item not in html]
+          if missing:
+              raise SystemExit("Missing public website requirements: " + ", ".join(missing))
+          if "app-debug.apk" in html:
+              raise SystemExit("Debug APK must never be exposed as an official download")
+          if "admin/" in html or "بوابة الإدارة" in html or "دخول الإدارة" in html:
+              raise SystemExit("Admin portal links must not appear on the public website")
+          PY

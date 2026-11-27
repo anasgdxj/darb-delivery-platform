@@ -6,18 +6,8 @@ MIGRATION_DIR="$ROOT/backend/prisma/migrations/20261119120000_delivery_offers"
 mkdir -p "$MIGRATION_DIR"
 AI_MIGRATION_DIR="$ROOT/backend/prisma/migrations/20261120120000_ai_order_assistant"
 mkdir -p "$AI_MIGRATION_DIR"
-PLATFORM_MIGRATION_DIR="$ROOT/backend/prisma/migrations/20261121120000_platform_enhancements"
-mkdir -p "$PLATFORM_MIGRATION_DIR"
-NOTIF_MIGRATION_DIR="$ROOT/backend/prisma/migrations/20261122090000_notifications_reviews_dismissals"
-mkdir -p "$NOTIF_MIGRATION_DIR"
 cp "$SCRIPT_DIR/ai-order-assistant.migration.sql" "$AI_MIGRATION_DIR/migration.sql"
 cp "$SCRIPT_DIR/delivery-offers.migration.sql" "$MIGRATION_DIR/migration.sql"
-if [ -f "$SCRIPT_DIR/platform-enhancements.migration.sql" ]; then
-  cp "$SCRIPT_DIR/platform-enhancements.migration.sql" "$PLATFORM_MIGRATION_DIR/migration.sql"
-fi
-if [ -f "$SCRIPT_DIR/notifications-reviews-dismissals.migration.sql" ]; then
-  cp "$SCRIPT_DIR/notifications-reviews-dismissals.migration.sql" "$NOTIF_MIGRATION_DIR/migration.sql"
-fi
 python3 - "$ROOT" <<'PY'
 from pathlib import Path
 import json, sys

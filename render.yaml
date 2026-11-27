@@ -17,8 +17,6 @@ services:
       cp backend-overrides/auth.controller.ts .render-build/darb-project/backend/src/modules/auth/auth.controller.ts &&
       cp backend-overrides/otp.service.ts .render-build/darb-project/backend/src/modules/auth/otp.service.ts &&
       cp backend-overrides/admin.controller.ts .render-build/darb-project/backend/src/modules/admin/admin.controller.ts &&
-      cp backend-overrides/admin.service.ts .render-build/darb-project/backend/src/modules/admin/admin.service.ts &&
-      cp backend-overrides/vendors.controller.ts .render-build/darb-project/backend/src/modules/vendors/vendors.controller.ts &&
       cp backend-overrides/vendors.service.ts .render-build/darb-project/backend/src/modules/vendors/vendors.service.ts &&
       cp backend-overrides/vendor-application.dto.ts .render-build/darb-project/backend/src/modules/vendors/vendor-application.dto.ts &&
       cp backend-overrides/addresses.service.ts .render-build/darb-project/backend/src/modules/addresses/addresses.service.ts &&
@@ -47,11 +45,6 @@ services:
       cp backend-overrides/notifications.service.ts .render-build/darb-project/backend/src/modules/notifications/notifications.service.ts &&
       cp backend-overrides/notifications.controller.ts .render-build/darb-project/backend/src/modules/notifications/notifications.controller.ts &&
       cp backend-overrides/notifications.module.ts .render-build/darb-project/backend/src/modules/notifications/notifications.module.ts &&
-      cp backend-overrides/release-notifications.controller.ts .render-build/darb-project/backend/src/modules/notifications/release-notifications.controller.ts &&
-      mkdir -p .render-build/darb-project/backend/src/modules/telegram-admin &&
-      cp backend-overrides/telegram-admin.controller.ts .render-build/darb-project/backend/src/modules/telegram-admin/telegram-admin.controller.ts &&
-      cp backend-overrides/telegram-admin.service.ts .render-build/darb-project/backend/src/modules/telegram-admin/telegram-admin.service.ts &&
-      cp backend-overrides/telegram-admin.module.ts .render-build/darb-project/backend/src/modules/telegram-admin/telegram-admin.module.ts &&
       cp backend-overrides/app.module.ts .render-build/darb-project/backend/src/app.module.ts &&
       mkdir -p .render-build/darb-project/backend/prisma/migrations/20261117170000_firebase_devices &&
       cp backend-overrides/firebase-devices.migration.sql .render-build/darb-project/backend/prisma/migrations/20261117170000_firebase_devices/migration.sql &&
@@ -99,27 +92,10 @@ services:
         sync: false
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false
-      - key: DARB_RELEASE_WEBHOOK_TOKEN
-        sync: false
-      - key: TELEGRAM_BOT_TOKEN
-        sync: false
-      - key: TELEGRAM_ADMIN_IDS
-        sync: false
-      - key: TELEGRAM_WEBHOOK_SECRET
-        sync: false
-      - key: TELEGRAM_WEBHOOK_URL
-        sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_TRANSCRIPTION_MODEL
         value: whisper-1
       - key: OPENAI_ORDER_MODEL
         value: gpt-4o-mini
-      - key: GEMINI_API_KEY
-        sync: false
-      - key: GEMINI_MODEL
-        value: gemini-3.8-flash
-      - key: GOOGLE_MAPS_API_KEY
-        sync: false
-      - key: CORS_ORIGINS
-        sync: false
+

@@ -1,345 +1,1256 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#14171D">
-  <meta name="description" content="دازريفو (DAZREVO) منصة توصيل سورية تجمع طلبات المتاجر المحلية والتوصيل المستقل والسائقين والمساعد الذكي في تجربة واحدة.">
-  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
-  <meta name="googlebot" content="index,follow">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta name="color-scheme" content="light dark">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="ar_SY">
-  <meta property="og:site_name" content="دازريفو | DAZREVO">
-  <meta property="og:title" content="دازريفو | DAZREVO — منصة التوصيل الذكية وطلبات المتاجر">
-  <meta property="og:description" content="اطلب من المتاجر المحلية أو أرسل طردك مع سائق مستقل وتابع التوصيل لحظة بلحظة عبر دازريفو (DAZREVO).">
-  <meta property="og:url" content="https://anasgdxj.github.io/darb-delivery-platform/">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="دازريفو | DAZREVO — توصيل ذكي من الباب إلى الباب">
-  <meta name="twitter:description" content="طلبات المتاجر والتوصيل المستقل في سوريا عبر تطبيق دازريفو (DAZREVO).">
-  <link rel="canonical" href="https://anasgdxj.github.io/darb-delivery-platform/">
-  <link rel="alternate" hreflang="ar-SY" href="https://anasgdxj.github.io/darb-delivery-platform/">
-  <link rel="alternate" hreflang="en" href="https://anasgdxj.github.io/darb-delivery-platform/en/">
-  <link rel="alternate" hreflang="tr" href="https://anasgdxj.github.io/darb-delivery-platform/tr/">
-  <link rel="alternate" hreflang="x-default" href="https://anasgdxj.github.io/darb-delivery-platform/">
-  <link rel="manifest" href="./site.webmanifest">
-  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; upgrade-insecure-requests">
-  <title>دازريفو | DAZREVO — منصة التوصيل الذكية وطلبات المتاجر</title>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": "https://anasgdxj.github.io/darb-delivery-platform/#organization",
-        "name": "دازريفو",
-        "alternateName": "DAZREVO",
-        "url": "https://anasgdxj.github.io/darb-delivery-platform/",
-        "description": "منصة توصيل سورية تجمع المتاجر المحلية والسائقين المستقلين وخدمات توصيل الطلبات."
-      },
-      {
-        "@type": "WebSite",
-        "@id": "https://anasgdxj.github.io/darb-delivery-platform/#website",
-        "url": "https://anasgdxj.github.io/darb-delivery-platform/",
-        "name": "دازريفو",
-        "alternateName": "DAZREVO",
-        "inLanguage": "ar-SY",
-        "publisher": {"@id": "https://anasgdxj.github.io/darb-delivery-platform/#organization"}
-      },
-      {
-        "@type": "MobileApplication",
-        "name": "دازريفو",
-        "alternateName": "DAZREVO",
-        "applicationCategory": "TravelApplication",
-        "operatingSystem": "Android",
-        "description": "تطبيق توصيل وطلبات متاجر في سوريا يربط العملاء بالمتاجر والسائقين المستقلين مع تتبع مباشر ومساعد ذكي.",
-        "url": "https://anasgdxj.github.io/darb-delivery-platform/",
-        "downloadUrl": "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk",
-        "inLanguage": ["ar", "en", "tr"]
-      }
-    ]
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090B0E">
+<meta name="description" content="DAZREVO — منصة توصيل ذكية تربطك بالمتاجر والسائقين. اطلب من متاجرك المفضلة أو أرسل طرودك المستقلة وقارن عروض التوصيل بسهولة.">
+<title>DAZREVO | منصة التوصيل والتنقل الذكي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F6F2;
+  --surface: #FFFFFF;
+  --surface-alt: #EFECE4;
+  --ink: #11151B;
+  --muted: #646B76;
+  --line: #E4DFD4;
+  --line-strong: #CCC4B4;
+  --accent: #B89146;
+  --accent-bright: #C6A15B;
+  --accent-ink: #090B0E;
+  --accent-soft: rgba(198, 161, 91, 0.12);
+  --success: #1E8E64;
+  --header-bg: rgba(247, 246, 242, 0.86);
+  --shadow: 0 24px 60px rgba(17, 21, 27, 0.08);
+  --device-bg: #11151B;
+  --device-card: #181E27;
+  --device-line: #27303D;
+  --device-ink: #F5F2EB;
+  --device-muted: #98A0AB;
+  --font-display: 'Readex Pro', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Readex Pro', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html.dark {
+  --bg: #090B0E;
+  --surface: #11151B;
+  --surface-alt: #181E27;
+  --ink: #F5F2EB;
+  --muted: #969DA8;
+  --line: #222934;
+  --line-strong: #343F4F;
+  --accent: #DFBE7D;
+  --accent-bright: #E8CB91;
+  --accent-ink: #090B0E;
+  --accent-soft: rgba(223, 190, 125, 0.12);
+  --success: #4CD49E;
+  --header-bg: rgba(9, 11, 14, 0.82);
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 220ms cubic-bezier(0.16, 1, 0.3, 1), color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+
+.wrap {
+  width: min(1200px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+/* Top Bar Contract: 3 zones separated by gap */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--header-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #0E1217;
+  border: 1px solid rgba(223, 190, 125, 0.35);
+  flex-shrink: 0;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.nav-links a {
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 6px 2px;
+  position: relative;
+  transition: color 180ms ease;
+}
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1.5px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-links a:hover::after { transform: scaleX(1); }
+
+.header-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  min-height: 44px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease;
+}
+.header-cta:hover {
+  background: var(--accent-bright);
+  transform: translateY(-1px);
+}
+
+/* Utility controls strip below fold / in hero */
+.hero {
+  padding: 40px 0 88px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 42px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.hero-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  gap: 2px;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  padding: 6px 12px;
+  min-height: 34px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.segmented button.active {
+  background: var(--surface-alt);
+  color: var(--ink);
+}
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  min-height: 40px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: stretch;
+  gap: 52px;
+}
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero-copy h1 {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 4.4vw, 56px);
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0 0 20px;
+  text-wrap: balance;
+}
+.hero-copy h1 span {
+  color: var(--accent);
+}
+.hero-lead {
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--muted);
+  max-width: 56ch;
+  margin: 0 0 30px;
+}
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 13px 26px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 180ms ease, border-color 180ms ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.btn-primary:hover { background: var(--accent-bright); }
+.btn-outline {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+.btn-outline:hover { border-color: var(--accent); }
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 40px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+.metric-item strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.metric-item span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Interactive Architectural Device Showcase */
+.showcase {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.atelier-frame {
+  width: 100%;
+  max-width: 470px;
+  background: var(--device-bg);
+  color: var(--device-ink);
+  border: 1px solid var(--device-line);
+  border-radius: 28px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+.atelier-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--device-line);
+}
+.atelier-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.role-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #0A0D12;
+  border: 1px solid var(--device-line);
+}
+.role-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--device-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.role-tabs button.active {
+  background: #DFBE7D;
+  color: #090B0E;
+}
+.atelier-body {
+  padding-top: 18px;
+  display: grid;
+  gap: 12px;
+}
+.atelier-card {
+  background: var(--device-card);
+  border: 1px solid var(--device-line);
+  border-radius: 18px;
+  padding: 16px;
+}
+.atelier-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.atelier-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  color: #DFBE7D;
+}
+.atelier-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.atelier-sub {
+  font-size: 12px;
+  color: var(--device-muted);
+  margin: 0;
+}
+.route-diagram {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #10151D;
+  border: 1px solid var(--device-line);
+  display: grid;
+  gap: 10px;
+}
+.route-stop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.route-pin {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #DFBE7D;
+  flex-shrink: 0;
+}
+.route-pin.end {
+  background: #4CD49E;
+  border-radius: 50%;
+}
+.offer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #121720;
+  border: 1px solid var(--device-line);
+}
+.offer-row.featured {
+  border-color: rgba(223, 190, 125, 0.5);
+}
+.offer-price {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: 700;
+  color: #DFBE7D;
+  white-space: nowrap;
+}
+[dir="rtl"] .offer-price {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+/* Sections */
+.section {
+  padding: 88px 0;
+  border-top: 1px solid var(--line);
+}
+.section-head {
+  max-width: 680px;
+  margin-bottom: 44px;
+}
+.section-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.section-head h2 {
+  font-size: clamp(26px, 3.2vw, 38px);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.section-head p {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 0;
+}
+
+/* Asymmetric Bento Capabilities */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+}
+.bento-card {
+  grid-column: span 4;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 240px;
+  transition: border-color 200ms ease, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bento-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
+.bento-card.wide {
+  grid-column: span 6;
+}
+.bento-index {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+.bento-card h3 {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.bento-card p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.75;
+  margin: 0;
+}
+.bento-meta {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Steps */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.step-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 28px;
+}
+.step-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.step-card h3 {
+  font-size: 18px;
+  margin: 14px 0 10px;
+}
+.step-card p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.75;
+}
+
+/* Download Banner */
+.download-box {
+  background: #11151B;
+  color: #F5F2EB;
+  border: 1px solid #262E3B;
+  border-radius: 28px;
+  padding: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.download-copy { max-width: 600px; }
+.download-copy .section-kicker { color: #DFBE7D; }
+.download-copy h2 {
+  font-size: clamp(26px, 3vw, 36px);
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.download-copy p {
+  color: #A2AAB5;
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 0;
+}
+.download-action {
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+.download-status {
+  font-size: 12px;
+  color: #A2AAB5;
+  text-align: center;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 32px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.footer-links a:hover { color: var(--ink); }
+
+@media (max-width: 960px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+  .bento-card, .bento-card.wide { grid-column: span 6; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .download-box { flex-direction: column; text-align: center; padding: 36px 24px; }
+  .download-action { width: 100%; max-width: 320px; }
+}
+
+@media (max-width: 640px) {
+  .wrap { width: min(100% - 28px, 1200px); }
+  .nav-links { display: none; }
+  .topbar-inner { height: 64px; gap: 12px; }
+  .bento-card, .bento-card.wide { grid-column: span 12; min-height: auto; }
+  .hero-metrics { grid-template-columns: 1fr; gap: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
   }
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/css/site.css">
+}
+</style>
 </head>
 <body>
-  <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
-  <header class="site-header">
-    <div class="wrap nav">
-      <a class="brand" href="./" aria-label="دازريفو - الصفحة الرئيسية">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 108 108" fill="none" aria-hidden="true">
-  <circle cx="54" cy="54" r="40" stroke="#E7D3A3" stroke-opacity=".18" stroke-width="1.5"/>
-  <path d="M33 25H57L80 42V66L57 83H33L42.5 72H54.5L68.5 61.5V46.5L54.5 36H42.5Z" fill="#F7F4EC"/>
-  <path d="M28 36L52 54L28 72" stroke="#D6B46C" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M34 45L45.5 54L34 63" stroke="#E7D3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="28" cy="36" r="4" fill="#D6B46C"/><circle cx="28" cy="72" r="4" fill="#D6B46C"/>
-  <circle cx="53" cy="54" r="9.6" fill="#3FD1BE" fill-opacity=".26"/><circle cx="53" cy="54" r="5.8" fill="#3FD1BE"/><circle cx="53" cy="54" r="2.2" fill="#0C0D0F"/>
-</svg>
-        </span>
-        <span>دازريفو</span>
-      </a>
-      <nav class="nav-links" aria-label="التنقل الرئيسي">
-        <a href="#services">الخدمات</a>
-        <a href="#coverage">التغطية</a>
-        <a href="./drivers/">السائقون</a>
-        <a href="./merchants/">المتاجر</a>
-        <a href="./faq/">الأسئلة</a>
-      </nav>
-      <div class="nav-actions">
-        <div class="language-links" aria-label="تبديل اللغة">
-          <a href="./" aria-current="page">عربي</a>
-          <a href="./en/">EN</a>
-          <a href="./tr/">TR</a>
-        </div>
-        <button class="theme-toggle" id="themeToggle" type="button" aria-label="تبديل المظهر" title="تبديل المظهر">
-          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
-          </svg>
-        </button>
-        <a class="btn btn-primary" href="#download">تنزيل التطبيق</a>
-        <button class="menu-toggle" id="menuToggle" type="button" aria-label="فتح القائمة" aria-expanded="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M4 7h16M4 12h16M4 17h16"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-    <nav class="mobile-panel" id="mobilePanel" aria-label="قائمة الهاتف">
-      <a href="#services">الخدمات</a>
-      <a href="#coverage">التغطية</a>
-      <a href="./drivers/">السائقون</a>
-      <a href="./merchants/">المتاجر</a>
-      <a href="./faq/">الأسئلة الشائعة</a>
-      <a href="#download">تنزيل التطبيق</a>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+          <path d="M7 6H16.5C22.299 6 27 10.701 27 16.5C27 22.299 22.299 27 16.5 27H7V21.5H16C19.0376 21.5 21.5 19.0376 21.5 16C21.5 12.9624 19.0376 10.5 16 10.5H7V6Z" fill="#DFBE7D"/>
+          <path d="M7 13.5H14.5L18.5 16L14.5 18.5H7V13.5Z" fill="#F5F2EB"/>
+        </svg>
+      </span>
+      <span>DAZREVO</span>
+    </a>
+    <nav class="nav-links" aria-label="التنقل الرئيسي">
+      <a href="#services" data-i18n="navServices">الخدمات</a>
+      <a href="#how" data-i18n="navHow">كيف يعمل</a>
+      <a href="#download" data-i18n="navDownload">التطبيق</a>
     </nav>
-  </header>
+    <a class="header-cta" href="#download" data-i18n="navCta">تنزيل التطبيق</a>
+  </div>
+</header>
 
-  <main id="main">
-    <section class="hero">
-      <div class="wrap hero-layout">
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-controls">
+        <span class="hero-eyebrow" data-i18n="eyebrow">منظومة DAZREVO للتوصيل والتنقل الحضري · 2026</span>
+        <div class="controls-group">
+          <div class="segmented" role="group" aria-label="اختيار اللغة">
+            <button type="button" class="active" data-lang="ar">AR</button>
+            <button type="button" data-lang="en">EN</button>
+            <button type="button" data-lang="tr">TR</button>
+          </div>
+          <button type="button" id="themeToggle" class="theme-toggle">
+            <span id="themeLabel">الوضع النهاري</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-grid">
         <div class="hero-copy">
-          <div class="kicker-line">دازريفو · منصة التوصيل والطلبات في سوريا</div>
-          <h1>طلباتك ومشاويرك على <span>مسار واحد</span> أسرع.</h1>
-          <p>اطلب احتياجاتك من المتاجر المحلية، أو أرسل غرضاً بين أي نقطتين بعروض مباشرة من المناديب، مع تتبع حي عبر الخريطة ومساعد ذكي يصيغ طلبك خلال ثوانٍ.</p>
+          <h1 data-i18n="heroTitle">تجربة توصيل <span>أكثر دقة</span> للمتاجر والطرود.</h1>
+          <p class="hero-lead" data-i18n="heroLead">تطبيق DAZREVO يجمع طلبات المتاجر، المساعد الذكي للطلبات، وخدمة التوصيل المستقل بعروض أسعار شفافة في منصة واحدة متكاملة.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#download">تحميل تطبيق أندرويد</a>
-            <a class="btn btn-quiet" href="#how">كيف يعمل النظام</a>
+            <a class="btn btn-primary" href="#download" data-i18n="heroPrimary">تنزيل تطبيق أندرويد</a>
+            <a class="btn btn-outline" href="#how" data-i18n="heroSecondary">استكشف آلية العمل</a>
           </div>
-          <div class="hero-meta">
-            <span>العربية · English · Türkçe</span>
-            <span aria-hidden="true">·</span>
-            <span>دفع نقدي عند الاستلام</span>
-            <span aria-hidden="true">·</span>
-            <span>تتبّع GPS لحظي</span>
-          </div>
-        </div>
-
-        <div class="hero-art" role="img" aria-label="رسم هندسي لمسار توصيل دازريفو يربط المتجر ونقطة التسليم">
-          <div class="art-grid"></div>
-          <div class="art-glow"></div>
-          <svg class="route-art" viewBox="0 0 520 260" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-            <path class="route-ai-path" d="M84 196 C150 90 250 175 340 86"/>
-            <path class="route-path" d="M84 196 C145 196 175 126 254 126 S360 156 432 68"/>
-            <circle class="route-halo" cx="84" cy="196" r="24"/>
-            <circle class="route-pin" cx="84" cy="196" r="9"/>
-            <circle class="route-halo" cx="432" cy="68" r="24"/>
-            <circle class="route-pin end" cx="432" cy="68" r="9"/>
-            <circle cx="254" cy="126" r="6" fill="#D6B46C"/>
-          </svg>
-          <div class="art-panels">
-            <div class="art-panel">
-              <strong>توصيل من الباب إلى الباب</strong>
-              <small>مسارات متاجر وعروض سائقين مستقلين</small>
+          <div class="hero-metrics">
+            <div class="metric-item">
+              <strong>01 · Stores</strong>
+              <span data-i18n="metric1">طلب مباشر من متاجر مدينتك</span>
             </div>
-            <div class="art-panel ai-accent">
-              <strong>مساعد دازريفو الذكي</strong>
-              <small>تحويل الرسائل النصية إلى طلب جاهز</small>
+            <div class="metric-item">
+              <strong>02 · Bids</strong>
+              <span data-i18n="metric2">مقارنة عروض السائقين بحرية</span>
+            </div>
+            <div class="metric-item">
+              <strong>03 · AI Draft</strong>
+              <span data-i18n="metric3">تحويل النص إلى مسودة طلب</span>
             </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <section class="role-band" aria-label="مسارات المستخدمين">
-      <div class="wrap">
-        <div class="role-head">
-          <h2>اختر دورك في منظومة دازريفو</h2>
-          <div class="segmented" role="group" aria-label="تبديل نوع الحساب">
-            <button type="button" data-role="customer" aria-pressed="true">العميل</button>
-            <button type="button" data-role="driver" aria-pressed="false">المندوب</button>
-            <button type="button" data-role="merchant" aria-pressed="false">التاجر</button>
-          </div>
-        </div>
-        <div class="role-panel" aria-live="polite">
-          <div>
-            <h3 id="roleTitle">للعملاء: اطلب من المتاجر أو أرسل طرداً مستقلاً</h3>
-            <p id="roleBody">تصفح المتاجر القريبة، أو حدد نقطتي استلام وتسليم لتصلك عروض أجرة السائقين، أو اكتب طلبك بالعربية لمساعد دازريفو الذكي.</p>
-          </div>
-          <div class="role-points" id="rolePoints">
-            <div>الدفع نقداً عند الاستلام مع ملخص رسوم واضح قبل التأكيد</div>
-            <div>تتبّع مباشر لموقع المندوب عبر الخريطة وإشعارات فورية لكل مرحلة</div>
-            <div>صياغة ذكية للطلبات النصية وتحويلها إلى مسودة جاهزة</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="services">
-      <div class="wrap">
-        <div class="section-head">
-          <div class="section-kicker">خدمات المنصة</div>
-          <h2>أربعة مسارات متكاملة في تطبيق واحد.</h2>
-          <p>تصميم عملي يخدم العملاء والمتاجر والمناديب وإدارة المدن بنفس الدقة والوضوح.</p>
-        </div>
-        <div class="services-grid">
-          <article class="service primary">
-            <div>
-              <div class="service-top">
-                <span class="service-number">01</span>
-                <span class="service-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 9h16l-1.5 11h-13L4 9Z"/><path d="m6 9 2-5h8l2 5"/></svg>
-                </span>
+        <div class="showcase">
+          <div class="atelier-frame" aria-label="معاينة تفاعلية لواجهة تطبيق DAZREVO">
+            <div class="atelier-top">
+              <div class="atelier-brand">
+                <svg width="18" height="18" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <path d="M7 6H16.5C22.299 6 27 10.701 27 16.5C27 22.299 22.299 27 16.5 27H7V21.5H16C19.0376 21.5 21.5 19.0376 21.5 16C21.5 12.9624 19.0376 10.5 16 10.5H7V6Z" fill="#DFBE7D"/>
+                </svg>
+                <span>DAZREVO</span>
               </div>
-              <h3>الطلب المباشر من المتاجر المحلية.</h3>
-              <p>تصفح المطاعم والأسواق القريبة، قارن المنتجات والكميات المتاحة، واحسب رسوم التوصيل قبل تأكيد الطلب والدفع عند الاستلام.</p>
+              <div class="role-tabs" role="tablist">
+                <button type="button" class="active" data-preview="customer" data-i18n="tabCustomer">العميل</button>
+                <button type="button" data-preview="driver" data-i18n="tabDriver">السائق</button>
+                <button type="button" data-preview="vendor" data-i18n="tabVendor">المتجر</button>
+              </div>
             </div>
-            <div class="service-foot">المتاجر المفتوحة وتقدير الرسوم لحظياً</div>
-          </article>
-
-          <article class="service">
-            <div class="service-top">
-              <span class="service-number">02</span>
-              <span class="service-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 7h13v10H3z"/><path d="M16 10h4l2 3v4h-6z"/></svg>
-              </span>
-            </div>
-            <h3>التوصيل المستقل بعروض السائقين</h3>
-            <p>حدّد نقطتي الاستلام والتسليم على الخريطة، واستقبل عروض الأجرة من المناديب القريبين واختر العرض الأنسب.</p>
-          </article>
-
-          <article class="service ai-card">
-            <div class="service-top">
-              <span class="service-number">03</span>
-              <span class="service-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3 14.2 9.2 20.5 11.5 14.2 13.8 12 20 9.8 13.8 3.5 11.5 9.8 9.2 12 3Z"/></svg>
-              </span>
-            </div>
-            <h3>مساعد دازريفو الذكي</h3>
-            <p>اكتب طلبك بلغة طبيعية لتحصل على مسودة منظمة، أو استشر المساعد حول طلباتك ومهامك وفق دور حسابك.</p>
-          </article>
-
-          <article class="service">
-            <div class="service-top">
-              <span class="service-number">04</span>
-              <span class="service-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-              </span>
-            </div>
-            <h3>بوابة المناديب والمتاجر</h3>
-            <p>إدارة المخزون، قبول الطلبات بضغطة واحدة، تتبّع الأرباح الحقيقية، ومشاركة الموقع المباشر أثناء التوصيل.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section coverage" id="coverage">
-      <div class="wrap coverage-layout">
-        <div>
-          <div class="section-kicker">التغطية الجغرافية</div>
-          <div class="section-head">
-            <h2>بنية جاهزة للتوسع عبر المدن السورية.</h2>
-            <p>يتم تفعيل المدن ومناطق التوصيل تدريجياً وفق جاهزية المتاجر والمناديب المحليين في كل محافظة.</p>
-          </div>
-          <p class="coverage-note">اختر مدينة لمعاينة رمز التغطية ضمن الشبكة. التوفر الفعلي للطلبات والمتاجر يُعرض مباشرة داخل تطبيق دازريفو.</p>
-        </div>
-        <div class="city-board">
-          <div class="city-board-head">
-            <strong>شبكة المدن المدعومة</strong>
-            <span>تحديد تفاعلي</span>
-          </div>
-          <div class="city-list" role="group" aria-label="اختر مدينة">
-            <button class="city-chip" type="button" data-city="damascus" aria-pressed="true"><span>دمشق</span><small>DAM</small></button>
-            <button class="city-chip" type="button" data-city="aleppo" aria-pressed="false"><span>حلب</span><small>ALE</small></button>
-            <button class="city-chip" type="button" data-city="homs" aria-pressed="false"><span>حمص</span><small>HMS</small></button>
-            <button class="city-chip" type="button" data-city="hama" aria-pressed="false"><span>حماة</span><small>HMA</small></button>
-            <button class="city-chip" type="button" data-city="latakia" aria-pressed="false"><span>اللاذقية</span><small>LAT</small></button>
-          </div>
-          <div class="city-detail" aria-live="polite">
-            <div>
-              <strong id="cityName">دمشق</strong>
-              <p id="cityDescription">نقطة انطلاق شبكة دازريفو ومسارات التوصيل الحضرية.</p>
-            </div>
-            <span class="city-code tabular" id="cityCode">DAMASCUS / SY</span>
+            <div id="previewStage" class="atelier-body"></div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="section" id="how">
-      <div class="wrap">
-        <div class="section-head">
-          <div class="section-kicker">آلية العمل</div>
-          <h2>ثلاث خطوات واضحة من البداية حتى التسليم.</h2>
-          <p>شفافية كاملة في الأجرة والموقع وحالة الطلب دون تعقيد.</p>
-        </div>
-        <div class="steps">
-          <article class="step">
-            <h3>أنشئ طلبك أو اختر متجراً</h3>
-            <p>تصفح المتاجر المفتوحة، أو حدد استلاماً وتوصيلاً لطرد خاص، أو اكتب رسالة لمساعد دازريفو الذكي.</p>
-          </article>
-          <article class="step">
-            <h3>ثبّت العنوان وقارن الرسوم</h3>
-            <p>حدّد موقعك على الخريطة بدقة، وراجع تكلفة التوصيل المتوقعة أو اختر عرض المندوب الأنسب.</p>
-          </article>
-          <article class="step">
-            <h3>تابع المسار حتى الاستلام</h3>
-            <p>راقب مراحل التحضير، موقع المندوب على الخريطة، واستلم إشعاراً فورياً عند كل تحديث.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="download-section" id="download">
-      <div class="wrap">
-        <div class="download-card">
-          <div class="download-copy">
-            <div class="download-kicker">نسخة أندرويد الرسمية · DAZREVO</div>
-            <h2>ابدأ استخدام دازريفو الآن.</h2>
-            <p>سجّل الدخول عبر رقم الهاتف السوري أو حساب Google في ثوانٍ، وتابع طلباتك ومتجرك أو رحلاتك من تطبيق واحد.</p>
-          </div>
-          <div class="download-action">
-            <a class="btn" id="downloadBtn" href="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" download="dazrevo-app-release.apk">تنزيل ملف APK</a>
-            <small id="downloadStatus">إصدار دازريفو الرسمي لأجهزة أندرويد</small>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="wrap footer-row">
-      <div><span class="footer-brand">دازريفو · DAZREVO</span> · <span class="tabular" id="year">2026</span></div>
-      <nav class="footer-links" aria-label="روابط الموقع">
-        <a href="./faq/">الأسئلة الشائعة</a>
-        <a href="./drivers/">انضمام السائقين</a>
-        <a href="./merchants/">انضمام المتاجر</a>
-        <a href="./privacy/">الخصوصية</a>
-        <a href="./terms/">الشروط</a>
-      </nav>
-      <div class="creator-links" aria-label="روابط المطور">
-        <span>منصة دازريفو — Anas Al-Sheikh</span>
-        <a href="https://youtube.com/channel/UCswMRlEEwqH22_3gkERIXSA" target="_blank" rel="noopener noreferrer">YouTube</a>
-        <a href="https://instagram.com/anasgdxj" target="_blank" rel="noopener noreferrer">Instagram</a>
       </div>
     </div>
-  </footer>
-  <script src="./assets/js/site.js" defer></script>
+  </section>
+
+  <section class="section" id="services">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker" data-i18n="servicesKicker">قدرات المنصة</div>
+        <h2 data-i18n="servicesTitle">أربعة مسارات متصلة في تجربة واحدة</h2>
+        <p data-i18n="servicesSub">صُممت كل واجهة في DAZREVO لتخدم العميل والسائق والتاجر بأقل خطوات ممكنة وأعلى وضوح بصري.</p>
+      </div>
+      <div class="bento">
+        <article class="bento-card wide">
+          <div>
+            <div class="bento-index">01.</div>
+            <h3 data-i18n="s1Title">التوصيل المستقل وعروض السائقين</h3>
+            <p data-i18n="s1Desc">حدد نقطة الاستلام وعنوان التسليم، صف الغرض في ثلاث خطوات واضحة، واستقبل عروض الأجرة من السائقين المعتمدين لتختار العرض الأنسب قبل التأكيد.</p>
+          </div>
+          <div class="bento-meta" data-i18n="s1Meta">تحكم كامل بالسعر · تتبع المسافة والموقع</div>
+        </article>
+        <article class="bento-card wide">
+          <div>
+            <div class="bento-index">02.</div>
+            <h3 data-i18n="s2Title">التسوق من متاجر مدينتك</h3>
+            <p data-i18n="s2Desc">استعرض المتاجر المتاحة حسب المدينة، ابحث داخل قوائم المنتجات، أضف للسلة، وأكمل الطلب بعنوانك المحفوظ مع الدفع نقداً عند الاستلام.</p>
+          </div>
+          <div class="bento-meta" data-i18n="s2Meta">تسعير مؤكد من الخادم · متابعة لحظية للحالة</div>
+        </article>
+        <article class="bento-card">
+          <div>
+            <div class="bento-index">03.</div>
+            <h3 data-i18n="s3Title">مساعد الطلب الذكي</h3>
+            <p data-i18n="s3Desc">اكتب طلبك بطريقتك أو لهجتك اليومية، ليقوم المساعد بتحويله إلى مسودة منظمة تراجعها قبل الإرسال.</p>
+          </div>
+          <div class="bento-meta" data-i18n="s3Meta">تحليل فوري · مراجعة قبل الاعتماد</div>
+        </article>
+        <article class="bento-card">
+          <div>
+            <div class="bento-index">04.</div>
+            <h3 data-i18n="s4Title">لوحات السائق والتاجر</h3>
+            <p data-i18n="s4Desc">تحكم فوري بحالة الاتصال للسائق وإرسال العروض، وتحديث سلس لمراحل تجهيز الطلبات وإدارة المنتجات للمتاجر.</p>
+          </div>
+          <div class="bento-meta" data-i18n="s4Meta">تحديثات مباشرة · إشعارات فورية</div>
+        </article>
+        <article class="bento-card">
+          <div>
+            <div class="bento-index">05.</div>
+            <h3 data-i18n="s5Title">ثلاث لغات ومظهران</h3>
+            <p data-i18n="s5Desc">دعم أصيل للعربية والإنجليزية والتركية مع اتجاه RTL/LTR دقيق، ووضع داكن وفاتح مصمم بعناية لراحة العين.</p>
+          </div>
+          <div class="bento-meta" data-i18n="s5Meta">العربية · English · Türkçe</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker" data-i18n="howKicker">سير العمل</div>
+        <h2 data-i18n="howTitle">ثلاث خطوات واضحة لإتمام أي طلب</h2>
+        <p data-i18n="howSub">لا قوائم متداخلة ولا خطوات غير ضرورية؛ كل شاشة تركز على المهمة التالية.</p>
+      </div>
+      <div class="steps-grid">
+        <article class="step-card">
+          <div class="step-num">STEP 01</div>
+          <h3 data-i18n="h1Title">اختر مسار الطلب</h3>
+          <p data-i18n="h1Desc">ابدأ بالتسوق من متجر في مدينتك، أو أنشئ طلب توصيل مستقل، أو اكتب طلبك لمساعد DAZREVO الذكي.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-num">STEP 02</div>
+          <h3 data-i18n="h2Title">قارن وأكد التفاصيل</h3>
+          <p data-i18n="h2Desc">راجع منتجاتك وعنوان التوصيل، أو قارن عروض السائقين المتاحة واختر الأجرة التي تناسبك.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-num">STEP 03</div>
+          <h3 data-i18n="h3Title">تابع حتى التسليم</h3>
+          <p data-i18n="h3Desc">تلقَّ إشعارات الحالة من القبول والتجهيز حتى الاستلام، وتابع موقع السائق على الخريطة عند الانطلاق.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="download">
+    <div class="wrap">
+      <div class="download-box">
+        <div class="download-copy">
+          <div class="section-kicker" data-i18n="dlKicker">تطبيق أندرويد الرسمي</div>
+          <h2 data-i18n="dlTitle">ابدأ تجربة DAZREVO الآن</h2>
+          <p data-i18n="dlDesc">حمّل النسخة الرسمية الموقعة لنظام أندرويد واحصل على تجربة متكاملة للعملاء والسائقين والمتاجر مع تحديثات مباشرة داخل التطبيق.</p>
+        </div>
+        <div class="download-action">
+          <a id="downloadBtn" class="btn btn-primary" data-i18n="heroPrimary" href="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" download="dazrevo-app-release.apk" target="_blank" rel="noopener">تنزيل تطبيق أندرويد</a>
+          <div id="downloadStatus" class="download-status" data-i18n="dlStatus">أحدث إصدار رسمي موقّع · ملف APK مباشر</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span>DAZREVO · © <span id="year"></span></span>
+    <div class="footer-links">
+      <a href="#services" data-i18n="navServices">الخدمات</a>
+      <a href="#how" data-i18n="navHow">كيف يعمل</a>
+      <a href="#download" data-i18n="navDownload">التطبيق</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const yearEl = document.getElementById('year');
+if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+const directApk = 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk';
+const downloadBtn = document.getElementById('downloadBtn');
+if (downloadBtn) {
+  downloadBtn.href = directApk;
+  downloadBtn.setAttribute('download', 'dazrevo-app-release.apk');
+}
+
+const i18n = {
+  ar: {
+    dir: 'rtl',
+    navServices: 'الخدمات',
+    navHow: 'كيف يعمل',
+    navDownload: 'التطبيق',
+    navCta: 'تنزيل التطبيق',
+    eyebrow: 'منظومة DAZREVO للتوصيل والتنقل الحضري · 2026',
+    heroTitle: 'تجربة توصيل <span>أكثر دقة</span> للمتاجر والطرود.',
+    heroLead: 'تطبيق DAZREVO يجمع طلبات المتاجر، المساعد الذكي للطلبات، وخدمة التوصيل المستقل بعروض أسعار شفافة في منصة واحدة متكاملة.',
+    heroPrimary: 'تنزيل تطبيق أندرويد',
+    heroSecondary: 'استكشف آلية العمل',
+    metric1: 'طلب مباشر من متاجر مدينتك',
+    metric2: 'مقارنة عروض السائقين بحرية',
+    metric3: 'تحويل النص إلى مسودة طلب',
+    tabCustomer: 'العميل',
+    tabDriver: 'السائق',
+    tabVendor: 'المتجر',
+    servicesKicker: 'قدرات المنصة',
+    servicesTitle: 'أربعة مسارات متصلة في تجربة واحدة',
+    servicesSub: 'صُممت كل واجهة في DAZREVO لتخدم العميل والسائق والتاجر بأقل خطوات ممكنة وأعلى وضوح بصري.',
+    s1Title: 'التوصيل المستقل وعروض السائقين',
+    s1Desc: 'حدد نقطة الاستلام وعنوان التسليم، صف الغرض في ثلاث خطوات واضحة، واستقبل عروض الأجرة من السائقين المعتمدين لتختار العرض الأنسب قبل التأكيد.',
+    s1Meta: 'تحكم كامل بالسعر · تتبع المسافة والموقع',
+    s2Title: 'التسوق من متاجر مدينتك',
+    s2Desc: 'استعرض المتاجر المتاحة حسب المدينة، ابحث داخل قوائم المنتجات، أضف للسلة، وأكمل الطلب بعنوانك المحفوظ مع الدفع نقداً عند الاستلام.',
+    s2Meta: 'تسعير مؤكد من الخادم · متابعة لحظية للحالة',
+    s3Title: 'مساعد الطلب الذكي',
+    s3Desc: 'اكتب طلبك بطريقتك أو لهجتك اليومية، ليقوم المساعد بتحويله إلى مسودة منظمة تراجعها قبل الإرسال.',
+    s3Meta: 'تحليل فوري · مراجعة قبل الاعتماد',
+    s4Title: 'لوحات السائق والتاجر',
+    s4Desc: 'تحكم فوري بحالة الاتصال للسائق وإرسال العروض، وتحديث سلس لمراحل تجهيز الطلبات وإدارة المنتجات للمتاجر.',
+    s4Meta: 'تحديثات مباشرة · إشعارات فورية',
+    s5Title: 'ثلاث لغات ومظهران',
+    s5Desc: 'دعم أصيل للعربية والإنجليزية والتركية مع اتجاه RTL/LTR دقيق، ووضع داكن وفاتح مصمم بعناية لراحة العين.',
+    s5Meta: 'العربية · English · Türkçe',
+    howKicker: 'سير العمل',
+    howTitle: 'ثلاث خطوات واضحة لإتمام أي طلب',
+    howSub: 'لا قوائم متداخلة ولا خطوات غير ضرورية؛ كل شاشة تركز على المهمة التالية.',
+    h1Title: 'اختر مسار الطلب',
+    h1Desc: 'ابدأ بالتسوق من متجر في مدينتك، أو أنشئ طلب توصيل مستقل، أو اكتب طلبك لمساعد DAZREVO الذكي.',
+    h2Title: 'قارن وأكد التفاصيل',
+    h2Desc: 'راجع منتجاتك وعنوان التوصيل، أو قارن عروض السائقين المتاحة واختر الأجرة التي تناسبك.',
+    h3Title: 'تابع حتى التسليم',
+    h3Desc: 'تلقَّ إشعارات الحالة من القبول والتجهيز حتى الاستلام، وتابع موقع السائق على الخريطة عند الانطلاق.',
+    dlKicker: 'تطبيق أندرويد الرسمي',
+    dlTitle: 'ابدأ تجربة DAZREVO الآن',
+    dlDesc: 'حمّل النسخة الرسمية الموقعة لنظام أندرويد واحصل على تجربة متكاملة للعملاء والسائقين والمتاجر مع تحديثات مباشرة داخل التطبيق.',
+    dlStatus: 'أحدث إصدار رسمي موقّع · ملف APK مباشر',
+    lightLabel: 'الوضع النهاري',
+    darkLabel: 'الوضع الداكن',
+  },
+  en: {
+    dir: 'ltr',
+    navServices: 'Capabilities',
+    navHow: 'How it works',
+    navDownload: 'Download',
+    navCta: 'Get the App',
+    eyebrow: 'DAZREVO Urban Mobility & Delivery Network · 2026',
+    heroTitle: 'Precision delivery <span>engineered</span> for stores and parcels.',
+    heroLead: 'DAZREVO unifies city store ordering, AI-assisted order drafting, and independent parcel delivery with transparent driver fare bidding in one cohesive app.',
+    heroPrimary: 'Download Android App',
+    heroSecondary: 'Explore workflow',
+    metric1: 'Direct local store ordering',
+    metric2: 'Compare driver fare offers',
+    metric3: 'Natural-text AI order drafts',
+    tabCustomer: 'Customer',
+    tabDriver: 'Driver',
+    tabVendor: 'Store',
+    servicesKicker: 'Platform Capabilities',
+    servicesTitle: 'Every role connected in one unified architecture',
+    servicesSub: 'Each DAZREVO workspace is designed around task clarity, minimal taps, and reliable real-time feedback.',
+    s1Title: 'Independent Delivery & Fare Bidding',
+    s1Desc: 'Set pickup and drop-off coordinates in three clear steps, receive fare offers from approved drivers, and choose the best offer before confirming.',
+    s1Meta: 'Full fare control · Live distance & location',
+    s2Title: 'City Store Marketplace',
+    s2Desc: 'Browse verified stores by city, search product catalogs, manage your cart, and check out with saved GPS addresses and cash on delivery.',
+    s2Meta: 'Server-verified totals · Real-time status',
+    s3Title: 'AI Order Assistant',
+    s3Desc: 'Describe what you need in natural phrasing and review a structured draft before submitting.',
+    s3Meta: 'Instant parsing · Review before sending',
+    s4Title: 'Driver & Store Workspaces',
+    s4Desc: 'Drivers toggle live availability and submit competitive bids; stores progress orders from incoming to ready with catalog management.',
+    s4Meta: 'Live telemetry · Push alerts',
+    s5Title: 'Trilingual & Dual Theme',
+    s5Desc: 'Native Arabic RTL, English, and Turkish interfaces paired with calibrated Obsidian Dark and Alabaster Light themes.',
+    s5Meta: 'العربية · English · Türkçe',
+    howKicker: 'Workflow',
+    howTitle: 'Three clear steps from request to handoff',
+    howSub: 'Zero visual clutter—every screen surfaces the exact next action.',
+    h1Title: 'Choose your path',
+    h1Desc: 'Shop a local store, launch an independent parcel delivery, or draft with the DAZREVO AI assistant.',
+    h2Title: 'Compare & confirm',
+    h2Desc: 'Verify items and delivery coordinates, or compare driver fare offers side by side.',
+    h3Title: 'Track to delivery',
+    h3Desc: 'Receive live status transitions and open the driver location route once dispatched.',
+    dlKicker: 'Official Android Release',
+    dlTitle: 'Experience DAZREVO today',
+    dlDesc: 'Download the signed Android release with built-in support for customers, drivers, merchants, and in-app updates.',
+    dlStatus: 'Signed official Android release · Direct APK',
+    lightLabel: 'Light Mode',
+    darkLabel: 'Dark Mode',
+  },
+  tr: {
+    dir: 'ltr',
+    navServices: 'Hizmetler',
+    navHow: 'Nasıl Çalışır',
+    navDownload: 'İndir',
+    navCta: 'Uygulamayı İndir',
+    eyebrow: 'DAZREVO Şehir İçi Teslimat ve Lojistik Ağı · 2026',
+    heroTitle: 'Mağazalar ve gönderiler için <span>kusursuz</span> teslimat.',
+    heroLead: 'DAZREVO; şehir içi mağaza siparişlerini, yapay zeka destekli sipariş taslaklarını ve şeffaf kurye teklifleriyle bağımsız gönderileri tek platformda birleştirir.',
+    heroPrimary: 'Android Uygulamasını İndir',
+    heroSecondary: 'Süreci keşfet',
+    metric1: 'Şehrinizdeki mağazalardan sipariş',
+    metric2: 'Kurye ücret tekliflerini karşılaştırın',
+    metric3: 'Doğal metinden akıllı sipariş taslağı',
+    tabCustomer: 'Müşteri',
+    tabDriver: 'Kurye',
+    tabVendor: 'Mağaza',
+    servicesKicker: 'Platform Yetenekleri',
+    servicesTitle: 'Tüm roller tek bir modern deneyimde',
+    servicesSub: 'Her DAZREVO arayüzü yüksek okunabilirlik, net hiyerarşi ve hızlı işlem için tasarlandı.',
+    s1Title: 'Bağımsız Teslimat ve Teklifler',
+    s1Desc: 'Üç adımda alım ve teslimat konumlarını belirleyin, onaylı kuryelerden gelen ücret tekliflerini karşılaştırıp en uygununu seçin.',
+    s1Meta: 'Ücret kontrolü · Mesafe ve konum takibi',
+    s2Title: 'Şehir Mağaza Pazarı',
+    s2Desc: 'Şehrinize göre mağazaları keşfedin, ürünleri arayın, sepetinizi oluşturun ve kapıda nakit ödeme ile sipariş verin.',
+    s2Meta: 'Sunucu onaylı tutar · Canlı durum takibi',
+    s3Title: 'Yapay Zeka Sipariş Asistanı',
+    s3Desc: 'İhtiyacınızı doğal dille yazın, asistan sizin için incelenebilir bir taslağa dönüştürsün.',
+    s3Meta: 'Anında analiz · Göndermeden önce kontrol',
+    s4Title: 'Kurye ve Mağaza Panelleri',
+    s4Desc: 'Kuryeler çevrimiçi olup teklif verir; mağazalar sipariş aşamalarını ve ürün kataloğunu kolayca yönetir.',
+    s4Meta: 'Canlı akış · Anlık bildirimler',
+    s5Title: 'Üç Dil ve Çift Tema',
+    s5Desc: 'Arapça RTL, İngilizce ve Türkçe dil desteği ile özenle kalibre edilmiş Koyu ve Açık modlar.',
+    s5Meta: 'العربية · English · Türkçe',
+    howKicker: 'İş Akışı',
+    howTitle: 'Üç net adımda teslimat',
+    howSub: 'Karmaşadan uzak, her ekranda bir sonraki adıma odaklanan yapı.',
+    h1Title: 'Yolunuzu seçin',
+    h1Desc: 'Mağazadan alışveriş yapın, bağımsız gönderi oluşturun veya DAZREVO asistanıyla taslak hazırlayın.',
+    h2Title: 'Karşılaştırın ve onaylayın',
+    h2Desc: 'Ürünleri ve konumu doğrulayın ya da gelen kurye tekliflerinden size uygun olanı seçin.',
+    h3Title: 'Teslimata kadar takip edin',
+    h3Desc: 'Hazırlık ve yola çıkış bildirimlerini alın, kurye konumunu anlık görüntüleyin.',
+    dlKicker: 'Resmi Android Sürümü',
+    dlTitle: 'DAZREVO deneyimini başlatın',
+    dlDesc: 'Müşteriler, kuryeler ve mağazalar için imzalı resmi Android uygulamasını doğrudan indirin.',
+    dlStatus: 'Resmi imzalı sürüm · Doğrudan APK indirme',
+    lightLabel: 'Açık Mod',
+    darkLabel: 'Koyu Mod',
+  }
+};
+
+const previews = {
+  ar: {
+    customer: {
+      kicker: 'توصيل مستقل · مسار نشط',
+      title: 'اختر العرض الأنسب لغرضك',
+      sub: 'تم تحديد نقطتي الاستلام والتسليم بدقة 4.2 كم',
+      from: 'الاستلام: حي الشهباء — نقطة محددة',
+      to: 'التسليم: المنزل — إحداثيات محفوظة',
+      offers: [
+        { name: 'عرض موصى به · سائق معتمد', meta: 'دراجة نارية · تقييم موثق', price: '12,500 SYP', featured: true },
+        { name: 'عرض بديل · سائق متاح', meta: 'سيارة صغيرة · قريب من نقطة الاستلام', price: '15,000 SYP', featured: false }
+      ]
+    },
+    driver: {
+      kicker: 'لوحة السائق · متصل الآن',
+      title: 'الطلبات المتاحة في مدينتك',
+      sub: 'مشاركة الموقع نشطة كل 30 ثانية للطلبات الجارية',
+      from: 'طلب توصيل مستقل · 3.8 كم',
+      to: 'أرسل عرض الأجرة المباشر للعميل',
+      offers: [
+        { name: 'طلب متجر جاهز للاستلام', meta: 'استلام فوري وتوصيل للعنوان', price: 'جاهز', featured: true },
+        { name: 'توصيل طرد خاص', meta: 'بانتظار تحديد أجرة السائق', price: 'قدّم عرضك', featured: false }
+      ]
+    },
+    vendor: {
+      kicker: 'لوحة المتجر · إدارة الطلبات',
+      title: 'تسلسل تجهيز واضح للطلبات',
+      sub: 'انتقال سلس من القبول إلى التحضير ثم الجاهزية',
+      from: 'طلب جديد #DZ-4082 · بانتظار القبول',
+      to: 'الدفع نقداً عند الاستلام',
+      offers: [
+        { name: 'قيد التجهيز · 3 منتجات', meta: 'تحديث الحالة بنقرة واحدة', price: 'جاهز للاستلام', featured: true },
+        { name: 'كتالوج المنتجات النشطة', meta: 'إضافة وتعديل المنتجات والأسعار', price: 'مفعّل', featured: false }
+      ]
+    }
+  },
+  en: {
+    customer: {
+      kicker: 'Independent Delivery · Active Route',
+      title: 'Compare offers and pick your driver',
+      sub: 'Pickup and drop-off verified · 4.2 km route',
+      from: 'Pickup: Verified GPS origin',
+      to: 'Drop-off: Saved address coordinates',
+      offers: [
+        { name: 'Lowest Fare · Approved Driver', meta: 'Motorcycle · Ready for pickup', price: '12,500 SYP', featured: true },
+        { name: 'Alternative Offer · Nearby', meta: 'Compact car · Available now', price: '15,000 SYP', featured: false }
+      ]
+    },
+    driver: {
+      kicker: 'Driver Cockpit · Online',
+      title: 'Available city requests',
+      sub: 'Location telemetry active while approved & online',
+      from: 'Independent parcel · 3.8 km',
+      to: 'Submit a transparent fare bid',
+      offers: [
+        { name: 'Store order ready for pickup', meta: 'Instant claim workflow', price: 'Claim', featured: true },
+        { name: 'Peer parcel delivery', meta: 'Awaiting driver fare offer', price: 'Bid Fare', featured: false }
+      ]
+    },
+    vendor: {
+      kicker: 'Merchant Console · Order Queue',
+      title: 'Streamlined kitchen & dispatch flow',
+      sub: 'Accept, prepare, and mark ready in one tap',
+      from: 'Incoming order #DZ-4082',
+      to: 'Cash on delivery confirmed',
+      offers: [
+        { name: 'Preparing · 3 catalog items', meta: 'Single-tap status progression', price: 'Mark Ready', featured: true },
+        { name: 'Active Store Catalog', meta: 'Manage localized titles & pricing', price: 'Live', featured: false }
+      ]
+    }
+  },
+  tr: {
+    customer: {
+      kicker: 'Bağımsız Teslimat · Aktif Rota',
+      title: 'Teklifleri karşılaştırın ve seçin',
+      sub: 'Alım ve teslimat konumu doğrulandı · 4.2 km',
+      from: 'Alım: Doğrulanmış GPS noktası',
+      to: 'Teslimat: Kayıtlı adres koordinatı',
+      offers: [
+        { name: 'En Uygun Teklif · Onaylı Kurye', meta: 'Motosiklet · Teslim almaya hazır', price: '12,500 SYP', featured: true },
+        { name: 'Alternatif Teklif · Yakında', meta: 'Araç · Şu an müsait', price: '15,000 SYP', featured: false }
+      ]
+    },
+    driver: {
+      kicker: 'Kurye Paneli · Çevrimiçi',
+      title: 'Şehirdeki mevcut talepler',
+      sub: 'Çevrimiçi konum paylaşımı aktif',
+      from: 'Bağımsız gönderi · 3.8 km',
+      to: 'Şeffaf ücret teklifi gönderin',
+      offers: [
+        { name: 'Mağaza siparişi hazır', meta: 'Tek dokunuşla teslim al', price: 'Teslim Al', featured: true },
+        { name: 'Özel paket gönderimi', meta: 'Kurye teklifi bekleniyor', price: 'Teklif Ver', featured: false }
+      ]
+    },
+    vendor: {
+      kicker: 'Mağaza Paneli · Sipariş Akışı',
+      title: 'Düzenli hazırlık ve teslim süreci',
+      sub: 'Kabul, hazırlık ve hazır aşamaları',
+      from: 'Yeni sipariş #DZ-4082',
+      to: 'Kapıda nakit ödeme',
+      offers: [
+        { name: 'Hazırlanıyor · 3 ürün', meta: 'Tek dokunuşla durum güncelle', price: 'Hazır', featured: true },
+        { name: 'Aktif Ürün Kataloğu', meta: 'Ürün ve fiyat yönetimi', price: 'Aktif', featured: false }
+      ]
+    }
+  }
+};
+
+let currentLang = 'ar';
+let currentPreview = 'customer';
+
+function renderPreview() {
+  const stage = document.getElementById('previewStage');
+  if (!stage) return;
+  const data = (previews[currentLang] || previews.ar)[currentPreview];
+  stage.textContent = '';
+
+  const card = document.createElement('div');
+  card.className = 'atelier-card';
+
+  const head = document.createElement('div');
+  head.className = 'atelier-card-head';
+  const kicker = document.createElement('span');
+  kicker.className = 'atelier-kicker';
+  kicker.textContent = data.kicker;
+  head.appendChild(kicker);
+
+  const title = document.createElement('h3');
+  title.className = 'atelier-title';
+  title.textContent = data.title;
+
+  const sub = document.createElement('p');
+  sub.className = 'atelier-sub';
+  sub.textContent = data.sub;
+
+  const route = document.createElement('div');
+  route.className = 'route-diagram';
+
+  const stop1 = document.createElement('div');
+  stop1.className = 'route-stop';
+  const pin1 = document.createElement('span');
+  pin1.className = 'route-pin';
+  const txt1 = document.createElement('span');
+  txt1.textContent = data.from;
+  stop1.append(pin1, txt1);
+
+  const stop2 = document.createElement('div');
+  stop2.className = 'route-stop';
+  const pin2 = document.createElement('span');
+  pin2.className = 'route-pin end';
+  const txt2 = document.createElement('span');
+  txt2.textContent = data.to;
+  stop2.append(pin2, txt2);
+
+  route.append(stop1, stop2);
+  card.append(head, title, sub, route);
+  stage.appendChild(card);
+
+  for (const offer of data.offers) {
+    const row = document.createElement('div');
+    row.className = 'offer-row' + (offer.featured ? ' featured' : '');
+    const left = document.createElement('div');
+    const nameEl = document.createElement('div');
+    nameEl.style.fontSize = '13px';
+    nameEl.style.fontWeight = '700';
+    nameEl.textContent = offer.name;
+    const metaEl = document.createElement('div');
+    metaEl.style.fontSize = '11px';
+    metaEl.style.color = '#98A0AB';
+    metaEl.textContent = offer.meta;
+    left.append(nameEl, metaEl);
+
+    const priceEl = document.createElement('span');
+    priceEl.className = 'offer-price';
+    priceEl.textContent = offer.price;
+    row.append(left, priceEl);
+    stage.appendChild(row);
+  }
+}
+
+function applyLanguage(lang) {
+  currentLang = lang;
+  const dict = i18n[lang] || i18n.ar;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = dict.dir;
+
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    if (!key || !dict[key]) return;
+    if (key === 'heroTitle') {
+      el.innerHTML = dict[key];
+    } else {
+      el.textContent = dict[key];
+    }
+  });
+
+  const dlStatus = document.getElementById('downloadStatus');
+  if (dlStatus) dlStatus.textContent = dict.dlStatus;
+
+  const isDark = document.documentElement.classList.contains('dark');
+  const themeLabel = document.getElementById('themeLabel');
+  if (themeLabel) themeLabel.textContent = isDark ? dict.lightLabel : dict.darkLabel;
+
+  document.querySelectorAll('[data-lang]').forEach((btn) => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+  });
+  renderPreview();
+}
+
+document.querySelectorAll('[data-lang]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    applyLanguage(btn.getAttribute('data-lang') || 'ar');
+  });
+});
+
+document.querySelectorAll('[data-preview]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    currentPreview = btn.getAttribute('data-preview') || 'customer';
+    document.querySelectorAll('[data-preview]').forEach((b) => {
+      b.classList.toggle('active', b === btn);
+    });
+    renderPreview();
+  });
+});
+
+const themeBtn = document.getElementById('themeToggle');
+if (themeBtn) {
+  themeBtn.addEventListener('click', () => {
+    const root = document.documentElement;
+    root.classList.toggle('dark');
+    const isDark = root.classList.contains('dark');
+    const dict = i18n[currentLang] || i18n.ar;
+    const themeLabel = document.getElementById('themeLabel');
+    if (themeLabel) themeLabel.textContent = isDark ? dict.lightLabel : dict.darkLabel;
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) metaTheme.setAttribute('content', isDark ? '#090B0E' : '#F7F6F2');
+  });
+}
+
+applyLanguage('ar');
+</script>
 </body>
 </html>

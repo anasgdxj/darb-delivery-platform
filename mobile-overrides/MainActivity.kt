@@ -41,13 +41,11 @@ class MainActivity : FlutterActivity() {
                             val oldId = prefs.getLong(DarbUpdateDownloadReceiver.KEY_DOWNLOAD_ID, -1L)
                             if (oldId > 0L) (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).remove(oldId)
                             val request = DownloadManager.Request(Uri.parse(url))
-                                .setTitle("تحديث دازريفو")
+                                .setTitle("تحديث دَرْب")
                                 .setDescription("جارٍ تنزيل الإصدار $version")
                                 .setAllowedOverMetered(true)
                                 .setAllowedOverRoaming(true)
-                                // VISIBILITY_HIDDEN requires the privileged DOWNLOAD_WITHOUT_NOTIFICATION permission.
-                                // Use a normal system notification so downloads work on standard Android devices.
-                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
                                 .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "darb-update-$version.apk")
                             val id = (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
                             prefs.edit().putLong(DarbUpdateDownloadReceiver.KEY_DOWNLOAD_ID, id)
@@ -103,7 +101,7 @@ class MainActivity : FlutterActivity() {
         val uri = Uri.parse(uriText)
         val installIntent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
-            clipData = ClipData.newUri(contentResolver, "DAZREVO APK update", uri)
+            clipData = ClipData.newUri(contentResolver, "Darb APK update", uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(installIntent)
@@ -128,7 +126,7 @@ class MainActivity : FlutterActivity() {
         val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", apk)
         val installIntent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
-            clipData = ClipData.newUri(contentResolver, "DAZREVO APK update", uri)
+            clipData = ClipData.newUri(contentResolver, "Darb APK update", uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(installIntent)

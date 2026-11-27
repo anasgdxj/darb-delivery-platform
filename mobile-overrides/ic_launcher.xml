@@ -1,82 +1,55 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
 
-    <!-- Smoked Obsidian gradient base -->
-    <path android:pathData="M0,0h108v108h-108z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="12"
-                android:startY="8"
-                android:endX="98"
-                android:endY="102">
-                <item android:offset="0.0" android:color="#FF0C0D0F" />
-                <item android:offset="0.55" android:color="#FF14171D" />
-                <item android:offset="1.0" android:color="#FF1E222B" />
-            </gradient>
-        </aapt:attr>
-    </path>
+    <!-- Nocturne Atelier Deep Obsidian Background -->
+    <path
+        android:fillColor="#090B0E"
+        android:pathData="M0,0h1024v1024h-1024z" />
 
-    <!-- Warm Champagne Brass & Mineral Teal sheen -->
-    <path android:pathData="M56,52m-44,0a44,44 0,1 1,88 0a44,44 0,1 1,-88 0">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="radial"
-                android:centerX="56"
-                android:centerY="52"
-                android:gradientRadius="44">
-                <item android:offset="0.0" android:color="#38D6B46C" />
-                <item android:offset="0.56" android:color="#1F3FD1BE" />
-                <item android:offset="1.0" android:color="#000C0D0F" />
-            </gradient>
-        </aapt:attr>
-    </path>
+    <!-- Elevated Architectural Inner Plate -->
+    <path
+        android:fillColor="#11151B"
+        android:pathData="M140,260 C140,193.7 193.7,140 260,140 L764,140 C830.3,140 884,193.7 884,260 L884,764 C884,830.3 830.3,884 764,884 L260,884 C193.7,884 140,830.3 140,764 Z" />
 
-    <!-- Subtle architectural calibration ring -->
+    <!-- Subtle Champagne Architectural Frame -->
     <path
-        android:pathData="M54,54m-35,0a35,35 0,1 1,70 0a35,35 0,1 1,-70 0"
-        android:strokeWidth="1.25"
-        android:strokeColor="#33E7D3A3" />
+        android:fillColor="#00000000"
+        android:strokeColor="#2A323F"
+        android:strokeWidth="6"
+        android:pathData="M140,260 C140,193.7 193.7,140 260,140 L764,140 C830.3,140 884,193.7 884,260 L884,764 C884,830.3 830.3,884 764,884 L260,884 C193.7,884 140,830.3 140,764 Z" />
 
-    <!-- Architectural chamfered ivory D crest -->
+    <!-- Architectural Orbital Track Arc -->
     <path
-        android:fillColor="#FFF7F4EC"
-        android:pathData="M33,25 L57,25 L80,42 L80,66 L57,83 L33,83 L42.5,72 L54.5,72 L68.5,61.5 L68.5,46.5 L54.5,36 L42.5,36 Z" />
+        android:fillColor="#00000000"
+        android:strokeColor="#3A3122"
+        android:strokeWidth="5"
+        android:pathData="M512,216 A296,296 0 1,1 511.9,216 Z" />
 
-    <!-- Double-bevel Champagne Brass route chevron -->
+    <!-- Kinetic Route Spine (Vertical Precision Pillar) -->
     <path
-        android:pathData="M28,36 L52,54 L28,72"
-        android:strokeWidth="4.6"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#FFD6B46C" />
-    <path
-        android:pathData="M34,45 L45.5,54 L34,63"
-        android:strokeWidth="2.0"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#B8E7D3A3" />
+        android:fillColor="#DFBE7D"
+        android:pathData="M312,298 L374,298 L374,726 L312,726 Z" />
 
-    <!-- Champagne origin & destination anchor pins -->
+    <!-- Outer Champagne "D" Kinetic Ribbon -->
     <path
-        android:fillColor="#FFD6B46C"
-        android:pathData="M28,36m-4.0,0a4.0,4.0 0,1 1,8.0 0a4.0,4.0 0,1 1,-8.0 0" />
-    <path
-        android:fillColor="#FFD6B46C"
-        android:pathData="M28,72m-4.0,0a4.0,4.0 0,1 1,8.0 0a4.0,4.0 0,1 1,-8.0 0" />
+        android:fillColor="#DFBE7D"
+        android:pathData="M398,298 L544,298 C662,298 738,384 738,512 C738,640 662,726 544,726 L398,726 L398,656 L536,656 C618,656 668,598 668,512 C668,426 618,368 536,368 L398,368 Z" />
 
-    <!-- Mineral Teal telemetry nexus core -->
+    <!-- Inner Precision Route Accent Chevron -->
     <path
-        android:fillColor="#423FD1BE"
-        android:pathData="M53,54m-9.6,0a9.6,9.6 0,1 1,19.2 0a9.6,9.6 0,1 1,-19.2 0" />
+        android:fillColor="#C6A15B"
+        android:pathData="M438,444 L526,444 C568,444 594,472 594,512 C594,552 568,580 526,580 L438,580 L438,530 L520,530 C536,530 546,522 546,512 C546,502 536,494 520,494 L438,494 Z" />
+
+    <!-- Warm Ivory Waypoint Beacon -->
     <path
-        android:fillColor="#FF3FD1BE"
-        android:pathData="M53,54m-5.8,0a5.8,5.8 0,1 1,11.6 0a5.8,5.8 0,1 1,-11.6 0" />
+        android:fillColor="#F5F2EB"
+        android:pathData="M343,234 m-26,0 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0" />
+
+    <!-- Champagne Destination Node -->
     <path
-        android:fillColor="#FF0C0D0F"
-        android:pathData="M53,54m-2.2,0a2.2,2.2 0,1 1,4.4 0a2.2,2.2 0,1 1,-4.4 0" />
+        android:fillColor="#DFBE7D"
+        android:pathData="M712,312 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0" />
 </vector>

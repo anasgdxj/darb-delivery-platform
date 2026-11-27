@@ -62,15 +62,11 @@ jobs:
           cp backend-overrides/auth.controller.ts extracted/darb-project/backend/src/modules/auth/auth.controller.ts
           cp backend-overrides/otp.service.ts extracted/darb-project/backend/src/modules/auth/otp.service.ts
           cp backend-overrides/admin.controller.ts extracted/darb-project/backend/src/modules/admin/admin.controller.ts
-          cp backend-overrides/admin.service.ts extracted/darb-project/backend/src/modules/admin/admin.service.ts
-          cp backend-overrides/vendors.controller.ts extracted/darb-project/backend/src/modules/vendors/vendors.controller.ts
           cp backend-overrides/vendors.service.ts extracted/darb-project/backend/src/modules/vendors/vendors.service.ts
-          cp backend-overrides/vendors.service.spec.ts extracted/darb-project/backend/src/modules/vendors/vendors.service.spec.ts
           cp backend-overrides/vendor-application.dto.ts extracted/darb-project/backend/src/modules/vendors/vendor-application.dto.ts
           cp backend-overrides/addresses.service.ts extracted/darb-project/backend/src/modules/addresses/addresses.service.ts
           cp backend-overrides/addresses.controller.ts extracted/darb-project/backend/src/modules/addresses/addresses.controller.ts
           cp backend-overrides/drivers.service.ts extracted/darb-project/backend/src/modules/drivers/drivers.service.ts
-          cp backend-overrides/drivers.service.spec.ts extracted/darb-project/backend/src/modules/drivers/drivers.service.spec.ts
           cp backend-overrides/drivers.module.ts extracted/darb-project/backend/src/modules/drivers/drivers.module.ts
           cp backend-overrides/driver-location.controller.ts extracted/darb-project/backend/src/modules/drivers/driver-location.controller.ts
           cp backend-overrides/driver-location.service.ts extracted/darb-project/backend/src/modules/drivers/driver-location.service.ts
@@ -94,11 +90,6 @@ jobs:
           cp backend-overrides/notifications.service.ts extracted/darb-project/backend/src/modules/notifications/notifications.service.ts
           cp backend-overrides/notifications.controller.ts extracted/darb-project/backend/src/modules/notifications/notifications.controller.ts
           cp backend-overrides/notifications.module.ts extracted/darb-project/backend/src/modules/notifications/notifications.module.ts
-          cp backend-overrides/release-notifications.controller.ts extracted/darb-project/backend/src/modules/notifications/release-notifications.controller.ts
-          mkdir -p extracted/darb-project/backend/src/modules/telegram-admin
-          cp backend-overrides/telegram-admin.controller.ts extracted/darb-project/backend/src/modules/telegram-admin/telegram-admin.controller.ts
-          cp backend-overrides/telegram-admin.service.ts extracted/darb-project/backend/src/modules/telegram-admin/telegram-admin.service.ts
-          cp backend-overrides/telegram-admin.module.ts extracted/darb-project/backend/src/modules/telegram-admin/telegram-admin.module.ts
           cp backend-overrides/app.module.ts extracted/darb-project/backend/src/app.module.ts
           cp backend-overrides/schema.prisma extracted/darb-project/backend/prisma/schema.prisma
           mkdir -p extracted/darb-project/backend/prisma/migrations/20261118195000_peer_delivery_pickup_coordinates

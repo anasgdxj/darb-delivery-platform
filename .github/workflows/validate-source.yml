@@ -7,10 +7,7 @@ on:
       - ".github/workflows/validate-source.yml"
       - ".github/workflows/build-android-release.yml"
       - "mobile-overrides/**"
-      - "backend/**"
       - "backend-overrides/**"
-      - "darb-workspace/darb-project/mobile/**"
-      - "darb-workspace/darb-project/backend/**"
   workflow_dispatch:
 
 permissions:
@@ -30,22 +27,98 @@ jobs:
           set -euo pipefail
           test -s DARB-source.zip
           unzip -q DARB-source.zip -d extracted
-          rm -rf extracted/darb-project/mobile/lib/screens extracted/darb-project/mobile/lib/core extracted/darb-project/mobile/lib/features
-          mkdir -p extracted/darb-project/mobile/lib extracted/darb-project/mobile/test
-          cp -r mobile-overrides/lib/. extracted/darb-project/mobile/lib/
-          cp mobile-overrides/test/widget_test.dart extracted/darb-project/mobile/test/widget_test.dart
+          dart_file="extracted/darb-project/mobile/lib/screens/app_shell.dart"
+          if grep -Fq "cityId:cityId))));}}" "$dart_file"; then
+            sed -i "s/cityId:cityId))));}}/cityId:cityId)))));}}/" "$dart_file"
+          fi
+          if grep -Fq "cityId:cityId))));}}" "$dart_file"; then
+            echo "::error::Vendor navigation syntax patch did not apply"
+            exit 1
+          fi
+          echo "Applied Dart syntax repair to vendor navigation."
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("extracted/darb-project/mobile/lib/screens/app_shell.dart")
+          s = p.read_text()
+          old = "    final city = widget.kind == 'drivers' ? row['city']?['code']?.toString() ?? '' : '';"
+          new = "    final cityData = row['city'];\n    final city = widget.kind == 'drivers' && cityData is Map ? cityData['code']?.toString() ?? '' : '';"
+          p.write_text(s.replace(old, new))
+          PY
+          cp mobile-overrides/api.dart extracted/darb-project/mobile/lib/core/api.dart
+          cp mobile-overrides/login_screen.dart extracted/darb-project/mobile/lib/screens/login_screen.dart
+          cp mobile-overrides/city_carousel.dart extracted/darb-project/mobile/lib/screens/city_carousel.dart
           bash mobile-overrides/prepare_city_assets.sh extracted/darb-project/mobile
-          mkdir -p extracted/darb-project/backend
-          cp darb-workspace/darb-project/backend/package.json extracted/darb-project/backend/package.json
-          cp darb-workspace/darb-project/backend/package-lock.json extracted/darb-project/backend/package-lock.json
-          cp darb-workspace/darb-project/backend/nest-cli.json extracted/darb-project/backend/nest-cli.json
-          cp darb-workspace/darb-project/backend/tsconfig.json extracted/darb-project/backend/tsconfig.json
-          cp -R backend/src/. extracted/darb-project/backend/src/
+          cp mobile-overrides/main.dart extracted/darb-project/mobile/lib/main.dart
+          cp mobile-overrides/design_system.dart extracted/darb-project/mobile/lib/design_system.dart
+          cp mobile-overrides/localizations.dart extracted/darb-project/mobile/lib/localizations.dart
+          mkdir -p extracted/darb-project/backend/src/modules/orders
+          mkdir -p extracted/darb-project/backend/src/modules/notifications
+          cp backend-overrides/orders.service.spec.ts extracted/darb-project/backend/src/modules/orders/orders.service.spec.ts
+          cp backend-overrides/orders.service.ts extracted/darb-project/backend/src/modules/orders/orders.service.ts
+          cp backend-overrides/sms.providers.ts extracted/darb-project/backend/src/modules/auth/sms/sms.providers.ts
+          cp backend-overrides/auth.service.ts extracted/darb-project/backend/src/modules/auth/auth.service.ts
+          cp backend-overrides/auth.controller.ts extracted/darb-project/backend/src/modules/auth/auth.controller.ts
+          cp backend-overrides/otp.service.ts extracted/darb-project/backend/src/modules/auth/otp.service.ts
+          cp backend-overrides/otp.service.spec.ts extracted/darb-project/backend/src/modules/auth/otp.service.spec.ts
+          cp backend-overrides/auth.service.spec.ts extracted/darb-project/backend/src/modules/auth/auth.service.spec.ts
+          cp backend-overrides/orders.tracking.service.spec.ts extracted/darb-project/backend/src/modules/orders/orders.tracking.service.spec.ts
+          cp backend-overrides/driver-location.service.spec.ts extracted/darb-project/backend/src/modules/drivers/driver-location.service.spec.ts
+          cp backend-overrides/notifications.service.spec.ts extracted/darb-project/backend/src/modules/notifications/notifications.service.spec.ts
+          cp backend-overrides/admin.controller.ts extracted/darb-project/backend/src/modules/admin/admin.controller.ts
+          cp backend-overrides/vendors.service.ts extracted/darb-project/backend/src/modules/vendors/vendors.service.ts
+          cp backend-overrides/vendor-application.dto.ts extracted/darb-project/backend/src/modules/vendors/vendor-application.dto.ts
+          cp backend-overrides/addresses.service.ts extracted/darb-project/backend/src/modules/addresses/addresses.service.ts
+          cp backend-overrides/addresses.controller.ts extracted/darb-project/backend/src/modules/addresses/addresses.controller.ts
+          cp backend-overrides/drivers.service.ts extracted/darb-project/backend/src/modules/drivers/drivers.service.ts
+          cp backend-overrides/drivers.module.ts extracted/darb-project/backend/src/modules/drivers/drivers.module.ts
+          cp backend-overrides/driver-location.controller.ts extracted/darb-project/backend/src/modules/drivers/driver-location.controller.ts
+          cp backend-overrides/driver-location.service.ts extracted/darb-project/backend/src/modules/drivers/driver-location.service.ts
+          cp backend-overrides/orders.module.ts extracted/darb-project/backend/src/modules/orders/orders.module.ts
+          cp backend-overrides/orders.tracking.controller.ts extracted/darb-project/backend/src/modules/orders/orders.tracking.controller.ts
+          cp backend-overrides/orders.tracking.service.ts extracted/darb-project/backend/src/modules/orders/orders.tracking.service.ts
+          mkdir -p extracted/darb-project/backend/src/modules/notifications extracted/darb-project/backend/src/modules/health
+          cp backend/src/modules/health/* extracted/darb-project/backend/src/modules/health/
+          cp backend-overrides/notifications.service.ts extracted/darb-project/backend/src/modules/notifications/notifications.service.ts
+          cp backend-overrides/notifications.controller.ts extracted/darb-project/backend/src/modules/notifications/notifications.controller.ts
+          cp backend-overrides/notifications.module.ts extracted/darb-project/backend/src/modules/notifications/notifications.module.ts
+          cp backend-overrides/orders.controller.ts extracted/darb-project/backend/src/modules/orders/orders.controller.ts
+          mkdir -p extracted/darb-project/backend/src/modules/ai-order-assistant
+          cp backend-overrides/ai-order-assistant.module.ts extracted/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.module.ts
+          mkdir -p extracted/darb-project/backend/src/modules/ai-role-assistant
+          cp backend-overrides/ai-role-assistant.module.ts extracted/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.module.ts
+          cp backend-overrides/ai-role-assistant.controller.ts extracted/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.controller.ts
+          cp backend-overrides/ai-role-assistant.service.ts extracted/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.service.ts
+          cp backend-overrides/ai-text-provider.ts extracted/darb-project/backend/src/modules/ai-role-assistant/ai-text-provider.ts
+          cp backend-overrides/gemini-ai-text-provider.ts extracted/darb-project/backend/src/modules/ai-role-assistant/gemini-ai-text-provider.ts
+          cp backend-overrides/ai-order-assistant.controller.ts extracted/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.controller.ts
+          cp backend-overrides/ai-order-assistant.service.ts extracted/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.service.ts
+          cp backend-overrides/ai-order-assistant.service.spec.ts extracted/darb-project/backend/src/modules/ai-order-assistant/ai-order-assistant.service.spec.ts
+          cp backend-overrides/ai-role-assistant.service.spec.ts extracted/darb-project/backend/src/modules/ai-role-assistant/ai-role-assistant.service.spec.ts
+          cp backend-overrides/gemini-ai-text-provider.spec.ts extracted/darb-project/backend/src/modules/ai-role-assistant/gemini-ai-text-provider.spec.ts
+          cp backend-overrides/app.module.ts extracted/darb-project/backend/src/app.module.ts
+          mkdir -p extracted/darb-project/backend/prisma/migrations/20261117170000_firebase_devices
+          cp backend-overrides/firebase-devices.migration.sql extracted/darb-project/backend/prisma/migrations/20261117170000_firebase_devices/migration.sql
+          mkdir -p extracted/darb-project/backend/prisma/migrations/20261117180000_seed_syrian_cities
+          cp backend-overrides/syrian-cities.migration.sql extracted/darb-project/backend/prisma/migrations/20261117180000_seed_syrian_cities/migration.sql
+          cp mobile-overrides/app_shell.dart extracted/darb-project/mobile/lib/screens/app_shell.dart
+          cp mobile-overrides/admin_screens.dart extracted/darb-project/mobile/lib/screens/admin_screens.dart
+          cp mobile-overrides/customer_screens.dart extracted/darb-project/mobile/lib/screens/customer_screens.dart
+          cp mobile-overrides/peer_delivery_screen.dart extracted/darb-project/mobile/lib/screens/peer_delivery_screen.dart
+          cp mobile-overrides/vendor_screens.dart extracted/darb-project/mobile/lib/screens/vendor_screens.dart
+          cp mobile-overrides/driver_screens.dart extracted/darb-project/mobile/lib/screens/driver_screens.dart
+          cp mobile-overrides/account_screens.dart extracted/darb-project/mobile/lib/screens/account_screens.dart
+          cp mobile-overrides/account_pages.dart extracted/darb-project/mobile/lib/screens/account_pages.dart
+          cp mobile-overrides/notifications.dart extracted/darb-project/mobile/lib/notifications.dart
+          cp mobile-overrides/app_update.dart extracted/darb-project/mobile/lib/app_update.dart
+          mkdir -p extracted/darb-project/backend/prisma/migrations/20261117160000_google_accounts
+          cp backend-overrides/google-accounts.migration.sql extracted/darb-project/backend/prisma/migrations/20261117160000_google_accounts/migration.sql
           cp backend-overrides/schema.prisma extracted/darb-project/backend/prisma/schema.prisma
-          mkdir -p extracted/darb-project/backend/prisma/migrations
-          cp -R backend/prisma/migrations/. extracted/darb-project/backend/prisma/migrations/
+          mkdir -p extracted/darb-project/backend/prisma/migrations/20261118195000_peer_delivery_pickup_coordinates
+          cp backend-overrides/pickup-coordinates.migration.sql extracted/darb-project/backend/prisma/migrations/20261118195000_peer_delivery_pickup_coordinates/migration.sql
+          mkdir -p extracted/darb-project/backend/prisma/migrations/20261119120000_delivery_offers
+          cp backend-overrides/delivery-offers.migration.sql extracted/darb-project/backend/prisma/migrations/20261119120000_delivery_offers/migration.sql
           bash backend-overrides/prepare-source.sh extracted/darb-project
-          echo "Applied modular backend and mobile sources."
+          echo "Applied backend order tests and MsgPlus diagnostics."
           echo "Extracted files:"
           find extracted -maxdepth 4 -type f | sort | head -250
 
@@ -123,13 +196,13 @@ jobs:
           deps = {
               "google_sign_in": "  google_sign_in: ^6.2.1",
               "geolocator": "  geolocator: ^13.0.2",
-              "flutter_map": "  flutter_map: ^7.0.2",
-              "latlong2": "  latlong2: ^0.9.1",
               "url_launcher": "  url_launcher: ^6.3.1",
               "firebase_core": "  firebase_core: ^3.8.1",
               "firebase_messaging": "  firebase_messaging: ^15.1.6",
               "package_info_plus": "  package_info_plus: ^8.1.2",
               "crypto": "  crypto: ^3.0.6",
+              "flutter_map": "  flutter_map: ^7.0.2",
+              "latlong2": "  latlong2: ^0.9.1",
           }
           lines = s.splitlines()
           dep = next((i for i, line in enumerate(lines) if line.strip() == "dependencies:"), None)
@@ -154,7 +227,7 @@ jobs:
           flutter pub get
             if ! flutter analyze --no-pub --no-fatal-infos --no-fatal-warnings; then
               echo "::group::Dart syntax context: app_shell.dart lines 25-33"
-              nl -ba lib/features/shell/app_shell.dart | sed -n '25,33p' | fold -w 160
+              nl -ba lib/screens/app_shell.dart | sed -n '25,33p' | fold -w 160
               echo "::endgroup::"
               exit 1
             fi

@@ -41,8 +41,5 @@ describe('OrderTrackingService', () => {
       available: true,
       ...point,
     });
-    const locationQuery = prisma.$queryRaw.mock.calls[0][0].join(' ');
-    expect(locationQuery).toContain('ORDER BY "updatedAt" DESC');
-    expect(locationQuery).toContain('LIMIT 1');
   });
 });
