@@ -2466,7 +2466,16 @@ void main() {
             matching: find.byType(Scrollable),
           )
           .first;
-      debugPrint('[AddressesWidgetTest] view=${tester.view.physicalSize} media=${tester.widget<MediaQuery>(find.byType(MediaQuery).last).data.size} scaffold=${tester.getSize(find.byType(Scaffold).first)} list=${tester.getSize(find.byType(ListView).first)} scrollables=${find.byType(Scrollable).evaluate().length}');
+      debugPrint(
+        '[AddressesWidgetTest] view=${tester.view.physicalSize} '
+        'media=${tester.widget<MediaQuery>(find.byType(MediaQuery).last).data.size} '
+        'scaffold=${tester.getSize(find.byType(Scaffold).first)} '
+        'ambient=${tester.getSize(find.byType(DarbAmbientBackground).first)} '
+        'refresh=${tester.getSize(find.byType(RefreshIndicator).first)} '
+        'center=${tester.getSize(find.byType(Center).first)} '
+        'constrained=${tester.getSize(find.byType(ConstrainedBox).first)} '
+        'list=${tester.getSize(find.byType(ListView).first)}',
+      );
       final addressScrollState = tester.state<ScrollableState>(addressScrollable);
       expect(
         addressScrollState.position.viewportDimension,
