@@ -3515,26 +3515,18 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final autoTitle = find.text('التحديث التلقائي للتطبيق');
-      final autoTile = find.ancestor(
-        of: autoTitle,
-        matching: find.byType(DarbSettingsTile),
-      );
-      await tester.ensureVisible(autoTile);
+      final autoSwitch = find.byKey(const ValueKey('auto-update-switch'));
+      await tester.ensureVisible(autoSwitch);
       await tester.pumpAndSettle();
-      await tester.tap(autoTile);
+      await tester.tap(autoSwitch);
       await tester.pumpAndSettle();
       expect(DarbUpdater.instance.autoUpdateEnabled, isFalse);
       expect(nativePrefs['auto_update_enabled'], isFalse);
 
-      final wifiTitle = find.text('التنزيل عبر Wi-Fi فقط');
-      final wifiTile = find.ancestor(
-        of: wifiTitle,
-        matching: find.byType(DarbSettingsTile),
-      );
-      await tester.ensureVisible(wifiTile);
+      final wifiSwitch = find.byKey(const ValueKey('wifi-only-switch'));
+      await tester.ensureVisible(wifiSwitch);
       await tester.pumpAndSettle();
-      await tester.tap(wifiTile);
+      await tester.tap(wifiSwitch);
       await tester.pumpAndSettle();
       expect(DarbUpdater.instance.wifiOnly, isFalse);
       expect(nativePrefs['wifi_only'], isFalse);
