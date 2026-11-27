@@ -45,6 +45,11 @@ services:
       cp backend-overrides/notifications.service.ts .render-build/darb-project/backend/src/modules/notifications/notifications.service.ts &&
       cp backend-overrides/notifications.controller.ts .render-build/darb-project/backend/src/modules/notifications/notifications.controller.ts &&
       cp backend-overrides/notifications.module.ts .render-build/darb-project/backend/src/modules/notifications/notifications.module.ts &&
+      mkdir -p .render-build/darb-project/backend/src/modules/telegram-admin &&
+      cp backend-overrides/telegram-admin.module.ts .render-build/darb-project/backend/src/modules/telegram-admin/telegram-admin.module.ts &&
+      cp backend-overrides/telegram-admin.controller.ts .render-build/darb-project/backend/src/modules/telegram-admin/telegram-admin.controller.ts &&
+      cp backend-overrides/telegram-admin.service.ts .render-build/darb-project/backend/src/modules/telegram-admin/telegram-admin.service.ts &&
+      cp backend-overrides/release-notifications.controller.ts .render-build/darb-project/backend/src/modules/notifications/release-notifications.controller.ts &&
       cp backend-overrides/app.module.ts .render-build/darb-project/backend/src/app.module.ts &&
       mkdir -p .render-build/darb-project/backend/prisma/migrations/20261117170000_firebase_devices &&
       cp backend-overrides/firebase-devices.migration.sql .render-build/darb-project/backend/prisma/migrations/20261117170000_firebase_devices/migration.sql &&
