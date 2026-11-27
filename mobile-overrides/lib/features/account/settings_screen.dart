@@ -474,6 +474,114 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _openAutomaticUpdateSettings() async {
+    if (kDarbPlayStoreBuild) return;
+    final saved = await DarbUpdater.instance.getAutomaticUpdateSettings();
+    var enabled = saved['enabled'] ?? true;
+    var wifiOnly = saved['wifiOnly'] ?? true;
+
+    if (!mounted) return;
+    await showDarbGlassModalSheet<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) {
+          Future<void> persist({bool? nextEnabled, bool? nextWifiOnly}) async {
+            final previousEnabled = enabled;
+            final previousWifiOnly = wifiOnly;
+            setSheet(() {
+              enabled = nextEnabled ?? enabled;
+              wifiOnly = nextWifiOnly ?? wifiOnly;
+            });
+            try {
+              await DarbUpdater.instance.saveAutomaticUpdateSettings(
+                enabled: enabled,
+                wifiOnly: wifiOnly,
+              );
+              if (enabled && !previousEnabled) {
+                unawaited(DarbUpdater.instance.runAutomaticUpdateCheck(force: true));
+              }
+            } catch (_) {
+              setSheet(() {
+                enabled = previousEnabled;
+                wifiOnly = previousWifiOnly;
+              });
+              if (ctx.mounted) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(content: Text(dt('تعذر حفظ إعدادات التحديث'))),
+                );
+              }
+            }
+          }
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                dt('التحديث التلقائي'),
+                style: TextStyle(
+                  color: DarbColors.inkOf(ctx),
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                dt('يحصل التطبيق على آخر إصدار تلقائياً، ويؤجل التنزيل حتى تتوفر الشبكة المسموح بها.'),
+                style: TextStyle(
+                  color: DarbColors.mutedOf(ctx),
+                  fontSize: 12.5,
+                  height: 1.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                value: enabled,
+                onChanged: (value) => persist(nextEnabled: value),
+                title: Text(
+                  dt('تفعيل التحديث التلقائي'),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                subtitle: Text(dt('فحص الإصدارات الجديدة وبدء تنزيلها تلقائياً')),
+              ),
+              const Divider(height: 12),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                value: wifiOnly,
+                onChanged: enabled
+                    ? (value) => persist(nextWifiOnly: value)
+                    : null,
+                title: Text(
+                  dt('التنزيل عبر Wi-Fi فقط'),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                subtitle: Text(
+                  dt('عند التفعيل لن يستخدم تنزيل التحديث بيانات الهاتف، وسيبقى منتظراً حتى تتوفر شبكة Wi-Fi.'),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                dt('لأمان Android، سيطلب النظام موافقتك على تثبيت كل إصدار بعد اكتمال التنزيل والتحقق منه.'),
+                style: TextStyle(
+                  color: DarbColors.mutedOf(ctx),
+                  fontSize: 11.5,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 14),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(dt('تم')),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   Future<void> _checkUpdates() async {
     if (_checkingUpdates) return;
     setState(() => _checkingUpdates = true);
@@ -978,6 +1086,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   )
                                 : null,
                             onTap: _checkUpdates,
+                          ),
+                        if (!kDarbPlayStoreBuild)
+                          DarbSettingsTile(
+                            icon: Icons.wifi_tethering_rounded,
+                            accentColor: DarbColors.primaryOf(context),
+                            title: dt('التحديث التلقائي عبر Wi-Fi'),
+                            subtitle: dt('تنزيل الإصدارات الجديدة تلقائياً دون استهلاك بيانات الهاتف'),
+                            onTap: _openAutomaticUpdateSettings,
                           ),
                         DarbSettingsTile(
                           icon: Icons.logout_rounded,

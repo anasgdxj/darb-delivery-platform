@@ -23,6 +23,9 @@ class MainActivity : FlutterActivity() {
         private const val CHANNEL = "com.darb/update"
         private const val HIGH_NOTIFICATION_CHANNEL_ID = "dazrevo_high_importance"
         private const val FALLBACK_NOTIFICATION_CHANNEL_ID = "fcm_fallback_notification_channel"
+        private const val UPDATE_PREFS = "darb_update_preferences"
+        private const val KEY_AUTO_UPDATE_ENABLED = "auto_update_enabled"
+        private const val KEY_WIFI_ONLY = "wifi_only"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +65,26 @@ class MainActivity : FlutterActivity() {
                 try {
                     when (call.method) {
                         "installApk" -> installFileApk(call.argument<String>("path"), result)
+                        "getUpdatePreferences" -> {
+                            val prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE)
+                            result.success(mapOf(
+                                "enabled" to prefs.getBoolean(KEY_AUTO_UPDATE_ENABLED, true),
+                                "wifiOnly" to prefs.getBoolean(KEY_WIFI_ONLY, true)
+                            ))
+                        }
+                        "setUpdatePreferences" -> {
+                            val enabled = call.argument<Boolean>("enabled")
+                            val wifiOnly = call.argument<Boolean>("wifiOnly")
+                            if (enabled == null || wifiOnly == null) {
+                                result.error("INVALID_PREFERENCES", "Both update preferences are required", null)
+                                return@setMethodCallHandler
+                            }
+                            getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE).edit()
+                                .putBoolean(KEY_AUTO_UPDATE_ENABLED, enabled)
+                                .putBoolean(KEY_WIFI_ONLY, wifiOnly)
+                                .apply()
+                            result.success(true)
+                        }
                         "startBackgroundDownload" -> {
                             val url = call.argument<String>("url")
                             val sha = call.argument<String>("sha256")?.lowercase()
@@ -75,11 +98,18 @@ class MainActivity : FlutterActivity() {
                             val prefs = getSharedPreferences(DarbUpdateDownloadReceiver.PREFS, MODE_PRIVATE)
                             val oldId = prefs.getLong(DarbUpdateDownloadReceiver.KEY_DOWNLOAD_ID, -1L)
                             if (oldId > 0L) (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).remove(oldId)
+                            val updatePreferences = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE)
+                            val wifiOnly = updatePreferences.getBoolean(KEY_WIFI_ONLY, true)
+                            val allowedNetworks = if (wifiOnly) {
+                                DownloadManager.Request.NETWORK_WIFI
+                            } else {
+                                DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE
+                            }
                             val request = DownloadManager.Request(Uri.parse(url))
                                 .setTitle("تحديث دازريفو")
                                 .setDescription("جارٍ تنزيل الإصدار $version")
-                                .setAllowedOverMetered(true)
-                                .setAllowedOverRoaming(true)
+                                .setAllowedNetworkTypes(allowedNetworks)
+                                .setAllowedOverRoaming(false)
                                 // VISIBILITY_HIDDEN requires the privileged DOWNLOAD_WITHOUT_NOTIFICATION permission.
                                 // Use a normal system notification so downloads work on standard Android devices.
                                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)

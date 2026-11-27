@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/l10n/app_localizations.dart';
 import 'core/network/api_client.dart';
 import 'core/services/notifications_service.dart';
+import 'core/services/app_update_service.dart';
 import 'core/storage/local_cache.dart';
 import 'core/theme/darb_design_system.dart';
 import 'core/widgets/darb_components.dart';
@@ -23,10 +26,35 @@ Future<void> main() async {
   runApp(const DarbApp());
 }
 
-class DarbApp extends StatelessWidget {
+class DarbApp extends StatefulWidget {
   const DarbApp({super.key, this.initialScreen});
 
   final Widget? initialScreen;
+
+  @override
+  State<DarbApp> createState() => _DarbAppState();
+}
+
+class _DarbAppState extends State<DarbApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(DarbUpdater.instance.runAutomaticUpdateCheck());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(DarbUpdater.instance.runAutomaticUpdateCheck());
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +99,7 @@ class DarbApp extends StatelessWidget {
               child: child,
             );
           },
-          home: initialScreen ?? const _DarbSplashGate(),
+          home: widget.initialScreen ?? const _DarbSplashGate(),
         );
       },
     );
