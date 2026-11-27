@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'core/api.dart';
 
 @pragma('vm:entry-point')
@@ -9,6 +10,24 @@ Future<void> darbFirebaseBackgroundHandler(RemoteMessage message) async {}
 class DarbNotifications {
   static bool _ready = false;
   static StreamSubscription<String>? _tokenSubscription;
+  static StreamSubscription<RemoteMessage>? _openedMessageSubscription;
+  static final ValueNotifier<bool> updateNotificationTapped =
+      ValueNotifier<bool>(false);
+
+  static bool _isReleaseNotification(RemoteMessage message) {
+    final data = message.data;
+    return data['releaseTag'] == 'latest' ||
+        data['type'] == 'app_update' ||
+        data['type'] == 'release_update' ||
+        (data.containsKey('versionCode') &&
+            (data.containsKey('apkUrl') || data.containsKey('releaseTag')));
+  }
+
+  static void _handleOpenedMessage(RemoteMessage message) {
+    if (_isReleaseNotification(message)) {
+      updateNotificationTapped.value = true;
+    }
+  }
 
   static Future<void> initialize() async {
     const apiKey = String.fromEnvironment('FIREBASE_API_KEY');
@@ -21,6 +40,13 @@ class DarbNotifications {
         apiKey: apiKey, appId: appId, messagingSenderId: senderId, projectId: projectId,
       ));
       FirebaseMessaging.onBackgroundMessage(darbFirebaseBackgroundHandler);
+      _openedMessageSubscription ??=
+          FirebaseMessaging.onMessageOpenedApp.listen(_handleOpenedMessage);
+      final initialMessage =
+          await FirebaseMessaging.instance.getInitialMessage();
+      if (initialMessage != null) {
+        _handleOpenedMessage(initialMessage);
+      }
       _ready = true;
     } catch (_) {
       _ready = false;
