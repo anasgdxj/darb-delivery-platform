@@ -66,7 +66,7 @@ class PageAudit(HTMLParser):
             self.ids.add(a["id"])
         for key in ("href", "src"):
             value = a.get(key)
-            if value:
+            if value and not (tag == "base" and key == "href"):
                 self.references.append((key, value))
         if tag == "meta":
             name = (a.get("name") or "").lower()
