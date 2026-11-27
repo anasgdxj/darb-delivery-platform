@@ -55,7 +55,7 @@ class DarbUpdater {
   bool checkFailed = false;
 
   Future<Map<String, bool>> getAutomaticUpdateSettings() async {
-    if (kDarbPlayStoreBuild) {
+    if (kDarbPlayStoreBuild || !Platform.isAndroid) {
       return const {'enabled': false, 'wifiOnly': true};
     }
     try {
@@ -83,7 +83,7 @@ class DarbUpdater {
   }
 
   Future<void> runAutomaticUpdateCheck() async {
-    if (kDarbPlayStoreBuild) return;
+    if (kDarbPlayStoreBuild || !Platform.isAndroid) return;
     try {
       final settings = await getAutomaticUpdateSettings();
       if (settings['enabled'] != true) return;
