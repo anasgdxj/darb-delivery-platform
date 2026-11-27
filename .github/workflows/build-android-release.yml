@@ -120,7 +120,10 @@ jobs:
                   android:resource="@drawable/ic_notification" />
               <meta-data
                   android:name="com.google.firebase.messaging.default_notification_color"
-                  android:resource="@color/dazrevo_accent" />"""
+                  android:resource="@color/dazrevo_accent" />
+              <meta-data
+                  android:name="com.google.firebase.messaging.default_notification_channel_id"
+                  android:value="dazrevo_updates" />"""
           if "DarbUpdateDownloadReceiver" not in m:
               m = m.replace("</application>", receiver + "\n    </application>", 1)
           if "androidx.core.content.FileProvider" not in m:
