@@ -10,3 +10,4 @@ This file records the explicit publication request for the verified DAZREVO cust
 Publish the signed APK and its matching app-update.json as the public latest release. The application source is unchanged by this release-trigger document; the release workflow rebuilds and verifies the exact main-branch source before replacing latest.
 
 - Publication trigger: [publish-apk]
+- DAZREVO release build: 8daeade9f6f26271c2dc2efb6a0f7e0404d0e3a1 — signed APK and AAB verified; publish this rebuilt release.
