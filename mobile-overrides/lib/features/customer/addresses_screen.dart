@@ -458,8 +458,9 @@ class _AddressesScreenState extends State<AddressesScreen> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 680),
-              child: _loading
-                  ? const DarbStateView.loading()
+              child: SizedBox.expand(
+                child: _loading
+                    ? const DarbStateView.loading()
                   : _error != null
                       ? DarbStateView.error(message: _error, onRetry: _load)
                       : _addresses.isEmpty
@@ -583,6 +584,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                                   ],
                               ],
                             ),
+                ),
             ),
           ),
         ),
