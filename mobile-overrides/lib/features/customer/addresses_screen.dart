@@ -337,7 +337,19 @@ class _AddressesScreenState extends State<AddressesScreen> {
         '/addresses',
         'customer_addresses',
       );
-      final list = (res.data as List? ?? [])
+      if (kDebugMode) {
+        debugPrint(
+          '[AddressesScreen] responseType=${res.data.runtimeType}, '
+          'isList=${res.data is List}, fromCache=${res.fromCache}',
+        );
+        if (res.data is List) {
+          debugPrint(
+            '[AddressesScreen] responseLength=${(res.data as List).length}, '
+            'itemTypes=${(res.data as List).map((item) => item.runtimeType).toList()}',
+          );
+        }
+      }
+      final list = (res.data is List ? res.data as List : const [])
           .whereType<Map<String, dynamic>>()
           .toList();
       if (!mounted) return;
@@ -347,7 +359,11 @@ class _AddressesScreenState extends State<AddressesScreen> {
       });
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.message);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('[AddressesScreen] load failed: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
       if (mounted) {
         setState(() => _error = dt('حدث خطأ غير متوقع، حاول مجدداً'));
       }
