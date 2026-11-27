@@ -1,12 +1,11 @@
 # Release trigger
 
-This file records the explicit publication request for the verified DAZREVO Any Request shopping-delivery release.
+This file records the explicit publication request for the verified DAZREVO customer-order refresh fix.
 
-- Source commit: 56e02ceb043c16a4a62d134f214a83e00cae2ba6
-- Backend validation: 45904289332 — passed.
-- Source archive validation: 45904289435 — passed.
-- Flutter validation: 45904289391 — passed.
-- Signed Android release build: 45904289392 — passed.
+- Application source commit: e246b7244844b504214a97abe0544457d4ecc5f7
+- Flutter analysis and tests: 45964609786 — passed.
+- Source archive validation and build: 45964609905 — passed.
+- Signed Android release build: 45964609882 — passed; APK and AAB artifacts uploaded.
 
 Publish the signed APK and its matching app-update.json as the public latest release. The application source is unchanged by this release-trigger document; the release workflow rebuilds and verifies the exact main-branch source before replacing latest.
 
