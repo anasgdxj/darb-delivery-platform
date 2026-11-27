@@ -29,8 +29,12 @@ describe('GeminiAiTextProvider', () => {
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const answer = await provider.generate({
-      systemPrompt: 'مساعد دَرْب',
+      systemPrompt: 'مساعد دازريفو',
       context: { activeOrders: 2 },
+      history: [
+        { role: 'user', content: 'مرحبا' },
+        { role: 'assistant', content: 'أهلاً بك' },
+      ],
       message: 'كم طلباً لدي؟',
     });
 
@@ -41,9 +45,34 @@ describe('GeminiAiTextProvider', () => {
     expect(options.headers['x-goog-api-key']).toBe('test-gemini-key');
     const requestBody = JSON.parse(options.body);
     const systemInstruction = requestBody.systemInstruction.parts[0].text as string;
-    const userMessage = requestBody.contents[0].parts[0].text as string;
+    const userMessage = requestBody.contents[2].parts[0].text as string;
     expect(systemInstruction).toContain('"activeOrders":2');
+    expect(requestBody.contents[0]).toEqual({ role: 'user', parts: [{ text: 'مرحبا' }] });
+    expect(requestBody.contents[1]).toEqual({ role: 'model', parts: [{ text: 'أهلاً بك' }] });
     expect(userMessage).toBe('كم طلباً لدي؟');
+    expect(requestBody.generationConfig.temperature).toBeUndefined();
+  });
+
+  it('defaults to gemini-3.8-flash when GEMINI_MODEL is empty or unset', async () => {
+    config.get = jest.fn((key: string) => {
+      if (key === 'GEMINI_API_KEY') return 'test-gemini-key';
+      if (key === 'GEMINI_MODEL') return '  ';
+      return undefined;
+    }) as unknown as ConfigService['get'];
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: 'حسناً' }] } }] }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await provider.generate({
+      systemPrompt: 'مساعد',
+      context: {},
+      message: 'مرحبا',
+    });
+
+    const [url] = fetchMock.mock.calls[0];
+    expect(url).toContain('/v1beta/models/gemini-3.8-flash:generateContent');
   });
 
   it('fails closed when the API key is missing', async () => {
@@ -66,6 +95,6 @@ describe('GeminiAiTextProvider', () => {
       systemPrompt: 'مساعد',
       context: {},
       message: 'مرحبا',
-    })).rejects.toThrow('مساعد دَرْب غير متاح حالياً');
+    })).rejects.toThrow('مساعد دازريفو غير متاح حالياً');
   });
 });
