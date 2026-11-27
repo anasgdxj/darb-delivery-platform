@@ -204,7 +204,7 @@ if "admin/" in root_html or "بوابة الإدارة" in root_html or "دخو�
 
 for page in MARKETING_PAGES:
     page_html = (ROOT / page).read_text(encoding="utf-8")
-    if re.search(r'href=["\\'](?:\\./|\\.\\./)app/', page_html):
+    if 'href="./app/' in page_html or 'href="../app/' in page_html:
         fail(f"{page.as_posix()} must not advertise the unfinished web portal as a live service")
 
 portal_html = (ROOT / "app/index.html").read_text(encoding="utf-8")
