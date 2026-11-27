@@ -145,7 +145,7 @@ class DarbUpdater {
   Future<Map<String, bool>> getAutomaticUpdateSettings() async {
     await restorePreferences(force: true);
     return <String, bool>{
-      'enabled': autoUpdateEnabled,
+      autoUpdatePrefKey: autoUpdateEnabled,
       wifiOnlyPrefKey: wifiOnly,
     };
   }
@@ -185,7 +185,7 @@ class DarbUpdater {
     } catch (_) {}
     try {
       await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
-        'wifiOnly': wifiOnly,
+        wifiOnlyPrefKey: wifiOnly,
       });
     } catch (_) {}
   }
