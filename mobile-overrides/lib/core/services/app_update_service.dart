@@ -53,6 +53,7 @@ class DarbUpdater {
   String? downloadedApkPath;
   bool _checking = false;
   bool checkFailed = false;
+  DateTime? _lastAutomaticCheckAt;
 
   Future<Map<String, bool>> getAutomaticUpdateSettings() async {
     if (kDarbPlayStoreBuild || !Platform.isAndroid) {
@@ -82,11 +83,17 @@ class DarbUpdater {
     });
   }
 
-  Future<void> runAutomaticUpdateCheck() async {
+  Future<void> runAutomaticUpdateCheck({bool force = false}) async {
     if (kDarbPlayStoreBuild || !Platform.isAndroid) return;
+    final now = DateTime.now();
+    if (!force && _lastAutomaticCheckAt != null &&
+        now.difference(_lastAutomaticCheckAt!) < const Duration(minutes: 10)) {
+      return;
+    }
     try {
       final settings = await getAutomaticUpdateSettings();
       if (settings['enabled'] != true) return;
+      _lastAutomaticCheckAt = now;
 
       await checkForUpdate();
       final info = availableUpdate.value;
