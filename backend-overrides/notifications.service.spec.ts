@@ -180,6 +180,41 @@ describe('NotificationsService', () => {
     expect(result.pushSent).toBe(501);
   });
 
+  it('sends a visible notification payload with high Android priority for closed-app release alerts', async () => {
+    prisma.userDevice.findMany.mockResolvedValueOnce([
+      { userId: 'user-closed-app', token: 'token-closed-app' },
+    ]);
+    const sendEachForMulticast = jest.fn().mockResolvedValueOnce({
+      successCount: 1,
+      failureCount: 0,
+      responses: [{ success: true }],
+    });
+    (service as any).messaging = { sendEachForMulticast };
+
+    await service.broadcastRelease({
+      releaseTag: 'latest',
+      versionCode: 1403,
+      versionName: '1.0.1403',
+      apkUrl: 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+    });
+
+    expect(sendEachForMulticast).toHaveBeenCalledWith({
+      tokens: ['token-closed-app'],
+      notification: {
+        title: 'تحديث جديد لتطبيق دَرْب',
+        body: 'الإصدار 1.0.1403 أصبح متاحاً. افتح دَرْب لتثبيته.',
+      },
+      data: {
+        type: 'APP_UPDATE',
+        releaseTag: 'latest',
+        versionCode: '1403',
+        versionName: '1.0.1403',
+        apkUrl: 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+      },
+      android: { priority: 'high' },
+    });
+  });
+
   it('prunes invalid release tokens and reports other FCM delivery failures', async () => {
     prisma.userDevice.findMany.mockResolvedValueOnce([
       { userId: 'user-1', token: 'token-valid' },
