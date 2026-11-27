@@ -2358,6 +2358,7 @@ void main() {
 
       final addressRequestPaths = <String>[];
       var addressResponseServed = false;
+      var notificationResponseServed = false;
       Api.instance.httpClientOverride = MockClient((request) async {
         final path = request.url.path;
         addressRequestPaths.add(path);
@@ -2411,6 +2412,7 @@ void main() {
           );
         }
         if (path.endsWith('/notifications')) {
+          notificationResponseServed = true;
           return _utf8Response(
             jsonEncode({
               'unreadCount': 1,
@@ -2419,7 +2421,8 @@ void main() {
                   'id': 'n-1',
                   'title': 'تم قبول طلبك',
                   'body': 'المتجر بدأ بتجهيز الطلب رقم DRB-101',
-                  'isRead': false,
+                  'type': 'ORDER_ACCEPTED',
+                  'readAt': null,
                   'createdAt': '2026-11-26T09:00:00Z',
                 },
               ],
@@ -2594,18 +2597,41 @@ void main() {
 
       // 5. NotificationsScreen
       await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
-          child: DarbApp(
-            key: ValueKey('sp-notifications'),
-            initialScreen: NotificationsScreen(),
+        const SizedBox(
+          width: 320,
+          height: 640,
+          child: MediaQuery(
+            data: MediaQueryData(
+              size: Size(320, 640),
+              disableAnimations: true,
+            ),
+            child: DarbApp(
+              key: ValueKey('sp-notifications'),
+              initialScreen: NotificationsScreen(),
+            ),
           ),
         ),
       );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
+      // The screen loads its feed asynchronously in initState. Pump the
+      // bounded viewport until the mocked endpoint has answered, without
+      // pumpAndSettle because the live unread indicator intentionally pulses.
+      for (var attempt = 0;
+          attempt < 10 && !notificationResponseServed;
+          attempt++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(
+        notificationResponseServed,
+        isTrue,
+        reason: 'NotificationsScreen must request and receive /notifications.',
+      );
       expect(find.byType(DarbCommandStage), findsOneWidget);
-      expect(find.text('تم قبول طلبك'), findsOneWidget);
+      expect(
+        find.text('تم قبول طلبك'),
+        findsOneWidget,
+        reason: 'The notification title must render after the feed response.',
+      );
       expect(tester.takeException(), isNull);
     });
   });
