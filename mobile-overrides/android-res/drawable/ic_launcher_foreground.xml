@@ -4,47 +4,32 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Subtle calibration ring inside 66dp adaptive safe zone -->
+    <!-- DAZREVO route monogram: a precise D-shaped path with a live route. -->
     <path
-        android:pathData="M54,54m-31,0a31,31 0,1 1,62 0a31,31 0,1 1,-62 0"
-        android:strokeWidth="1.15"
-        android:strokeColor="#30E7D3A3" />
-
-    <!-- Architectural chamfered ivory D crest -->
-    <path
-        android:fillColor="#FFF7F4EC"
-        android:pathData="M33,25 L57,25 L80,42 L80,66 L57,83 L33,83 L42.5,72 L54.5,72 L68.5,61.5 L68.5,46.5 L54.5,36 L42.5,36 Z" />
-
-    <!-- Double-bevel Champagne Brass route chevron -->
-    <path
-        android:pathData="M28,36 L52,54 L28,72"
-        android:strokeWidth="4.6"
+        android:pathData="M31,25 L31,83 M31,25 L52,25 C70,25 81,37 81,54 C81,71 70,83 52,83 L31,83"
+        android:strokeColor="#FFF7F4EC"
+        android:strokeWidth="7.2"
         android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#FFD6B46C" />
+        android:strokeLineJoin="round" />
+
+    <!-- Route line crossing the monogram, finished in Champagne Brass. -->
     <path
-        android:pathData="M34,45 L45.5,54 L34,63"
-        android:strokeWidth="2.0"
+        android:pathData="M41,68 C49,62 57,53 68,40"
+        android:strokeColor="#FFC6A875"
+        android:strokeWidth="5.2"
         android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#B8E7D3A3" />
+        android:strokeLineJoin="round" />
 
-    <!-- Champagne origin & destination anchor pins -->
+    <!-- Origin waypoint -->
     <path
-        android:fillColor="#FFD6B46C"
-        android:pathData="M28,36m-4.0,0a4.0,4.0 0,1 1,8.0 0a4.0,4.0 0,1 1,-8.0 0" />
-    <path
-        android:fillColor="#FFD6B46C"
-        android:pathData="M28,72m-4.0,0a4.0,4.0 0,1 1,8.0 0a4.0,4.0 0,1 1,-8.0 0" />
+        android:fillColor="#FFC6A875"
+        android:pathData="M41,68 m-4.4,0 a4.4,4.4 0,1 1,8.8 0 a4.4,4.4 0,1 1,-8.8 0" />
 
-    <!-- Mineral Teal telemetry nexus core -->
+    <!-- Destination beacon -->
     <path
-        android:fillColor="#423FD1BE"
-        android:pathData="M53,54m-9.6,0a9.6,9.6 0,1 1,19.2 0a9.6,9.6 0,1 1,-19.2 0" />
+        android:fillColor="#FF36B6A0"
+        android:pathData="M68,40 m-6.2,0 a6.2,6.2 0,1 1,12.4 0 a6.2,6.2 0,1 1,-12.4 0" />
     <path
-        android:fillColor="#FF3FD1BE"
-        android:pathData="M53,54m-5.8,0a5.8,5.8 0,1 1,11.6 0a5.8,5.8 0,1 1,-11.6 0" />
-    <path
-        android:fillColor="#FF0C0D0F"
-        android:pathData="M53,54m-2.2,0a2.2,2.2 0,1 1,4.4 0a2.2,2.2 0,1 1,-4.4 0" />
+        android:fillColor="#FF171C20"
+        android:pathData="M68,40 m-2.2,0 a2.2,2.2 0,1 1,4.4 0 a2.2,2.2 0,1 1,-4.4 0" />
 </vector>

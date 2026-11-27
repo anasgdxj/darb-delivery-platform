@@ -3,53 +3,28 @@
     android:height="1024dp"
     android:viewportWidth="1024"
     android:viewportHeight="1024">
-
-    <!-- Nocturne Atelier Deep Obsidian Background -->
+    <path android:fillColor="#FF171C20" android:pathData="M0,0h1024v1024h-1024z" />
     <path
-        android:fillColor="#090B0E"
-        android:pathData="M0,0h1024v1024h-1024z" />
-
-    <!-- Elevated Architectural Inner Plate -->
-    <path
-        android:fillColor="#11151B"
+        android:fillColor="#FF222A2E"
         android:pathData="M140,260 C140,193.7 193.7,140 260,140 L764,140 C830.3,140 884,193.7 884,260 L884,764 C884,830.3 830.3,884 764,884 L260,884 C193.7,884 140,830.3 140,764 Z" />
-
-    <!-- Subtle Champagne Architectural Frame -->
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#2A323F"
-        android:strokeWidth="6"
+        android:strokeColor="#3A5552"
+        android:strokeWidth="7"
         android:pathData="M140,260 C140,193.7 193.7,140 260,140 L764,140 C830.3,140 884,193.7 884,260 L884,764 C884,830.3 830.3,884 764,884 L260,884 C193.7,884 140,830.3 140,764 Z" />
-
-    <!-- Architectural Orbital Track Arc -->
     <path
-        android:fillColor="#00000000"
-        android:strokeColor="#3A3122"
-        android:strokeWidth="5"
-        android:pathData="M512,216 A296,296 0 1,1 511.9,216 Z" />
-
-    <!-- Kinetic Route Spine (Vertical Precision Pillar) -->
+        android:pathData="M340,310 L340,714 M340,310 L512,310 C638,310 718,390 718,512 C718,634 638,714 512,714 L340,714"
+        android:strokeColor="#FFF7F4EC"
+        android:strokeWidth="48"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
     <path
-        android:fillColor="#DFBE7D"
-        android:pathData="M312,298 L374,298 L374,726 L312,726 Z" />
-
-    <!-- Outer Champagne "D" Kinetic Ribbon -->
-    <path
-        android:fillColor="#DFBE7D"
-        android:pathData="M398,298 L544,298 C662,298 738,384 738,512 C738,640 662,726 544,726 L398,726 L398,656 L536,656 C618,656 668,598 668,512 C668,426 618,368 536,368 L398,368 Z" />
-
-    <!-- Inner Precision Route Accent Chevron -->
-    <path
-        android:fillColor="#C6A15B"
-        android:pathData="M438,444 L526,444 C568,444 594,472 594,512 C594,552 568,580 526,580 L438,580 L438,530 L520,530 C536,530 546,522 546,512 C546,502 536,494 520,494 L438,494 Z" />
-
-    <!-- Warm Ivory Waypoint Beacon -->
-    <path
-        android:fillColor="#F5F2EB"
-        android:pathData="M343,234 m-26,0 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0" />
-
-    <!-- Champagne Destination Node -->
-    <path
-        android:fillColor="#DFBE7D"
-        android:pathData="M712,312 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0" />
+        android:pathData="M418,650 C470,610 535,535 626,426"
+        android:strokeColor="#FFC6A875"
+        android:strokeWidth="40"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path android:fillColor="#FFC6A875" android:pathData="M418,650 m-28,0 a28,28 0,1 1,56 0 a28,28 0,1 1,-56 0" />
+    <path android:fillColor="#FF36B6A0" android:pathData="M626,426 m-39,0 a39,39 0,1 1,78 0 a39,39 0,1 1,-78 0" />
+    <path android:fillColor="#FF171C20" android:pathData="M626,426 m-14,0 a14,14 0,1 1,28 0 a14,14 0,1 1,-28 0" />
 </vector>
