@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import sys
@@ -200,6 +201,36 @@ if "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/
     fail("The public home page must link to the official latest signed APK")
 if "admin/" in root_html or "بوابة الإدارة" in root_html or "دخول الإدارة" in root_html:
     fail("Admin portal links must not appear on the public home page")
+
+for page in MARKETING_PAGES:
+    page_html = (ROOT / page).read_text(encoding="utf-8")
+    if 'href="./app/' in page_html or 'href="../app/' in page_html:
+        fail(f"{page.as_posix()} must not advertise the unfinished web portal as a live service")
+
+portal_html = (ROOT / "app/index.html").read_text(encoding="utf-8")
+if 'class="web-portal-maintenance"' not in portal_html or 'name="robots" content="noindex,nofollow"' not in portal_html:
+    fail("The unfinished web portal must remain gated and excluded from search indexing")
+if "بوابة الويب قيد الإعداد" not in portal_html:
+    fail("The web portal maintenance notice is missing")
+
+manifest_path = ROOT / "app-update.json"
+if not manifest_path.is_file():
+    fail("Missing app-update.json; the public site cannot show the current Android release")
+else:
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if not isinstance(manifest.get("versionCode"), int) or manifest["versionCode"] < 1:
+            fail("app-update.json must contain a positive integer versionCode")
+        if not isinstance(manifest.get("versionName"), str) or not manifest["versionName"].strip():
+            fail("app-update.json must contain a non-empty versionName")
+        if manifest.get("apkUrl") != "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk":
+            fail("app-update.json must point to the official latest signed APK")
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", str(manifest.get("sha256", ""))):
+            fail("app-update.json must contain a valid 64-character SHA-256 digest")
+        if not isinstance(manifest.get("releaseNotes"), str) or not manifest["releaseNotes"].strip():
+            fail("app-update.json must contain release notes")
+    except Exception as exc:
+        fail(f"Invalid app-update.json: {exc}")
 
 sitemap = ROOT / "sitemap.xml"
 if not sitemap.is_file():

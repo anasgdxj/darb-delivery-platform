@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "index.html"
+      - "app-update.json"
       - "app/**"
       - "assets/**"
       - "en/**"
@@ -22,6 +23,7 @@ on:
     branches: [main]
     paths:
       - "index.html"
+      - "app-update.json"
       - "app/**"
       - "assets/**"
       - "en/**"
@@ -66,10 +68,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp index.html robots.txt sitemap.xml site.webmanifest dist/
+          cp index.html robots.txt sitemap.xml site.webmanifest app-update.json dist/
           cp -R assets app en tr faq drivers merchants privacy terms dist/
           touch dist/.nojekyll
           test -s dist/index.html
+          test -s dist/app-update.json
           test -s dist/assets/css/site.css
           test -s dist/assets/js/site.js
       - name: Upload GitHub Pages artifact
