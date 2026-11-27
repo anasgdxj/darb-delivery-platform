@@ -2450,9 +2450,20 @@ void main() {
         isTrue,
         reason: 'The addresses request must receive the fixture response; captured: $addressRequestPaths',
       );
-      expect(find.text('المنزل'), findsOneWidget);
+      final addressPasses = tester
+          .widgetList<DarbTicketPass>(find.byType(DarbTicketPass))
+          .toList();
+      expect(
+        addressPasses,
+        hasLength(2),
+        reason: 'Both saved addresses must render as spatial address passes.',
+      );
+      expect(
+        addressPasses.first.title,
+        'المنزل',
+        reason: 'The first address label must be preserved in its rendered pass.',
+      );
       expect(find.byType(DarbCommandStage), findsOneWidget);
-      expect(find.byType(DarbTicketPass), findsNWidgets(2));
       expect(tester.takeException(), isNull);
 
       // 2. CheckoutScreen
