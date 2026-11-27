@@ -2432,12 +2432,19 @@ void main() {
 
       // 1. AddressesScreen
       await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(
-            size: const Size(320, 640),
-            disableAnimations: true,
+        const SizedBox(
+          width: 320,
+          height: 640,
+          child: MediaQuery(
+            data: MediaQueryData(
+              size: Size(320, 640),
+              disableAnimations: true,
+            ),
+            child: DarbApp(
+              key: ValueKey('sp-addresses'),
+              initialScreen: AddressesScreen(),
+            ),
           ),
-          child: DarbApp(key: ValueKey('sp-addresses'), initialScreen: AddressesScreen()),
         ),
       );
       await tester.pump();
@@ -2459,6 +2466,7 @@ void main() {
             matching: find.byType(Scrollable),
           )
           .first;
+      debugPrint('[AddressesWidgetTest] view=${tester.view.physicalSize} media=${tester.widget<MediaQuery>(find.byType(MediaQuery).last).data.size} scaffold=${tester.getSize(find.byType(Scaffold).first)} list=${tester.getSize(find.byType(ListView).first)} scrollables=${find.byType(Scrollable).evaluate().length}');
       final addressScrollState = tester.state<ScrollableState>(addressScrollable);
       expect(
         addressScrollState.position.viewportDimension,
