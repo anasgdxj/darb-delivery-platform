@@ -67,6 +67,8 @@ jobs:
           cp "$ROOT/backend-overrides/telegram-admin.module.ts" "$B/src/modules/telegram-admin/telegram-admin.module.ts"
           cp "$ROOT/backend-overrides/telegram-admin.controller.ts" "$B/src/modules/telegram-admin/telegram-admin.controller.ts"
           cp "$ROOT/backend-overrides/telegram-admin.service.ts" "$B/src/modules/telegram-admin/telegram-admin.service.ts"
+          cp "$ROOT/backend-overrides/auth.service.spec.ts" "$B/src/modules/auth/auth.service.spec.ts"
+          cp "$ROOT/backend-overrides/ai-role-assistant.service.spec.ts" "$B/src/modules/ai-role-assistant/ai-role-assistant.service.spec.ts"
           cp "$ROOT/backend-overrides/otp.service.spec.ts" "$B/src/modules/auth/otp.service.spec.ts"
           cp "$ROOT/backend-overrides/auth.service.spec.ts" "$B/src/modules/auth/auth.service.spec.ts"
           cp "$ROOT/backend-overrides/orders.service.spec.ts" "$B/src/modules/orders/orders.service.spec.ts"
