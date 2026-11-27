@@ -12,8 +12,9 @@ After the feature is merged and the Render service has deployed, add these envir
 | `TELEGRAM_ADMIN_IDS` | Comma-separated numeric Telegram user IDs allowed to run admin commands. |
 | `TELEGRAM_WEBHOOK_SECRET` | A random secret with at least 32 characters. Use only letters, numbers, underscores, and hyphens. |
 | `TELEGRAM_WEBHOOK_URL` | `https://darb-api-yapv.onrender.com/api/v1/internal/telegram/webhook` |
+| `GITHUB_TOKEN` | Fine-grained GitHub token with read-only Contents access to `anasgdxj/darb-delivery-platform`. Required for reliable `/version` and `/releases` API access when the unauthenticated rate limit is exhausted. Keep it secret. |
 
-Use the same bot token already stored as the GitHub Actions `TELEGRAM_BOT_TOKEN` secret. Do not put the token in Git, source files, screenshots, or chat messages. Generate a fresh webhook secret in a password manager; do not reuse the bot token.
+Use the same bot token already stored as the GitHub Actions `TELEGRAM_BOT_TOKEN` secret. Create a fine-grained GitHub token limited to this repository with **Contents: Read-only**, then add it to Render as `GITHUB_TOKEN`; never commit or share it. Do not put the token in Git, source files, screenshots, or chat messages. Generate a fresh webhook secret in a password manager; do not reuse the bot token.
 
 The backend registers the webhook with Telegram on startup after all four variables are configured. No manual `setWebhook` request is required. A successful Render deploy and a startup log entry saying the webhook was registered are required before testing commands.
 
