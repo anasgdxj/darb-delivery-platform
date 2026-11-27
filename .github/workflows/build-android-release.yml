@@ -123,7 +123,7 @@ jobs:
                   android:resource="@color/dazrevo_accent" />
               <meta-data
                   android:name="com.google.firebase.messaging.default_notification_channel_id"
-                  android:value="dazrevo_updates" />"""
+                  android:value="dazrevo_high_importance" />"""
           if "DarbUpdateDownloadReceiver" not in m:
               m = m.replace("</application>", receiver + "\n    </application>", 1)
           if "androidx.core.content.FileProvider" not in m:
@@ -329,14 +329,15 @@ jobs:
           set -euo pipefail
           if [ -z "$GOOGLE_SERVER_CLIENT_ID" ]; then echo "::error::Missing GOOGLE_SERVER_CLIENT_ID"; exit 1; fi
           args=(--release --dart-define=GOOGLE_SERVER_CLIENT_ID="$GOOGLE_SERVER_CLIENT_ID")
-          if [ -n "$FIREBASE_API_KEY" ] && [ -n "$FIREBASE_APP_ID" ] && [ -n "$FIREBASE_MESSAGING_SENDER_ID" ] && [ -n "$FIREBASE_PROJECT_ID" ]; then
-            args+=(--dart-define=FIREBASE_API_KEY="$FIREBASE_API_KEY" --dart-define=FIREBASE_APP_ID="$FIREBASE_APP_ID" --dart-define=FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID")
-            echo "::notice::Firebase configuration secrets are present; FCM will be enabled in this build."
-            echo "Firebase configuration: present" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "::warning::Firebase secrets incomplete; notifications will be disabled in this build."
-            echo "Firebase configuration: incomplete (notifications disabled)" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          for name in FIREBASE_API_KEY FIREBASE_APP_ID FIREBASE_MESSAGING_SENDER_ID FIREBASE_PROJECT_ID; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing required repository secret: $name. Refusing to build an APK with push notifications disabled."
+              exit 1
+            fi
+          done
+          args+=(--dart-define=FIREBASE_API_KEY="$FIREBASE_API_KEY" --dart-define=FIREBASE_APP_ID="$FIREBASE_APP_ID" --dart-define=FIREBASE_MESSAGING_SENDER_ID="$FIREBASE_MESSAGING_SENDER_ID" --dart-define=FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID")
+          echo "::notice::Firebase configuration secrets are present; FCM is enabled in this build."
+          echo "Firebase configuration: present (required)" >> "$GITHUB_STEP_SUMMARY"
           flutter analyze lib --no-pub --no-fatal-infos --no-fatal-warnings
           mkdir -p "$HOME/.gradle"
           cat > "$HOME/.gradle/init.gradle" <<'GRADLE'
