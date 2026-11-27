@@ -1,7 +1,10 @@
 package com.darb.darb
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ClipData
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -18,6 +21,24 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val TAG = "DarbUpdater"
         private const val CHANNEL = "com.darb/update"
+        private const val DAZREVO_CHANNEL_ID = "dazrevo_updates"
+    }
+
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channel = NotificationChannel(
+                DAZREVO_CHANNEL_ID,
+                "تحديثات دازريفو",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "إشعارات تحديثات التطبيق والتنبيهات المهمة"
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
