@@ -516,6 +516,24 @@ jobs:
           git tag --force latest "$GITHUB_SHA"
           git push origin "refs/tags/latest:refs/tags/latest" --force
 
+      - name: Sync public website update manifest
+        if: github.ref == 'refs/heads/main' && ((github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]')))
+        shell: bash
+        run: |
+          set -euo pipefail
+          MANIFEST="extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json"
+          test -s "$MANIFEST"
+          install -m 0644 "$MANIFEST" app-update.json
+          if git diff --quiet -- app-update.json; then
+            echo "Website update manifest already matches the published release."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app-update.json
+          git commit -m "chore(release): sync DAZREVO website update manifest"
+          git push origin HEAD:main
+
       - name: Notify DAZREVO users about the published release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
