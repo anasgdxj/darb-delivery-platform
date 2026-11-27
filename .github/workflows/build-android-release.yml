@@ -510,6 +510,10 @@ jobs:
           else
             gh release create latest "$APK#app-release.apk" "$APK_DIR/app-update.json#app-update.json" --title "دازريفو (DAZREVO) — أحدث إصدار أندرويد" --notes "إصدار أندرويد الرسمي الموقّع من دازريفو (DAZREVO)."
           fi
+          # Keep the mutable latest Git tag aligned with the exact source commit
+          # used to build the APK; updating release assets alone does not move it.
+          git tag --force latest "$GITHUB_SHA"
+          git push origin "refs/tags/latest:refs/tags/latest" --force
 
       - name: Notify DAZREVO users about the published release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
