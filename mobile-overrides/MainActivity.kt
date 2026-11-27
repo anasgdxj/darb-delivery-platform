@@ -85,8 +85,8 @@ class MainActivity : FlutterActivity() {
                                 if (wifiOnly != null) putBoolean(KEY_WIFI_ONLY, wifiOnly)
                             }.apply()
                             result.success(mapOf(
-                                "enabled" to prefs.getBoolean(KEY_AUTO_UPDATE_ENABLED, true),
-                                "wifiOnly" to prefs.getBoolean(KEY_WIFI_ONLY, true)
+                                "auto_update_enabled" to prefs.getBoolean(KEY_AUTO_UPDATE_ENABLED, true),
+                                "wifi_only" to prefs.getBoolean(KEY_WIFI_ONLY, true)
                             ))
                         }
                         "startBackgroundDownload" -> {
