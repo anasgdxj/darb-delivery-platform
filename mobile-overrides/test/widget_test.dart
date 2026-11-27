@@ -2356,8 +2356,10 @@ void main() {
       darbLocale.value = const Locale('ar');
       Api.instance.setSessionForTest(accessToken: 'valid-token');
 
+      final addressRequestPaths = <String>[];
       Api.instance.httpClientOverride = MockClient((request) async {
         final path = request.url.path;
+        addressRequestPaths.add(path);
         if (path.endsWith('/addresses')) {
           return _utf8Response(
             jsonEncode([
@@ -2436,9 +2438,14 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle(const Duration(milliseconds: 50));
+      expect(
+        addressRequestPaths,
+        contains('/api/v1/addresses'),
+        reason: 'AddressesScreen must request the authenticated addresses endpoint; captured: $addressRequestPaths',
+      );
+      expect(find.text('المنزل'), findsOneWidget);
       expect(find.byType(DarbCommandStage), findsOneWidget);
       expect(find.byType(DarbTicketPass), findsNWidgets(2));
-      expect(find.text('المنزل'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       // 2. CheckoutScreen
@@ -2772,11 +2779,10 @@ void main() {
       );
       expect(vendorTitle, findsOneWidget);
       final bookmarkButton = find.byIcon(Icons.bookmark_border_rounded).first;
-      await tester.scrollUntilVisible(
-        bookmarkButton,
-        180,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await tester.ensureVisible(bookmarkButton);
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
+      expect(bookmarkButton, findsOneWidget);
+      expect(tester.getCenter(bookmarkButton).dy, inInclusiveRange(0.0, tester.view.physicalSize.height / tester.view.devicePixelRatio));
       await tester.tap(bookmarkButton);
       await tester.pump();
       expect(find.byIcon(Icons.bookmark_rounded), findsOneWidget);
