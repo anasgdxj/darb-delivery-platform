@@ -48,22 +48,52 @@ class DarbUpdater {
   final availableUpdate = ValueNotifier<DarbUpdateInfo?>(null);
   final downloadProgress = ValueNotifier<double?>(null);
   String? downloadedApkPath;
-  bool _checking = false;
+  Future<void>? _inFlightCheck;
+  bool _forceRequested = false;
   bool checkFailed = false;
 
+  Uri _cacheBustedUri(String value) {
+    final uri = Uri.parse(value);
+    final query = Map<String, String>.from(uri.queryParameters);
+    query['_dazrevo_cache_bust'] =
+        DateTime.now().microsecondsSinceEpoch.toString();
+    return uri.replace(queryParameters: query);
+  }
+
   Future<void> checkForUpdate({bool force = false}) async {
-    if (_checking) return;
-    _checking = true;
+    final activeCheck = _inFlightCheck;
+    if (activeCheck != null) {
+      _forceRequested = _forceRequested || force;
+      await activeCheck;
+      return;
+    }
+
+    _forceRequested = force;
+    final future = _performUpdateCheck();
+    _inFlightCheck = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_inFlightCheck, future)) {
+        _inFlightCheck = null;
+        _forceRequested = false;
+      }
+    }
+  }
+
+  Future<void> _performUpdateCheck() async {
     checkFailed = false;
     try {
       Map<String, dynamic>? decoded;
       try {
+        final releaseUri = _cacheBustedUri(_releaseApi);
         final response = await http.get(
-          Uri.parse(_releaseApi),
+          releaseUri,
           headers: const {
             'Accept': 'application/vnd.github+json',
             'X-GitHub-Api-Version': '2022-11-28',
-            'Cache-Control': 'no-cache',
+            'Cache-Control': 'no-cache, no-store, max-age=0',
+            'Pragma': 'no-cache',
           },
         ).timeout(const Duration(seconds: 12));
         if (response.statusCode == 200) {
@@ -80,9 +110,13 @@ class DarbUpdater {
             }
             final url = manifest?['browser_download_url']?.toString();
             if (url != null && url.startsWith('https://')) {
-              final manifestResponse = await http
-                  .get(Uri.parse(url))
-                  .timeout(const Duration(seconds: 12));
+              final manifestResponse = await http.get(
+                _cacheBustedUri(url),
+                headers: const {
+                  'Cache-Control': 'no-cache, no-store, max-age=0',
+                  'Pragma': 'no-cache',
+                },
+              ).timeout(const Duration(seconds: 12));
               if (manifestResponse.statusCode == 200) {
                 final value =
                     jsonDecode(utf8.decode(manifestResponse.bodyBytes));
@@ -96,8 +130,11 @@ class DarbUpdater {
       }
       if (decoded == null) {
         final fallback = await http.get(
-          Uri.parse(_fallbackManifest),
-          headers: const {'Cache-Control': 'no-cache'},
+          _cacheBustedUri(_fallbackManifest),
+          headers: const {
+            'Cache-Control': 'no-cache, no-store, max-age=0',
+            'Pragma': 'no-cache',
+          },
         ).timeout(const Duration(seconds: 12));
         if (fallback.statusCode != 200) {
           throw Exception('Update manifest unavailable');
@@ -119,9 +156,7 @@ class DarbUpdater {
       availableUpdate.value = info.versionCode > installedBuild ? info : null;
       checkFailed = false;
     } catch (_) {
-      if (force) checkFailed = true;
-    } finally {
-      _checking = false;
+      if (_forceRequested) checkFailed = true;
     }
   }
 
