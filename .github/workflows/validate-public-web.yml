@@ -1,53 +1,98 @@
-name: Validate DARB public website
+name: Validate and deploy DAZREVO public website
+
 on:
   pull_request:
     paths:
       - "index.html"
+      - "app/**"
+      - "assets/**"
+      - "en/**"
+      - "tr/**"
+      - "faq/**"
+      - "drivers/**"
+      - "merchants/**"
+      - "privacy/**"
+      - "terms/**"
+      - "robots.txt"
+      - "sitemap.xml"
+      - "site.webmanifest"
+      - "scripts/validate_public_website.py"
       - ".github/workflows/validate-public-web.yml"
   push:
     branches: [main]
     paths:
       - "index.html"
+      - "app/**"
+      - "assets/**"
+      - "en/**"
+      - "tr/**"
+      - "faq/**"
+      - "drivers/**"
+      - "merchants/**"
+      - "privacy/**"
+      - "terms/**"
+      - "robots.txt"
+      - "sitemap.xml"
+      - "site.webmanifest"
+      - "scripts/validate_public_website.py"
       - ".github/workflows/validate-public-web.yml"
   workflow_dispatch:
+
 permissions:
   contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   validate:
+    name: Validate pages, links, SEO, and scripts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Validate inline JavaScript
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Validate public website
+        run: python3 scripts/validate_public_website.py
+
+  build:
+    name: Package public website only
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Prepare GitHub Pages artifact
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          html = Path("index.html").read_text()
-          scripts = re.findall(r"<script>(.*?)</script>", html, re.S)
-          if len(scripts) != 1:
-              raise SystemExit(f"Expected exactly one inline script, found {len(scripts)}")
-          Path("/tmp/public.js").write_text(scripts[0])
-          PY
-          node --check /tmp/public.js
-      - name: Validate page structure and safe download behavior
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          html = Path("index.html").read_text()
-          required = [
-              'lang="ar" dir="rtl"',
-              'id="services"',
-              'id="how"',
-              'id="download"',
-              "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk",
-              "تنزيل تطبيق أندرويد",
-              "أحدث إصدار رسمي موقّع",
-          ]
-          missing = [item for item in required if item not in html]
-          if missing:
-              raise SystemExit("Missing public website requirements: " + ", ".join(missing))
-          if "app-debug.apk" in html:
-              raise SystemExit("Debug APK must never be exposed as an official download")
-          if "admin/" in html or "بوابة الإدارة" in html or "دخول الإدارة" in html:
-              raise SystemExit("Admin portal links must not appear on the public website")
-          PY
+          set -euo pipefail
+          mkdir -p dist
+          cp index.html robots.txt sitemap.xml site.webmanifest dist/
+          cp -R assets app en tr faq drivers merchants privacy terms dist/
+          touch dist/.nojekyll
+          test -s dist/index.html
+          test -s dist/assets/css/site.css
+          test -s dist/assets/js/site.js
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    name: Deploy DAZREVO website
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: \${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Publish verified website
+        id: deployment
+        uses: actions/deploy-pages@v4
