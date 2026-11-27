@@ -3515,26 +3515,27 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final autoTitle = find.text('التحديث التلقائي للتطبيق');
+      final autoSwitch = find.byKey(const ValueKey('auto-update-switch'));
       await tester.scrollUntilVisible(
-        autoTitle,
+        autoSwitch,
         250,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.ensureVisible(autoTitle);
-      await tester.tap(autoTitle);
+      await tester.pumpAndSettle();
+      await tester.tap(autoSwitch);
       await tester.pumpAndSettle();
       expect(DarbUpdater.instance.autoUpdateEnabled, isFalse);
       expect(nativePrefs['auto_update_enabled'], isFalse);
 
-      final wifiTitle = find.text('التنزيل عبر Wi-Fi فقط');
+      final wifiSwitch = find.byKey(const ValueKey('wifi-only-switch'));
       await tester.scrollUntilVisible(
-        wifiTitle,
+        wifiSwitch,
         250,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.ensureVisible(wifiTitle);
-      await tester.tap(wifiTitle);
+      await tester.pumpAndSettle();
+      expect(wifiSwitch, findsOneWidget);
+      await tester.tap(find.text('التنزيل عبر Wi-Fi فقط'));
       await tester.pumpAndSettle();
       expect(DarbUpdater.instance.wifiOnly, isFalse);
       expect(nativePrefs['wifi_only'], isFalse);

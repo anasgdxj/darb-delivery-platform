@@ -10,6 +10,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../l10n/app_localizations.dart';
+import '../storage/local_cache.dart';
 import '../theme/darb_design_system.dart';
 import '../widgets/darb_glass.dart';
 
@@ -43,6 +44,8 @@ class DarbUpdater {
   DarbUpdater._();
   static final instance = DarbUpdater._();
   static const _channel = MethodChannel('com.darb/update');
+  static const autoUpdatePrefKey = 'auto_update_enabled';
+  static const wifiOnlyPrefKey = 'wifi_only';
   static const _releaseApi =
       'https://api.github.com/repos/anasgdxj/darb-delivery-platform/releases/tags/latest';
   static const _fallbackManifest =
@@ -50,69 +53,141 @@ class DarbUpdater {
 
   final availableUpdate = ValueNotifier<DarbUpdateInfo?>(null);
   final downloadProgress = ValueNotifier<double?>(null);
+  final autoUpdateEnabledNotifier = ValueNotifier<bool>(true);
+  final wifiOnlyNotifier = ValueNotifier<bool>(true);
+
   String? downloadedApkPath;
-  bool _checking = false;
+  Future<void>? _inFlightCheck;
+  bool _inFlightForce = false;
   bool checkFailed = false;
-  DateTime? _lastAutomaticCheckAt;
+  bool _preferencesRestored = false;
+  int? _lastBackgroundVersionCode;
+
+  @visibleForTesting
+  http.Client? httpClientOverride;
+
+  @visibleForTesting
+  int? installedBuildOverride;
+
+  @visibleForTesting
+  String? supportDirPathOverride;
+
+  bool get autoUpdateEnabled => autoUpdateEnabledNotifier.value;
+  bool get wifiOnly => wifiOnlyNotifier.value;
+
+  @visibleForTesting
+  void debugResetForTest({
+    bool autoUpdateEnabled = true,
+    bool wifiOnly = true,
+  }) {
+    availableUpdate.value = null;
+    downloadProgress.value = null;
+    autoUpdateEnabledNotifier.value = autoUpdateEnabled;
+    wifiOnlyNotifier.value = wifiOnly;
+    downloadedApkPath = null;
+    _inFlightCheck = null;
+    _inFlightForce = false;
+    checkFailed = false;
+    _preferencesRestored = false;
+    _lastBackgroundVersionCode = null;
+    httpClientOverride = null;
+    installedBuildOverride = null;
+    supportDirPathOverride = null;
+  }
+
+  Future<void> restorePreferences({bool force = false}) async {
+    if (_preferencesRestored && !force) return;
+    var autoVal = autoUpdateEnabledNotifier.value;
+    var wifiVal = wifiOnlyNotifier.value;
+    var hasLocalAuto = false;
+    var hasLocalWifi = false;
+
+    try {
+      final cachedAuto = await DarbLocalCache.instance.readJson(autoUpdatePrefKey);
+      if (cachedAuto is bool) {
+        autoVal = cachedAuto;
+        hasLocalAuto = true;
+      }
+      final cachedWifi = await DarbLocalCache.instance.readJson(wifiOnlyPrefKey);
+      if (cachedWifi is bool) {
+        wifiVal = cachedWifi;
+        hasLocalWifi = true;
+      }
+    } catch (_) {}
+
+    if (!hasLocalAuto || !hasLocalWifi) {
+      try {
+        final nativePrefs =
+            await _channel.invokeMapMethod<String, dynamic>('getUpdatePreferences');
+        if (nativePrefs != null) {
+          if (!hasLocalAuto && nativePrefs[autoUpdatePrefKey] is bool) {
+            autoVal = nativePrefs[autoUpdatePrefKey] as bool;
+          }
+          if (!hasLocalWifi && nativePrefs[wifiOnlyPrefKey] is bool) {
+            wifiVal = nativePrefs[wifiOnlyPrefKey] as bool;
+          }
+        }
+      } catch (_) {}
+    }
+
+    autoUpdateEnabledNotifier.value = autoVal;
+    wifiOnlyNotifier.value = wifiVal;
+    _preferencesRestored = true;
+
+    try {
+      await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
+        autoUpdatePrefKey: autoVal,
+        wifiOnlyPrefKey: wifiVal,
+      });
+    } catch (_) {}
+  }
 
   Future<Map<String, bool>> getAutomaticUpdateSettings() async {
-    if (kDarbPlayStoreBuild || !Platform.isAndroid) {
-      return const {'enabled': false, 'wifiOnly': true};
-    }
-    try {
-      final value = await _channel.invokeMapMethod<String, dynamic>(
-        'getUpdatePreferences',
-      );
-      return {
-        'enabled': value?['enabled'] as bool? ?? true,
-        'wifiOnly': value?['wifiOnly'] as bool? ?? true,
-      };
-    } catch (_) {
-      return const {'enabled': true, 'wifiOnly': true};
-    }
+    await restorePreferences(force: true);
+    return <String, bool>{
+      autoUpdatePrefKey: autoUpdateEnabled,
+      wifiOnlyPrefKey: wifiOnly,
+    };
   }
 
   Future<void> saveAutomaticUpdateSettings({
     required bool enabled,
     required bool wifiOnly,
   }) async {
-    if (kDarbPlayStoreBuild) return;
-    await _channel.invokeMethod<void>('setUpdatePreferences', {
-      'enabled': enabled,
-      'wifiOnly': wifiOnly,
-    });
+    await setAutoUpdateEnabled(enabled);
+    await setWifiOnly(wifiOnly);
   }
 
   Future<void> runAutomaticUpdateCheck({bool force = false}) async {
-    if (kDarbPlayStoreBuild || !Platform.isAndroid) return;
-    final now = DateTime.now();
-    if (!force && _lastAutomaticCheckAt != null &&
-        now.difference(_lastAutomaticCheckAt!) < const Duration(minutes: 10)) {
-      return;
-    }
+    await restorePreferences();
+    if (!autoUpdateEnabled && !force) return;
+    await checkForUpdate(force: force);
+  }
+
+  Future<void> setAutoUpdateEnabled(bool enabled) async {
+    autoUpdateEnabledNotifier.value = enabled;
+    _preferencesRestored = true;
     try {
-      final settings = await getAutomaticUpdateSettings();
-      if (settings['enabled'] != true) return;
-      _lastAutomaticCheckAt = now;
+      await DarbLocalCache.instance.writeJson(autoUpdatePrefKey, enabled);
+    } catch (_) {}
+    try {
+      await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
+        autoUpdatePrefKey: enabled,
+      });
+    } catch (_) {}
+  }
 
-      await checkForUpdate();
-      final info = availableUpdate.value;
-      if (info == null) return;
-
-      final state = await backgroundDownloadState();
-      final currentStatus = state['status']?.toString();
-      final queuedVersion = (state['versionCode'] as num?)?.toInt() ?? 0;
-      if (queuedVersion == info.versionCode &&
-          (currentStatus == 'downloading' || currentStatus == 'ready')) {
-        return;
-      }
-
-      // Android DownloadManager holds this request until the selected network
-      // type is available. With Wi-Fi-only enabled it never consumes mobile data.
-      await startBackgroundDownload(info);
-    } catch (_) {
-      // Update checks must never delay app startup or interrupt normal use.
-    }
+  Future<void> setWifiOnly(bool wifiOnly) async {
+    wifiOnlyNotifier.value = wifiOnly;
+    _preferencesRestored = true;
+    try {
+      await DarbLocalCache.instance.writeJson(wifiOnlyPrefKey, wifiOnly);
+    } catch (_) {}
+    try {
+      await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
+        wifiOnlyPrefKey: wifiOnly,
+      });
+    } catch (_) {}
   }
 
   Future<void> checkForUpdate({bool force = false}) async {
@@ -121,13 +196,31 @@ class DarbUpdater {
       checkFailed = false;
       return;
     }
-    if (_checking) return;
-    _checking = true;
-    checkFailed = false;
+    if (_inFlightCheck != null) {
+      _inFlightForce = _inFlightForce || force;
+      await _inFlightCheck;
+      return;
+    }
+    _inFlightForce = force;
+    final future = _runCheckForUpdate();
+    _inFlightCheck = future;
     try {
+      await future;
+    } finally {
+      _inFlightCheck = null;
+      _inFlightForce = false;
+    }
+  }
+
+  Future<void> _runCheckForUpdate() async {
+    checkFailed = false;
+    final ownsClient = httpClientOverride == null;
+    final client = httpClientOverride ?? http.Client();
+    try {
+      await restorePreferences();
       Map<String, dynamic>? decoded;
       try {
-        final response = await http.get(
+        final response = await client.get(
           Uri.parse(_releaseApi),
           headers: const {
             'Accept': 'application/vnd.github+json',
@@ -138,7 +231,8 @@ class DarbUpdater {
         if (response.statusCode == 200) {
           final release = jsonDecode(utf8.decode(response.bodyBytes));
           if (release is Map<String, dynamic> && release['assets'] is List) {
-            final assets = (release['assets'] as List).whereType<Map<String, dynamic>>();
+            final assets =
+                (release['assets'] as List).whereType<Map<String, dynamic>>();
             Map<String, dynamic>? manifest;
             for (final asset in assets) {
               if (asset['name'] == 'app-update.json') {
@@ -148,10 +242,12 @@ class DarbUpdater {
             }
             final url = manifest?['browser_download_url']?.toString();
             if (url != null && url.startsWith('https://')) {
-              final manifestResponse =
-                  await http.get(Uri.parse(url)).timeout(const Duration(seconds: 12));
+              final manifestResponse = await client
+                  .get(Uri.parse(url))
+                  .timeout(const Duration(seconds: 12));
               if (manifestResponse.statusCode == 200) {
-                final value = jsonDecode(utf8.decode(manifestResponse.bodyBytes));
+                final value =
+                    jsonDecode(utf8.decode(manifestResponse.bodyBytes));
                 if (value is Map<String, dynamic>) decoded = value;
               }
             }
@@ -159,13 +255,17 @@ class DarbUpdater {
         }
       } catch (_) {}
       if (decoded == null) {
-        final fallback = await http.get(
+        final fallback = await client.get(
           Uri.parse(_fallbackManifest),
           headers: const {'Cache-Control': 'no-cache'},
         ).timeout(const Duration(seconds: 12));
-        if (fallback.statusCode != 200) throw Exception('Update manifest unavailable');
+        if (fallback.statusCode != 200) {
+          throw Exception('Update manifest unavailable');
+        }
         final value = jsonDecode(utf8.decode(fallback.bodyBytes));
-        if (value is! Map<String, dynamic>) throw const FormatException('Invalid update manifest');
+        if (value is! Map<String, dynamic>) {
+          throw const FormatException('Invalid update manifest');
+        }
         decoded = value;
       }
       final info = DarbUpdateInfo.fromJson(decoded);
@@ -174,28 +274,97 @@ class DarbUpdater {
           !RegExp(r'^[a-f0-9]{64}$').hasMatch(info.sha256)) {
         throw const FormatException('Invalid update metadata');
       }
-      final package = await PackageInfo.fromPlatform();
-      final installedBuild = int.tryParse(package.buildNumber) ?? 0;
-      availableUpdate.value = info.versionCode > installedBuild ? info : null;
+      final int installedBuild;
+      if (installedBuildOverride != null) {
+        installedBuild = installedBuildOverride!;
+      } else {
+        final package = await PackageInfo.fromPlatform();
+        installedBuild = int.tryParse(package.buildNumber) ?? 0;
+      }
+      final newer = info.versionCode > installedBuild ? info : null;
+      availableUpdate.value = newer;
       checkFailed = false;
+      if (newer != null && !_inFlightForce && autoUpdateEnabled) {
+        unawaited(maybeAutoDownload(newer));
+      }
     } catch (_) {
-      if (force) checkFailed = true;
+      if (_inFlightForce) checkFailed = true;
     } finally {
-      _checking = false;
+      if (ownsClient) client.close();
     }
+  }
+
+  Future<bool> isVersionReadyOrDownloading(DarbUpdateInfo info) async {
+    try {
+      final state = await backgroundDownloadState();
+      final status = state['status']?.toString();
+      final version = (state['versionCode'] as num?)?.toInt() ?? 0;
+      if (version == info.versionCode &&
+          (status == 'ready' || status == 'downloading')) {
+        return true;
+      }
+    } catch (_) {}
+
+    try {
+      final path = await _expectedApkPath(info.versionCode);
+      final file = File(path);
+      if (await file.exists()) {
+        final hash = (await sha256.bind(file.openRead()).first).toString();
+        if (hash == info.sha256) {
+          downloadedApkPath = file.path;
+          downloadProgress.value = 1;
+          return true;
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  Future<bool> maybeAutoDownload(DarbUpdateInfo info) async {
+    if (kDarbPlayStoreBuild) return false;
+    await restorePreferences();
+    if (!autoUpdateEnabled) return false;
+    if (_lastBackgroundVersionCode == info.versionCode) return false;
+    if (await isVersionReadyOrDownloading(info)) {
+      _lastBackgroundVersionCode = info.versionCode;
+      return false;
+    }
+    try {
+      await startBackgroundDownload(info, autoTriggered: true);
+      _lastBackgroundVersionCode = info.versionCode;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<String> _expectedApkPath(int versionCode) async {
+    final base = supportDirPathOverride ??
+        (await getApplicationSupportDirectory()).path;
+    final updateDir = Directory('$base/updates');
+    if (!await updateDir.exists()) await updateDir.create(recursive: true);
+    return '${updateDir.path}/darb-update-$versionCode.apk';
   }
 
   Future<String> downloadUpdate(DarbUpdateInfo info) async {
     if (kDarbPlayStoreBuild) {
       throw StateError('APK self-update is disabled for Google Play builds');
     }
+    final targetPath = await _expectedApkPath(info.versionCode);
+    final file = File(targetPath);
+    if (await file.exists()) {
+      final existingHash = (await sha256.bind(file.openRead()).first).toString();
+      if (existingHash == info.sha256) {
+        downloadedApkPath = file.path;
+        downloadProgress.value = 1;
+        return file.path;
+      }
+    }
+
     downloadProgress.value = 0;
-    final client = http.Client();
+    final ownsClient = httpClientOverride == null;
+    final client = httpClientOverride ?? http.Client();
     try {
-      final supportDir = await getApplicationSupportDirectory();
-      final updateDir = Directory('${supportDir.path}/updates');
-      if (!await updateDir.exists()) await updateDir.create(recursive: true);
-      final file = File('${updateDir.path}/darb-update-${info.versionCode}.apk');
       final partial = File('${file.path}.part');
       var completed = false;
 
@@ -204,12 +373,14 @@ class DarbUpdater {
           final existing = await partial.exists() ? await partial.length() : 0;
           final request = http.Request('GET', Uri.parse(info.apkUrl));
           if (existing > 0) request.headers['Range'] = 'bytes=$existing-';
-          final response = await client.send(request).timeout(const Duration(seconds: 30));
+          final response =
+              await client.send(request).timeout(const Duration(seconds: 30));
 
           if (existing > 0 && response.statusCode == 200) {
             await partial.writeAsBytes(const [], flush: true);
           } else if (existing > 0 && response.statusCode != 206) {
-            throw HttpException('Server cannot resume download (HTTP ${response.statusCode})');
+            throw HttpException(
+                'Server cannot resume download (HTTP ${response.statusCode})');
           } else if (existing == 0 && response.statusCode != 200) {
             throw HttpException('Download failed (HTTP ${response.statusCode})');
           }
@@ -219,7 +390,8 @@ class DarbUpdater {
           final contentRange = response.headers['content-range'];
           int? total;
           if (response.statusCode == 206 && contentRange != null) {
-            final match = RegExp(r'^bytes \d+-\d+/(\d+)$').firstMatch(contentRange);
+            final match =
+                RegExp(r'^bytes \d+-\d+/(\d+)$').firstMatch(contentRange);
             if (match != null) total = int.tryParse(match.group(1)!);
             if (total == null) throw const FormatException('Invalid Content-Range');
           } else if (response.statusCode == 200) {
@@ -227,9 +399,11 @@ class DarbUpdater {
           }
 
           var received = startAt;
-          final sink = partial.openWrite(mode: append ? FileMode.append : FileMode.write);
+          final sink =
+              partial.openWrite(mode: append ? FileMode.append : FileMode.write);
           try {
-            await for (final chunk in response.stream.timeout(const Duration(seconds: 45))) {
+            await for (final chunk
+                in response.stream.timeout(const Duration(seconds: 45))) {
               sink.add(chunk);
               received += chunk.length;
               if (total != null && total > 0) {
@@ -242,14 +416,17 @@ class DarbUpdater {
           }
 
           if (total != null && received < total) {
-            if (attempt == 3) throw const SocketException('Download interrupted repeatedly');
+            if (attempt == 3) {
+              throw const SocketException('Download interrupted repeatedly');
+            }
             continue;
           }
           if (total != null && received > total) {
             await partial.delete();
             throw const FormatException('Downloaded file size is invalid');
           }
-          final actualHash = (await sha256.bind(partial.openRead()).first).toString();
+          final actualHash =
+              (await sha256.bind(partial.openRead()).first).toString();
           if (actualHash != info.sha256) {
             await partial.delete();
             throw const FormatException('APK checksum mismatch');
@@ -259,7 +436,8 @@ class DarbUpdater {
           completed = true;
         } catch (_) {
           if (attempt == 3) rethrow;
-          await Future<void>.delayed(Duration(milliseconds: 500 * (attempt + 1)));
+          await Future<void>.delayed(
+              Duration(milliseconds: 500 * (attempt + 1)));
         }
       }
       if (!completed) throw const SocketException('Download did not complete');
@@ -270,7 +448,7 @@ class DarbUpdater {
       downloadProgress.value = null;
       rethrow;
     } finally {
-      client.close();
+      if (ownsClient) client.close();
     }
   }
 
@@ -282,27 +460,44 @@ class DarbUpdater {
     if (path == null || !await File(path).exists()) {
       throw StateError('No downloaded update');
     }
-    return await _channel.invokeMethod<String>('installApk', {'path': path}) ?? 'unknown';
+    return await _channel.invokeMethod<String>('installApk', {'path': path}) ??
+        'unknown';
   }
 
-  Future<void> startBackgroundDownload(DarbUpdateInfo info) async {
+  Future<void> startBackgroundDownload(
+    DarbUpdateInfo info, {
+    bool autoTriggered = false,
+  }) async {
     if (kDarbPlayStoreBuild) {
       throw StateError('APK self-update is disabled for Google Play builds');
+    }
+    await restorePreferences();
+    if (autoTriggered && !autoUpdateEnabled) {
+      return;
     }
     await _channel.invokeMethod<int>('startBackgroundDownload', {
       'url': info.apkUrl,
       'sha256': info.sha256,
       'versionCode': info.versionCode,
+      'autoTriggered': autoTriggered,
+      'wifiOnly': wifiOnly,
     });
+    _lastBackgroundVersionCode = info.versionCode;
   }
 
   Future<Map<String, dynamic>> backgroundDownloadState() async {
-    final value = await _channel.invokeMapMethod<String, dynamic>('getBackgroundDownloadState');
-    return value ?? <String, dynamic>{'status': 'idle', 'progress': 0};
+    try {
+      final value = await _channel
+          .invokeMapMethod<String, dynamic>('getBackgroundDownloadState');
+      return value ?? <String, dynamic>{'status': 'idle', 'progress': 0};
+    } on MissingPluginException {
+      return <String, dynamic>{'status': 'idle', 'progress': 0};
+    }
   }
 
   Future<String> installBackgroundUpdate() async {
-    return await _channel.invokeMethod<String>('installBackgroundUpdate') ?? 'unknown';
+    return await _channel.invokeMethod<String>('installBackgroundUpdate') ??
+        'unknown';
   }
 }
 
@@ -323,6 +518,8 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
   bool get _downloaded =>
       _backgroundReady ||
       (DarbUpdater.instance.downloadedApkPath != null &&
+          DarbUpdater.instance.downloadedApkPath!
+              .endsWith('darb-update-${widget.info.versionCode}.apk') &&
           File(DarbUpdater.instance.downloadedApkPath!).existsSync());
 
   @override
@@ -337,10 +534,15 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
     super.dispose();
   }
 
+  bool _matchesVersion(Map<String, dynamic> state) {
+    final ver = (state['versionCode'] as num?)?.toInt() ?? 0;
+    return ver == 0 || ver == widget.info.versionCode;
+  }
+
   Future<void> _restoreBackgroundState() async {
     try {
       final state = await DarbUpdater.instance.backgroundDownloadState();
-      if (!mounted) return;
+      if (!mounted || !_matchesVersion(state)) return;
       final status = state['status']?.toString();
       if (status == 'ready') {
         setState(() => _backgroundReady = true);
@@ -357,6 +559,7 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
     _backgroundPoll = Timer.periodic(const Duration(seconds: 2), (_) async {
       try {
         final state = await DarbUpdater.instance.backgroundDownloadState();
+        if (!_matchesVersion(state)) return;
         final status = state['status']?.toString();
         final progress = (state['progress'] as num?)?.toDouble() ?? 0;
         DarbUpdater.instance.downloadProgress.value = progress / 100;
@@ -369,7 +572,8 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
           });
         } else if (status == 'failed') {
           _backgroundPoll?.cancel();
-          setState(() => _error = '${dt('فشل التنزيل')}: ${state['error'] ?? ''}');
+          setState(
+              () => _error = '${dt('فشل التنزيل')}: ${state['error'] ?? ''}');
         }
       } catch (_) {}
     });
@@ -382,10 +586,25 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
     });
     try {
       await DarbUpdater.instance.startBackgroundDownload(widget.info);
-      if (mounted) {
-        setState(() => _error = dt('سيستمر التنزيل في الخلفية ويمكنك إغلاق التطبيق'));
+      final state = await DarbUpdater.instance.backgroundDownloadState();
+      if (!mounted) return;
+      if (_matchesVersion(state) && state['status']?.toString() == 'ready') {
+        setState(() {
+          _backgroundReady = true;
+          _error = null;
+        });
+        return;
       }
+      setState(() => _error = dt('سيستمر التنزيل في الخلفية ويمكنك إغلاق التطبيق'));
       _watchBackgroundDownload();
+    } on PlatformException catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = error.code == 'WIFI_REQUIRED'
+              ? dt('التنزيل مقيّد بشبكة Wi-Fi فقط من الإعدادات')
+              : '${dt('تعذر تنزيل التحديث')}: ${error.message ?? error.code}',
+        );
+      }
     } catch (error) {
       if (mounted) setState(() => _error = '${dt('تعذر تنزيل التحديث')}: $error');
     } finally {
@@ -407,7 +626,9 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
             dt('اسمح لدازريفو بتثبيت التحديثات من إعدادات أندرويد ثم ارجع واضغط تثبيت'));
       }
     } catch (error) {
-      if (mounted) setState(() => _error = '${dt('فشل فتح مُثبّت أندرويد')}: $error');
+      if (mounted) {
+        setState(() => _error = '${dt('فشل فتح مُثبّت أندرويد')}: $error');
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -432,10 +653,12 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: DarbColors.primaryOf(context).withValues(alpha: 0.14),
+                    color:
+                        DarbColors.primaryOf(context).withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.system_update_rounded, color: DarbColors.primaryOf(context)),
+                  child: Icon(Icons.system_update_rounded,
+                      color: DarbColors.primaryOf(context)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -454,11 +677,14 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
             Row(
               children: [
                 Expanded(
-                  child: Text(dt('الإصدار الجديد'), style: TextStyle(color: DarbColors.mutedOf(context))),
+                  child: Text(dt('الإصدار الجديد'),
+                      style: TextStyle(color: DarbColors.mutedOf(context))),
                 ),
                 Text(
                   info.versionName,
-                  style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                      color: DarbColors.inkOf(context),
+                      fontWeight: FontWeight.w800),
                 ),
               ],
             ),
@@ -466,7 +692,9 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
               const SizedBox(height: 14),
               Text(
                 dt('ما الجديد في هذا التحديث؟'),
-                style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w800),
+                style: TextStyle(
+                    color: DarbColors.inkOf(context),
+                    fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 8),
               ...info.releaseNotes
@@ -482,13 +710,15 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Icon(Icons.check_circle_rounded, size: 15, color: DarbColors.primaryOf(context)),
+                        child: Icon(Icons.check_circle_rounded,
+                            size: 15, color: DarbColors.primaryOf(context)),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           note,
-                          style: TextStyle(color: DarbColors.mutedOf(context), height: 1.4),
+                          style: TextStyle(
+                              color: DarbColors.mutedOf(context), height: 1.4),
                         ),
                       ),
                     ],
@@ -496,7 +726,16 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
                 );
               }),
             ],
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
+            Text(
+              dt('يتطلب تثبيت التحديث موافقة نظام أندرويد عند الفتح'),
+              style: TextStyle(
+                color: DarbColors.mutedOf(context),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
             ValueListenableBuilder<double?>(
               valueListenable: DarbUpdater.instance.downloadProgress,
               builder: (context, progress, _) => progress == null
@@ -518,7 +757,9 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 10),
-              Text(_error!, style: TextStyle(color: DarbColors.dangerOf(context), fontSize: 12.5)),
+              Text(_error!,
+                  style: TextStyle(
+                      color: DarbColors.dangerOf(context), fontSize: 12.5)),
             ],
             const SizedBox(height: 18),
             Row(
@@ -537,7 +778,9 @@ class _DarbUpdateDialogState extends State<DarbUpdateDialog> {
                     child: Text(
                       _busy
                           ? dt('جارٍ تجهيز التحديث')
-                          : (_downloaded ? dt('تثبيت التحديث') : dt('تنزيل التحديث')),
+                          : (_downloaded
+                              ? dt('تثبيت التحديث')
+                              : dt('تنزيل التحديث')),
                     ),
                   ),
                 ),

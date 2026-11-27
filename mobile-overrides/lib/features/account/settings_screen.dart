@@ -483,8 +483,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _openAutomaticUpdateSettings() async {
     if (kDarbPlayStoreBuild) return;
     final saved = await DarbUpdater.instance.getAutomaticUpdateSettings();
-    var enabled = saved['enabled'] ?? true;
-    var wifiOnly = saved['wifiOnly'] ?? true;
+    var enabled = saved[DarbUpdater.autoUpdatePrefKey] ?? true;
+    var wifiOnly = saved[DarbUpdater.wifiOnlyPrefKey] ?? true;
 
     if (!mounted) return;
     await showDarbGlassModalSheet<void>(
@@ -993,6 +993,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             showChevron: false,
                             trailing: Switch(
+                              key: const ValueKey('auto-update-switch'),
                               value: DarbUpdater.instance.autoUpdateEnabled,
                               onChanged: (v) async {
                                 await DarbUpdater.instance
@@ -1020,6 +1021,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             showChevron: false,
                             trailing: Switch(
+                              key: const ValueKey('wifi-only-switch'),
                               value: DarbUpdater.instance.wifiOnly,
                               onChanged: (v) async {
                                 await DarbUpdater.instance.setWifiOnly(v);
