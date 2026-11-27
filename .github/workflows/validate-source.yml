@@ -82,7 +82,7 @@ jobs:
           mkdir -p "$B/prisma/migrations/20261117180000_seed_syrian_cities"
           cp "$ROOT/backend-overrides/syrian-cities.migration.sql" "$B/prisma/migrations/20261117180000_seed_syrian_cities/migration.sql"
           mkdir -p "$B/prisma/migrations/20261117190000_unique_delivery_zone_per_city"
-          cp "$ROOT/backend-overrides/unique-delivery-zone-per-city.migration.sql" "$B/prisma/migrations/20261117190000_unique-delivery-zone-per-city/migration.sql"
+          cp "$ROOT/backend-overrides/unique-delivery-zone-per-city.migration.sql" "$B/prisma/migrations/20261117190000_unique_delivery_zone_per_city/migration.sql"
           bash "$ROOT/backend-overrides/prepare-source.sh" "$ROOT/extracted/darb-project"
           cp -R "$ROOT/backend/prisma/migrations/." "$B/prisma/migrations/"
           echo "Backend overlays assembled from the same source set used by deployment."
