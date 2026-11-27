@@ -589,7 +589,9 @@ jobs:
               raise SystemExit("FCM delivery was not confirmed: " + json.dumps(result, ensure_ascii=False))
           targeted = int(result.get("targetedDevices", 0) or 0)
           sent = int(result.get("pushSent", 0) or 0)
-          if targeted > 0 and sent <= 0:
+          if targeted <= 0:
+              raise SystemExit("Release blocked: no registered devices are available for the update notification.")
+          if sent <= 0:
               raise SystemExit("FCM accepted no notifications for registered devices: " + json.dumps(result, ensure_ascii=False))
           summary = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
           if targeted == 0:
@@ -600,7 +602,7 @@ jobs:
               )
           print(f"Release notification confirmed: {sent}/{targeted} devices.")
           PY
-          if ! jq -e '.pushSkipped == false and (.pushFailed // 0) == 0 and ((.targetedDevices // 0) == 0 or (.pushSent // 0) > 0)' "$RUNNER_TEMP/darb-release-notification-result.json" >/dev/null; then
+          if ! jq -e '.pushSkipped == false and (.pushFailed // 0) == 0 and (.targetedDevices // 0) > 0 and (.pushSent // 0) > 0' "$RUNNER_TEMP/darb-release-notification-result.json" >/dev/null; then
             echo "::error::FCM delivery was not confirmed for the registered DARB devices."
             cat "$RUNNER_TEMP/darb-release-notification-result.json"
             exit 1
