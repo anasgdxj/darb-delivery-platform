@@ -120,11 +120,11 @@ class DarbUpdater {
         final nativePrefs =
             await _channel.invokeMapMethod<String, dynamic>('getUpdatePreferences');
         if (nativePrefs != null) {
-          if (!hasLocalAuto && nativePrefs[autoUpdatePrefKey] is bool) {
-            autoVal = nativePrefs[autoUpdatePrefKey] as bool;
+          if (!hasLocalAuto && nativePrefs['enabled'] is bool) {
+            autoVal = nativePrefs['enabled'] as bool;
           }
-          if (!hasLocalWifi && nativePrefs[wifiOnlyPrefKey] is bool) {
-            wifiVal = nativePrefs[wifiOnlyPrefKey] as bool;
+          if (!hasLocalWifi && nativePrefs['wifiOnly'] is bool) {
+            wifiVal = nativePrefs['wifiOnly'] as bool;
           }
         }
       } catch (_) {}
