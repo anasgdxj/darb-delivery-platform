@@ -128,7 +128,7 @@ void main() {
       expect(DarbColors.darkMuted, const Color(0xFFA39E93));
       expect(DarbColors.darkLine, const Color(0xFF262A33));
       expect(DarbColors.darkBorderStrong, const Color(0xFF3A404D));
-      expect(DarbColors.darkPrimary, const Color(0xFFC6A875));
+      expect(DarbColors.darkPrimary, const Color(0xFF36B6A0));
       expect(DarbColors.darkOnPrimary, const Color(0xFF071B18));
       expect(DarbColors.darkViolet, const Color(0xFF36B6A0));
       expect(DarbColors.darkVioletSoft, const Color(0xFF112926));
