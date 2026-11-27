@@ -1,60 +1,41 @@
-name: Deploy DARB public website and admin portal
+name: Validate DAZREVO admin portal
+
 on:
+  pull_request:
+    paths:
+      - "admin-web/**"
+      - ".github/workflows/deploy-admin-web.yml"
   push:
     branches: [main]
     paths:
-      - "index.html"
       - "admin-web/**"
       - ".github/workflows/deploy-admin-web.yml"
-  workflow_dispatch:
+
 permissions:
   contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: true
+
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  validate:
+    name: Validate admin portal without deploying a partial Pages site
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - name: Validate admin portal JavaScript
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Validate admin portal JavaScript and required operations
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
-          html = Path("admin-web/index.html").read_text()
+          html = Path("admin-web/index.html").read_text(encoding="utf-8")
           scripts = re.findall(r"<script>(.*?)</script>", html, re.S)
           if len(scripts) != 1:
               raise SystemExit(f"Expected one inline admin script, found {len(scripts)}")
-          Path("/tmp/admin.js").write_text(scripts[0])
+          Path("/tmp/admin.js").write_text(scripts[0], encoding="utf-8")
           required = ["/admin/delivery-zones", "renderZones", "/admin/drivers/pending", "/admin/vendors/pending", "handleGoogleCredential"]
           missing = [item for item in required if item not in html]
           if missing:
               raise SystemExit("Missing admin portal requirements: " + ", ".join(missing))
           PY
           node --check /tmp/admin.js
-      - name: Assemble public website and admin portal
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p .pages/admin
-          test -s index.html
-          test -s admin-web/index.html
-          cp index.html .pages/index.html
-          cp admin-web/index.html .pages/admin/index.html
-          cat > .pages/404.html <<'EOF'
-          <!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الصفحة غير موجودة | دَرْب</title><body style="font-family:Tahoma,Arial;background:#f6f7f2;color:#102b26;display:grid;place-items:center;min-height:90vh;text-align:center"><main><h1>هذه الصفحة غير موجودة</h1><p>قد يكون الرابط غير صحيح أو تم نقل الصفحة.</p><a href="/">العودة إلى موقع دَرْب</a></main></body></html>
-          EOF
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: .pages
-      - id: deployment
-        uses: actions/deploy-pages@v4
