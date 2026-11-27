@@ -98,15 +98,15 @@ void main() {
 
   group('DAZREVO Design System 2026 & Brand Integrity', () {
     test('enforces exact DESIGN_SYSTEM.md 2026 light and dark semantic tokens', () {
-      expect(DarbColors.forest, const Color(0xFF14171D));
-      expect(DarbColors.primaryGreen, const Color(0xFF8A651F));
-      expect(DarbColors.forestSoft, const Color(0xFF1E222B));
-      expect(DarbColors.mint, const Color(0xFFE7D3A3));
-      expect(DarbColors.lime, const Color(0xFFD6B46C));
-      expect(DarbColors.limeInk, const Color(0xFF6B4F1A));
-      expect(DarbColors.limeTint, const Color(0xFFF6EFE0));
+      expect(DarbColors.forest, const Color(0xFF171C20));
+      expect(DarbColors.primaryGreen, const Color(0xFF1D7A6E));
+      expect(DarbColors.forestSoft, const Color(0xFF222A2E));
+      expect(DarbColors.mint, const Color(0xFFE8D9B8));
+      expect(DarbColors.lime, const Color(0xFFC6A875));
+      expect(DarbColors.limeInk, const Color(0xFF725629));
+      expect(DarbColors.limeTint, const Color(0xFFF5F0E6));
       expect(DarbColors.violet, const Color(0xFF1D7A6E));
-      expect(DarbColors.violetSoft, const Color(0xFFE8F5F3));
+      expect(DarbColors.violetSoft, const Color(0xFFE8F4F1));
       expect(DarbColors.danger, const Color(0xFFC83E3B));
       expect(DarbColors.success, const Color(0xFF1C7C54));
       expect(DarbColors.warning, const Color(0xFFB87014));
@@ -128,9 +128,9 @@ void main() {
       expect(DarbColors.darkMuted, const Color(0xFFA39E93));
       expect(DarbColors.darkLine, const Color(0xFF262A33));
       expect(DarbColors.darkBorderStrong, const Color(0xFF3A404D));
-      expect(DarbColors.darkPrimary, const Color(0xFFD6B46C));
-      expect(DarbColors.darkOnPrimary, const Color(0xFF0C0D0F));
-      expect(DarbColors.darkViolet, const Color(0xFF3FD1BE));
+      expect(DarbColors.darkPrimary, const Color(0xFFC6A875));
+      expect(DarbColors.darkOnPrimary, const Color(0xFF071B18));
+      expect(DarbColors.darkViolet, const Color(0xFF36B6A0));
       expect(DarbColors.darkVioletSoft, const Color(0xFF112926));
 
       final themeLight = DarbTheme.light;
