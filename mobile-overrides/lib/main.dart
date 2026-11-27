@@ -24,13 +24,37 @@ Future<void> main() async {
     ]);
   } catch (_) {}
   runApp(const DarbApp());
-  unawaited(DarbUpdater.instance.runAutomaticUpdateCheck());
 }
 
-class DarbApp extends StatelessWidget {
+class DarbApp extends StatefulWidget {
   const DarbApp({super.key, this.initialScreen});
 
   final Widget? initialScreen;
+
+  @override
+  State<DarbApp> createState() => _DarbAppState();
+}
+
+class _DarbAppState extends State<DarbApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(DarbUpdater.instance.runAutomaticUpdateCheck());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(DarbUpdater.instance.runAutomaticUpdateCheck());
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +99,7 @@ class DarbApp extends StatelessWidget {
               child: child,
             );
           },
-          home: initialScreen ?? const _DarbSplashGate(),
+          home: widget.initialScreen ?? const _DarbSplashGate(),
         );
       },
     );
