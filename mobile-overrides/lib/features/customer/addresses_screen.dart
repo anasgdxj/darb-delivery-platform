@@ -350,9 +350,14 @@ class _AddressesScreenState extends State<AddressesScreen> {
           );
         }
       }
-      final list = (res.data is List ? res.data as List : const [])
-          .whereType<Map<String, dynamic>>()
+      final rawList = res.data is List ? res.data as List : const [];
+      final list = rawList
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
           .toList();
+      if (kDebugMode) {
+        debugPrint('[AddressesScreen] normalizedAddressCount=${list.length}');
+      }
       if (!mounted) return;
       setState(() {
         _addresses = list;
