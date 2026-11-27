@@ -22,6 +22,7 @@ PUBLIC_PAGES = [
     Path("merchants/index.html"),
     Path("privacy/index.html"),
     Path("terms/index.html"),
+    Path("404.html"),
 ]
 MARKETING_PAGES = {
     Path("index.html"),
@@ -65,7 +66,7 @@ class PageAudit(HTMLParser):
             self.ids.add(a["id"])
         for key in ("href", "src"):
             value = a.get(key)
-            if value:
+            if value and not (tag == "base" and key == "href"):
                 self.references.append((key, value))
         if tag == "meta":
             name = (a.get("name") or "").lower()
@@ -212,6 +213,42 @@ if 'class="web-portal-maintenance"' not in portal_html or 'name="robots" content
     fail("The unfinished web portal must remain gated and excluded from search indexing")
 if "بوابة الويب قيد الإعداد" not in portal_html:
     fail("The web portal maintenance notice is missing")
+
+not_found_html = ROOT / "404.html"
+if not not_found_html.is_file():
+    fail("Missing DAZREVO-branded 404.html")
+else:
+    content_404 = not_found_html.read_text(encoding="utf-8")
+    if "DAZREVO" not in content_404 or "دَرْب" in content_404:
+        fail("404.html must use the current DAZREVO identity, not the retired DARB brand")
+    if 'name="robots" content="noindex,nofollow"' not in content_404:
+        fail("404.html must be excluded from search indexing")
+
+admin_page = ROOT / "admin-web/index.html"
+if not admin_page.is_file():
+    fail("Missing public admin portal page")
+else:
+    admin_html = admin_page.read_text(encoding="utf-8")
+    admin_scripts = re.findall(r"<script>(.*?)</script>", admin_html, re.S)
+    if len(admin_scripts) != 1:
+        fail(f"Expected one inline admin script, found {len(admin_scripts)}")
+    else:
+        with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8") as handle:
+            handle.write(admin_scripts[0])
+            handle.flush()
+            result = subprocess.run(["node", "--check", handle.name], capture_output=True, text=True)
+        if result.returncode:
+            fail(f"Admin portal JavaScript syntax error: {result.stderr.strip()}")
+    required_admin_markers = [
+        "/admin/delivery-zones",
+        "renderZones",
+        "/admin/drivers/pending",
+        "/admin/vendors/pending",
+        "handleGoogleCredential",
+    ]
+    missing_admin_markers = [item for item in required_admin_markers if item not in admin_html]
+    if missing_admin_markers:
+        fail("Admin portal is missing required operations: " + ", ".join(missing_admin_markers))
 
 manifest_path = ROOT / "app-update.json"
 if not manifest_path.is_file():
