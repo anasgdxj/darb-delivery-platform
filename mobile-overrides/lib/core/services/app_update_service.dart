@@ -136,10 +136,32 @@ class DarbUpdater {
 
     try {
       await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
-        autoUpdatePrefKey: autoVal,
-        wifiOnlyPrefKey: wifiVal,
+        'enabled': autoVal,
+        'wifiOnly': wifiVal,
       });
     } catch (_) {}
+  }
+
+  Future<Map<String, bool>> getAutomaticUpdateSettings() async {
+    await restorePreferences(force: true);
+    return <String, bool>{
+      'enabled': autoUpdateEnabled,
+      'wifiOnly': wifiOnly,
+    };
+  }
+
+  Future<void> saveAutomaticUpdateSettings({
+    required bool enabled,
+    required bool wifiOnly,
+  }) async {
+    await setAutoUpdateEnabled(enabled);
+    await setWifiOnly(wifiOnly);
+  }
+
+  Future<void> runAutomaticUpdateCheck({bool force = false}) async {
+    await restorePreferences();
+    if (!autoUpdateEnabled && !force) return;
+    await checkForUpdate(force: force);
   }
 
   Future<void> setAutoUpdateEnabled(bool enabled) async {
@@ -150,7 +172,7 @@ class DarbUpdater {
     } catch (_) {}
     try {
       await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
-        autoUpdatePrefKey: enabled,
+        'enabled': enabled,
       });
     } catch (_) {}
   }
@@ -163,7 +185,7 @@ class DarbUpdater {
     } catch (_) {}
     try {
       await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
-        wifiOnlyPrefKey: wifiOnly,
+        'wifiOnly': wifiOnly,
       });
     } catch (_) {}
   }
