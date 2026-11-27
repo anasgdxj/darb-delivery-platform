@@ -1,4 +1,4 @@
-name: Validate DARB mobile overrides
+name: Validate DAZREVO mobile release source
 
 on:
   pull_request:
@@ -21,95 +21,134 @@ permissions:
 jobs:
   flutter:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - name: Assemble the exact mobile source used by release
+      - name: Assemble the same Flutter source used by the release APK
         shell: bash
         run: |
           set -euo pipefail
           unzip -q DARB-source.zip -d extracted
-          M="$GITHUB_WORKSPACE/extracted/darb-project/mobile"
+          ROOT="$GITHUB_WORKSPACE"
+          M="$ROOT/extracted/darb-project/mobile"
           cd "$M"
+          rm -rf android
           flutter create --platforms=android --org com.darb --project-name darb --no-pub .
-          cd "$GITHUB_WORKSPACE"
-          cp mobile-overrides/login_screen.dart "$M/lib/screens/login_screen.dart"
-          cp mobile-overrides/city_carousel.dart "$M/lib/screens/city_carousel.dart"
-          bash mobile-overrides/prepare_city_assets.sh "$M"
-          cp mobile-overrides/main.dart "$M/lib/main.dart"
-          cp mobile-overrides/design_system.dart "$M/lib/design_system.dart"
-          cp mobile-overrides/localizations.dart "$M/lib/localizations.dart"
-          cp mobile-overrides/api.dart "$M/lib/core/api.dart"
-          cp mobile-overrides/app_shell.dart "$M/lib/screens/app_shell.dart"
-          cp mobile-overrides/admin_screens.dart "$M/lib/screens/admin_screens.dart"
-          cp mobile-overrides/customer_screens.dart "$M/lib/screens/customer_screens.dart"
-          cp mobile-overrides/peer_delivery_screen.dart "$M/lib/screens/peer_delivery_screen.dart"
-          cp mobile-overrides/vendor_screens.dart "$M/lib/screens/vendor_screens.dart"
-          cp mobile-overrides/driver_screens.dart "$M/lib/screens/driver_screens.dart"
-          cp mobile-overrides/account_screens.dart "$M/lib/screens/account_screens.dart"
-          cp mobile-overrides/account_pages.dart "$M/lib/screens/account_pages.dart"
-          cp mobile-overrides/notifications.dart "$M/lib/notifications.dart"
-          cp mobile-overrides/app_update.dart "$M/lib/app_update.dart"
+          rm -rf "$M/lib/screens" "$M/lib/core" "$M/lib/features" "$M/lib/design_system.dart" "$M/lib/localizations.dart" "$M/lib/notifications.dart" "$M/lib/app_update.dart"
+          mkdir -p "$M/lib" "$M/test"
+          cp -r "$ROOT/mobile-overrides/lib/." "$M/lib/"
+          bash "$ROOT/mobile-overrides/prepare_city_assets.sh" "$M"
+          cp "$ROOT/mobile-overrides/test/widget_test.dart" "$M/test/widget_test.dart"
           mkdir -p "$M/android/app/src/main/kotlin/com/darb/darb" "$M/android/app/src/main/res/xml"
-          cp mobile-overrides/MainActivity.kt "$M/android/app/src/main/kotlin/com/darb/darb/MainActivity.kt"
-          cp mobile-overrides/DarbUpdateDownloadReceiver.kt "$M/android/app/src/main/kotlin/com/darb/darb/DarbUpdateDownloadReceiver.kt"
-          cp mobile-overrides/darb_file_paths.xml "$M/android/app/src/main/res/xml/darb_file_paths.xml"
-          cp mobile-overrides/design_system_test.dart "$M/test/widget_test.dart"
+          cp "$ROOT/mobile-overrides/MainActivity.kt" "$M/android/app/src/main/kotlin/com/darb/darb/MainActivity.kt"
+          cp "$ROOT/mobile-overrides/DarbUpdateDownloadReceiver.kt" "$M/android/app/src/main/kotlin/com/darb/darb/DarbUpdateDownloadReceiver.kt"
+          cp "$ROOT/mobile-overrides/darb_file_paths.xml" "$M/android/app/src/main/res/xml/darb_file_paths.xml"
           mkdir -p "$M/android/app/src/main/res/drawable"
-          cp mobile-overrides/ic_launcher.xml "$M/android/app/src/main/res/drawable/ic_launcher.xml"
-          sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|' "$M/android/app/src/main/AndroidManifest.xml"
-          python3 - "$M/android/app/src/main/AndroidManifest.xml" <<'PY'
+          cp -r "$ROOT/mobile-overrides/android-res/." "$M/android/app/src/main/res/"
+          cp "$ROOT/mobile-overrides/ic_launcher.xml" "$M/android/app/src/main/res/drawable/ic_launcher.xml"
+          sed -i 's|android:label="darb"|android:label="دازريفو"|' "$M/android/app/src/main/AndroidManifest.xml"
+          python3 - "$M/pubspec.yaml" "$M/android/app/src/main/AndroidManifest.xml" <<'PY'
           from pathlib import Path
+          import re
           import sys
-          p=Path(sys.argv[1]); m=p.read_text()
-          permission='<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />'
-          notification_permission='<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />'
-          if notification_permission not in m:
-              m=m.replace(permission, permission+"\n    "+notification_permission, 1)
-          if permission not in m:
-              m=m.replace("<application", permission+"\n    <application", 1)
-          if notification_permission not in m:
-              m=m.replace(permission, permission+"\n    "+notification_permission, 1)
-          provider="""    <provider
+          pubspec, manifest = map(Path, sys.argv[1:])
+          lines = pubspec.read_text().splitlines()
+          deps = ["  geolocator: ^13.0.2", "  flutter_map: ^7.0.2", "  latlong2: ^0.9.1", "  url_launcher: ^6.3.1", "  firebase_core: ^3.8.1", "  firebase_messaging: ^15.1.6", "  package_info_plus: ^8.1.2", "  crypto: ^3.0.6", "  path_provider: ^2.1.5"]
+          dep_index = next((i for i, line in enumerate(lines) if line.strip() == "dependencies:"), None)
+          if dep_index is None: raise SystemExit("dependencies section missing")
+          for dep in deps:
+              name = dep.split(":")[0].strip()
+              if not any(line.strip().startswith(name + ":") for line in lines):
+                  dep_index += 1
+                  lines.insert(dep_index, dep)
+          pubspec.write_text("\n".join(lines) + "\n")
+          m = manifest.read_text()
+          if 'android:roundIcon=' not in m:
+              m = m.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@mipmap/ic_launcher"\n        android:roundIcon="@mipmap/ic_launcher_round"', 1)
+          internet = '<uses-permission android:name="android.permission.INTERNET" />'
+          if "android.permission.INTERNET" not in m:
+              m = m.replace("<application", internet + "\n    <application", 1)
+          for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
+              tag = f'<uses-permission android:name="android.permission.{p}" />'
+              if tag not in m:
+                  m = m.replace(internet, internet + "\n    " + tag, 1)
+          m = re.sub(r'\s*<uses-permission[^>]*ACCESS_BACKGROUND_LOCATION[^>]*/>\s*', "\n    ", m)
+          if 'android:usesCleartextTraffic' in m:
+              m = re.sub(r'android:usesCleartextTraffic="(?:true|false)"', 'android:usesCleartextTraffic="false"', m)
+          else:
+              m = m.replace("<application", '<application\n        android:usesCleartextTraffic="false"', 1)
+          provider = """    <provider
                   android:name="androidx.core.content.FileProvider"
                   android:authorities="${applicationId}.fileprovider"
                   android:exported="false"
                   android:grantUriPermissions="true">
-                  <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/darb_file_paths" />
+                  <meta-data
+                      android:name="android.support.FILE_PROVIDER_PATHS"
+                      android:resource="@xml/darb_file_paths" />
               </provider>"""
-          receiver="""    <receiver
+          receiver = """    <receiver
                   android:name=".DarbUpdateDownloadReceiver"
                   android:exported="false">
                   <intent-filter>
                       <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
                   </intent-filter>
               </receiver>"""
+          notif_meta = """    <meta-data
+                  android:name="com.google.firebase.messaging.default_notification_icon"
+                  android:resource="@drawable/ic_notification" />
+              <meta-data
+                  android:name="com.google.firebase.messaging.default_notification_color"
+                  android:resource="@color/dazrevo_accent" />"""
           if "DarbUpdateDownloadReceiver" not in m:
-              m=m.replace("</application>", receiver+"\n    </application>", 1)
+              m = m.replace("</application>", receiver + "\n    </application>", 1)
           if "androidx.core.content.FileProvider" not in m:
-              m=m.replace("</application>", provider+"\n    </application>", 1)
-          p.write_text(m)
+              m = m.replace("</application>", provider + "\n    </application>", 1)
+          if "default_notification_icon" not in m:
+              m = m.replace("</application>", notif_meta + "\n    </application>", 1)
+          manifest.write_text(m)
           PY
           cd "$M"
           python3 - <<'PY'
           from pathlib import Path
-          p=Path("pubspec.yaml")
-          lines=p.read_text().splitlines()
-          lines=[line for line in lines if not line.strip().startswith("intl:")]
-          dep=next((i for i,line in enumerate(lines) if line.strip()=="dependencies:"),None)
+          p = Path("pubspec.yaml")
+          lines = p.read_text().splitlines()
+          lines = [line for line in lines if not line.strip().startswith("intl:")]
+          dep = next((i for i, line in enumerate(lines) if line.strip() == "dependencies:"), None)
           if dep is None: raise SystemExit("pubspec.yaml dependencies section missing")
-          for name, version in [("intl","^0.20.3"),("google_sign_in","^6.2.1"),("geolocator","^13.0.2"),("url_launcher","^6.3.1"),("firebase_core","^3.8.1"),("firebase_messaging","^15.1.6"),("package_info_plus","^8.1.2"),("crypto","^3.0.6"),("path_provider","^2.1.5"),("flutter_map","^7.0.2"),("latlong2","^0.9.1")]:
-              if not any(line.strip().startswith(name + ":") for line in lines):
-                  dep += 1
-                  lines.insert(dep, f"  {name}: {version}")
-          p.write_text("\n".join(lines)+"\n")
+          lines.insert(dep + 1, "  intl: ^0.20.3")
+          if not any(line.strip().startswith("google_sign_in:") for line in lines):
+              lines.insert(dep + 2, "  google_sign_in: ^6.2.1")
+          p.write_text("\n".join(lines) + "\n")
           PY
           flutter pub get
-      - name: Give the theme test build an isolated Android package ID
+      - name: Verify release UI assets and localization keys
+        working-directory: extracted/darb-project/mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          localization = Path("lib/core/l10n/app_localizations.dart")
+          source = localization.read_text(encoding="utf-8")
+          source_map = source.split("static const Map<String, Map<String, String>> _values = {", 1)[0]
+          keys = re.findall(r"(?m)^\s*'((?:\\.|[^'])*)'\s*:", source_map)
+          duplicates = sorted({key for key in keys if keys.count(key) > 1})
+          if duplicates: raise SystemExit("Duplicate source translation keys: " + ", ".join(duplicates))
+          carousel = Path("lib/features/auth/city_carousel.dart").read_text(encoding="utf-8")
+          if "DarbLoginVectorMap" not in carousel or "assets/cities/" in carousel or "Image.asset" in carousel:
+              raise SystemExit("City carousel must use abstract vector artwork, not photographs.")
+          if "assets/cities/" in Path("pubspec.yaml").read_text(encoding="utf-8"):
+              raise SystemExit("City photo assets must not be declared in pubspec.yaml.")
+          if Path("assets/cities").exists():
+              raise SystemExit("City photo assets directory must not be included in the mobile build.")
+          print("Release UI assets and localization keys verified.")
+          PY
+      - name: Give the validation build an isolated Android package ID
         working-directory: extracted/darb-project/mobile
         shell: bash
         run: |
@@ -119,45 +158,32 @@ jobs:
           import re
           candidates = [Path("android/app/build.gradle.kts"), Path("android/app/build.gradle")]
           gradle = next((p for p in candidates if p.is_file()), None)
-          if gradle is None:
-              raise SystemExit("Android app Gradle file not found")
+          if gradle is None: raise SystemExit("Android app Gradle file not found")
           source = gradle.read_text()
-          if "applicationIdSuffix" in source:
-              raise SystemExit("Refusing to add a duplicate applicationIdSuffix")
+          if "applicationIdSuffix" in source: raise SystemExit("Refusing to add a duplicate applicationIdSuffix")
           match = re.search(r"(?m)^(\s*)buildTypes\s*\{", source)
-          if not match:
-              raise SystemExit("Could not locate buildTypes block safely")
+          if not match: raise SystemExit("Could not locate buildTypes block safely")
           indent = match.group(1) + "    "
           if gradle.suffix == ".kts":
-              block = indent + 'getByName("debug") {\n' + indent + '    applicationIdSuffix = ".themetest"\n' + indent + '}\n'
+              block = indent + 'getByName("debug") {\n' + indent + '    applicationIdSuffix = ".validation"\n' + indent + '}\n'
           else:
-              block = indent + 'debug {\n' + indent + '    applicationIdSuffix ".themetest"\n' + indent + '}\n'
-          insert_at = match.end()
-          source = source[:insert_at] + "\n" + block + source[insert_at:]
+              block = indent + 'debug {\n' + indent + '    applicationIdSuffix ".validation"\n' + indent + '}\n'
+          source = source[:match.end()] + "\n" + block + source[match.end():]
           gradle.write_text(source)
-          print(f"Configured isolated test package in {gradle}")
           PY
-      - name: Analyze all mobile Dart sources
+      - name: Analyze the exact release Dart source
         working-directory: extracted/darb-project/mobile
         run: flutter analyze lib --no-pub --no-fatal-infos --no-fatal-warnings
-      - name: Build Android debug APK
+      - name: Run release Flutter widget tests
         working-directory: extracted/darb-project/mobile
-        run: flutter build apk --debug --no-pub --build-number 32
-      - name: Run Flutter tests
+        run: flutter test --no-pub
+      - name: Build validation APK from release source
         working-directory: extracted/darb-project/mobile
-        shell: bash
-        run: |
-          set -euo pipefail
-          if find test -type f -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
-            flutter test --no-pub
-          else
-            echo "::notice::No Flutter test files supplied by the source archive."
-          fi
-
-      - name: Upload Android debug APK for device testing
+        run: flutter build apk --debug --no-pub
+      - name: Upload validation APK
         uses: actions/upload-artifact@v4
         with:
-          name: darb-theme-test-apk
+          name: dazrevo-release-source-validation
           path: extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 14
