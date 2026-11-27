@@ -576,20 +576,22 @@ class _AddressesScreenState extends State<AddressesScreen> {
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
-          child: Center(
-            heightFactor: 1,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 680),
-              child: DarbGlassSurface(
-                borderRadius: DarbRadius.xl,
-                blurSigma: 22,
-                padding: const EdgeInsets.all(10),
-                child: DarbActionButton(
-                  label: dt('إضافة عنوان'),
-                  icon: Icons.add_location_alt_rounded,
-                  onPressed: _openCreateSheet,
+        child: SizedBox(
+          height: 88,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: DarbGlassSurface(
+                  borderRadius: DarbRadius.xl,
+                  blurSigma: 22,
+                  padding: const EdgeInsets.all(10),
+                  child: DarbActionButton(
+                    label: dt('إضافة عنوان'),
+                    icon: Icons.add_location_alt_rounded,
+                    onPressed: _openCreateSheet,
+                  ),
                 ),
               ),
             ),
