@@ -485,6 +485,33 @@ jobs:
           path: extracted-play/darb-project/mobile/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 7
+      - name: Verify release notification readiness
+        if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        env:
+          DARB_RELEASE_WEBHOOK_TOKEN: ${{ secrets.DARB_RELEASE_WEBHOOK_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "${DARB_RELEASE_WEBHOOK_TOKEN:-}" =~ ^[A-Fa-f0-9]{64}$ ]]; then
+            echo "::error::DARB_RELEASE_WEBHOOK_TOKEN must be a separate 64-character hexadecimal token; Firebase JSON is not accepted."
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error --retry 2 --retry-all-errors --connect-timeout 15 --max-time 45 \
+            "https://darb-api-yapv.onrender.com/api/v1/internal/release-notifications/readiness" \
+            -H "Authorization: Bearer ${DARB_RELEASE_WEBHOOK_TOKEN}" \
+            -o "$RUNNER_TEMP/darb-release-readiness.json"
+          python3 - "$RUNNER_TEMP/darb-release-readiness.json" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          result = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          if result.get("ready") is not True:
+              raise SystemExit("Firebase release readiness was not confirmed.")
+          print("Firebase release readiness confirmed.")
+          PY
+          echo "FCM release readiness: confirmed" >> "$GITHUB_STEP_SUMMARY"
+
       # Release publication is gated by the [publish-apk] commit marker; APK and AAB artifacts must build and pass signature verification before latest is replaced.
       - name: Publish signed APK as the latest public release
         id: publish_release
