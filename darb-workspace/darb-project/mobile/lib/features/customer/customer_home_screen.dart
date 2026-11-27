@@ -15,6 +15,7 @@ import 'addresses_screen.dart';
 import 'ai_order_assistant_screen.dart';
 import 'driver_tracking_screen.dart';
 import 'peer_delivery_screen.dart';
+import 'shopping_request_screen.dart';
 import 'vendor_catalog_screen.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
@@ -521,6 +522,23 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
               ),
 
+              const SizedBox(height: 12),
+              DarbFadeSlide(
+                child: DarbBentoActionCard(
+                  icon: Icons.shopping_cart_checkout_rounded,
+                  accentColor: DarbColors.primaryOf(context),
+                  badge: dt('خدمة جديدة'),
+                  title: dt('اطلب أي شيء'),
+                  subtitle: dt('نشتريه من أي متجر ونوصله إلى بابك بعد موافقتك على السعر'),
+                  onTap: () {
+                    if (_selectedCityId == null) return;
+                    DarbHaptics.light();
+                    Navigator.push(context, DarbPageRoute(builder: (_) => ShoppingRequestScreen(
+                      cityId: _selectedCityId!, cityName: _selectedCityName, onCreated: widget.onOrderCreated,
+                    )));
+                  },
+                ),
+              ),
               // 4. Featured Order Dispatch Ticket
               if (featuredOrder != null) ...[
                 const SizedBox(height: 20),

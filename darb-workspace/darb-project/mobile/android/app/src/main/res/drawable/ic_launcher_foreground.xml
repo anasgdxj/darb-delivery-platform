@@ -6,41 +6,47 @@
 
     <!-- Subtle calibration ring inside 66dp adaptive safe zone -->
     <path
-        android:pathData="M54,54m-31,0a31,31 0,1 1,62 0a31,31 0,1 1,-62 0"
-        android:strokeWidth="1.15"
-        android:strokeColor="#30E7D3A3" />
+        android:pathData="M54,54m-30.5,0a30.5,30.5 0,1 1,61 0a30.5,30.5 0,1 1,-61 0"
+        android:strokeWidth="1.1"
+        android:strokeColor="#2EE7D3A3" />
 
     <!-- Architectural chamfered ivory D crest -->
     <path
-        android:fillColor="#FFF7F4EC"
-        android:pathData="M33,25 L57,25 L80,42 L80,66 L57,83 L33,83 L42.5,72 L54.5,72 L68.5,61.5 L68.5,46.5 L54.5,36 L42.5,36 Z" />
+        android:fillColor="#FFF8F5EE"
+        android:pathData="M34,25.5 L57,25.5 L79.5,42 L79.5,66 L57,82.5 L34,82.5 L43,71.5 L54.5,71.5 L68,61.5 L68,46.5 L54.5,36.5 L43,36.5 Z" />
 
-    <!-- Double-bevel Champagne Brass route chevron -->
+    <!-- Double-bevel Champagne Gold kinetic route chevron -->
     <path
         android:pathData="M28,36 L52,54 L28,72"
-        android:strokeWidth="4.6"
+        android:strokeWidth="4.8"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:strokeColor="#FFD6B46C" />
     <path
-        android:pathData="M34,45 L45.5,54 L34,63"
+        android:pathData="M34.5,45 L45.5,54 L34.5,63"
         android:strokeWidth="2.0"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:strokeColor="#B8E7D3A3" />
+        android:strokeColor="#D8F2DFB4" />
 
-    <!-- Champagne origin & destination anchor pins -->
+    <!-- Champagne Gold origin & destination anchor pins -->
     <path
         android:fillColor="#FFD6B46C"
-        android:pathData="M28,36m-4.0,0a4.0,4.0 0,1 1,8.0 0a4.0,4.0 0,1 1,-8.0 0" />
+        android:pathData="M28,36m-4.2,0a4.2,4.2 0,1 1,8.4 0a4.2,4.2 0,1 1,-8.4 0" />
+    <path
+        android:fillColor="#E6FFF7E6"
+        android:pathData="M28,36m-1.35,0a1.35,1.35 0,1 1,2.7 0a1.35,1.35 0,1 1,-2.7 0" />
     <path
         android:fillColor="#FFD6B46C"
-        android:pathData="M28,72m-4.0,0a4.0,4.0 0,1 1,8.0 0a4.0,4.0 0,1 1,-8.0 0" />
-
-    <!-- Mineral Teal telemetry nexus core -->
+        android:pathData="M28,72m-4.2,0a4.2,4.2 0,1 1,8.4 0a4.2,4.2 0,1 1,-8.4 0" />
     <path
-        android:fillColor="#423FD1BE"
-        android:pathData="M53,54m-9.6,0a9.6,9.6 0,1 1,19.2 0a9.6,9.6 0,1 1,-19.2 0" />
+        android:fillColor="#E6FFF7E6"
+        android:pathData="M28,72m-1.35,0a1.35,1.35 0,1 1,2.7 0a1.35,1.35 0,1 1,-2.7 0" />
+
+    <!-- Mineral Teal live telemetry nexus core -->
+    <path
+        android:fillColor="#473FD1BE"
+        android:pathData="M53,54m-9.8,0a9.8,9.8 0,1 1,19.6 0a9.8,9.8 0,1 1,-19.6 0" />
     <path
         android:fillColor="#FF3FD1BE"
         android:pathData="M53,54m-5.8,0a5.8,5.8 0,1 1,11.6 0a5.8,5.8 0,1 1,-11.6 0" />

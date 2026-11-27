@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:darb/core/l10n/app_localizations.dart';
 import 'package:darb/core/network/api_client.dart';
+import 'package:darb/core/services/app_update_service.dart';
 import 'package:darb/core/services/location_service.dart';
 import 'package:darb/core/services/notifications_service.dart';
+import 'package:darb/core/storage/local_cache.dart';
 import 'package:darb/core/theme/darb_design_system.dart';
 import 'package:darb/core/widgets/darb_city_scene.dart';
 import 'package:darb/core/widgets/darb_components.dart';
@@ -1764,9 +1769,12 @@ void main() {
       // Clear temporary cache dialog -> confirm
       expect(find.text('Notification sync updated for this device'), findsOneWidget);
 
-      await tester.drag(find.byType(ListView).first, const Offset(0, -1200));
-      await tester.pumpAndSettle();
       final clearTile = find.text('Clear cached data');
+      await tester.scrollUntilVisible(
+        clearTile,
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.ensureVisible(clearTile);
       final clearTileSurface = find.ancestor(
         of: clearTile,
@@ -3030,6 +3038,522 @@ void main() {
       expect(find.text('DRB-901'), findsNothing);
     });
   });
+
+  group('DAZREVO App Updater Concurrency, Auto-Update Preferences & Routing', () {
+    test(
+        'checkForUpdate awaits an active in-flight check instead of returning early empty',
+        () async {
+      final storage = <String, String>{};
+      _mockSecureStorage(storage);
+      _mockUpdateChannel(
+        nativePrefs: {'auto_update_enabled': false, 'wifi_only': true},
+      );
+      DarbUpdater.instance.debugResetForTest();
+      DarbUpdater.instance.installedBuildOverride = 2000;
+      addTearDown(() {
+        DarbUpdater.instance.debugResetForTest();
+        _clearUpdateChannelMock();
+        _clearSecureStorageMock();
+      });
+
+      final digest = sha256.convert(utf8.encode('dazrevo-apk-2050')).toString();
+      final releaseGate = Completer<http.Response>();
+      var releaseApiHits = 0;
+
+      DarbUpdater.instance.httpClientOverride = MockClient((request) async {
+        final url = request.url.toString();
+        if (url.contains('releases/tags/latest')) {
+          releaseApiHits++;
+          return releaseGate.future;
+        }
+        return _utf8Response(
+          jsonEncode({
+            'versionCode': 2050,
+            'versionName': '1.0.2050',
+            'apkUrl':
+                'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+            'sha256': digest,
+            'releaseNotes': 'تحديث مهم',
+          }),
+          200,
+        );
+      });
+
+      final firstCall = DarbUpdater.instance.checkForUpdate();
+      await Future<void>.delayed(Duration.zero);
+      final secondCall = DarbUpdater.instance.checkForUpdate(force: true);
+
+      expect(releaseApiHits, 1);
+
+      releaseGate.complete(
+        _utf8Response(
+          jsonEncode({
+            'assets': [
+              {
+                'name': 'app-update.json',
+                'browser_download_url':
+                    'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json',
+              },
+            ],
+          }),
+          200,
+        ),
+      );
+
+      await Future.wait([firstCall, secondCall]);
+
+      expect(releaseApiHits, 1);
+      expect(DarbUpdater.instance.checkFailed, isFalse);
+      expect(DarbUpdater.instance.availableUpdate.value?.versionCode, 2050);
+    });
+
+    test(
+        'auto_update_enabled & wifi_only persist, restore, enforce guards, and prevent duplicate downloads',
+        () async {
+      final storage = <String, String>{};
+      final channelCalls = <MethodCall>[];
+      final nativePrefs = <String, bool>{
+        'auto_update_enabled': true,
+        'wifi_only': true,
+      };
+      Map<String, dynamic> bgState = <String, dynamic>{
+        'status': 'idle',
+        'progress': 0,
+        'versionCode': 0,
+      };
+
+      _mockSecureStorage(storage);
+      _mockUpdateChannel(
+        nativePrefs: nativePrefs,
+        backgroundStateProvider: () => bgState,
+        recordedCalls: channelCalls,
+      );
+      DarbUpdater.instance.debugResetForTest();
+
+      final tempDir = await Directory.systemTemp.createTemp('dazrevo_upd_');
+      addTearDown(() async {
+        DarbUpdater.instance.debugResetForTest();
+        _clearUpdateChannelMock();
+        _clearSecureStorageMock();
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      });
+
+      // Persist from Flutter -> restore after fresh instance reset
+      await DarbUpdater.instance.setAutoUpdateEnabled(false);
+      await DarbUpdater.instance.setWifiOnly(false);
+      expect(nativePrefs['auto_update_enabled'], isFalse);
+      expect(nativePrefs['wifi_only'], isFalse);
+
+      DarbUpdater.instance.debugResetForTest(
+        autoUpdateEnabled: true,
+        wifiOnly: true,
+      );
+      await DarbUpdater.instance.restorePreferences();
+      expect(DarbUpdater.instance.autoUpdateEnabled, isFalse);
+      expect(DarbUpdater.instance.wifiOnly, isFalse);
+
+      // Native fallback restoration when local cache is empty
+      storage.clear();
+      nativePrefs['auto_update_enabled'] = false;
+      nativePrefs['wifi_only'] = true;
+      DarbUpdater.instance.debugResetForTest(
+        autoUpdateEnabled: true,
+        wifiOnly: false,
+      );
+      await DarbUpdater.instance.restorePreferences();
+      expect(DarbUpdater.instance.autoUpdateEnabled, isFalse);
+      expect(DarbUpdater.instance.wifiOnly, isTrue);
+
+      final apkBytes = utf8.encode('dazrevo-verified-apk-binary');
+      final digest = sha256.convert(apkBytes).toString();
+      final info = DarbUpdateInfo(
+        versionCode: 2051,
+        versionName: '1.0.2051',
+        apkUrl:
+            'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+        sha256: digest,
+        releaseNotes: 'اختبار التحديث التلقائي',
+      );
+
+      // Auto-download must remain blocked while auto_update_enabled == false
+      final skippedWhenOff = await DarbUpdater.instance.maybeAutoDownload(info);
+      expect(skippedWhenOff, isFalse);
+      expect(
+        channelCalls.where((c) => c.method == 'startBackgroundDownload'),
+        isEmpty,
+      );
+
+      // Re-enable auto updates with wifi_only == true
+      await DarbUpdater.instance.setAutoUpdateEnabled(true);
+      await DarbUpdater.instance.setWifiOnly(true);
+      final started = await DarbUpdater.instance.maybeAutoDownload(info);
+      expect(started, isTrue);
+
+      final startCall = channelCalls.lastWhere(
+        (c) => c.method == 'startBackgroundDownload',
+      );
+      final args =
+          (startCall.arguments as Map).cast<String, dynamic>();
+      expect(args['versionCode'], 2051);
+      expect(args['autoTriggered'], isTrue);
+      expect(args['wifiOnly'], isTrue);
+
+      // Duplicate version prevention via native ready/downloading state
+      bgState = <String, dynamic>{
+        'status': 'downloading',
+        'progress': 42,
+        'versionCode': 2051,
+      };
+      expect(await DarbUpdater.instance.isVersionReadyOrDownloading(info), isTrue);
+
+      DarbUpdater.instance.debugResetForTest();
+      bgState = <String, dynamic>{
+        'status': 'ready',
+        'progress': 100,
+        'versionCode': 2051,
+      };
+      channelCalls.clear();
+      final dupNative = await DarbUpdater.instance.maybeAutoDownload(info);
+      expect(dupNative, isFalse);
+      expect(
+        channelCalls.where((c) => c.method == 'startBackgroundDownload'),
+        isEmpty,
+      );
+
+      // Duplicate version prevention via verified local APK file SHA-256
+      DarbUpdater.instance.debugResetForTest();
+      bgState = <String, dynamic>{'status': 'idle', 'progress': 0, 'versionCode': 0};
+      DarbUpdater.instance.supportDirPathOverride = tempDir.path;
+      final updateDir = Directory('${tempDir.path}/updates');
+      await updateDir.create(recursive: true);
+      await File('${updateDir.path}/darb-update-2051.apk')
+          .writeAsBytes(apkBytes, flush: true);
+
+      final dupLocal = await DarbUpdater.instance.maybeAutoDownload(info);
+      expect(dupLocal, isFalse);
+      expect(
+        DarbUpdater.instance.downloadedApkPath,
+        endsWith('darb-update-2051.apk'),
+      );
+      expect(
+        channelCalls.where((c) => c.method == 'startBackgroundDownload'),
+        isEmpty,
+      );
+    });
+
+    testWidgets(
+        'DarbUpdateDialog surfaces WIFI_REQUIRED restriction and states Android confirmation is required',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      _mockSecureStorage(<String, String>{});
+      _mockUpdateChannel(
+        nativePrefs: {'auto_update_enabled': true, 'wifi_only': true},
+        onStartBackgroundDownload: (_) async {
+          throw PlatformException(
+            code: 'WIFI_REQUIRED',
+            message: 'Wi-Fi connection is required by update settings',
+          );
+        },
+      );
+      DarbUpdater.instance.debugResetForTest();
+      addTearDown(() {
+        DarbUpdater.instance.debugResetForTest();
+        _clearUpdateChannelMock();
+        _clearSecureStorageMock();
+      });
+
+      final digest = sha256.convert(utf8.encode('wifi-test')).toString();
+      final info = DarbUpdateInfo(
+        versionCode: 2052,
+        versionName: '1.0.2052',
+        apkUrl:
+            'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+        sha256: digest,
+        releaseNotes: 'ملاحظات الإصدار',
+      );
+
+      await tester.pumpWidget(
+        DarbApp(
+          initialScreen: Scaffold(
+            body: DarbUpdateDialog(info: info),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        find.text('يتطلب تثبيت التحديث موافقة نظام أندرويد عند الفتح'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('تنزيل التحديث'));
+      await tester.pump();
+
+      expect(
+        find.text('التنزيل مقيّد بشبكة Wi-Fi فقط من الإعدادات'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'AppShell opens DarbUpdateDialog for APP_UPDATE on cold start (getInitialMessage) even during concurrent startup check',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      _mockSecureStorage(<String, String>{
+        'accessToken': 'valid-token',
+        'refreshToken': 'valid-refresh',
+      });
+      _mockUpdateChannel(
+        nativePrefs: {'auto_update_enabled': false, 'wifi_only': true},
+      );
+      DarbUpdater.instance.debugResetForTest();
+      DarbNotifications.debugResetForTest(ready: false);
+      Api.instance.setSessionForTest(accessToken: 'valid-token');
+      Api.instance.httpClientOverride = _createRoleMockClient(role: 'CUSTOMER');
+
+      final digest = sha256.convert(utf8.encode('cold-start-apk')).toString();
+      final manifestGate = Completer<http.Response>();
+      var manifestRequests = 0;
+
+      DarbUpdater.instance.installedBuildOverride = 2000;
+      DarbUpdater.instance.httpClientOverride = MockClient((request) async {
+        final url = request.url.toString();
+        if (url.contains('releases/tags/latest')) {
+          manifestRequests++;
+          return manifestGate.future;
+        }
+        return _utf8Response(
+          jsonEncode({
+            'versionCode': 2060,
+            'versionName': '1.0.2060',
+            'apkUrl':
+                'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+            'sha256': digest,
+            'releaseNotes': 'تحديث الإشعار الفوري',
+          }),
+          200,
+        );
+      });
+
+      DarbNotifications.initialMessageOverride = () async => {
+            'type': 'APP_UPDATE',
+            'releaseTag': 'latest',
+          };
+      await DarbNotifications.captureInitialMessage();
+
+      addTearDown(() {
+        DarbUpdater.instance.debugResetForTest();
+        DarbNotifications.debugResetForTest();
+        DriverLocationReporter.stop();
+        _clearUpdateChannelMock();
+        _clearSecureStorageMock();
+        Api.instance.httpClientOverride = null;
+        Api.instance.setSessionForTest();
+      });
+
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(
+            size: Size(412, 900),
+            devicePixelRatio: 1,
+            disableAnimations: true,
+          ),
+          child: DarbApp(
+            key: ValueKey('app-shell-cold-update'),
+            initialScreen: AppShell(checkForUpdates: true),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      manifestGate.complete(
+        _utf8Response(
+          jsonEncode({
+            'assets': [
+              {
+                'name': 'app-update.json',
+                'browser_download_url':
+                    'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json',
+              },
+            ],
+          }),
+          200,
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(manifestRequests, 1);
+      expect(find.byType(DarbUpdateDialog), findsOneWidget);
+      expect(find.text('1.0.2060'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'AppShell opens DarbUpdateDialog when tapping APP_UPDATE via onMessageOpenedApp',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      _mockSecureStorage(<String, String>{
+        'accessToken': 'valid-token',
+        'refreshToken': 'valid-refresh',
+      });
+      _mockUpdateChannel(
+        nativePrefs: {'auto_update_enabled': false, 'wifi_only': true},
+      );
+      DarbUpdater.instance.debugResetForTest();
+      DarbNotifications.debugResetForTest(ready: false);
+      Api.instance.setSessionForTest(accessToken: 'valid-token');
+      Api.instance.httpClientOverride = _createRoleMockClient(role: 'CUSTOMER');
+
+      final digest = sha256.convert(utf8.encode('opened-app-apk')).toString();
+      DarbUpdater.instance.installedBuildOverride = 2000;
+      DarbUpdater.instance.httpClientOverride = MockClient((request) async {
+        if (request.url.toString().contains('releases/tags/latest')) {
+          return _utf8Response(
+            jsonEncode({
+              'assets': [
+                {
+                  'name': 'app-update.json',
+                  'browser_download_url':
+                      'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json',
+                },
+              ],
+            }),
+            200,
+          );
+        }
+        return _utf8Response(
+          jsonEncode({
+            'versionCode': 2061,
+            'versionName': '1.0.2061',
+            'apkUrl':
+                'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+            'sha256': digest,
+            'releaseNotes': 'فتح مباشر من الخلفية',
+          }),
+          200,
+        );
+      });
+
+      final openedController =
+          StreamController<Map<String, dynamic>>.broadcast();
+      DarbNotifications.openedMessageStreamOverride = openedController.stream;
+
+      addTearDown(() async {
+        await openedController.close();
+        DarbUpdater.instance.debugResetForTest();
+        DarbNotifications.debugResetForTest();
+        DriverLocationReporter.stop();
+        _clearUpdateChannelMock();
+        _clearSecureStorageMock();
+        Api.instance.httpClientOverride = null;
+        Api.instance.setSessionForTest();
+      });
+
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(
+            size: Size(412, 900),
+            devicePixelRatio: 1,
+            disableAnimations: true,
+          ),
+          child: DarbApp(
+            key: ValueKey('app-shell-opened-update'),
+            initialScreen: AppShell(checkForUpdates: false),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+
+      openedController.add({'type': 'APP_UPDATE', 'releaseTag': 'latest'});
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byType(DarbUpdateDialog), findsOneWidget);
+      expect(find.text('1.0.2061'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'SettingsScreen switches toggle and persist auto_update_enabled & wifi_only',
+        (tester) async {
+      final storage = <String, String>{};
+      final nativePrefs = <String, bool>{
+        'auto_update_enabled': true,
+        'wifi_only': true,
+      };
+      _mockSecureStorage(storage);
+      _mockUpdateChannel(nativePrefs: nativePrefs);
+      DarbUpdater.instance.debugResetForTest();
+      darbLocale.value = const Locale('ar');
+
+      addTearDown(() {
+        DarbUpdater.instance.debugResetForTest();
+        _clearUpdateChannelMock();
+        _clearSecureStorageMock();
+      });
+
+      await tester.pumpWidget(
+        DarbApp(
+          initialScreen: SettingsScreen(
+            user: const {
+              'id': 'u-1',
+              'name': 'أنس',
+              'phone': '+963933123456',
+              'role': 'CUSTOMER',
+            },
+            onRefreshUser: () async {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final autoTitle = find.text('التحديث التلقائي للتطبيق');
+      await tester.scrollUntilVisible(
+        autoTitle,
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(autoTitle);
+      await tester.tap(autoTitle);
+      await tester.pumpAndSettle();
+      expect(DarbUpdater.instance.autoUpdateEnabled, isFalse);
+      expect(nativePrefs['auto_update_enabled'], isFalse);
+
+      final wifiTitle = find.text('التنزيل عبر Wi-Fi فقط');
+      await tester.scrollUntilVisible(
+        wifiTitle,
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(wifiTitle);
+      await tester.tap(wifiTitle);
+      await tester.pumpAndSettle();
+      expect(DarbUpdater.instance.wifiOnly, isFalse);
+      expect(nativePrefs['wifi_only'], isFalse);
+
+      // Re-verify persistence via DarbLocalCache after reset
+      DarbUpdater.instance.debugResetForTest();
+      await DarbUpdater.instance.restorePreferences();
+      expect(DarbUpdater.instance.autoUpdateEnabled, isFalse);
+      expect(DarbUpdater.instance.wifiOnly, isFalse);
+      expect(
+        await DarbLocalCache.instance.readJson(DarbUpdater.autoUpdatePrefKey),
+        isFalse,
+      );
+      expect(
+        await DarbLocalCache.instance.readJson(DarbUpdater.wifiOnlyPrefKey),
+        isFalse,
+      );
+    });
+  });
 }
 
 class _CounterTestTab extends StatefulWidget {
@@ -3091,6 +3615,57 @@ void _mockSecureStorage(Map<String, String> store, {bool failAll = false}) {
 
 void _clearSecureStorageMock() {
   const channel = MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(channel, null);
+}
+
+void _mockUpdateChannel({
+  required Map<String, bool> nativePrefs,
+  Map<String, dynamic> Function()? backgroundStateProvider,
+  List<MethodCall>? recordedCalls,
+  Future<dynamic> Function(MethodCall call)? onStartBackgroundDownload,
+}) {
+  const channel = MethodChannel('com.darb/update');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(channel, (MethodCall call) async {
+    recordedCalls?.add(call);
+    switch (call.method) {
+      case 'getUpdatePreferences':
+        return Map<String, bool>.from(nativePrefs);
+      case 'setUpdatePreferences':
+        final args =
+            (call.arguments as Map?)?.cast<Object?, Object?>() ?? const {};
+        if (args['auto_update_enabled'] is bool) {
+          nativePrefs['auto_update_enabled'] =
+              args['auto_update_enabled'] as bool;
+        }
+        if (args['wifi_only'] is bool) {
+          nativePrefs['wifi_only'] = args['wifi_only'] as bool;
+        }
+        return Map<String, bool>.from(nativePrefs);
+      case 'getBackgroundDownloadState':
+        return backgroundStateProvider?.call() ??
+            <String, dynamic>{
+              'status': 'idle',
+              'progress': 0,
+              'versionCode': 0,
+            };
+      case 'startBackgroundDownload':
+        if (onStartBackgroundDownload != null) {
+          return await onStartBackgroundDownload(call);
+        }
+        return 7001;
+      case 'installBackgroundUpdate':
+      case 'installApk':
+        return 'opened';
+      default:
+        return null;
+    }
+  });
+}
+
+void _clearUpdateChannelMock() {
+  const channel = MethodChannel('com.darb/update');
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(channel, null);
 }

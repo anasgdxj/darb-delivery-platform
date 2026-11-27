@@ -48,6 +48,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _loggingOut = false;
 
   @override
+  void initState() {
+    super.initState();
+    unawaited(DarbUpdater.instance.restorePreferences());
+  }
+
+  @override
   void dispose() {
     _feedbackTimer?.cancel();
     super.dispose();
@@ -666,7 +672,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 620),
               child: AnimatedBuilder(
-                animation: appearance,
+                animation: Listenable.merge([
+                  appearance,
+                  DarbUpdater.instance.autoUpdateEnabledNotifier,
+                  DarbUpdater.instance.wifiOnlyNotifier,
+                ]),
                 builder: (context, _) => Stack(
                   fit: StackFit.expand,
                   children: [
@@ -973,6 +983,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               : null,
                           onTap: _syncPushNotifications,
                         ),
+                        if (!kDarbPlayStoreBuild) ...[
+                          DarbSettingsTile(
+                            icon: Icons.autorenew_rounded,
+                            accentColor: DarbColors.primaryOf(context),
+                            title: dt('التحديث التلقائي للتطبيق'),
+                            subtitle: dt(
+                              'تنزيل التحديثات الموثّقة بالخلفية (يتطلب موافقة أندرويد عند التثبيت)',
+                            ),
+                            showChevron: false,
+                            trailing: Switch(
+                              value: DarbUpdater.instance.autoUpdateEnabled,
+                              onChanged: (v) async {
+                                await DarbUpdater.instance
+                                    .setAutoUpdateEnabled(v);
+                                DarbHaptics.selection();
+                                _showFeedback(
+                                  DarbFeedbackKind.success,
+                                  dt('تم حفظ تفضيلات التحديث'),
+                                );
+                              },
+                            ),
+                            onTap: () async {
+                              await DarbUpdater.instance.setAutoUpdateEnabled(
+                                !DarbUpdater.instance.autoUpdateEnabled,
+                              );
+                              DarbHaptics.selection();
+                            },
+                          ),
+                          DarbSettingsTile(
+                            icon: Icons.wifi_rounded,
+                            accentColor: DarbColors.infoOf(context),
+                            title: dt('التنزيل عبر Wi-Fi فقط'),
+                            subtitle: dt(
+                              'منع استهلاك بيانات الهاتف أثناء تنزيل تحديثات التطبيق',
+                            ),
+                            showChevron: false,
+                            trailing: Switch(
+                              value: DarbUpdater.instance.wifiOnly,
+                              onChanged: (v) async {
+                                await DarbUpdater.instance.setWifiOnly(v);
+                                DarbHaptics.selection();
+                                _showFeedback(
+                                  DarbFeedbackKind.success,
+                                  dt('تم حفظ تفضيلات التحديث'),
+                                );
+                              },
+                            ),
+                            onTap: () async {
+                              await DarbUpdater.instance.setWifiOnly(
+                                !DarbUpdater.instance.wifiOnly,
+                              );
+                              DarbHaptics.selection();
+                            },
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 18),

@@ -48,11 +48,12 @@ class _AppShellState extends State<AppShell> {
   int _unreadNotifications = 0;
 
   StreamSubscription<RemoteMessage>? _fgSub;
-  StreamSubscription<RemoteMessage>? _openSub;
+  StreamSubscription<dynamic>? _openSub;
   Timer? _bannerTimer;
   ({String title, String body, Map<String, dynamic> data})? _bannerNotification;
   Map<String, dynamic>? _pendingNotificationData;
   bool _handlingNotification = false;
+  bool _updateDialogOpen = false;
   bool _redirectingToLogin = false;
 
   @override
@@ -62,8 +63,13 @@ class _AppShellState extends State<AppShell> {
     _loadUser();
     _setupNotifications();
     if (!kDarbPlayStoreBuild && widget.checkForUpdates) {
-      DarbUpdater.instance.checkForUpdate();
+      unawaited(_initUpdaterAndCheck());
     }
+  }
+
+  Future<void> _initUpdaterAndCheck() async {
+    await DarbUpdater.instance.restorePreferences();
+    await DarbUpdater.instance.checkForUpdate();
   }
 
   @override
@@ -136,6 +142,19 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
+  Future<void> _openUpdateDialog(DarbUpdateInfo update) async {
+    if (!mounted || _updateDialogOpen) return;
+    _updateDialogOpen = true;
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (_) => DarbUpdateDialog(info: update),
+      );
+    } finally {
+      _updateDialogOpen = false;
+    }
+  }
+
   Future<void> _handleNotificationOpen(Map<String, dynamic> data) async {
     _dismissBanner();
     if (_user == null) {
@@ -145,18 +164,28 @@ class _AppShellState extends State<AppShell> {
     if (_handlingNotification) return;
 
     final orderId = data['orderId']?.toString().trim();
+    final type = data['type']?.toString().trim().toUpperCase() ?? '';
     unawaited(_refreshUnreadCount());
 
-    if (data['type']?.toString() == 'APP_UPDATE') {
+    if (type == 'APP_UPDATE' ||
+        (data['releaseTag'] != null && (orderId == null || orderId.isEmpty))) {
       if (!kDarbPlayStoreBuild) {
         await DarbUpdater.instance.checkForUpdate(force: true);
         final update = DarbUpdater.instance.availableUpdate.value;
         if (mounted && update != null) {
-          await showDialog<void>(
-            context: context,
-            builder: (_) => DarbUpdateDialog(info: update),
-          );
+          await _openUpdateDialog(update);
           return;
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                DarbUpdater.instance.checkFailed
+                    ? dt('تعذر التحقق من التحديث')
+                    : dt('تطبيقك محدّث إلى آخر إصدار'),
+              ),
+            ),
+          );
         }
       }
       await _openNotifications();
@@ -751,10 +780,7 @@ class _AppShellState extends State<AppShell> {
                   tooltip: dt('تحديث التطبيق'),
                   onTap: () {
                     DarbHaptics.light();
-                    showDialog<void>(
-                      context: context,
-                      builder: (_) => DarbUpdateDialog(info: update),
-                    );
+                    unawaited(_openUpdateDialog(update));
                   },
                   child: Icon(
                     Icons.system_update_rounded,

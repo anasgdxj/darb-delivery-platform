@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -28,7 +29,7 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
             if (status != DownloadManager.STATUS_SUCCESSFUL) {
                 val reason = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
                 prefs.edit().putString(KEY_STATUS, "failed").putString(KEY_ERROR, "DownloadManager reason=$reason").apply()
-                notifyUser(context, "فشل تنزيل التحديث", "افتح دازريفو وحاول تنزيل التحديث مجدداً")
+                notifyAppFallback(context, "فشل تنزيل التحديث", "افتح دازريفو وحاول تنزيل التحديث مجدداً")
                 return
             }
         }
@@ -36,7 +37,7 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
         val uri = manager.getUriForDownloadedFile(id)
         if (uri == null) {
             prefs.edit().putString(KEY_STATUS, "failed").putString(KEY_ERROR, "Downloaded APK URI is missing").apply()
-            notifyUser(context, "تعذر التحقق من التحديث", "افتح دازريفو وحاول مجدداً")
+            notifyAppFallback(context, "تعذر التحقق من التحديث", "افتح دازريفو وحاول مجدداً")
             return
         }
 
@@ -55,33 +56,100 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
             if (!expected.matches(Regex("^[a-fA-F0-9]{64}$")) || !actual.equals(expected, true)) {
                 manager.remove(id)
                 prefs.edit().putString(KEY_STATUS, "failed").putString(KEY_ERROR, "SHA-256 mismatch").apply()
-                notifyUser(context, "فشل التحقق من التحديث", "تم رفض الملف لحماية التطبيق")
+                notifyAppFallback(context, "فشل التحقق من التحديث", "تم رفض الملف لحماية دازريفو")
                 return
             }
-            prefs.edit().putString(KEY_STATUS, "ready").putString(KEY_URI, uri.toString())
-                .putString(KEY_ERROR, "").apply()
-            notifyUser(context, "التحديث جاهز", "افتح دازريفو لإكمال تثبيت التحديث")
+            prefs.edit()
+                .putString(KEY_STATUS, "ready")
+                .putString(KEY_URI, uri.toString())
+                .putString(KEY_ERROR, "")
+                .apply()
+            notifyReadyToInstall(context, uri)
         } catch (error: Exception) {
             Log.e(TAG, "Background APK verification failed", error)
             prefs.edit().putString(KEY_STATUS, "failed").putString(KEY_ERROR, error.message ?: error.javaClass.simpleName).apply()
-            notifyUser(context, "تعذر التحقق من التحديث", "افتح دازريفو وحاول مجدداً")
+            notifyAppFallback(context, "تعذر التحقق من التحديث", "افتح دازريفو وحاول مجدداً")
         }
     }
 
-    private fun notifyUser(context: Context, title: String, message: String) {
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private fun ensureChannel(manager: NotificationManager) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(NotificationChannel(CHANNEL_ID, "تحديثات دازريفو", NotificationManager.IMPORTANCE_DEFAULT))
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "تحديثات دازريفو",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "إشعارات جاهزية التحديث وتثبيته لتطبيق دازريفو"
+                enableVibration(true)
+                setShowBadge(true)
+            }
+            manager.createNotificationChannel(channel)
         }
+    }
+
+    private fun resolveSmallIcon(context: Context): Int {
+        val iconId = context.resources.getIdentifier("ic_notification", "drawable", context.packageName)
+        return if (iconId != 0) iconId else android.R.drawable.stat_sys_download_done
+    }
+
+    private fun pendingIntentFlags(): Int {
+        return PendingIntent.FLAG_UPDATE_CURRENT or
+            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+    }
+
+    private fun notifyReadyToInstall(context: Context, uri: Uri) {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        ensureChannel(manager)
+        val canInstallDirectly =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.O || context.packageManager.canRequestPackageInstalls()
+        val targetIntent: Intent = if (canInstallDirectly) {
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                clipData = ClipData.newUri(context.contentResolver, "DAZREVO APK update", uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        } else {
+            Intent(context, MainActivity::class.java).apply {
+                action = MainActivity.ACTION_INSTALL_UPDATE
+                addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP
+                )
+            }
+        }
+        val pending = PendingIntent.getActivity(
+            context,
+            NOTIFICATION_ID,
+            targetIntent,
+            pendingIntentFlags()
+        )
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(resolveSmallIcon(context))
+            .setContentTitle("التحديث جاهز للتثبيت")
+            .setContentText("اضغط لتثبيت تحديث دازريفو مباشرة")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pending)
+            .build()
+        manager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun notifyAppFallback(context: Context, title: String, message: String) {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        ensureChannel(manager)
         val openApp = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val pending = openApp?.let {
-            PendingIntent.getActivity(context, 7301, it, PendingIntent.FLAG_UPDATE_CURRENT or
-                (if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0))
+            PendingIntent.getActivity(context, NOTIFICATION_ID + 1, it, pendingIntentFlags())
         }
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentTitle(title).setContentText(message).setAutoCancel(true)
-            .setContentIntent(pending).build()
+            .setSmallIcon(resolveSmallIcon(context))
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pending)
+            .build()
         manager.notify(NOTIFICATION_ID, notification)
     }
 
@@ -92,7 +160,10 @@ class DarbUpdateDownloadReceiver : BroadcastReceiver() {
         const val KEY_STATUS = "status"
         const val KEY_URI = "uri"
         const val KEY_ERROR = "error"
-        const val CHANNEL_ID = "darb_updates"
+        const val KEY_VERSION_CODE = "version_code"
+        const val KEY_AUTO_UPDATE_ENABLED = "auto_update_enabled"
+        const val KEY_WIFI_ONLY = "wifi_only"
+        const val CHANNEL_ID = "dazrevo_updates"
         const val NOTIFICATION_ID = 7301
         private const val TAG = "DarbUpdateReceiver"
     }

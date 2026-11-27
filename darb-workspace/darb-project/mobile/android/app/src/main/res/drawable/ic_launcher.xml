@@ -5,74 +5,88 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Smoked Obsidian gradient base -->
-    <path android:pathData="M0,0h108v108h-108z">
+    <!-- Smoked Obsidian squircle shield -->
+    <path android:pathData="M18,4 L90,4 C97.73,4 104,10.27 104,18 L104,90 C104,97.73 97.73,104 90,104 L18,104 C10.27,104 4,97.73 4,90 L4,18 C4,10.27 10.27,4 18,4 Z">
         <aapt:attr name="android:fillColor">
             <gradient
                 android:type="linear"
-                android:startX="12"
-                android:startY="8"
+                android:startX="8"
+                android:startY="6"
                 android:endX="98"
                 android:endY="102">
-                <item android:offset="0.0" android:color="#FF0C0D0F" />
-                <item android:offset="0.55" android:color="#FF14171D" />
-                <item android:offset="1.0" android:color="#FF1E222B" />
+                <item android:offset="0.0" android:color="#FF090B0E" />
+                <item android:offset="0.52" android:color="#FF14171D" />
+                <item android:offset="1.0" android:color="#FF1E232D" />
             </gradient>
         </aapt:attr>
     </path>
 
-    <!-- Warm Champagne Brass & Mineral Teal sheen -->
-    <path android:pathData="M56,52m-44,0a44,44 0,1 1,88 0a44,44 0,1 1,-88 0">
+    <!-- Warm Champagne Gold & Mineral Teal depth sheen -->
+    <path android:pathData="M55,52m-46,0a46,46 0,1 1,92 0a46,46 0,1 1,-92 0">
         <aapt:attr name="android:fillColor">
             <gradient
                 android:type="radial"
-                android:centerX="56"
+                android:centerX="55"
                 android:centerY="52"
-                android:gradientRadius="44">
-                <item android:offset="0.0" android:color="#38D6B46C" />
-                <item android:offset="0.56" android:color="#1F3FD1BE" />
+                android:gradientRadius="46">
+                <item android:offset="0.0" android:color="#3DD6B46C" />
+                <item android:offset="0.56" android:color="#243FD1BE" />
                 <item android:offset="1.0" android:color="#000C0D0F" />
             </gradient>
         </aapt:attr>
     </path>
 
-    <!-- Subtle architectural calibration ring -->
+    <!-- Outer Champagne bezel & orbital calibration rings -->
     <path
-        android:pathData="M54,54m-35,0a35,35 0,1 1,70 0a35,35 0,1 1,-70 0"
-        android:strokeWidth="1.25"
-        android:strokeColor="#33E7D3A3" />
+        android:pathData="M18,4.6 L90,4.6 C97.4,4.6 103.4,10.6 103.4,18 L103.4,90 C103.4,97.4 97.4,103.4 90,103.4 L18,103.4 C10.6,103.4 4.6,97.4 4.6,90 L4.6,18 C4.6,10.6 10.6,4.6 18,4.6 Z"
+        android:strokeWidth="1.2"
+        android:strokeColor="#5CD6B46C" />
+    <path
+        android:pathData="M54,54m-36.5,0a36.5,36.5 0,1 1,73 0a36.5,36.5 0,1 1,-73 0"
+        android:strokeWidth="1.15"
+        android:strokeColor="#38E7D3A3" />
+    <path
+        android:pathData="M54,54m-30.5,0a30.5,30.5 0,1 1,61 0a30.5,30.5 0,1 1,-61 0"
+        android:strokeWidth="1.05"
+        android:strokeColor="#2EE7D3A3" />
 
     <!-- Architectural chamfered ivory D crest -->
     <path
-        android:fillColor="#FFF7F4EC"
-        android:pathData="M33,25 L57,25 L80,42 L80,66 L57,83 L33,83 L42.5,72 L54.5,72 L68.5,61.5 L68.5,46.5 L54.5,36 L42.5,36 Z" />
+        android:fillColor="#FFF8F5EE"
+        android:pathData="M34,25.5 L57,25.5 L79.5,42 L79.5,66 L57,82.5 L34,82.5 L43,71.5 L54.5,71.5 L68,61.5 L68,46.5 L54.5,36.5 L43,36.5 Z" />
 
-    <!-- Double-bevel Champagne Brass route chevron -->
+    <!-- Double-bevel Champagne Gold kinetic route chevron -->
     <path
         android:pathData="M28,36 L52,54 L28,72"
-        android:strokeWidth="4.6"
+        android:strokeWidth="4.8"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:strokeColor="#FFD6B46C" />
     <path
-        android:pathData="M34,45 L45.5,54 L34,63"
+        android:pathData="M34.5,45 L45.5,54 L34.5,63"
         android:strokeWidth="2.0"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:strokeColor="#B8E7D3A3" />
+        android:strokeColor="#D8F2DFB4" />
 
-    <!-- Champagne origin & destination anchor pins -->
+    <!-- Origin & Destination waypoint pins with ivory specular dots -->
     <path
         android:fillColor="#FFD6B46C"
-        android:pathData="M28,36m-4.0,0a4.0,4.0 0,1 1,8.0 0a4.0,4.0 0,1 1,-8.0 0" />
+        android:pathData="M28,36m-4.2,0a4.2,4.2 0,1 1,8.4 0a4.2,4.2 0,1 1,-8.4 0" />
+    <path
+        android:fillColor="#E6FFF7E6"
+        android:pathData="M28,36m-1.35,0a1.35,1.35 0,1 1,2.7 0a1.35,1.35 0,1 1,-2.7 0" />
     <path
         android:fillColor="#FFD6B46C"
-        android:pathData="M28,72m-4.0,0a4.0,4.0 0,1 1,8.0 0a4.0,4.0 0,1 1,-8.0 0" />
-
-    <!-- Mineral Teal telemetry nexus core -->
+        android:pathData="M28,72m-4.2,0a4.2,4.2 0,1 1,8.4 0a4.2,4.2 0,1 1,-8.4 0" />
     <path
-        android:fillColor="#423FD1BE"
-        android:pathData="M53,54m-9.6,0a9.6,9.6 0,1 1,19.2 0a9.6,9.6 0,1 1,-19.2 0" />
+        android:fillColor="#E6FFF7E6"
+        android:pathData="M28,72m-1.35,0a1.35,1.35 0,1 1,2.7 0a1.35,1.35 0,1 1,-2.7 0" />
+
+    <!-- Mineral Teal live telemetry nexus core -->
+    <path
+        android:fillColor="#473FD1BE"
+        android:pathData="M53,54m-9.8,0a9.8,9.8 0,1 1,19.6 0a9.8,9.8 0,1 1,-19.6 0" />
     <path
         android:fillColor="#FF3FD1BE"
         android:pathData="M53,54m-5.8,0a5.8,5.8 0,1 1,11.6 0a5.8,5.8 0,1 1,-11.6 0" />

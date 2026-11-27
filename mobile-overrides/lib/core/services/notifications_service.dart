@@ -17,6 +17,8 @@ class DarbNotifications {
   static String? _lastSyncedSessionToken;
   static DateTime? _lastSyncedAt;
   static AuthorizationStatus? _authorizationStatus;
+  static Map<String, dynamic>? _bufferedInitialData;
+  static bool _initialCaptured = false;
 
   @visibleForTesting
   static Future<String?> Function()? tokenProviderOverride;
@@ -28,6 +30,12 @@ class DarbNotifications {
   @visibleForTesting
   static Future<void> Function(String token, String platform)?
       unregisterDeviceOverride;
+
+  @visibleForTesting
+  static Future<Map<String, dynamic>?> Function()? initialMessageOverride;
+
+  @visibleForTesting
+  static Stream<Map<String, dynamic>>? openedMessageStreamOverride;
 
   static bool get isReady => _ready;
   static bool get hasSyncedToken =>
@@ -67,11 +75,15 @@ class DarbNotifications {
     _lastSyncedSessionToken = null;
     _lastSyncedAt = null;
     _authorizationStatus = null;
+    _bufferedInitialData = null;
+    _initialCaptured = false;
     unawaited(_tokenSubscription?.cancel());
     _tokenSubscription = null;
     tokenProviderOverride = null;
     registerDeviceOverride = null;
     unregisterDeviceOverride = null;
+    initialMessageOverride = null;
+    openedMessageStreamOverride = null;
   }
 
   static Future<void> initialize() async {
@@ -103,6 +115,27 @@ class DarbNotifications {
     }
   }
 
+  static Future<void> captureInitialMessage() async {
+    if (_initialCaptured) return;
+    _initialCaptured = true;
+    try {
+      if (initialMessageOverride != null) {
+        final data = await initialMessageOverride!();
+        if (data != null) {
+          _bufferedInitialData = Map<String, dynamic>.from(data);
+        }
+        return;
+      }
+      if (!_ready) return;
+      final message = await FirebaseMessaging.instance.getInitialMessage();
+      if (message != null) {
+        _bufferedInitialData = Map<String, dynamic>.from(message.data);
+      }
+    } catch (error) {
+      lastError = 'تعذر قراءة الإشعار الأولي: $error';
+    }
+  }
+
   static StreamSubscription<RemoteMessage>? listenForeground(
     void Function(String? title, String? body, Map<String, dynamic> data)
         onMessage,
@@ -118,9 +151,14 @@ class DarbNotifications {
     });
   }
 
-  static StreamSubscription<RemoteMessage>? listenOpened(
+  static StreamSubscription<dynamic>? listenOpened(
     void Function(Map<String, dynamic> data) onOpened,
   ) {
+    if (openedMessageStreamOverride != null) {
+      return openedMessageStreamOverride!.listen(
+        (data) => onOpened(Map<String, dynamic>.from(data)),
+      );
+    }
     if (!_ready) return null;
     return FirebaseMessaging.onMessageOpenedApp.listen(
       (message) => onOpened(Map<String, dynamic>.from(message.data)),
@@ -128,6 +166,20 @@ class DarbNotifications {
   }
 
   static Future<Map<String, dynamic>?> initialMessageData() async {
+    final buffered = _bufferedInitialData;
+    if (buffered != null) {
+      _bufferedInitialData = null;
+      return Map<String, dynamic>.from(buffered);
+    }
+    if (initialMessageOverride != null) {
+      try {
+        final data = await initialMessageOverride!();
+        return data == null ? null : Map<String, dynamic>.from(data);
+      } catch (error) {
+        lastError = 'تعذر قراءة الإشعار الأولي: $error';
+        return null;
+      }
+    }
     if (!_ready) return null;
     try {
       final message = await FirebaseMessaging.instance.getInitialMessage();

@@ -875,6 +875,13 @@ class AppLocalizations {
     'المفضلة': 'Favorites|Favoriler',
     'ابحث برقم الطلب أو اسم العميل...': 'Search by order # or customer name…|Sipariş no veya müşteri adı ara…',
     'طلب جديد بانتظار القبول': 'New order awaiting acceptance|Onay bekleyen yeni sipariş',
+    'التحديث التلقائي للتطبيق': 'Automatic app updates|Otomatik uygulama güncellemeleri',
+    'تنزيل التحديثات الموثّقة بالخلفية (يتطلب موافقة أندرويد عند التثبيت)': 'Download verified updates in background (Android confirmation required to install)|Doğrulanmış güncellemeleri arka planda indir (kurulum için Android onayı gerekir)',
+    'التنزيل عبر Wi-Fi فقط': 'Download over Wi-Fi only|Yalnızca Wi-Fi üzerinden indir',
+    'منع استهلاك بيانات الهاتف أثناء تنزيل تحديثات التطبيق': 'Prevent cellular data usage when downloading updates|Güncelleme indirirken mobil veri kullanımını önle',
+    'تم حفظ تفضيلات التحديث': 'Update preferences saved|Güncelleme tercihleri kaydedildi',
+    'التنزيل مقيّد بشبكة Wi-Fi فقط من الإعدادات': 'Downloads are restricted to Wi-Fi in settings|İndirmeler ayarlardan yalnızca Wi-Fi ile sınırlandırılmıştır',
+    'يتطلب تثبيت التحديث موافقة نظام أندرويد عند الفتح': 'Installing this update requires Android system confirmation|Bu güncellemeyi yüklemek için Android sistem onayı gerekir',
   };
 
   static const Map<String, Map<String, String>> _values = {

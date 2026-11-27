@@ -90,7 +90,7 @@ jobs:
               m = m.replace("<application", internet + "\n    <application", 1)
           if "android.permission.INTERNET" not in m:
               raise SystemExit("Could not add INTERNET permission to Android manifest")
-          for p in ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
+          for p in ["ACCESS_NETWORK_STATE", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS", "REQUEST_INSTALL_PACKAGES"]:
               tag = f'<uses-permission android:name="android.permission.{p}" />'
               if tag not in m:
                   m = m.replace(internet, internet + "\n    " + tag, 1)

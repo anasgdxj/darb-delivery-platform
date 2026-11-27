@@ -88,32 +88,40 @@ class _DarbBrandMarkPainter extends CustomPainter {
         ).createShader(glowRect),
     );
 
-    // Architectural diamond calibration frame (subtle hairline)
+    // Architectural calibration rings matching adaptive launcher emblem
     canvas.drawCircle(
       const Offset(54, 54),
-      35,
+      36.5,
       Paint()
-        ..color = DarbColors.mint.withValues(alpha: 0.20)
+        ..color = DarbColors.mint.withValues(alpha: 0.22)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.25,
+        ..strokeWidth = 1.15,
+    );
+    canvas.drawCircle(
+      const Offset(54, 54),
+      30.5,
+      Paint()
+        ..color = DarbColors.mint.withValues(alpha: 0.18)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.05,
     );
 
     // Architectural chamfered ivory "D" crest
     final d = Path()
-      ..moveTo(33, 25)
-      ..lineTo(57, 25)
-      ..lineTo(80, 42)
-      ..lineTo(80, 66)
-      ..lineTo(57, 83)
-      ..lineTo(33, 83)
-      ..lineTo(42.5, 72)
-      ..lineTo(54.5, 72)
-      ..lineTo(68.5, 61.5)
-      ..lineTo(68.5, 46.5)
-      ..lineTo(54.5, 36)
-      ..lineTo(42.5, 36)
+      ..moveTo(34, 25.5)
+      ..lineTo(57, 25.5)
+      ..lineTo(79.5, 42)
+      ..lineTo(79.5, 66)
+      ..lineTo(57, 82.5)
+      ..lineTo(34, 82.5)
+      ..lineTo(43, 71.5)
+      ..lineTo(54.5, 71.5)
+      ..lineTo(68, 61.5)
+      ..lineTo(68, 46.5)
+      ..lineTo(54.5, 36.5)
+      ..lineTo(43, 36.5)
       ..close();
-    canvas.drawPath(d, Paint()..color = const Color(0xFFF7F4EC));
+    canvas.drawPath(d, Paint()..color = const Color(0xFFF8F5EE));
 
     // Double-bevel Champagne Brass route vector cutting through the crest
     final upperBevel = Path()
@@ -125,36 +133,39 @@ class _DarbBrandMarkPainter extends CustomPainter {
       Paint()
         ..color = DarbColors.lime
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.6
+        ..strokeWidth = 4.8
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
     );
 
-    // Subtle secondary bronze speed line
+    // Subtle secondary champagne speed line
     final innerEcho = Path()
-      ..moveTo(34, 45)
+      ..moveTo(34.5, 45)
       ..lineTo(45.5, 54)
-      ..lineTo(34, 63);
+      ..lineTo(34.5, 63);
     canvas.drawPath(
       innerEcho,
       Paint()
-        ..color = DarbColors.mint.withValues(alpha: 0.72)
+        ..color = const Color(0xD8F2DFB4)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.0
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
     );
 
-    // Champagne origin/destination anchor pins
+    // Champagne origin/destination anchor pins with ivory specular highlights
     final pinPaint = Paint()..color = DarbColors.lime;
-    canvas.drawCircle(const Offset(28, 36), 4.0, pinPaint);
-    canvas.drawCircle(const Offset(28, 72), 4.0, pinPaint);
+    final specPaint = Paint()..color = const Color(0xE6FFF7E6);
+    canvas.drawCircle(const Offset(28, 36), 4.2, pinPaint);
+    canvas.drawCircle(const Offset(28, 36), 1.35, specPaint);
+    canvas.drawCircle(const Offset(28, 72), 4.2, pinPaint);
+    canvas.drawCircle(const Offset(28, 72), 1.35, specPaint);
 
     // Mineral Teal live telemetry core inside the Brass nexus
     canvas.drawCircle(
       const Offset(53, 54),
-      9.6,
-      Paint()..color = DarbColors.darkViolet.withValues(alpha: 0.26),
+      9.8,
+      Paint()..color = DarbColors.darkViolet.withValues(alpha: 0.28),
     );
     canvas.drawCircle(
       const Offset(53, 54),

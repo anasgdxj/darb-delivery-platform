@@ -14,15 +14,17 @@ The presentation layer has been refactored away from repetitive stacked Material
 ```text
 mobile-overrides/
 ├── DESIGN_ARCHITECTURE_HANDOFF.md         # This technical handoff specification
-├── MainActivity.kt                        # Android 8+ notification channels (dazrevo_high_importance & fallback) + APK updater channel
+├── MainActivity.kt                        # Android 8+ notification channels (dazrevo_high_importance, dazrevo_updates & fallback), updater MethodChannel, auto_update/Wi-Fi/duplicate guards
+├── DarbUpdateDownloadReceiver.kt          # Verified SHA-256 background download receiver launching Android Package Installer directly on notification tap
 ├── ic_launcher.xml                        # Unified chamfered D + Champagne Brass + Mineral Teal vector icon
-├── android-res/                           # Adaptive XMLs, launch splash, notification vector & mipmap PNG icons
+├── android-res/                           # Adaptive XMLs (foreground/background/monochrome), launch splash, notification vector & all mdpi-xxxhdpi PNG icons (standard + round)
 ├── lib/
 │   ├── core/
 │   │   ├── l10n/
-│   │   │   └── app_localizations.dart         # Full AR/EN/TR _sourceValues dictionary (683 keys + dynamic rules)
+│   │   │   └── app_localizations.dart         # Full AR/EN/TR _sourceValues dictionary (690 keys + dynamic rules)
 │   │   ├── services/
-│   │   │   └── notifications_service.dart     # Hardened FCM registration, token refresh, deduplication, retry & sync diagnostics
+│   │   │   ├── app_update_service.dart        # Concurrent checkForUpdate lock, auto_update_enabled/wifi_only persistence, duplicate & Wi-Fi guards
+│   │   │   └── notifications_service.dart     # Hardened FCM registration, initial-message buffering, token refresh, deduplication & sync diagnostics
 │   │   ├── theme/
 │   │   │   └── darb_design_system.dart        # DarbColors, DarbSpace, DarbRadius, DarbMotion, DarbTheme, DarbAppearanceController
 │   │   └── widgets/
@@ -142,10 +144,11 @@ Uses the platform font stack (system Arabic/Latin sans) scaled dynamically by `D
 2. **Backend Endpoints & Auth**:
    - Auth recovery (`Api.restore`), token refresh, MsgPlus OTP, Google Sign-In, `/auth/me`, `/notifications`, `/cities`, `/vendors`, `/drivers/me`, `/drivers/stats`, `/orders/driver/available`, `/vendors/mine`, `/vendors/mine/stats`, `/orders/vendor`, `/admin/stats`, `/admin/vendors/pending`, `/admin/drivers/pending`, `/admin/orders` remain unmodified.
    - `VendorOrdersScreen` preserves exact `MISSING`/`PENDING` empty states; `DriverDashboardScreen` preserves `REJECTED` review messages and non-fatal `statsError` banner recovery; `AccountScreen` preserves `ListView` + 3 `DarbGroupedSection` blocks and `SettingsScreen` navigation.
-3. **FCM & Android Notification Channels**:
-   - `MainActivity.kt` creates high-importance channels `dazrevo_high_importance` and `fcm_fallback_notification_channel` on Android O+.
-   - `AndroidManifest.xml` specifies `com.google.firebase.messaging.default_notification_channel_id = dazrevo_high_importance`.
-   - `backend-overrides/notifications.service.ts` attaches `android.notification.channelId = 'dazrevo_high_importance'`, `#8A651F` tint, and `دازريفو` release notification copy.
-   - `DarbNotifications` checks `Firebase.apps.isEmpty`, normalizes platform names (`android`, `ios`, `web`), subscribes to `onTokenRefresh` unconditionally, deduplicates identical syncs, retries once on transient errors, and exposes test hooks (`tokenProviderOverride`, `registerDeviceOverride`, `unregisterDeviceOverride`).
-4. **Localization Completeness**: All 683 static `dt('...')` UI strings have explicit English and Turkish pairs in `app_localizations.dart` (`_sourceValues`), plus dynamic prefix/suffix handlers for stock counts, distances, and product totals.
+3. **FCM, Android Notification Channels & APK Self-Updater**:
+   - `MainActivity.kt` creates high-importance channels `dazrevo_high_importance`, `dazrevo_updates`, and `fcm_fallback_notification_channel` on Android O+.
+   - `AndroidManifest.xml` specifies `com.google.firebase.messaging.default_notification_channel_id`, `@drawable/ic_notification`, and `ACCESS_NETWORK_STATE`.
+   - `DarbUpdateDownloadReceiver.kt` verifies SHA-256 on download completion and opens Android Package Installer directly on tap (with `MainActivity.ACTION_INSTALL_UPDATE` fallback if `REQUEST_INSTALL_PACKAGES` permission is required).
+   - `DarbUpdater` (`app_update_service.dart`) shares active in-flight `checkForUpdate()` futures, persists `auto_update_enabled` & `wifi_only`, blocks cellular/duplicate auto-downloads cleanly, and always requires Android's system install confirmation prompt.
+   - `DarbNotifications` buffers cold-start `getInitialMessage()` in `main.dart`, listens cleanly to `onMessageOpenedApp`, checks `Firebase.apps.isEmpty`, normalizes platform names (`android`, `ios`, `web`), and exposes test hooks (`initialMessageOverride`, `openedMessageStreamOverride`, `tokenProviderOverride`, `registerDeviceOverride`, `unregisterDeviceOverride`).
+4. **Localization Completeness**: All 690 static `dt('...')` UI strings have explicit English and Turkish pairs in `app_localizations.dart` (`_sourceValues`), plus dynamic prefix/suffix handlers for stock counts, distances, and product totals.
 5. **Verification Note**: Run `.github/workflows/validate-mobile-overrides.yml` and `.github/workflows/build-android-release.yml` in GitHub Actions to execute `flutter analyze lib`, `flutter test`, and signed `com.darb.darb` release APK/AAB compilation before publishing (`[publish-apk]`).
