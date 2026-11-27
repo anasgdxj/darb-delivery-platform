@@ -3534,7 +3534,8 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      await tester.tap(wifiSwitch);
+      expect(wifiSwitch, findsOneWidget);
+      await tester.tap(find.text('التنزيل عبر Wi-Fi فقط'));
       await tester.pumpAndSettle();
       expect(DarbUpdater.instance.wifiOnly, isFalse);
       expect(nativePrefs['wifi_only'], isFalse);
