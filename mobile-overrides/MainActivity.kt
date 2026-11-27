@@ -75,15 +75,19 @@ class MainActivity : FlutterActivity() {
                         "setUpdatePreferences" -> {
                             val enabled = call.argument<Boolean>("enabled")
                             val wifiOnly = call.argument<Boolean>("wifiOnly")
-                            if (enabled == null || wifiOnly == null) {
-                                result.error("INVALID_PREFERENCES", "Both update preferences are required", null)
+                            if (enabled == null && wifiOnly == null) {
+                                result.error("INVALID_PREFERENCES", "At least one update preference is required", null)
                                 return@setMethodCallHandler
                             }
-                            getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE).edit()
-                                .putBoolean(KEY_AUTO_UPDATE_ENABLED, enabled)
-                                .putBoolean(KEY_WIFI_ONLY, wifiOnly)
-                                .apply()
-                            result.success(true)
+                            val prefs = getSharedPreferences(UPDATE_PREFS, MODE_PRIVATE)
+                            prefs.edit().apply {
+                                if (enabled != null) putBoolean(KEY_AUTO_UPDATE_ENABLED, enabled)
+                                if (wifiOnly != null) putBoolean(KEY_WIFI_ONLY, wifiOnly)
+                            }.apply()
+                            result.success(mapOf(
+                                "enabled" to prefs.getBoolean(KEY_AUTO_UPDATE_ENABLED, true),
+                                "wifiOnly" to prefs.getBoolean(KEY_WIFI_ONLY, true)
+                            ))
                         }
                         "startBackgroundDownload" -> {
                             val url = call.argument<String>("url")
