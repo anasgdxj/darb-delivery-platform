@@ -1,9 +1,11 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-style="glass">
+<html lang="ar" dir="rtl" data-style="glass" class="web-portal-maintenance">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#14171D">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="بوابة الويب لدازريفو قيد الإعداد للإطلاق الآمن. حمّل تطبيق أندرويد الرسمي للبدء.">
 <title>دازريفو | DAZREVO — تطبيق العملاء والسائقين والمتاجر</title>
 <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -610,8 +612,75 @@ html.dark .star-btn.lit { color: var(--gold); }
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
 </style>
+<style>
+html.web-portal-maintenance body > *:not(#webPortalNotice) { display: none !important; }
+#webPortalNotice {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 18px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(214,180,108,.18), transparent 32%),
+    radial-gradient(circle at 88% 92%, rgba(63,209,190,.12), transparent 34%),
+    #0C0D0F;
+  color: #F5F3EE;
+  font-family: 'Cairo', Tahoma, sans-serif;
+}
+#webPortalNotice .web-portal-card {
+  width: min(100%, 620px);
+  padding: clamp(24px, 5vw, 44px);
+  border: 1px solid rgba(214,180,108,.28);
+  border-radius: 28px;
+  background: rgba(20,23,29,.94);
+  box-shadow: 0 28px 80px rgba(0,0,0,.32);
+  text-align: center;
+}
+#webPortalNotice .web-portal-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(214,180,108,.35);
+  border-radius: 20px;
+  color: #D6B46C;
+  font-size: 24px;
+  font-weight: 900;
+}
+#webPortalNotice h1 { margin: 0 0 12px; font-size: clamp(25px, 5vw, 36px); line-height: 1.25; }
+#webPortalNotice p { margin: 0 auto 18px; max-width: 48ch; color: #C8C4BA; line-height: 1.9; }
+#webPortalNotice .web-portal-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 22px;
+  border-radius: 14px;
+  background: #D6B46C;
+  color: #14171D;
+  font-weight: 900;
+  text-decoration: none;
+}
+#webPortalNotice .web-portal-back { display: inline-block; margin-inline-start: 14px; color: #E7D3A3; text-decoration: none; font-weight: 800; }
+#webPortalNotice .web-portal-translations { margin-top: 26px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.1); }
+#webPortalNotice .web-portal-translations p { margin: 8px auto 0; font-size: 13px; }
+</style>
 </head>
 <body>
+<main id="webPortalNotice" aria-labelledby="webPortalTitle">
+  <section class="web-portal-card">
+    <div class="web-portal-mark" aria-hidden="true">D</div>
+    <div style="color:#D6B46C;font-size:12px;font-weight:900;letter-spacing:.14em">DAZREVO · WEB</div>
+    <h1 id="webPortalTitle">بوابة الويب قيد الإعداد</h1>
+    <p>نعمل على ربط نسخة الويب بخدمات دازريفو الفعلية وتدقيق تسجيل الدخول والصلاحيات والطلبات قبل إتاحتها للعامة.</p>
+    <a class="web-portal-cta" href="../#download">تنزيل تطبيق أندرويد الرسمي</a>
+    <a class="web-portal-back" href="../">العودة إلى الموقع</a>
+    <div class="web-portal-translations">
+      <p lang="en" dir="ltr">The web portal is being prepared for a secure production launch. Download the official Android app to use DAZREVO today.</p>
+      <p lang="tr" dir="ltr">Web portalı güvenli üretim lansmanı için hazırlanıyor. DAZREVO'yu kullanmak için resmî Android uygulamasını indirin.</p>
+    </div>
+  </section>
+</main>
 <div class="ambient" aria-hidden="true">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -823,6 +892,7 @@ html.dark .star-btn.lit { color: var(--gold); }
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
 <script>
+if (!document.documentElement.classList.contains('web-portal-maintenance')) {
 const $ = (id) => document.getElementById(id);
 const API_BASE = (window.location.origin || 'http://localhost:3000') + '/api/v1';
 
@@ -2377,6 +2447,7 @@ const params = new URLSearchParams(window.location.search);
 if (params.get('autostart') === '1') {
   const r = (params.get('role') || 'CUSTOMER').toUpperCase();
   switchRoleSession(['CUSTOMER', 'DRIVER', 'VENDOR'].includes(r) ? r : 'CUSTOMER');
+}
 }
 </script>
 </body>
