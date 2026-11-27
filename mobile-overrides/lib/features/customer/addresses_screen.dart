@@ -338,26 +338,11 @@ class _AddressesScreenState extends State<AddressesScreen> {
         '/addresses',
         'customer_addresses',
       );
-      if (kDebugMode) {
-        debugPrint(
-          '[AddressesScreen] responseType=${res.data.runtimeType}, '
-          'isList=${res.data is List}, fromCache=${res.fromCache}',
-        );
-        if (res.data is List) {
-          debugPrint(
-            '[AddressesScreen] responseLength=${(res.data as List).length}, '
-            'itemTypes=${(res.data as List).map((item) => item.runtimeType).toList()}',
-          );
-        }
-      }
       final rawList = res.data is List ? res.data as List : const [];
       final list = rawList
           .whereType<Map>()
           .map((item) => Map<String, dynamic>.from(item))
           .toList();
-      if (kDebugMode) {
-        debugPrint('[AddressesScreen] normalizedAddressCount=${list.length}');
-      }
       if (!mounted) return;
       setState(() {
         _addresses = list;
