@@ -1395,6 +1395,108 @@ void main() {
     });
 
     testWidgets(
+        'DriverDashboardScreen filters vendor, shopping, and peer orders by backend type',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      _mockSecureStorage(<String, String>{});
+      Api.instance.setSessionForTest(accessToken: 'valid-token');
+      Api.instance.httpClientOverride = MockClient((request) async {
+        final path = request.url.path;
+        if (path.endsWith('/drivers/me')) {
+          return _utf8Response(
+            jsonEncode({
+              'id': 'drv-1',
+              'status': 'APPROVED',
+              'isOnline': true,
+              'vehicleType': 'MOTORCYCLE',
+            }),
+            200,
+          );
+        }
+        if (path.endsWith('/drivers/stats')) {
+          return _utf8Response(jsonEncode({}), 200);
+        }
+        if (path.endsWith('/orders/driver/available')) {
+          return _utf8Response(
+            jsonEncode([
+              {
+                'id': 'vendor-1',
+                'type': 'VENDOR_ORDER',
+                'status': 'READY',
+                'vendor': {'translations': [{'name': 'متجر تجريبي'}]},
+                'deliveryOffers': [],
+                'total': '12000',
+                'currency': 'SYP',
+                'address': {'details': 'حلب - العزيزية'},
+              },
+              {
+                'id': 'shopping-1',
+                'type': 'SHOPPING_DELIVERY',
+                'status': 'PENDING',
+                'shoppingItemName': 'دواء',
+                'shoppingDescription': 'شراء دواء من الصيدلية',
+                'shoppingStoreName': 'صيدلية تجريبية',
+                'shoppingStoreAddress': 'حلب',
+                'deliveryOffers': [],
+                'address': {'details': 'حلب - الجميلية'},
+              },
+              {
+                'id': 'peer-1',
+                'type': 'PEER_DELIVERY',
+                'status': 'PENDING',
+                'pickupAddress': 'حلب - الفرقان',
+                'deliveryOffers': [],
+                'address': {'details': 'حلب - الشهباء'},
+              },
+            ]),
+            200,
+          );
+        }
+        return _utf8Response('[]', 200);
+      });
+      addTearDown(() async {
+        DriverLocationReporter.stop();
+        _clearSecureStorageMock();
+        Api.instance.httpClientOverride = null;
+        Api.instance.setSessionForTest();
+      });
+
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            initialScreen: Scaffold(body: DriverDashboardScreen()),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('متجر تجريبي'), findsWidgets);
+      expect(find.text('شراء وتوصيل: دواء'), findsOneWidget);
+      expect(find.text('طلب توصيل مستقل'), findsOneWidget);
+
+      await tester.tap(find.text('طلب متجر'));
+      await tester.pump();
+      expect(find.text('متجر تجريبي'), findsWidgets);
+      expect(find.text('شراء وتوصيل: دواء'), findsNothing);
+      expect(find.text('طلب توصيل مستقل'), findsNothing);
+
+      await tester.tap(find.text('شراء وتوصيل'));
+      await tester.pump();
+      expect(find.text('شراء وتوصيل: دواء'), findsOneWidget);
+      expect(find.text('متجر تجريبي'), findsNothing);
+      expect(find.text('طلب توصيل مستقل'), findsNothing);
+
+      await tester.tap(find.text('توصيل مستقل'));
+      await tester.pump();
+      expect(find.text('طلب توصيل مستقل'), findsOneWidget);
+      expect(find.text('متجر تجريبي'), findsNothing);
+      expect(find.text('شراء وتوصيل: دواء'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
         'AppShell renders without overflow on 320px narrow viewport in Dark Mode and EN/TR locales',
         (tester) async {
       _mockSecureStorage(<String, String>{

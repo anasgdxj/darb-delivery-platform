@@ -35,9 +35,10 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
 
   List<Map<String, dynamic>> get _filteredAvailable {
     if (_typeFilter == 'ALL') return _available;
-    return _available
-        .where((o) => o['type']?.toString() == _typeFilter)
-        .toList();
+    return _available.where((order) {
+      final type = order['type']?.toString();
+      return type == _typeFilter;
+    }).toList();
   }
 
   @override
@@ -589,12 +590,20 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                       count: _available.length,
                     ),
                     DarbDockOption(
-                      value: 'VENDOR',
+                      value: 'VENDOR_ORDER',
                       label: dt('طلب متجر'),
                       count: _available
-                          .where((o) => o['type']?.toString() != 'PEER_DELIVERY')
+                          .where((o) => o['type']?.toString() == 'VENDOR_ORDER')
                           .length,
                       icon: Icons.storefront_outlined,
+                    ),
+                    DarbDockOption(
+                      value: 'SHOPPING_DELIVERY',
+                      label: dt('شراء وتوصيل'),
+                      count: _available
+                          .where((o) => o['type']?.toString() == 'SHOPPING_DELIVERY')
+                          .length,
+                      icon: Icons.shopping_bag_outlined,
                     ),
                     DarbDockOption(
                       value: 'PEER_DELIVERY',
