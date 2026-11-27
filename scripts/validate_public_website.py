@@ -202,6 +202,17 @@ if "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/
 if "admin/" in root_html or "بوابة الإدارة" in root_html or "دخول الإدارة" in root_html:
     fail("Admin portal links must not appear on the public home page")
 
+for page in MARKETING_PAGES:
+    page_html = (ROOT / page).read_text(encoding="utf-8")
+    if re.search(r'href=["\\'](?:\\./|\\.\\./)app/', page_html):
+        fail(f"{page.as_posix()} must not advertise the unfinished web portal as a live service")
+
+portal_html = (ROOT / "app/index.html").read_text(encoding="utf-8")
+if 'class="web-portal-maintenance"' not in portal_html or 'name="robots" content="noindex,nofollow"' not in portal_html:
+    fail("The unfinished web portal must remain gated and excluded from search indexing")
+if "بوابة الويب قيد الإعداد" not in portal_html:
+    fail("The web portal maintenance notice is missing")
+
 manifest_path = ROOT / "app-update.json"
 if not manifest_path.is_file():
     fail("Missing app-update.json; the public site cannot show the current Android release")
