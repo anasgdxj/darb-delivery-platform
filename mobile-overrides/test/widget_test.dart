@@ -2494,23 +2494,30 @@ void main() {
 
       // 2. CheckoutScreen
       await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
-          child: DarbApp(
-            key: ValueKey('sp-checkout'),
-            initialScreen: CheckoutScreen(
-              cityId: 'city-1',
-              vendorId: 'v-1',
-              vendorName: 'مقهى دازريفو',
-              items: [
-                CartCheckoutItem(
-                  productId: 'p-1',
-                  name: 'قهوة مختصة',
-                  unitPrice: 12000,
-                  currency: 'SYP',
-                  quantity: 2,
-                ),
-              ],
+        const SizedBox(
+          width: 320,
+          height: 640,
+          child: MediaQuery(
+            data: MediaQueryData(
+              size: Size(320, 640),
+              disableAnimations: true,
+            ),
+            child: DarbApp(
+              key: ValueKey('sp-checkout'),
+              initialScreen: CheckoutScreen(
+                cityId: 'city-1',
+                vendorId: 'v-1',
+                vendorName: 'مقهى دازريفو',
+                items: [
+                  CartCheckoutItem(
+                    productId: 'p-1',
+                    name: 'قهوة مختصة',
+                    unitPrice: 12000,
+                    currency: 'SYP',
+                    quantity: 2,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -2519,6 +2526,17 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       expect(find.byType(DarbCommandStage), findsOneWidget);
       expect(find.byType(DarbRouteConnector), findsOneWidget);
+      final checkoutScrollable = find
+          .descendant(
+            of: find.byType(ListView).first,
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await tester.scrollUntilVisible(
+        find.text('قهوة مختصة'),
+        180,
+        scrollable: checkoutScrollable,
+      );
       expect(find.text('قهوة مختصة'), findsOneWidget);
       expect(find.text('2×'), findsOneWidget);
       expect(tester.takeException(), isNull);
