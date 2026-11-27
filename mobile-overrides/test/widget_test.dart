@@ -3516,25 +3516,25 @@ void main() {
       await tester.pumpAndSettle();
 
       final autoTitle = find.text('التحديث التلقائي للتطبيق');
-      await tester.scrollUntilVisible(
-        autoTitle,
-        250,
-        scrollable: find.byType(Scrollable).first,
+      final autoTile = find.ancestor(
+        of: autoTitle,
+        matching: find.byType(DarbSettingsTile),
       );
-      await tester.ensureVisible(autoTitle);
-      await tester.tap(autoTitle);
+      await tester.ensureVisible(autoTile);
+      await tester.pumpAndSettle();
+      await tester.tap(autoTile);
       await tester.pumpAndSettle();
       expect(DarbUpdater.instance.autoUpdateEnabled, isFalse);
       expect(nativePrefs['auto_update_enabled'], isFalse);
 
       final wifiTitle = find.text('التنزيل عبر Wi-Fi فقط');
-      await tester.scrollUntilVisible(
-        wifiTitle,
-        250,
-        scrollable: find.byType(Scrollable).first,
+      final wifiTile = find.ancestor(
+        of: wifiTitle,
+        matching: find.byType(DarbSettingsTile),
       );
-      await tester.ensureVisible(wifiTitle);
-      await tester.tap(wifiTitle);
+      await tester.ensureVisible(wifiTile);
+      await tester.pumpAndSettle();
+      await tester.tap(wifiTile);
       await tester.pumpAndSettle();
       expect(DarbUpdater.instance.wifiOnly, isFalse);
       expect(nativePrefs['wifi_only'], isFalse);
