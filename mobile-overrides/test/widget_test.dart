@@ -2433,7 +2433,10 @@ void main() {
       // 1. AddressesScreen
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
+          data: MediaQueryData(
+            size: const Size(320, 640),
+            disableAnimations: true,
+          ),
           child: DarbApp(key: ValueKey('sp-addresses'), initialScreen: AddressesScreen()),
         ),
       );
