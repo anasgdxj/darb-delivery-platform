@@ -338,20 +338,10 @@ class _AddressesScreenState extends State<AddressesScreen> {
         '/addresses',
         'customer_addresses',
       );
-      if (kDebugMode) {
-        debugPrint(
-          '[AddressesScreen] responseType=${res.data.runtimeType}, '
-          'isList=${res.data is List}, fromCache=${res.fromCache}',
-        );
-        if (res.data is List) {
-          debugPrint(
-            '[AddressesScreen] responseLength=${(res.data as List).length}, '
-            'itemTypes=${(res.data as List).map((item) => item.runtimeType).toList()}',
-          );
-        }
-      }
-      final list = (res.data is List ? res.data as List : const [])
-          .whereType<Map<String, dynamic>>()
+      final rawList = res.data is List ? res.data as List : const [];
+      final list = rawList
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
           .toList();
       if (!mounted) return;
       setState(() {
@@ -453,8 +443,9 @@ class _AddressesScreenState extends State<AddressesScreen> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 680),
-              child: _loading
-                  ? const DarbStateView.loading()
+              child: SizedBox.expand(
+                child: _loading
+                    ? const DarbStateView.loading()
                   : _error != null
                       ? DarbStateView.error(message: _error, onRetry: _load)
                       : _addresses.isEmpty
@@ -578,26 +569,29 @@ class _AddressesScreenState extends State<AddressesScreen> {
                                   ],
                               ],
                             ),
+                ),
             ),
           ),
         ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
-          child: Center(
-            heightFactor: 1,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 680),
-              child: DarbGlassSurface(
-                borderRadius: DarbRadius.xl,
-                blurSigma: 22,
-                padding: const EdgeInsets.all(10),
-                child: DarbActionButton(
-                  label: dt('إضافة عنوان'),
-                  icon: Icons.add_location_alt_rounded,
-                  onPressed: _openCreateSheet,
+        child: SizedBox(
+          height: 88,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: DarbGlassSurface(
+                  borderRadius: DarbRadius.xl,
+                  blurSigma: 22,
+                  padding: const EdgeInsets.all(10),
+                  child: DarbActionButton(
+                    label: dt('إضافة عنوان'),
+                    icon: Icons.add_location_alt_rounded,
+                    onPressed: _openCreateSheet,
+                  ),
                 ),
               ),
             ),

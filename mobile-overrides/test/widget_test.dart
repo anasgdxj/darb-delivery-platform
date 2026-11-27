@@ -2358,6 +2358,7 @@ void main() {
 
       final addressRequestPaths = <String>[];
       var addressResponseServed = false;
+      var notificationResponseServed = false;
       Api.instance.httpClientOverride = MockClient((request) async {
         final path = request.url.path;
         addressRequestPaths.add(path);
@@ -2411,6 +2412,7 @@ void main() {
           );
         }
         if (path.endsWith('/notifications')) {
+          notificationResponseServed = true;
           return _utf8Response(
             jsonEncode({
               'unreadCount': 1,
@@ -2419,7 +2421,8 @@ void main() {
                   'id': 'n-1',
                   'title': 'تم قبول طلبك',
                   'body': 'المتجر بدأ بتجهيز الطلب رقم DRB-101',
-                  'isRead': false,
+                  'type': 'ORDER_ACCEPTED',
+                  'readAt': null,
                   'createdAt': '2026-11-26T09:00:00Z',
                 },
               ],
@@ -2432,9 +2435,19 @@ void main() {
 
       // 1. AddressesScreen
       await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
-          child: DarbApp(key: ValueKey('sp-addresses'), initialScreen: AddressesScreen()),
+        const SizedBox(
+          width: 320,
+          height: 640,
+          child: MediaQuery(
+            data: MediaQueryData(
+              size: Size(320, 640),
+              disableAnimations: true,
+            ),
+            child: DarbApp(
+              key: ValueKey('sp-addresses'),
+              initialScreen: AddressesScreen(),
+            ),
+          ),
         ),
       );
       await tester.pump();
@@ -2450,30 +2463,64 @@ void main() {
         isTrue,
         reason: 'The addresses request must receive the fixture response; captured: $addressRequestPaths',
       );
+      final addressScrollable = find
+          .descendant(
+            of: find.byType(ListView).first,
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      final addressScrollState = tester.state<ScrollableState>(addressScrollable);
+      expect(
+        addressScrollState.position.viewportDimension,
+        greaterThan(0),
+        reason: 'The saved-address list must receive a bounded, visible viewport.',
+      );
+      await tester.scrollUntilVisible(
+        find.text('المنزل'),
+        180,
+        scrollable: addressScrollable,
+      );
       expect(find.text('المنزل'), findsOneWidget);
+      expect(
+        tester.widget<DarbTicketPass>(find.byType(DarbTicketPass).first).title,
+        'المنزل',
+        reason: 'The first address label must be preserved in its rendered pass.',
+      );
+      await tester.scrollUntilVisible(
+        find.text('المكتب'),
+        180,
+        scrollable: addressScrollable,
+      );
+      expect(find.text('المكتب'), findsOneWidget);
       expect(find.byType(DarbCommandStage), findsOneWidget);
-      expect(find.byType(DarbTicketPass), findsNWidgets(2));
       expect(tester.takeException(), isNull);
 
       // 2. CheckoutScreen
       await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
-          child: DarbApp(
-            key: ValueKey('sp-checkout'),
-            initialScreen: CheckoutScreen(
-              cityId: 'city-1',
-              vendorId: 'v-1',
-              vendorName: 'مقهى دازريفو',
-              items: [
-                CartCheckoutItem(
-                  productId: 'p-1',
-                  name: 'قهوة مختصة',
-                  unitPrice: 12000,
-                  currency: 'SYP',
-                  quantity: 2,
-                ),
-              ],
+        const SizedBox(
+          width: 320,
+          height: 640,
+          child: MediaQuery(
+            data: MediaQueryData(
+              size: Size(320, 640),
+              disableAnimations: true,
+            ),
+            child: DarbApp(
+              key: ValueKey('sp-checkout'),
+              initialScreen: CheckoutScreen(
+                cityId: 'city-1',
+                vendorId: 'v-1',
+                vendorName: 'مقهى دازريفو',
+                items: [
+                  CartCheckoutItem(
+                    productId: 'p-1',
+                    name: 'قهوة مختصة',
+                    unitPrice: 12000,
+                    currency: 'SYP',
+                    quantity: 2,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -2482,7 +2529,19 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
       expect(find.byType(DarbCommandStage), findsOneWidget);
       expect(find.byType(DarbRouteConnector), findsOneWidget);
-      expect(find.text('قهوة مختصة × 2'), findsOneWidget);
+      final checkoutScrollable = find
+          .descendant(
+            of: find.byType(ListView).first,
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await tester.scrollUntilVisible(
+        find.text('قهوة مختصة'),
+        180,
+        scrollable: checkoutScrollable,
+      );
+      expect(find.text('قهوة مختصة'), findsOneWidget);
+      expect(find.text('2×'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       // 3. AiOrderAssistantScreen
@@ -2498,7 +2557,25 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('إرسال مفاتيح من المزة إلى المالكي'));
       await tester.pump(const Duration(milliseconds: 200));
-      expect(find.byType(DarbTicketPass), findsOneWidget);
+      expect(
+        tester.widget<TextField>(find.byType(TextField).first).controller!.text,
+        'إرسال مفاتيح من المزة إلى المالكي',
+        reason: 'Selecting an example must populate the request without submitting it.',
+      );
+      await tester.ensureVisible(find.text('تحليل الطلب'));
+      await tester.tap(find.text('تحليل الطلب'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(
+        find.byType(DarbTicketPass),
+        findsOneWidget,
+        reason: 'The AI draft ticket must appear only after the analysis request succeeds.',
+      );
+      expect(
+        addressRequestPaths.any((path) => path.endsWith('/ai/order-assistant/drafts/text')),
+        isTrue,
+        reason: 'The test must exercise the AI order-assistant API endpoint.',
+      );
       expect(tester.takeException(), isNull);
 
       // 4. AiRoleAssistantScreen
@@ -2520,18 +2597,52 @@ void main() {
 
       // 5. NotificationsScreen
       await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
-          child: DarbApp(
-            key: ValueKey('sp-notifications'),
-            initialScreen: NotificationsScreen(),
+        const SizedBox(
+          width: 320,
+          height: 640,
+          child: MediaQuery(
+            data: MediaQueryData(
+              size: Size(320, 640),
+              disableAnimations: true,
+            ),
+            child: DarbApp(
+              key: ValueKey('sp-notifications'),
+              initialScreen: NotificationsScreen(),
+            ),
           ),
         ),
       );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
+      // The screen loads its feed asynchronously in initState. Pump the
+      // bounded viewport until the mocked endpoint has answered, without
+      // pumpAndSettle because the live unread indicator intentionally pulses.
+      for (var attempt = 0;
+          attempt < 10 && !notificationResponseServed;
+          attempt++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(
+        notificationResponseServed,
+        isTrue,
+        reason: 'NotificationsScreen must request and receive /notifications.',
+      );
       expect(find.byType(DarbCommandStage), findsOneWidget);
-      expect(find.text('تم قبول طلبك'), findsOneWidget);
+      final notificationsScrollable = find
+          .descendant(
+            of: find.byType(ListView).first,
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await tester.scrollUntilVisible(
+        find.text('تم قبول طلبك'),
+        160,
+        scrollable: notificationsScrollable,
+      );
+      expect(
+        find.text('تم قبول طلبك'),
+        findsOneWidget,
+        reason: 'The notification title must render in the scrollable feed after the API response.',
+      );
       expect(tester.takeException(), isNull);
     });
   });
