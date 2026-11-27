@@ -120,11 +120,11 @@ class DarbUpdater {
         final nativePrefs =
             await _channel.invokeMapMethod<String, dynamic>('getUpdatePreferences');
         if (nativePrefs != null) {
-          if (!hasLocalAuto && nativePrefs['enabled'] is bool) {
-            autoVal = nativePrefs['enabled'] as bool;
+          if (!hasLocalAuto && nativePrefs[autoUpdatePrefKey] is bool) {
+            autoVal = nativePrefs[autoUpdatePrefKey] as bool;
           }
-          if (!hasLocalWifi && nativePrefs['wifiOnly'] is bool) {
-            wifiVal = nativePrefs['wifiOnly'] as bool;
+          if (!hasLocalWifi && nativePrefs[wifiOnlyPrefKey] is bool) {
+            wifiVal = nativePrefs[wifiOnlyPrefKey] as bool;
           }
         }
       } catch (_) {}
@@ -136,8 +136,8 @@ class DarbUpdater {
 
     try {
       await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
-        'enabled': autoVal,
-        'wifiOnly': wifiVal,
+        autoUpdatePrefKey: autoVal,
+        wifiOnlyPrefKey: wifiVal,
       });
     } catch (_) {}
   }
@@ -146,7 +146,7 @@ class DarbUpdater {
     await restorePreferences(force: true);
     return <String, bool>{
       'enabled': autoUpdateEnabled,
-      'wifiOnly': wifiOnly,
+      wifiOnlyPrefKey: wifiOnly,
     };
   }
 
@@ -172,7 +172,7 @@ class DarbUpdater {
     } catch (_) {}
     try {
       await _channel.invokeMethod<dynamic>('setUpdatePreferences', {
-        'enabled': enabled,
+        autoUpdatePrefKey: enabled,
       });
     } catch (_) {}
   }
