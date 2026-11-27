@@ -12,7 +12,30 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { HealthModule } from './modules/health/health.module';
+import { MapsModule } from './modules/maps/maps.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
-@Module({ imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, RedisModule, HealthModule, AuthModule, CitiesModule, VendorsModule, CatalogModule, OrdersModule, AiOrderAssistantModule, AiRoleAssistantModule, DriversModule, AddressesModule, AdminModule, NotificationsModule] })
+import { TelegramAdminModule } from './modules/telegram-admin/telegram-admin.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    RedisModule,
+    MapsModule,
+    HealthModule,
+    AuthModule,
+    CitiesModule,
+    VendorsModule,
+    CatalogModule,
+    OrdersModule,
+    AiOrderAssistantModule,
+    AiRoleAssistantModule,
+    DriversModule,
+    AddressesModule,
+    AdminModule,
+    NotificationsModule,
+    TelegramAdminModule,
+  ],
+})
 export class AppModule {}
