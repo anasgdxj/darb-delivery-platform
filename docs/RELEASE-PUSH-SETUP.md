@@ -14,7 +14,7 @@ The backend never logs credential values. If initialization fails, it reports on
 
 ## 2. Protect the release webhook
 
-Create a random token of at least 32 characters, for example with:
+Create a separate random 64-character hexadecimal webhook token, for example with:
 
 ```bash
 openssl rand -hex 32
@@ -25,9 +25,17 @@ Store the **same token** in both places:
 - Render service environment: `DARB_RELEASE_WEBHOOK_TOKEN`
 - GitHub repository Actions secret: `DARB_RELEASE_WEBHOOK_TOKEN`
 
-Do not commit the token, put it in a workflow file, or send it in a URL. The internal endpoint accepts only the official DARB `latest/app-release.apk` URL.
+**The webhook token must be exactly 64 hexadecimal characters. It is separate from `FIREBASE_SERVICE_ACCOUNT_JSON`; never put Firebase JSON or a private key in the webhook secret.**
 
-## 3. Verify delivery
+Do not commit the token, put it in a workflow file, or send it in a URL. The internal endpoint accepts only the official DAZREVO `latest/app-release.apk` URL.
+
+## 3. Release preflight
+
+Before a release can replace the public `latest` assets, GitHub Actions calls the protected `GET /api/v1/internal/release-notifications/readiness` endpoint. It returns ready only when the bearer token matches and Firebase Admin Messaging is initialized. A manual workflow run from `main` with `publish_release=false` checks readiness without publishing the APK or sending notifications.
+
+If preflight fails, the existing public APK and update manifest remain untouched.
+
+## 4. Verify delivery
 
 1. Install a current signed DARB APK and sign in so the device registers its FCM token.
 2. Confirm the Render logs contain `Firebase Admin initialized` for the expected Firebase project.

@@ -11,10 +11,20 @@ on:
       - "backend-overrides/**"
       - "darb-workspace/darb-project/mobile/**"
       - "darb-workspace/darb-project/backend/**"
+  pull_request:
+    paths:
+      - "DARB-source.zip"
+      - ".github/workflows/validate-source.yml"
+      - ".github/workflows/build-android-release.yml"
+      - "mobile-overrides/**"
+      - "backend/**"
+      - "backend-overrides/**"
+      - "darb-workspace/darb-project/mobile/**"
+      - "darb-workspace/darb-project/backend/**"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   inspect-and-build:
