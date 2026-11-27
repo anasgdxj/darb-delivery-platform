@@ -2450,8 +2450,13 @@ void main() {
         isTrue,
         reason: 'The addresses request must receive the fixture response; captured: $addressRequestPaths',
       );
-      debugPrint('[AddressesWidgetTest] screen=${find.byType(AddressesScreen).evaluate().length} scrollables=${find.byType(Scrollable).evaluate().length} listViews=${find.byType(ListView).evaluate().length} tickets=${find.byType(DarbTicketPass).evaluate().length} empty=${find.text('لا يوجد عنوان محفوظ').evaluate().length}');
       final addressScrollable = find.byType(Scrollable).first;
+      final addressScrollState = tester.state<ScrollableState>(addressScrollable);
+      expect(
+        addressScrollState.position.viewportDimension,
+        greaterThan(0),
+        reason: 'The saved-address list must receive a bounded, visible viewport.',
+      );
       await tester.scrollUntilVisible(
         find.text('المنزل'),
         180,
