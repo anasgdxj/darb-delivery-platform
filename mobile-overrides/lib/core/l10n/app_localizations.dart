@@ -898,6 +898,16 @@ class AppLocalizations {
     'شراء وتوصيل': 'Shopping & delivery|Alışveriş ve teslimat',
     'غرض': 'Item|Ürün',
     'متجر يحدده السائق': 'Courier-selected store|Kurye tarafından seçilen mağaza',
+    'إرسال تكلفة المشتريات': 'Send purchase cost|Alışveriş maliyetini gönder',
+    'قيمة المشتريات': 'Purchase amount|Alışveriş tutarı',
+    'تفاصيل الأصناف والسعر': 'Item and price details|Ürün ve fiyat ayrıntıları',
+    'إرسال للعميل': 'Send to customer|Müşteriye gönder',
+    'إثبات الشراء': 'Proof of purchase|Alışveriş kanıtı',
+    'رقم الفاتورة أو مرجع الشراء': 'Invoice number or purchase reference|Fatura numarası veya alışveriş referansı',
+    'تأكيد الشراء': 'Confirm purchase|Alışverişi onayla',
+    'تكلفة المشتريات': 'Purchase cost|Alışveriş maliyeti',
+    'تسجيل إثبات الشراء': 'Record proof of purchase|Alışveriş kanıtını kaydet',
+    'إرسال تكلفة الشراء': 'Send purchase cost|Alışveriş maliyetini gönder',
   };
 
   static const Map<String, Map<String, String>> _values = {
