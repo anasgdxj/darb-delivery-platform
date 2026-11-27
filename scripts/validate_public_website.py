@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+import tempfile
+from html.parser import HTMLParser
+from pathlib import Path
+from urllib.parse import unquote, urlsplit
+import xml.etree.ElementTree as ET
+
+ROOT = Path.cwd().resolve()
+PUBLIC_PAGES = [
+    Path("index.html"),
+    Path("en/index.html"),
+    Path("tr/index.html"),
+    Path("app/index.html"),
+    Path("faq/index.html"),
+    Path("drivers/index.html"),
+    Path("merchants/index.html"),
+    Path("privacy/index.html"),
+    Path("terms/index.html"),
+]
+MARKETING_PAGES = {
+    Path("index.html"),
+    Path("en/index.html"),
+    Path("tr/index.html"),
+    Path("faq/index.html"),
+    Path("drivers/index.html"),
+    Path("merchants/index.html"),
+    Path("privacy/index.html"),
+    Path("terms/index.html"),
+}
+errors: list[str] = []
+parsed: dict[Path, "PageAudit"] = {}
+
+class PageAudit(HTMLParser):
+    def __init__(self, path: Path):
+        super().__init__(convert_charrefs=True)
+        self.path = path
+        self.ids: set[str] = set()
+        self.references: list[tuple[str, str]] = []
+        self.inline_scripts: list[str] = []
+        self._script_type: str | None = None
+        self._script_parts: list[str] = []
+        self.lang: str | None = None
+        self.direction: str | None = None
+        self.title_parts: list[str] = []
+        self.in_title = False
+        self.viewport = False
+        self.description = False
+        self.canonical = False
+        self.csp = False
+        self.root_seen = False
+
+    def handle_starttag(self, tag: str, attrs):
+        a = dict(attrs)
+        if tag == "html":
+            self.root_seen = True
+            self.lang = a.get("lang")
+            self.direction = a.get("dir")
+        if a.get("id"):
+            self.ids.add(a["id"])
+        for key in ("href", "src"):
+            value = a.get(key)
+            if value:
+                self.references.append((key, value))
+        if tag == "meta":
+            name = (a.get("name") or "").lower()
+            if name == "viewport":
+                self.viewport = True
+            if name == "description" and a.get("content", "").strip():
+                self.description = True
+            if a.get("http-equiv", "").lower() == "content-security-policy":
+                self.csp = True
+        if tag == "link" and (a.get("rel") or "").lower() == "canonical":
+            self.canonical = bool(a.get("href"))
+        if tag == "title":
+            self.in_title = True
+        if tag == "script":
+            self._script_type = (a.get("type") or "").lower()
+            self._script_parts = []
+
+    def handle_data(self, data: str):
+        if self.in_title:
+            self.title_parts.append(data)
+        if self._script_type is not None and self._script_type != "application/ld+json":
+            self._script_parts.append(data)
+
+    def handle_endtag(self, tag: str):
+        if tag == "title":
+            self.in_title = False
+        if tag == "script" and self._script_type is not None:
+            code = "".join(self._script_parts).strip()
+            if code:
+                self.inline_scripts.append(code)
+            self._script_type = None
+            self._script_parts = []
+
+def fail(message: str):
+    errors.append(message)
+
+for page in PUBLIC_PAGES:
+    full = ROOT / page
+    if not full.is_file():
+        fail(f"Missing public page: {page.as_posix()}")
+        continue
+    audit = PageAudit(page)
+    try:
+        audit.feed(full.read_text(encoding="utf-8"))
+        audit.close()
+    except Exception as exc:
+        fail(f"Cannot parse {page.as_posix()}: {exc}")
+        continue
+    parsed[page] = audit
+    if not audit.root_seen or not audit.lang or not audit.direction:
+        fail(f"{page.as_posix()} must declare html lang and dir")
+    if not "".join(audit.title_parts).strip():
+        fail(f"{page.as_posix()} is missing a title")
+    if not audit.viewport:
+        fail(f"{page.as_posix()} is missing the viewport meta tag")
+    if page in MARKETING_PAGES:
+        if not audit.description:
+            fail(f"{page.as_posix()} is missing a meta description")
+        if not audit.canonical:
+            fail(f"{page.as_posix()} is missing a canonical URL")
+        if not audit.csp:
+            fail(f"{page.as_posix()} is missing a Content-Security-Policy meta tag")
+
+for page, audit in parsed.items():
+    for kind, value in audit.references:
+        value = value.strip()
+        if not value or value.startswith("#"):
+            fragment = value[1:] if value.startswith("#") else ""
+            if fragment and fragment not in audit.ids:
+                fail(f"Broken anchor in {page.as_posix()}: #{fragment}")
+            continue
+        parts = urlsplit(value)
+        if parts.scheme or parts.netloc or value.startswith("//"):
+            continue
+        target_path = unquote(parts.path)
+        if not target_path:
+            target = ROOT / page
+        elif target_path.startswith("/"):
+            target = ROOT / target_path.lstrip("/")
+        else:
+            target = (ROOT / page.parent / target_path).resolve()
+        if target.is_dir() or target_path.endswith("/"):
+            target = target / "index.html"
+        if not target.is_file():
+            fail(f"Broken local {kind} in {page.as_posix()}: {value}")
+            continue
+        if parts.fragment and target.suffix.lower() == ".html":
+            relative = target.relative_to(ROOT)
+            target_page = Path("index.html") if relative.as_posix() == "index.html" else relative
+            target_audit = parsed.get(target_page)
+            if target_audit is None:
+                target_audit = PageAudit(target_page)
+                try:
+                    target_audit.feed(target.read_text(encoding="utf-8"))
+                    target_audit.close()
+                except Exception as exc:
+                    fail(f"Cannot parse link target {target_page.as_posix()}: {exc}")
+                    continue
+                parsed[target_page] = target_audit
+            if unquote(parts.fragment) not in target_audit.ids:
+                fail(f"Broken fragment in {page.as_posix()}: {value}")
+
+js_files = [Path("assets/js/site.js")]
+for js_file in js_files:
+    if not (ROOT / js_file).is_file():
+        fail(f"Missing JavaScript asset: {js_file.as_posix()}")
+        continue
+    result = subprocess.run(
+        ["node", "--check", str(ROOT / js_file)],
+        capture_output=True, text=True
+    )
+    if result.returncode:
+        fail(f"JavaScript syntax error in {js_file.as_posix()}: {result.stderr.strip()}")
+
+for page, audit in parsed.items():
+    for index, code in enumerate(audit.inline_scripts, start=1):
+        with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8") as handle:
+            handle.write(code)
+            handle.flush()
+            result = subprocess.run(
+                ["node", "--check", handle.name],
+                capture_output=True, text=True
+            )
+        if result.returncode:
+            fail(f"Inline JavaScript syntax error in {page.as_posix()} script {index}: {result.stderr.strip()}")
+
+root_html = (ROOT / "index.html").read_text(encoding="utf-8")
+if "DAZREVO" not in root_html:
+    fail("The public home page must use the approved DAZREVO identity")
+if "app-debug.apk" in root_html:
+    fail("The public home page must never advertise a debug APK")
+if "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" not in root_html:
+    fail("The public home page must link to the official latest signed APK")
+if "admin/" in root_html or "بوابة الإدارة" in root_html or "دخول الإدارة" in root_html:
+    fail("Admin portal links must not appear on the public home page")
+
+sitemap = ROOT / "sitemap.xml"
+if not sitemap.is_file():
+    fail("Missing sitemap.xml")
+else:
+    try:
+        tree = ET.parse(sitemap)
+        namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+        for node in tree.findall(".//sm:loc", namespace):
+            url = (node.text or "").strip()
+            path = urlsplit(url).path
+            prefix = "/darb-delivery-platform"
+            if path.startswith(prefix):
+                path = path[len(prefix):]
+            local = ROOT / path.lstrip("/")
+            if local.is_dir() or path.endswith("/"):
+                local = local / "index.html"
+            if not local.is_file():
+                fail(f"Sitemap URL has no matching public file: {url}")
+    except Exception as exc:
+        fail(f"Invalid sitemap.xml: {exc}")
+
+if errors:
+    print("DAZREVO public website validation failed:")
+    for error in errors:
+        print(f" - {error}")
+    sys.exit(1)
+
+print(f"DAZREVO public website validation passed: {len(PUBLIC_PAGES)} pages, local links, SEO metadata, sitemap, and JavaScript syntax.")
