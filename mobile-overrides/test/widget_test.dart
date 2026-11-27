@@ -2555,8 +2555,8 @@ void main() {
       await tester.tap(find.text('إرسال مفاتيح من المزة إلى المالكي'));
       await tester.pump(const Duration(milliseconds: 200));
       expect(
-        find.text('إرسال مفاتيح من المزة إلى المالكي'),
-        findsOneWidget,
+        tester.widget<TextField>(find.byType(TextField).first).controller!.text,
+        'إرسال مفاتيح من المزة إلى المالكي',
         reason: 'Selecting an example must populate the request without submitting it.',
       );
       await tester.ensureVisible(find.text('تحليل الطلب'));
