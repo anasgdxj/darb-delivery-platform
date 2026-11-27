@@ -2468,12 +2468,14 @@ void main() {
           .first;
       debugPrint(
         '[AddressesWidgetTest] view=${tester.view.physicalSize} '
-        'media=${tester.widget<MediaQuery>(find.byType(MediaQuery).last).data.size} '
         'scaffold=${tester.getSize(find.byType(Scaffold).first)} '
+        'appBar=${tester.getSize(find.byType(DarbGlassAppBar).first)} '
         'ambient=${tester.getSize(find.byType(DarbAmbientBackground).first)} '
         'refresh=${tester.getSize(find.byType(RefreshIndicator).first)} '
         'center=${tester.getSize(find.byType(Center).first)} '
-        'constrained=${tester.getSize(find.byType(ConstrainedBox).first)} '
+        'safeAreas=${find.byType(SafeArea).evaluate().map((e) => tester.getSize(find.byWidget(e.widget))).toList()} '
+        'glassSurfaces=${find.byType(DarbGlassSurface).evaluate().map((e) => tester.getSize(find.byWidget(e.widget))).toList()} '
+        'buttons=${find.byType(DarbActionButton).evaluate().map((e) => tester.getSize(find.byWidget(e.widget))).toList()} '
         'list=${tester.getSize(find.byType(ListView).first)}',
       );
       final addressScrollState = tester.state<ScrollableState>(addressScrollable);
