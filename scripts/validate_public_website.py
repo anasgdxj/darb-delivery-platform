@@ -215,7 +215,7 @@ if "بوابة الويب قيد الإعداد" not in portal_html:
     fail("The web portal maintenance notice is missing")
 
 not_found_html = ROOT / "404.html"
-if not_found_html.is_file():
+if not not_found_html.is_file():
     fail("Missing DAZREVO-branded 404.html")
 else:
     content_404 = not_found_html.read_text(encoding="utf-8")
