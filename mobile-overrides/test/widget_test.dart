@@ -2554,7 +2554,25 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('إرسال مفاتيح من المزة إلى المالكي'));
       await tester.pump(const Duration(milliseconds: 200));
-      expect(find.byType(DarbTicketPass), findsOneWidget);
+      expect(
+        find.text('إرسال مفاتيح من المزة إلى المالكي'),
+        findsOneWidget,
+        reason: 'Selecting an example must populate the request without submitting it.',
+      );
+      await tester.ensureVisible(find.text('تحليل الطلب'));
+      await tester.tap(find.text('تحليل الطلب'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(
+        find.byType(DarbTicketPass),
+        findsOneWidget,
+        reason: 'The AI draft ticket must appear only after the analysis request succeeds.',
+      );
+      expect(
+        addressRequestPaths.any((path) => path.endsWith('/ai/order-assistant/drafts/text')),
+        isTrue,
+        reason: 'The test must exercise the AI order-assistant API endpoint.',
+      );
       expect(tester.takeException(), isNull);
 
       // 4. AiRoleAssistantScreen
