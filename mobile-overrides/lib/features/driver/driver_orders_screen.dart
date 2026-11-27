@@ -394,9 +394,10 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
               color: DarbColors.primaryOf(context).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(DarbRadius.sm),
             ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final feeText = Text(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
                   '${dt('أجرة التوصيل')}: ${formatDarbMoney(fee, currency)}',
                   softWrap: true,
                   style: TextStyle(
@@ -405,8 +406,9 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                     fontSize: 13,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
-                );
-                final totalText = Text(
+                ),
+                const SizedBox(height: 4),
+                Text(
                   formatDarbMoney(total, currency),
                   textAlign: TextAlign.end,
                   softWrap: true,
@@ -416,26 +418,8 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                     fontSize: 13.5,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
-                );
-                if (constraints.maxWidth < 380) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      feeText,
-                      const SizedBox(height: 4),
-                      totalText,
-                    ],
-                  );
-                }
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(child: feeText),
-                    const SizedBox(width: 12),
-                    Flexible(child: totalText),
-                  ],
-                );
-              },
+                ),
+              ],
             ),
           ),
         ],
