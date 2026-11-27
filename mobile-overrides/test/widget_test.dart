@@ -3516,7 +3516,11 @@ void main() {
       await tester.pumpAndSettle();
 
       final autoSwitch = find.byKey(const ValueKey('auto-update-switch'));
-      await tester.ensureVisible(autoSwitch);
+      await tester.scrollUntilVisible(
+        autoSwitch,
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(autoSwitch);
       await tester.pumpAndSettle();
@@ -3524,7 +3528,11 @@ void main() {
       expect(nativePrefs['auto_update_enabled'], isFalse);
 
       final wifiSwitch = find.byKey(const ValueKey('wifi-only-switch'));
-      await tester.ensureVisible(wifiSwitch);
+      await tester.scrollUntilVisible(
+        wifiSwitch,
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       await tester.tap(wifiSwitch);
       await tester.pumpAndSettle();
