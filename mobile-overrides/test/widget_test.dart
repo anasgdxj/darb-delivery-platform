@@ -2451,12 +2451,7 @@ void main() {
         reason: 'The addresses request must receive the fixture response; captured: $addressRequestPaths',
       );
       debugPrint('[AddressesWidgetTest] screen=${find.byType(AddressesScreen).evaluate().length} scrollables=${find.byType(Scrollable).evaluate().length} listViews=${find.byType(ListView).evaluate().length} tickets=${find.byType(DarbTicketPass).evaluate().length} empty=${find.text('لا يوجد عنوان محفوظ').evaluate().length}');
-      final addressScrollable = find
-          .descendant(
-            of: find.byType(AddressesScreen),
-            matching: find.byType(Scrollable),
-          )
-          .first;
+      final addressScrollable = find.byType(Scrollable).first;
       await tester.scrollUntilVisible(
         find.text('المنزل'),
         180,
