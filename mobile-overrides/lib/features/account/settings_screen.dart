@@ -498,7 +498,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 wifiOnly: wifiOnly,
               );
               if (enabled && !previousEnabled) {
-                unawaited(DarbUpdater.instance.runAutomaticUpdateCheck());
+                unawaited(DarbUpdater.instance.runAutomaticUpdateCheck(force: true));
               }
             } catch (_) {
               setSheet(() {
