@@ -1,0 +1,75 @@
+name: Package DARB for Android Studio
+
+on:
+  push:
+    branches:
+      - feature/android-studio-package
+    paths:
+      - "DARB-source.zip"
+      - "mobile-overrides/**"
+      - "prepare-android-studio.sh"
+      - ".github/workflows/package-android-studio.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-flutter-project:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Prepare merged Android Studio project
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash prepare-android-studio.sh "$RUNNER_TEMP/DARB-Android-Studio"
+          cd "$RUNNER_TEMP"
+          zip -qr DARB-Android-Studio.zip DARB-Android-Studio
+
+      - name: Resolve dependencies, analyze, and test Flutter source
+        working-directory: ${{ runner.temp }}/DARB-Android-Studio
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter analyze lib test --no-fatal-infos --no-fatal-warnings
+          flutter test
+
+      - name: Build Android debug APK
+        working-directory: ${{ runner.temp }}/DARB-Android-Studio
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build apk --debug
+
+      - name: Upload Android Studio project ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: DARB-Android-Studio
+          path: ${{ runner.temp }}/DARB-Android-Studio.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DARB-Debug-APK
+          path: ${{ runner.temp }}/DARB-Android-Studio/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
