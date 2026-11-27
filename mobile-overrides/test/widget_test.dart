@@ -2627,10 +2627,21 @@ void main() {
         reason: 'NotificationsScreen must request and receive /notifications.',
       );
       expect(find.byType(DarbCommandStage), findsOneWidget);
+      final notificationsScrollable = find
+          .descendant(
+            of: find.byType(ListView).first,
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await tester.scrollUntilVisible(
+        find.text('تم قبول طلبك'),
+        160,
+        scrollable: notificationsScrollable,
+      );
       expect(
         find.text('تم قبول طلبك'),
         findsOneWidget,
-        reason: 'The notification title must render after the feed response.',
+        reason: 'The notification title must render in the scrollable feed after the API response.',
       );
       expect(tester.takeException(), isNull);
     });
