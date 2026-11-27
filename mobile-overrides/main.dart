@@ -68,7 +68,18 @@ class _DarbLaunchGateState extends State<DarbLaunchGate> {
   @override
   void initState() {
     super.initState();
+    DarbNotifications.updateNotificationTapped.addListener(
+      _onUpdateNotificationTapped,
+    );
     _bootstrap();
+  }
+
+  @override
+  void dispose() {
+    DarbNotifications.updateNotificationTapped.removeListener(
+      _onUpdateNotificationTapped,
+    );
+    super.dispose();
   }
 
   Future<void> _bootstrap() async {
@@ -84,9 +95,58 @@ class _DarbLaunchGateState extends State<DarbLaunchGate> {
     } catch (_) {
       // Never clear stored credentials because local restoration temporarily failed.
     }
-    DarbUpdater.instance.checkForUpdate();
+    unawaited(DarbUpdater.instance.checkForUpdate());
     await minimumDisplay;
-    if (mounted) setState(() => _ready = true);
+    if (!mounted) return;
+    setState(() => _ready = true);
+    if (DarbNotifications.updateNotificationTapped.value) {
+      _onUpdateNotificationTapped();
+    }
+  }
+
+  void _onUpdateNotificationTapped() {
+    if (!mounted ||
+        !_ready ||
+        !DarbNotifications.updateNotificationTapped.value) {
+      return;
+    }
+    DarbNotifications.updateNotificationTapped.value = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showUpdateForNotification();
+    });
+  }
+
+  Future<void> _showUpdateForNotification() async {
+    if (!mounted) return;
+    await DarbUpdater.instance.checkForUpdate(force: true);
+    if (!mounted) return;
+    final update = DarbUpdater.instance.availableUpdate.value;
+    if (update != null) {
+      await showDialog<void>(
+        context: context,
+        builder: (_) => DarbUpdateDialog(info: update),
+      );
+      return;
+    }
+
+    final failed = DarbUpdater.instance.checkFailed;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(failed ? 'تعذر التحقق من التحديث' : 'التطبيق محدّث'),
+        content: Text(
+          failed
+              ? 'تعذر الاتصال بخدمة التحديث. تحقق من الإنترنت وحاول مرة أخرى.'
+              : 'هذا الجهاز يستخدم أحدث إصدار متاح من DAZREVO.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('إغلاق'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
