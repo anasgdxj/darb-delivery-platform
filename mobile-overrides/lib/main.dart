@@ -7,7 +7,6 @@ import 'core/l10n/app_localizations.dart';
 import 'core/network/api_client.dart';
 import 'core/services/app_update_service.dart';
 import 'core/services/notifications_service.dart';
-import 'core/services/app_update_service.dart';
 import 'core/storage/local_cache.dart';
 import 'core/theme/darb_design_system.dart';
 import 'core/widgets/darb_components.dart';
