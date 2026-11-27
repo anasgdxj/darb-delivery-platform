@@ -865,8 +865,13 @@ void main() {
       await tester.pump();
 
       expect(find.text('4 / 5'), findsOneWidget);
-      for (final box in find.byType(Checkbox).evaluate()) {
-        await tester.tap(find.byWidget(box.widget));
+      final consentCheckboxes = find.byType(Checkbox);
+      for (var index = 0; index < consentCheckboxes.evaluate().length; index++) {
+        final checkbox = consentCheckboxes.at(index);
+        await tester.ensureVisible(checkbox);
+        await tester.pump();
+        await tester.tap(checkbox, warnIfMissed: false);
+        await tester.pump();
       }
       await tester.pump();
       await tester.tap(find.text('متابعة'));
