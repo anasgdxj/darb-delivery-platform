@@ -2357,10 +2357,12 @@ void main() {
       Api.instance.setSessionForTest(accessToken: 'valid-token');
 
       final addressRequestPaths = <String>[];
+      var addressResponseServed = false;
       Api.instance.httpClientOverride = MockClient((request) async {
         final path = request.url.path;
         addressRequestPaths.add(path);
         if (path.endsWith('/addresses')) {
+          addressResponseServed = true;
           return _utf8Response(
             jsonEncode([
               {
@@ -2442,6 +2444,11 @@ void main() {
         addressRequestPaths,
         contains('/api/v1/addresses'),
         reason: 'AddressesScreen must request the authenticated addresses endpoint; captured: $addressRequestPaths',
+      );
+      expect(
+        addressResponseServed,
+        isTrue,
+        reason: 'The addresses request must receive the fixture response; captured: $addressRequestPaths',
       );
       expect(find.text('المنزل'), findsOneWidget);
       expect(find.byType(DarbCommandStage), findsOneWidget);
