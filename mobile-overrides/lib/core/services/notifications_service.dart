@@ -13,16 +13,65 @@ class DarbNotifications {
   static bool _ready = false;
   static String? lastError;
   static StreamSubscription<String>? _tokenSubscription;
+  static String? _lastSyncedToken;
+  static String? _lastSyncedSessionToken;
+  static DateTime? _lastSyncedAt;
+  static AuthorizationStatus? _authorizationStatus;
 
-  static String get _platform {
-    if (kIsWeb) return 'web';
-    return switch (defaultTargetPlatform) {
+  @visibleForTesting
+  static Future<String?> Function()? tokenProviderOverride;
+
+  @visibleForTesting
+  static Future<void> Function(String token, String platform)?
+      registerDeviceOverride;
+
+  @visibleForTesting
+  static Future<void> Function(String token, String platform)?
+      unregisterDeviceOverride;
+
+  static bool get isReady => _ready;
+  static bool get hasSyncedToken =>
+      _lastSyncedToken != null &&
+      _lastSyncedToken!.isNotEmpty &&
+      _lastSyncedSessionToken == Api.instance.accessToken;
+  static DateTime? get lastSyncedAt => _lastSyncedAt;
+  static String? get lastSyncedToken => _lastSyncedToken;
+  static AuthorizationStatus? get authorizationStatus => _authorizationStatus;
+  static bool get permissionGranted =>
+      _authorizationStatus == AuthorizationStatus.authorized ||
+      _authorizationStatus == AuthorizationStatus.provisional;
+
+  @visibleForTesting
+  static String resolvePlatform(
+    TargetPlatform target, {
+    bool isWeb = kIsWeb,
+  }) {
+    if (isWeb) return 'web';
+    return switch (target) {
       TargetPlatform.iOS => 'ios',
-      TargetPlatform.macOS => 'macos',
-      TargetPlatform.windows => 'windows',
-      TargetPlatform.linux => 'linux',
       TargetPlatform.android || TargetPlatform.fuchsia => 'android',
+      TargetPlatform.macOS ||
+      TargetPlatform.windows ||
+      TargetPlatform.linux =>
+        'web',
     };
+  }
+
+  static String get _platform => resolvePlatform(defaultTargetPlatform);
+
+  @visibleForTesting
+  static void debugResetForTest({bool ready = false}) {
+    _ready = ready;
+    lastError = null;
+    _lastSyncedToken = null;
+    _lastSyncedSessionToken = null;
+    _lastSyncedAt = null;
+    _authorizationStatus = null;
+    unawaited(_tokenSubscription?.cancel());
+    _tokenSubscription = null;
+    tokenProviderOverride = null;
+    registerDeviceOverride = null;
+    unregisterDeviceOverride = null;
   }
 
   static Future<void> initialize() async {
@@ -35,14 +84,16 @@ class DarbNotifications {
       return;
     }
     try {
-      await Firebase.initializeApp(
-        options: const FirebaseOptions(
-          apiKey: apiKey,
-          appId: appId,
-          messagingSenderId: senderId,
-          projectId: projectId,
-        ),
-      );
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: const FirebaseOptions(
+            apiKey: apiKey,
+            appId: appId,
+            messagingSenderId: senderId,
+            projectId: projectId,
+          ),
+        );
+      }
       FirebaseMessaging.onBackgroundMessage(darbFirebaseBackgroundHandler);
       _ready = true;
       lastError = null;
@@ -53,7 +104,8 @@ class DarbNotifications {
   }
 
   static StreamSubscription<RemoteMessage>? listenForeground(
-    void Function(String? title, String? body, Map<String, dynamic> data) onMessage,
+    void Function(String? title, String? body, Map<String, dynamic> data)
+        onMessage,
   ) {
     if (!_ready) return null;
     return FirebaseMessaging.onMessage.listen((message) {
@@ -86,50 +138,117 @@ class DarbNotifications {
     }
   }
 
-  static Future<void> register() async {
-    if (!_ready || Api.instance.accessToken == null) return;
+  static void _ensureRefreshListener() {
+    if (!_ready || _tokenSubscription != null) return;
+    _tokenSubscription = FirebaseMessaging.instance.onTokenRefresh.listen(
+      (refreshedToken) {
+        if (refreshedToken.isEmpty || Api.instance.accessToken == null) return;
+        unawaited(_postDeviceToken(refreshedToken));
+      },
+      onError: (Object error) {
+        lastError = 'فشل تحديث رمز الإشعارات: $error';
+      },
+    );
+  }
+
+  static Future<void> _postDeviceToken(String token) async {
+    final platform = _platform;
+    if (registerDeviceOverride != null) {
+      await registerDeviceOverride!(token, platform);
+    } else {
+      await Api.instance.post('/notifications/device', {
+        'token': token,
+        'platform': platform,
+      });
+    }
+    _lastSyncedToken = token;
+    _lastSyncedSessionToken = Api.instance.accessToken;
+    _lastSyncedAt = DateTime.now();
+    lastError = null;
+  }
+
+  static Future<void> register({bool force = false}) async {
+    final hasTestHooks =
+        tokenProviderOverride != null || registerDeviceOverride != null;
+    if ((!_ready && !hasTestHooks) || Api.instance.accessToken == null) return;
+
+    if (_ready) {
+      _ensureRefreshListener();
+    }
+
     try {
-      await FirebaseMessaging.instance.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-      final token = await FirebaseMessaging.instance.getToken();
+      String? token;
+      if (tokenProviderOverride != null) {
+        _authorizationStatus ??= AuthorizationStatus.authorized;
+        token = await tokenProviderOverride!();
+      } else {
+        final settings = await FirebaseMessaging.instance.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        _authorizationStatus = settings.authorizationStatus;
+        if (settings.authorizationStatus == AuthorizationStatus.denied) {
+          lastError = 'تم رفض إذن الإشعارات من إعدادات الجهاز';
+          return;
+        }
+        await FirebaseMessaging.instance
+            .setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        token = await FirebaseMessaging.instance.getToken();
+      }
+
       if (token == null || token.isEmpty) {
         throw StateError('Firebase لم يُرجع رمز الجهاز');
       }
-      await Api.instance.post('/notifications/device', {
-        'token': token,
-        'platform': _platform,
-      });
-      lastError = null;
-      _tokenSubscription ??= FirebaseMessaging.instance.onTokenRefresh.listen(
-        (token) {
-          Api.instance.post('/notifications/device', {
-            'token': token,
-            'platform': _platform,
-          }).catchError((error) {
-            lastError = 'تعذر تحديث رمز الإشعارات: $error';
-          });
-        },
-        onError: (Object error) {
-          lastError = 'فشل تحديث رمز الإشعارات: $error';
-        },
-      );
+
+      final alreadySynced = !force &&
+          _lastSyncedToken == token &&
+          _lastSyncedSessionToken == Api.instance.accessToken &&
+          lastError == null;
+      if (alreadySynced) return;
+
+      try {
+        await _postDeviceToken(token);
+      } catch (_) {
+        await Future<void>.delayed(const Duration(milliseconds: 350));
+        await _postDeviceToken(token);
+      }
     } catch (error) {
       lastError = 'تعذر تسجيل هذا الجهاز للإشعارات: $error';
     }
   }
 
   static Future<void> unregister() async {
-    if (!_ready) return;
+    final activeToken = _lastSyncedToken;
+    await _tokenSubscription?.cancel();
+    _tokenSubscription = null;
+    _lastSyncedToken = null;
+    _lastSyncedSessionToken = null;
+    _lastSyncedAt = null;
+
+    final hasTestHooks =
+        tokenProviderOverride != null || unregisterDeviceOverride != null;
+    if (!_ready && !hasTestHooks) return;
+
     try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        await Api.instance.delete('/notifications/device', {
-          'token': token,
-          'platform': _platform,
-        });
+      final token = activeToken ??
+          (tokenProviderOverride != null
+              ? await tokenProviderOverride!()
+              : await FirebaseMessaging.instance.getToken());
+      if (token != null && token.isNotEmpty) {
+        final platform = _platform;
+        if (unregisterDeviceOverride != null) {
+          await unregisterDeviceOverride!(token, platform);
+        } else {
+          await Api.instance.delete('/notifications/device', {
+            'token': token,
+            'platform': platform,
+          });
+        }
       }
     } catch (error) {
       lastError = 'تعذر إلغاء تسجيل الجهاز: $error';

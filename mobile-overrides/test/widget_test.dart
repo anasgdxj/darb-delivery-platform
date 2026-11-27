@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:darb/core/l10n/app_localizations.dart';
 import 'package:darb/core/network/api_client.dart';
 import 'package:darb/core/services/location_service.dart';
+import 'package:darb/core/services/notifications_service.dart';
 import 'package:darb/core/theme/darb_design_system.dart';
 import 'package:darb/core/widgets/darb_city_scene.dart';
 import 'package:darb/core/widgets/darb_components.dart';
@@ -11,6 +12,7 @@ import 'package:darb/core/widgets/darb_glass.dart';
 import 'package:darb/core/widgets/darb_motion_components.dart';
 import 'package:darb/core/widgets/darb_spatial_primitives.dart';
 import 'package:darb/features/account/account_screen.dart';
+import 'package:darb/features/account/ai_role_assistant_screen.dart';
 import 'package:darb/features/account/driver_application_screen.dart';
 import 'package:darb/features/account/edit_profile_screen.dart';
 import 'package:darb/features/account/settings_screen.dart';
@@ -19,8 +21,13 @@ import 'package:darb/features/admin/admin_dashboard_screen.dart';
 import 'package:darb/features/auth/login_hero_map.dart';
 import 'package:darb/features/auth/login_screen.dart';
 import 'package:darb/features/auth/onboarding_screen.dart';
+import 'package:darb/features/customer/addresses_screen.dart';
+import 'package:darb/features/customer/ai_order_assistant_screen.dart';
+import 'package:darb/features/customer/checkout_screen.dart';
 import 'package:darb/features/customer/customer_home_screen.dart';
 import 'package:darb/features/driver/driver_dashboard_screen.dart';
+import 'package:darb/features/driver/driver_orders_screen.dart';
+import 'package:darb/features/notifications/notifications_screen.dart';
 import 'package:darb/features/shell/app_shell.dart';
 import 'package:darb/features/vendor/vendor_orders_screen.dart';
 import 'package:darb/features/vendor/vendor_products_screen.dart';
@@ -2317,6 +2324,472 @@ void main() {
 
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
+    });
+
+    testWidgets(
+        'AddressesScreen, CheckoutScreen, AI Assistants, and NotificationsScreen render Spatial flows on 320px Dark Mode without overflow',
+        (tester) async {
+      _mockSecureStorage(<String, String>{
+        'accessToken': 'valid-token',
+        'refreshToken': 'valid-refresh',
+      });
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() async {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        await DarbAppearanceController.instance.setThemeMode(ThemeMode.system);
+        darbLocale.value = const Locale('ar');
+        _clearSecureStorageMock();
+        Api.instance.httpClientOverride = null;
+        Api.instance.setSessionForTest();
+      });
+
+      await DarbAppearanceController.instance.setThemeMode(ThemeMode.dark);
+      darbLocale.value = const Locale('ar');
+      Api.instance.setSessionForTest(accessToken: 'valid-token');
+
+      Api.instance.httpClientOverride = MockClient((request) async {
+        final path = request.url.path;
+        if (path.endsWith('/addresses')) {
+          return _utf8Response(
+            jsonEncode([
+              {
+                'id': 'addr-1',
+                'label': 'المنزل',
+                'details': 'المالكي · شارع عبد المنعم رياض',
+                'latitude': 33.5138,
+                'longitude': 36.2765,
+              },
+              {
+                'id': 'addr-2',
+                'label': 'المكتب',
+                'details': 'المزة أوتوستراد',
+              },
+            ]),
+            200,
+          );
+        }
+        if (path.endsWith('/orders/estimate')) {
+          return _utf8Response(
+            jsonEncode({
+              'subtotal': 24000,
+              'deliveryFee': 6000,
+              'total': 30000,
+              'distanceKm': 2.8,
+              'currency': 'SYP',
+            }),
+            200,
+          );
+        }
+        if (path.endsWith('/ai/order-assistant/drafts/text')) {
+          return _utf8Response(
+            jsonEncode({
+              'intent': 'PEER_DELIVERY',
+              'confidence': 0.94,
+              'notes': 'إرسال مفاتيح من المزة إلى المالكي',
+              'suggestedActions': ['تجهيز طلب التوصيل'],
+            }),
+            200,
+          );
+        }
+        if (path.endsWith('/ai/assistant/ask')) {
+          return _utf8Response(
+            jsonEncode({'answer': 'لديك طلب نشط قيد التحضير حالياً.'}),
+            200,
+          );
+        }
+        if (path.endsWith('/notifications')) {
+          return _utf8Response(
+            jsonEncode({
+              'unreadCount': 1,
+              'items': [
+                {
+                  'id': 'n-1',
+                  'title': 'تم قبول طلبك',
+                  'body': 'المتجر بدأ بتجهيز الطلب رقم DRB-101',
+                  'isRead': false,
+                  'createdAt': '2026-11-26T09:00:00Z',
+                },
+              ],
+            }),
+            200,
+          );
+        }
+        return _utf8Response('{}', 200);
+      });
+
+      // 1. AddressesScreen
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(key: ValueKey('sp-addresses'), initialScreen: AddressesScreen()),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byType(DarbCommandStage), findsOneWidget);
+      expect(find.byType(DarbTicketPass), findsNWidgets(2));
+      expect(find.text('المنزل'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // 2. CheckoutScreen
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            key: ValueKey('sp-checkout'),
+            initialScreen: CheckoutScreen(
+              cityId: 'city-1',
+              vendorId: 'v-1',
+              vendorName: 'مقهى دازريفو',
+              items: [
+                CartCheckoutItem(
+                  productId: 'p-1',
+                  name: 'قهوة مختصة',
+                  unitPrice: 12000,
+                  currency: 'SYP',
+                  quantity: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.byType(DarbCommandStage), findsOneWidget);
+      expect(find.byType(DarbRouteConnector), findsOneWidget);
+      expect(find.text('قهوة مختصة × 2'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // 3. AiOrderAssistantScreen
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            key: ValueKey('sp-ai-order'),
+            initialScreen: AiOrderAssistantScreen(cityId: 'city-1', cityName: 'دمشق'),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('إرسال مفاتيح من المزة إلى المالكي'));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byType(DarbTicketPass), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // 4. AiRoleAssistantScreen
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            key: ValueKey('sp-ai-role'),
+            initialScreen: AiRoleAssistantScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(DarbCommandStage), findsOneWidget);
+      await tester.tap(find.text('ما حالة طلباتي اليوم؟'));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('لديك طلب نشط قيد التحضير حالياً.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // 5. NotificationsScreen
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            key: ValueKey('sp-notifications'),
+            initialScreen: NotificationsScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byType(DarbCommandStage), findsOneWidget);
+      expect(find.text('تم قبول طلبك'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('FCM Push Registration, Notification Routing & Role Enhancements', () {
+    test('DarbNotifications maps platforms cleanly and deduplicates/resets sync state',
+        () async {
+      expect(
+        DarbNotifications.resolvePlatform(TargetPlatform.android, isWeb: false),
+        'android',
+      );
+      expect(
+        DarbNotifications.resolvePlatform(TargetPlatform.iOS, isWeb: false),
+        'ios',
+      );
+      expect(
+        DarbNotifications.resolvePlatform(TargetPlatform.linux, isWeb: false),
+        'web',
+      );
+      expect(
+        DarbNotifications.resolvePlatform(TargetPlatform.macOS, isWeb: false),
+        'web',
+      );
+      expect(
+        DarbNotifications.resolvePlatform(TargetPlatform.android, isWeb: true),
+        'web',
+      );
+
+      DarbNotifications.debugResetForTest(ready: false);
+      Api.instance.setSessionForTest(accessToken: 'sess-1');
+      addTearDown(() {
+        DarbNotifications.debugResetForTest();
+        Api.instance.setSessionForTest();
+      });
+
+      var registerCalls = 0;
+      String? registeredToken;
+      String? unregisteredToken;
+
+      DarbNotifications.tokenProviderOverride = () async => 'fcm-tok-123';
+      DarbNotifications.registerDeviceOverride = (token, platform) async {
+        registerCalls++;
+        registeredToken = token;
+      };
+      DarbNotifications.unregisterDeviceOverride = (token, platform) async {
+        unregisteredToken = token;
+      };
+
+      await DarbNotifications.register();
+      expect(registerCalls, 1);
+      expect(registeredToken, 'fcm-tok-123');
+      expect(DarbNotifications.hasSyncedToken, isTrue);
+
+      // Deduplicated when already synced with same session & token
+      await DarbNotifications.register();
+      expect(registerCalls, 1);
+
+      // Force sync triggers a fresh registration
+      await DarbNotifications.register(force: true);
+      expect(registerCalls, 2);
+
+      await DarbNotifications.unregister();
+      expect(unregisteredToken, 'fcm-tok-123');
+      expect(DarbNotifications.hasSyncedToken, isFalse);
+    });
+
+    testWidgets(
+        'DarbBeaconRing and DarbBrandMark(animatePulse: true) honor Reduce Motion',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DarbTheme.dark,
+          home: const MediaQuery(
+            data: MediaQueryData(disableAnimations: true),
+            child: Scaffold(
+              body: Column(
+                children: [
+                  DarbBrandMark(size: 56, animatePulse: true),
+                  DarbOrderTimeline(status: 'PREPARING'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(DarbBeaconRing), findsWidgets);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'NotificationsScreen triggers tap-to-open order/update routing and device sync',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      _mockSecureStorage(<String, String>{});
+      DarbNotifications.debugResetForTest(ready: false);
+      var syncCalls = 0;
+      DarbNotifications.tokenProviderOverride = () async => 'fcm-inbox-tok';
+      DarbNotifications.registerDeviceOverride = (token, platform) async {
+        syncCalls++;
+      };
+      Api.instance.setSessionForTest(accessToken: 'valid-token');
+      addTearDown(() {
+        DarbNotifications.debugResetForTest();
+        _clearSecureStorageMock();
+        Api.instance.httpClientOverride = null;
+        Api.instance.setSessionForTest();
+      });
+
+      Api.instance.httpClientOverride = MockClient((request) async {
+        if (request.url.path.endsWith('/notifications')) {
+          return _utf8Response(
+            jsonEncode({
+              'unreadCount': 1,
+              'items': [
+                {
+                  'id': 'n-order',
+                  'type': 'ORDER_ACCEPTED',
+                  'title': 'طلبك قيد التجهيز',
+                  'body': 'تم قبول الطلب DRB-707',
+                  'data': {'orderId': 'ord-707', 'type': 'ORDER_ACCEPTED'},
+                  'readAt': null,
+                  'createdAt': '2026-11-27T10:00:00Z',
+                },
+              ],
+            }),
+            200,
+          );
+        }
+        if (request.url.path.endsWith('/notifications/n-order/read')) {
+          return _utf8Response(jsonEncode({'id': 'n-order', 'readAt': '2026-11-27T10:01:00Z'}), 200);
+        }
+        return _utf8Response('{}', 200);
+      });
+
+      Map<String, dynamic>? openedPayload;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            initialScreen: NotificationsScreen(
+              onOpenNotificationData: (data) async {
+                openedPayload = data;
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.text('مزامنة الآن'), findsOneWidget);
+      await tester.tap(find.text('مزامنة الآن'));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(syncCalls, 1);
+
+      await tester.tap(find.text('طلبك قيد التجهيز'));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(openedPayload?['orderId'], 'ord-707');
+      expect(openedPayload?['type'], 'ORDER_ACCEPTED');
+    });
+
+    testWidgets(
+        'CustomerHomeScreen favorite pinning & Driver/Vendor role filters work cleanly',
+        (tester) async {
+      darbLocale.value = const Locale('ar');
+      _mockSecureStorage(<String, String>{});
+      addTearDown(() {
+        _clearSecureStorageMock();
+        Api.instance.httpClientOverride = null;
+        Api.instance.setSessionForTest();
+      });
+
+      Api.instance.setSessionForTest(accessToken: 'valid-token');
+      Api.instance.httpClientOverride = MockClient((request) async {
+        final path = request.url.path;
+        if (path.endsWith('/cities')) {
+          return _utf8Response(
+            jsonEncode([
+              {
+                'id': 'c-1',
+                'code': 'damascus',
+                'names': [{'locale': 'ar', 'name': 'دمشق'}],
+              },
+            ]),
+            200,
+          );
+        }
+        if (path.endsWith('/vendors')) {
+          return _utf8Response(
+            jsonEncode([
+              {
+                'id': 'v-1',
+                'type': 'مطعم',
+                'isOpen': true,
+                'translations': [{'locale': 'ar', 'name': 'مطعم القلعة'}],
+              },
+            ]),
+            200,
+          );
+        }
+        if (path.endsWith('/orders/driver/mine')) {
+          return _utf8Response(
+            jsonEncode([
+              {
+                'id': 'do-1',
+                'orderNumber': 'DRB-901',
+                'type': 'VENDOR',
+                'status': 'ASSIGNED',
+                'total': 20000,
+                'deliveryFee': 4000,
+                'currency': 'SYP',
+                'customer': {'name': 'سامي'},
+              },
+              {
+                'id': 'do-2',
+                'orderNumber': 'DRB-902',
+                'type': 'PEER_DELIVERY',
+                'status': 'PICKED_UP',
+                'total': 15000,
+                'deliveryFee': 5000,
+                'currency': 'SYP',
+                'customer': {'name': 'ريم'},
+              },
+            ]),
+            200,
+          );
+        }
+        return _utf8Response('[]', 200);
+      });
+
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            key: ValueKey('cust-fav'),
+            initialScreen: Scaffold(
+              body: CustomerHomeScreen(
+                user: {'id': 'u1', 'name': 'أنس', 'role': 'CUSTOMER'},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      final vendorTitle = find.text('مطعم القلعة');
+      await tester.scrollUntilVisible(
+        vendorTitle,
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(vendorTitle, findsOneWidget);
+      final bookmarkButton = find.byIcon(Icons.bookmark_border_rounded).first;
+      await tester.ensureVisible(bookmarkButton);
+      await tester.tap(bookmarkButton);
+      await tester.pump();
+      expect(find.byIcon(Icons.bookmark_rounded), findsOneWidget);
+      expect(find.text('المفضلة (1)'), findsOneWidget);
+
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: DarbApp(
+            key: ValueKey('drv-filter'),
+            initialScreen: Scaffold(body: DriverOrdersScreen()),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.text('DRB-901'), findsOneWidget);
+      expect(find.text('DRB-902'), findsOneWidget);
+
+      final peerChip = find.text('توصيل مستقل').first;
+      await tester.ensureVisible(peerChip);
+      await tester.tap(peerChip);
+      await tester.pump();
+      expect(find.text('DRB-902'), findsOneWidget);
+      expect(find.text('DRB-901'), findsNothing);
     });
   });
 }

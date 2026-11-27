@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../core/network/api_client.dart';
+import '../../core/storage/local_cache.dart';
 import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_city_scene.dart';
 import '../../core/widgets/darb_components.dart';
@@ -31,14 +34,18 @@ class CustomerHomeScreen extends StatefulWidget {
 }
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
+  static const _favoritesCacheKey = 'favorite_vendors_v1';
+
   final _searchController = TextEditingController();
   List<Map<String, dynamic>> _cities = const [];
   List<Map<String, dynamic>> _vendors = const [];
   List<Map<String, dynamic>> _recentOrders = const [];
   List<Map<String, dynamic>> _addresses = const [];
+  Set<String> _favoriteVendorIds = <String>{};
   String? _selectedCityId;
   String _selectedType = '';
   bool _openOnly = false;
+  bool _favoritesOnly = false;
   bool _loading = true;
   bool _loadingVendors = false;
   bool _offline = false;
@@ -49,7 +56,37 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   void initState() {
     super.initState();
     darbLocale.addListener(_onLocaleChanged);
+    unawaited(_loadFavorites());
     _bootstrap();
+  }
+
+  Future<void> _loadFavorites() async {
+    try {
+      final raw = await DarbLocalCache.instance.readJson(_favoritesCacheKey);
+      if (raw is List && mounted) {
+        setState(() {
+          _favoriteVendorIds =
+              raw.map((e) => e.toString()).where((e) => e.isNotEmpty).toSet();
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _toggleFavorite(String vendorId) async {
+    DarbHaptics.selection();
+    final updated = Set<String>.from(_favoriteVendorIds);
+    if (!updated.remove(vendorId)) {
+      updated.add(vendorId);
+    }
+    setState(() {
+      _favoriteVendorIds = updated;
+      if (_favoritesOnly && updated.isEmpty) {
+        _favoritesOnly = false;
+      }
+    });
+    unawaited(
+      DarbLocalCache.instance.writeJson(_favoritesCacheKey, updated.toList()),
+    );
   }
 
   void _onLocaleChanged() {
@@ -231,7 +268,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   List<Map<String, dynamic>> get _filteredVendors {
     final q = _searchController.text.trim().toLowerCase();
-    return _vendors.where((v) {
+    final list = _vendors.where((v) {
+      final id = v['id']?.toString() ?? '';
+      if (_favoritesOnly && !_favoriteVendorIds.contains(id)) return false;
       if (_openOnly && v['isOpen'] == false) return false;
       if (_selectedType.isNotEmpty && v['type']?.toString() != _selectedType) {
         return false;
@@ -243,6 +282,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       final type = v['type']?.toString().toLowerCase() ?? '';
       return name.contains(q) || type.contains(q);
     }).toList();
+    if (_favoriteVendorIds.isNotEmpty) {
+      list.sort((a, b) {
+        final aFav = _favoriteVendorIds.contains(a['id']?.toString() ?? '');
+        final bFav = _favoriteVendorIds.contains(b['id']?.toString() ?? '');
+        if (aFav == bFav) return 0;
+        return aFav ? -1 : 1;
+      });
+    }
+    return list;
   }
 
   Map<String, dynamic>? get _featuredOrder {
@@ -554,6 +602,73 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 hintText: dt('ابحث عن متجر أو نشاط...'),
                 onChanged: (_) => setState(() {}),
               ),
+              if (_vendors.isNotEmpty &&
+                  (_favoriteVendorIds.isNotEmpty || _favoritesOnly)) ...[
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    DarbPressScale(
+                      borderRadius: DarbRadius.pill,
+                      onTap: () {
+                        DarbHaptics.selection();
+                        setState(() => _favoritesOnly = !_favoritesOnly);
+                      },
+                      child: AnimatedContainer(
+                        duration: DarbMotion.effectiveDuration(
+                          context,
+                          DarbMotion.interactive,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _favoritesOnly
+                              ? (isDark ? DarbColors.lime : DarbColors.forest)
+                              : DarbColors.surfaceOf(context),
+                          borderRadius: BorderRadius.circular(DarbRadius.pill),
+                          border: Border.all(
+                            color: _favoritesOnly
+                                ? Colors.transparent
+                                : DarbColors.borderOf(context),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _favoritesOnly
+                                  ? Icons.bookmark_rounded
+                                  : Icons.bookmark_border_rounded,
+                              size: 14,
+                              color: _favoritesOnly
+                                  ? (isDark
+                                      ? DarbColors.darkCanvas
+                                      : DarbColors.lime)
+                                  : DarbColors.primaryOf(context),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${dt('المفضلة')} (${_vendors.where((v) => _favoriteVendorIds.contains(v['id']?.toString() ?? '')).length})',
+                              style: TextStyle(
+                                color: _favoritesOnly
+                                    ? (isDark
+                                        ? DarbColors.darkCanvas
+                                        : Colors.white)
+                                    : DarbColors.inkOf(context),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               if (types.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 DarbSegmentedDock<String>(
@@ -604,6 +719,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                           setState(() {
                             _selectedType = '';
                             _openOnly = false;
+                            _favoritesOnly = false;
                           });
                         },
                 )
@@ -688,6 +804,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Widget _buildVendorCard(Map<String, dynamic> v) {
+    final vendorId = v['id']?.toString() ?? '';
     final tr = (v['translations'] as List? ?? []);
     final name = tr.isNotEmpty
         ? (tr.first['name']?.toString() ?? dt('متجر'))
@@ -708,6 +825,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       productsLabel: dt('$count منتج متاح'),
       ratingAvg: ratingAvg,
       reviewsCount: reviewsCount,
+      isFavorite: vendorId.isNotEmpty && _favoriteVendorIds.contains(vendorId),
+      onToggleFavorite:
+          vendorId.isNotEmpty ? () => _toggleFavorite(vendorId) : null,
       onTap: _selectedCityId == null
           ? null
           : () => Navigator.push(

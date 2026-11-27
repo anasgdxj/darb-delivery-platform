@@ -956,3 +956,112 @@ class _DarbTypingDotsState extends State<DarbTypingDots>
     );
   }
 }
+
+/// Subtle expanding telemetry halo ring for live focal nodes, crests, and
+/// active order timeline steps. Completely stops under Reduce Motion.
+class DarbBeaconRing extends StatefulWidget {
+  const DarbBeaconRing({
+    super.key,
+    required this.child,
+    this.active = true,
+    this.color,
+    this.maxScale = 1.38,
+    this.borderRadius,
+  });
+
+  final Widget child;
+  final bool active;
+  final Color? color;
+  final double maxScale;
+  final BorderRadius? borderRadius;
+
+  @override
+  State<DarbBeaconRing> createState() => _DarbBeaconRingState();
+}
+
+class _DarbBeaconRingState extends State<DarbBeaconRing>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1900),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant DarbBeaconRing oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.active != widget.active) {
+      _syncAnimation();
+    }
+  }
+
+  void _syncAnimation() {
+    if (!widget.active || DarbMotion.reduceMotion(context)) {
+      if (_controller.isAnimating) _controller.stop();
+      _controller.value = 0;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = widget.color ?? DarbColors.primaryOf(context);
+    if (!widget.active || DarbMotion.reduceMotion(context)) {
+      return widget.child;
+    }
+
+    return Stack(
+      alignment: Alignment.center,
+      clipBehavior: Clip.none,
+      children: [
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final t = Curves.easeOut.transform(_controller.value);
+                final scale = 1.0 + (widget.maxScale - 1.0) * t;
+                final alpha = (1.0 - t) * 0.42;
+                return Transform.scale(
+                  scale: scale,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: widget.borderRadius == null
+                          ? BoxShape.circle
+                          : BoxShape.rectangle,
+                      borderRadius: widget.borderRadius,
+                      border: Border.all(
+                        color: tone.withValues(alpha: alpha),
+                        width: 1.8,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        widget.child,
+      ],
+    );
+  }
+}
+

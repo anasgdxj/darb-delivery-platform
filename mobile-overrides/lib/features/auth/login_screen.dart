@@ -452,7 +452,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     isDark: true,
                                   ),
                                 ),
-                                child: const DarbBrandMark(size: 46),
+                                child: const DarbBrandMark(
+                                  size: 46,
+                                  animatePulse: true,
+                                ),
                               ),
                               const SizedBox(width: 11),
                               Text(
@@ -969,7 +972,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                               isDark: true,
                                             ),
                                           ),
-                                          child: const DarbBrandMark(size: 46),
+                                          child: const DarbBrandMark(
+                                            size: 46,
+                                            animatePulse: true,
+                                          ),
                                         ),
                                         const SizedBox(width: 11),
                                         Text(

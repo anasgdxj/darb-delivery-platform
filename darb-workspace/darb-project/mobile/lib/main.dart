@@ -172,7 +172,7 @@ class _DarbSplashGateState extends State<_DarbSplashGate>
           tintColor: DarbColors.forestSoft.withValues(alpha: 0.54),
           borderColor: DarbColors.lime.withValues(alpha: 0.40),
           padding: const EdgeInsets.all(18),
-          child: const DarbBrandMark(size: 82),
+          child: const DarbBrandMark(size: 82, animatePulse: true),
         ),
       ],
     );

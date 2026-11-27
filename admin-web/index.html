@@ -1,541 +1,591 @@
 <!doctype html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl" data-style="glass">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090B0E">
+<meta name="theme-color" content="#14171D">
 <meta name="robots" content="noindex,nofollow">
-<title>DAZREVO | مركز العمليات والإدارة</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>إدارة دازريفو | DAZREVO Operations</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap');
+
 :root {
-  --bg: #F7F6F2;
+  color-scheme: light;
+  --obsidian: #0C0D0F;
+  --obsidian-rail: #14171D;
+  --obsidian-soft: #1E222B;
+  --gold: #D6B46C;
+  --gold-soft: #E7D3A3;
+  --bronze: #8A651F;
+  --bronze-hover: #735216;
+  --gold-tint: #F6EFE0;
+  --teal: #1D7A6E;
+  --teal-bright: #3FD1BE;
+  --teal-soft: #E8F5F3;
+  --canvas: #FAF9F6;
   --surface: #FFFFFF;
-  --surface-alt: #EFECE4;
-  --sidebar: #11151B;
-  --sidebar-line: #232A36;
-  --ink: #11151B;
-  --muted: #656C78;
-  --line: #E4DFD4;
-  --line-strong: #CCC4B4;
-  --accent: #B89146;
-  --accent-bright: #C6A15B;
-  --accent-ink: #090B0E;
-  --success: #1E8E64;
-  --warning: #B87A1E;
-  --danger: #B93D45;
-  --shadow: 0 22px 54px rgba(17, 21, 27, 0.08);
-  --font-ui: 'Readex Pro', 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --surface-glass: rgba(255, 255, 255, 0.86);
+  --surface-soft: #F2EFE9;
+  --ink: #141413;
+  --muted: #636059;
+  --border: #E5E0D6;
+  --border-strong: #CEC7BA;
+  --glass-border: rgba(214, 180, 108, 0.28);
+  --danger: #C83E3E;
+  --danger-soft: #FCEBEB;
+  --success: #177856;
+  --success-soft: #E6F4EE;
+  --warn: #B57314;
+  --warn-soft: #FBF1DF;
+  --shadow: 0 22px 58px rgba(12, 13, 15, 0.08);
+  --blur: 20px;
 }
 
 html.dark {
-  --bg: #090B0E;
-  --surface: #11151B;
-  --surface-alt: #181E27;
-  --sidebar: #0D1015;
-  --sidebar-line: #1E2530;
-  --ink: #F5F2EB;
-  --muted: #969DA8;
-  --line: #222934;
-  --line-strong: #343F4F;
-  --accent: #DFBE7D;
-  --accent-bright: #E8CB91;
-  --accent-ink: #090B0E;
-  --success: #4CD49E;
-  --warning: #E6B86A;
-  --danger: #EB7A82;
-  --shadow: 0 28px 72px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+  --canvas: #0C0D0F;
+  --surface: #14161A;
+  --surface-glass: rgba(20, 22, 26, 0.86);
+  --surface-soft: #232730;
+  --ink: #F5F3EE;
+  --muted: #A39E93;
+  --bronze: #D6B46C;
+  --bronze-hover: #E7D3A3;
+  --gold-tint: rgba(214, 180, 108, 0.14);
+  --teal: #3FD1BE;
+  --teal-soft: #112926;
+  --border: #262A33;
+  --border-strong: #3A404D;
+  --glass-border: rgba(214, 180, 108, 0.2);
+  --danger: #F26E6E;
+  --danger-soft: rgba(242, 110, 110, 0.14);
+  --success: #4AD99D;
+  --success-soft: rgba(74, 217, 157, 0.14);
+  --warn: #F0B654;
+  --warn-soft: rgba(240, 182, 84, 0.14);
+  --shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: clip; }
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--canvas);
   color: var(--ink);
-  font-family: var(--font-ui);
+  font-family: 'Cairo', 'Plus Jakarta Sans', Tahoma, Arial, sans-serif;
   line-height: 1.6;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-button, input, select { font: inherit; color: inherit; }
+html[lang="en"] body, html[lang="tr"] body {
+  font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, sans-serif;
+}
+button, input, select, textarea { font: inherit; }
 button {
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: 12px;
-  padding: 10px 16px;
-  min-height: 42px;
-  font-size: 13px;
-  font-weight: 700;
-  background: var(--accent);
-  color: var(--accent-ink);
+  min-height: 40px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 800;
   white-space: nowrap;
-  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease, border-color 160ms ease;
 }
-button:hover:not(:disabled) { transform: translateY(-1px); background: var(--accent-bright); }
-button:disabled { opacity: 0.5; cursor: wait; transform: none; }
-
-.btn-outline {
-  background: var(--surface);
-  color: var(--ink);
-  border-color: var(--line-strong);
+button:hover:not(:disabled) { transform: translateY(-1px); }
+button:active:not(:disabled) { transform: scale(0.98); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
 }
-.btn-outline:hover:not(:disabled) {
-  background: var(--surface-alt);
-  border-color: var(--accent);
-}
-.btn-danger {
-  background: transparent;
-  color: var(--danger);
-  border-color: rgba(235, 122, 130, 0.35);
-}
-.btn-danger:hover:not(:disabled) {
-  background: rgba(235, 122, 130, 0.12);
-}
-
+.tabular { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; unicode-bidi: isolate; direction: ltr; }
 .hidden { display: none !important; }
 
-/* Login View */
-.login-wrap {
+/* Ambient Glass Field */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 220ms ease;
+}
+html[data-style="standard"] .ambient { opacity: 0; }
+.orb { position: absolute; border-radius: 50%; filter: blur(86px); }
+.orb-1 {
+  width: 440px; height: 440px; top: -130px; inset-inline-start: -120px;
+  background: radial-gradient(circle, rgba(214, 180, 108, 0.22), transparent 70%);
+}
+.orb-2 {
+  width: 400px; height: 400px; bottom: -120px; inset-inline-end: -90px;
+  background: radial-gradient(circle, rgba(29, 122, 110, 0.16), transparent 70%);
+}
+html.dark .orb-1 { background: radial-gradient(circle, rgba(214, 180, 108, 0.14), transparent 70%); }
+html.dark .orb-2 { background: radial-gradient(circle, rgba(63, 209, 190, 0.12), transparent 70%); }
+
+.surface {
+  background: var(--surface-glass);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+}
+html[data-style="standard"] .surface {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 18px rgba(12, 13, 15, 0.05);
+}
+
+.btn-primary {
+  background: var(--obsidian-rail);
+  color: var(--gold);
+  border-color: rgba(214, 180, 108, 0.35);
+}
+.btn-primary:hover:not(:disabled) { background: var(--obsidian-soft); }
+html.dark .btn-primary {
+  background: var(--gold);
+  color: var(--obsidian);
+  border-color: transparent;
+}
+html.dark .btn-primary:hover:not(:disabled) { background: var(--gold-soft); }
+.btn-teal {
+  background: var(--teal);
+  color: #FFFFFF;
+}
+html.dark .btn-teal { color: #0C0D0F; }
+.btn-teal:hover:not(:disabled) { filter: brightness(1.06); }
+.btn-outline { background: var(--surface); border-color: var(--border-strong); color: var(--ink); }
+.btn-outline:hover:not(:disabled) { background: var(--surface-soft); }
+.btn-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
+input, select, textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13.5px;
+}
+
+/* Unified Chamfered-D Brand Mark */
+.brand-row { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 44px; height: 44px;
+  border-radius: 13px;
+  overflow: hidden;
+  border: 1px solid rgba(214, 180, 108, 0.42);
+  box-shadow: 0 8px 20px rgba(12, 13, 15, 0.24);
+  flex-shrink: 0;
+}
+.brand-mark svg { width: 100%; height: 100%; display: block; }
+
+/* Login Gate */
+.login-shell {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 24px;
-  background: radial-gradient(circle at 80% 12%, rgba(223, 190, 125, 0.10), transparent 36%), var(--bg);
 }
 .login-card {
-  width: min(460px, 100%);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 26px;
+  width: min(490px, 100%);
+  border-radius: 28px;
   padding: 32px;
-  box-shadow: var(--shadow);
-}
-.login-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 26px;
-}
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: 0.08em;
-}
-.brand-mark {
-  width: 42px;
-  height: 42px;
   display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: #0D1015;
-  border: 1px solid rgba(223, 190, 125, 0.38);
-  flex-shrink: 0;
+  gap: 18px;
 }
-.brand small {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0;
-  color: var(--muted);
-  font-weight: 500;
-}
-.login-card h1 {
-  margin: 0 0 10px;
-  font-size: 24px;
-  line-height: 1.3;
-}
-.login-card p {
-  margin: 0 0 22px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.75;
-}
-.google-wrap {
+.login-head-controls {
   display: flex;
-  justify-content: center;
-  min-height: 48px;
-  padding: 12px;
-  border-radius: 16px;
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
+.seg-mini {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.seg-mini button {
+  min-height: 30px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 7px;
+}
+.seg-mini button[aria-pressed="true"] {
+  background: var(--obsidian-rail);
+  color: var(--gold);
+}
+html.dark .seg-mini button[aria-pressed="true"] {
+  background: var(--gold);
+  color: var(--obsidian);
+}
+.login-card h1 { margin: 0; font-size: 23px; font-weight: 900; }
+.login-card p { margin: 0; color: var(--muted); font-size: 13.5px; }
 .notice {
-  margin-top: 14px;
   padding: 12px 14px;
   border-radius: 12px;
   font-size: 13px;
-  background: rgba(76, 212, 158, 0.12);
-  color: var(--success);
-  border: 1px solid rgba(76, 212, 158, 0.25);
+  font-weight: 700;
+  background: var(--teal-soft);
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--teal) 32%, transparent);
 }
 .notice.bad {
-  background: rgba(235, 122, 130, 0.12);
+  background: var(--danger-soft);
   color: var(--danger);
-  border-color: rgba(235, 122, 130, 0.28);
+  border-color: color-mix(in srgb, var(--danger) 32%, transparent);
 }
 
-/* App Shell */
-.shell {
+/* Order Expansion & Spatial Route Preview */
+.order-expand-tr td { background: var(--surface-soft); padding: 18px !important; }
+.order-details-box { display: grid; gap: 14px; }
+.order-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 13px; }
+.info-card strong { display: block; margin-bottom: 3px; color: var(--bronze); }
+html.dark .info-card strong { color: var(--gold); }
+.route-map-container {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(214, 180, 108, 0.3);
+  overflow: hidden;
+  background: linear-gradient(145deg, #0C0D0F 0%, #14171D 60%, #1E222B 100%);
+  color: #F5F3EE;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+.route-map-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: #C8C2B6;
+}
+.route-map-container svg {
+  width: 100%;
+  height: 170px;
+  display: block;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Admin Workspace Shell */
+.app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 276px 1fr;
+  grid-template-columns: 280px minmax(0, 1fr);
 }
-.side {
-  background: var(--sidebar);
-  color: #F5F2EB;
-  border-inline-end: 1px solid var(--sidebar-line);
-  padding: 24px 18px;
+.sidebar {
+  background: linear-gradient(180deg, var(--obsidian) 0%, var(--obsidian-rail) 100%);
+  color: #F5F3EE;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
+  border-inline-end: 1px solid rgba(214, 180, 108, 0.2);
 }
-.side .brand small { color: #969DA8; }
-.nav {
-  display: grid;
-  gap: 6px;
-}
-.nav button {
+.sidebar .brand-sub { font-size: 12px; color: var(--gold-soft); font-weight: 700; }
+.side-nav { display: grid; gap: 6px; }
+.side-nav button {
   background: transparent;
-  color: #B9C0CA;
-  border: 1px solid transparent;
-  min-height: 46px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
+  color: rgba(245, 243, 238, 0.8);
   justify-content: space-between;
-  text-align: start;
-  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
 }
-.nav button:hover:not(:disabled) {
-  transform: none;
-  background: rgba(255, 255, 255, 0.05);
-  color: #FFFFFF;
+.side-nav button:hover { background: rgba(255, 255, 255, 0.08); color: #FFFFFF; }
+.side-nav button.active {
+  background: var(--obsidian-soft);
+  color: var(--gold);
+  border: 1px solid rgba(214, 180, 108, 0.36);
 }
-.nav button.active {
-  background: rgba(223, 190, 125, 0.12);
-  border-color: rgba(223, 190, 125, 0.35);
-  color: #DFBE7D;
+.side-nav button.ai-tab.active {
+  background: rgba(29, 122, 110, 0.25);
+  color: var(--teal-bright);
+  border-color: rgba(63, 209, 190, 0.5);
 }
-.nav-count {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+.count-tag {
   font-size: 12px;
-  color: inherit;
+  color: var(--gold);
+  font-weight: 800;
 }
-.side-foot {
+.side-controls {
   margin-top: auto;
-  padding-top: 18px;
-  border-top: 1px solid var(--sidebar-line);
-  color: #88919D;
-  font-size: 12px;
-  line-height: 1.7;
+  display: grid;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.side-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.32);
+  padding: 4px;
+  border-radius: 11px;
+}
+.side-seg.tri { grid-template-columns: repeat(3, 1fr); }
+.side-seg button {
+  min-height: 30px;
+  padding: 4px 6px;
+  font-size: 11.5px;
+  color: rgba(245, 243, 238, 0.72);
+  background: transparent;
+  border-radius: 8px;
+}
+.side-seg button[aria-pressed="true"] {
+  background: rgba(214, 180, 108, 0.22);
+  color: var(--gold);
 }
 
-.main {
-  padding: 28px 34px 44px;
-  max-width: 1400px;
+.workspace {
+  padding: 24px 28px;
+  max-width: 1420px;
   width: 100%;
   margin-inline: auto;
+  display: grid;
+  gap: 20px;
+  align-content: start;
 }
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
-.topbar h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-}
-.topbar-sub {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.segmented {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px;
-  border-radius: 10px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  gap: 2px;
-}
-.segmented button {
-  min-height: 34px;
-  padding: 6px 10px;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 12px;
-}
-.segmented button:hover:not(:disabled) { transform: none; background: var(--surface-alt); }
-.segmented button.active {
-  background: var(--surface-alt);
-  color: var(--ink);
-}
+.crumb { font-size: 12.5px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+.topbar h1 { margin: 0; font-size: 22px; font-weight: 900; }
+.top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mobile-menu-btn { display: none; }
 
 /* KPI Strip */
-.stats {
+.kpi-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 22px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
-.stat {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 20px;
+.kpi-card {
+  border-radius: 20px;
+  padding: 18px 20px;
 }
-.stat-label {
-  font-size: 12px;
-  color: var(--muted);
-}
-.stat-value {
+.kpi-label { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.kpi-value {
   display: block;
-  margin-top: 8px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--accent);
+  margin-top: 6px;
+  font-size: clamp(18px, 2.2vw, 26px);
+  font-weight: 900;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
-/* Workspace Panel */
+/* Main Panel & Filters */
 .panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
   border-radius: 22px;
-  padding: 24px;
+  padding: 22px;
+  display: grid;
+  gap: 16px;
 }
 .panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
+  gap: 12px;
 }
-.panel-head h2 {
-  margin: 0;
-  font-size: 18px;
-}
-.panel-meta {
-  font-size: 12px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-.filterbar {
+.panel-head h2 { margin: 0; font-size: 17px; font-weight: 900; }
+.panel-meta { font-size: 13px; color: var(--muted); font-weight: 700; }
+.toolbar {
   display: flex;
-  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-.filterbar input,
-.filterbar select {
-  min-width: 170px;
-  padding: 10px 12px;
-  min-height: 42px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface-alt);
-  color: var(--ink);
-  outline: none;
-}
-.filterbar input[type="search"] {
-  min-width: min(100%, 280px);
-  flex: 1 1 280px;
-  max-width: 380px;
-}
-.filterbar input:focus,
-.filterbar select:focus {
-  border-color: var(--accent);
-}
-
-.list { display: grid; gap: 12px; }
-.request {
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 18px;
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
   align-items: center;
 }
-.request h3 { margin: 0 0 6px; font-size: 16px; }
-.meta {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.75;
-}
-.actions { display: flex; gap: 8px; flex-shrink: 0; }
+.toolbar > * { flex: 1 1 180px; max-width: 280px; }
 
-.order-card {
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 18px;
-  display: grid;
-  gap: 12px;
+/* Data Table & Row Cards */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
 }
-.order-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+th, td {
+  text-align: start;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
-.order-top strong {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 15px;
-}
-.status-label {
+th {
   font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
+  font-weight: 800;
+  color: var(--muted);
+  white-space: nowrap;
 }
-.order-meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 10px;
-  font-size: 13px;
-}
-.order-cell {
+tbody tr:hover { background: var(--surface-soft); }
+.state-text { font-weight: 800; font-size: 12.5px; }
+.state-ok { color: var(--success); }
+.state-warn { color: var(--warn); }
+.state-bad { color: var(--danger); }
+
+.row-list { display: grid; gap: 12px; }
+.row-item {
+  border: 1px solid var(--border);
   background: var(--surface);
-  border: 1px solid var(--line);
-  padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
-.order-cell small {
-  display: block;
-  font-size: 11px;
-  color: var(--muted);
-}
+.row-info h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 900; }
+.row-meta { font-size: 13px; color: var(--muted); }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .zone-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
 }
-.zone-card {
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 18px;
-}
-.zone-card h3 { margin: 0 0 4px; font-size: 16px; }
-.zone-sub { font-size: 12px; color: var(--muted); }
-.zone-fields {
-  display: grid;
-  gap: 10px;
-  margin: 14px 0;
-}
-.zone-fields label {
-  display: grid;
-  gap: 5px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.zone-fields input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+.zone-box {
+  border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  border-radius: 18px;
+  padding: 18px;
+  display: grid;
+  gap: 12px;
 }
-.zone-fields input[data-field="name"] {
-  font-family: var(--font-ui);
+.zone-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-group { display: grid; gap: 5px; }
+.field-group label { font-size: 12px; color: var(--muted); font-weight: 700; }
+
+/* AI Copilot */
+.copilot-box { display: grid; gap: 14px; }
+.copilot-prompts { display: flex; gap: 8px; flex-wrap: wrap; }
+.copilot-prompts button {
+  background: var(--teal-soft);
+  color: var(--teal);
+  border: 1px solid color-mix(in srgb, var(--teal) 32%, transparent);
+  font-size: 12.5px;
+  min-height: 36px;
+  padding: 6px 12px;
 }
-.zone-save { width: 100%; }
+.copilot-feed { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; padding: 4px 2px; }
+.copilot-msg {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 14px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+.copilot-msg.user {
+  background: var(--teal-soft);
+  border-color: color-mix(in srgb, var(--teal) 38%, transparent);
+}
+.copilot-msg.bad { background: var(--danger-soft); color: var(--danger); }
+.copilot-form { display: flex; gap: 10px; align-items: center; }
+.copilot-form input { flex: 1; }
 
 .pager {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  margin-top: 16px;
+  padding-top: 8px;
 }
-.empty, .error {
+.empty-box, .error-box {
+  padding: 36px 20px;
   text-align: center;
-  padding: 40px 20px;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--muted);
 }
-.error { color: var(--danger); }
+.error-box { color: var(--danger); }
 
-/* Non-blocking Toast & Confirm Modal */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  inset-inline-end: 24px;
-  z-index: 80;
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  color: var(--ink);
-  padding: 12px 18px;
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-  font-size: 13px;
-  font-weight: 600;
-}
-.toast.bad { border-color: var(--danger); color: var(--danger); }
-
+/* In-page Modal Dialog & Toast */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 90;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px);
+  z-index: 60;
+  background: rgba(12, 13, 15, 0.68);
+  backdrop-filter: blur(8px);
   display: grid;
   place-items: center;
   padding: 20px;
 }
 .modal-card {
-  width: min(400px, 100%);
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: 20px;
+  width: min(460px, 100%);
+  border-radius: 24px;
   padding: 24px;
-  box-shadow: var(--shadow);
+  display: grid;
+  gap: 14px;
 }
-.modal-card h3 { margin: 0 0 8px; font-size: 18px; }
-.modal-card p { margin: 0 0 20px; font-size: 13px; color: var(--muted); line-height: 1.7; }
+.modal-card h3 { margin: 0; font-size: 18px; font-weight: 900; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.toast {
+  position: fixed;
+  bottom: 22px;
+  inset-inline-start: 22px;
+  z-index: 70;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 800;
+  background: var(--obsidian-rail);
+  color: var(--gold);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(214, 180, 108, 0.4);
+}
+.toast.bad { background: var(--danger); color: #FFFFFF; border-color: #FFFFFF; }
 
-@media (max-width: 900px) {
-  .shell { grid-template-columns: 1fr; }
-  .side { padding: 16px; gap: 14px; border-inline-end: 0; border-bottom: 1px solid var(--sidebar-line); }
-  .side-foot { display: none; }
-  .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .main { padding: 20px 16px 36px; }
-  .stats { grid-template-columns: 1fr; }
-  .request { flex-direction: column; align-items: flex-start; }
-  .actions { width: 100%; }
-  .actions button { flex: 1; }
+@media (max-width: 960px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .sidebar.open-mobile {
+    display: flex;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: min(290px, 85vw);
+    z-index: 65;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  }
+  .mobile-menu-btn { display: inline-flex; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .workspace { padding: 16px; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .copilot-form { flex-direction: column; align-items: stretch; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
@@ -544,370 +594,1379 @@ button:disabled { opacity: 0.5; cursor: wait; transform: none; }
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+<div class="ambient" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+</div>
 
-<section id="loginView" class="login-wrap">
-  <div class="login-card">
-    <div class="login-top">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-            <path d="M7 6H16.5C22.299 6 27 10.701 27 16.5C27 22.299 22.299 27 16.5 27H7V21.5H16C19.0376 21.5 21.5 19.0376 21.5 16C21.5 12.9624 19.0376 10.5 16 10.5H7V6Z" fill="#DFBE7D"/>
-            <path d="M7 13.5H14.5L18.5 16L14.5 18.5H7V13.5Z" fill="#F5F2EB"/>
+<!-- Login Gate -->
+<section id="loginView" class="login-shell">
+  <div class="login-card surface">
+    <div class="login-head-controls">
+      <div class="brand-row">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 108 108">
+            <rect width="108" height="108" rx="28" fill="#14171D"/>
+            <path d="M33 25h24l23 17v24L57 83H33l9.5-11h12l14-10.5v-15L54.5 36h-12z" fill="#F7F4EC"/>
+            <path d="M28 36L52 54 28 72" fill="none" stroke="#D6B46C" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="53" cy="54" r="5.8" fill="#3FD1BE"/>
           </svg>
-        </span>
+        </div>
         <div>
-          <span>DAZREVO</span>
-          <small data-i18n="portalSub">بوابة الإدارة والعمليات</small>
+          <strong>دازريفو · DAZREVO</strong>
+          <div class="panel-meta" id="gateSub">بوابة العمليات والإدارة</div>
         </div>
       </div>
-      <div class="segmented" role="group" aria-label="Language">
-        <button type="button" class="active" data-lang="ar">AR</button>
-        <button type="button" data-lang="en">EN</button>
-        <button type="button" data-lang="tr">TR</button>
+
+      <div class="seg-mini" role="group" aria-label="Language">
+        <button type="button" data-admin-lang="ar" aria-pressed="true">عربي</button>
+        <button type="button" data-admin-lang="en" aria-pressed="false">EN</button>
+        <button type="button" data-admin-lang="tr" aria-pressed="false">TR</button>
       </div>
     </div>
-    <h1 data-i18n="loginTitle">تسجيل دخول المدير</h1>
-    <p data-i18n="loginDesc">الوصول مقصور على الحسابات المعتمدة بصلاحية ADMIN عبر بريد Google المصرح به من إدارة DAZREVO.</p>
-    <div id="googleButton" class="google-wrap"></div>
-    <div id="loginNotice" aria-live="polite"></div>
+
+    <div>
+      <h1 id="loginTitle">تسجيل دخول الإدارة</h1>
+      <p id="loginDesc">الوصول محصور بحسابات ADMIN المعتمدة. يتم التحقق من صلاحية الحساب على الخادم قبل فتح لوحة التحكم.</p>
+    </div>
+
+    <div class="field-group">
+      <label for="apiEnvSelect" id="apiEnvLabel">بيئة الخادم</label>
+      <select id="apiEnvSelect">
+        <option value="local">خادم المعاينة المحلي (/api/v1)</option>
+        <option value="prod">خادم الإنتاج (darb-api-yapv.onrender.com)</option>
+      </select>
+    </div>
+
+    <div id="googleButton" style="display:flex;justify-content:center;min-height:44px"></div>
+
+    <button type="button" id="previewLoginBtn" class="btn-primary">دخول سريع لوضع المعاينة (Admin Preview)</button>
+
+    <div id="loginNotice" class="hidden" aria-live="polite"></div>
   </div>
 </section>
 
-<section id="appView" class="shell hidden">
-  <aside class="side">
-    <div class="brand">
-      <span class="brand-mark" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-          <path d="M7 6H16.5C22.299 6 27 10.701 27 16.5C27 22.299 22.299 27 16.5 27H7V21.5H16C19.0376 21.5 21.5 19.0376 21.5 16C21.5 12.9624 19.0376 10.5 16 10.5H7V6Z" fill="#DFBE7D"/>
-          <path d="M7 13.5H14.5L18.5 16L14.5 18.5H7V13.5Z" fill="#F5F2EB"/>
+<!-- Main Operations Workspace -->
+<section id="appView" class="app-shell hidden">
+  <aside class="sidebar" id="adminSidebar">
+    <div class="brand-row">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 108 108">
+          <rect width="108" height="108" rx="28" fill="#14171D"/>
+          <path d="M33 25h24l23 17v24L57 83H33l9.5-11h12l14-10.5v-15L54.5 36h-12z" fill="#F7F4EC"/>
+          <path d="M28 36L52 54 28 72" fill="none" stroke="#D6B46C" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="53" cy="54" r="5.8" fill="#3FD1BE"/>
         </svg>
-      </span>
+      </div>
       <div>
-        <span>DAZREVO</span>
-        <small data-i18n="consoleSub">مركز العمليات</small>
+        <strong>دازريفو · DAZREVO</strong>
+        <div class="brand-sub" id="sideBrandSub">مركز العمليات والإدارة</div>
       </div>
     </div>
-    <nav class="nav">
-      <button type="button" data-kind="drivers" class="active"><span data-i18n="navDrivers">طلبات السائقين</span> <span id="driverCount" class="nav-count">—</span></button>
-      <button type="button" data-kind="vendors"><span data-i18n="navVendors">طلبات المتاجر</span> <span id="vendorCount" class="nav-count">—</span></button>
-      <button type="button" data-kind="zones"><span data-i18n="navZones">مناطق ورسوم التوصيل</span></button>
-      <button type="button" data-kind="orders"><span data-i18n="navOrders">مراقبة الطلبات</span></button>
-      <button type="button" id="refresh" data-i18n="navRefresh">تحديث البيانات</button>
+
+    <nav class="side-nav" aria-label="أقسام الإدارة">
+      <button type="button" data-tab="pending" class="active"><span data-nav-lbl="pending">الموافقات المعلقة</span> <span id="navPendingCount" class="count-tag tabular">0</span></button>
+      <button type="button" data-tab="vendors"><span data-nav-lbl="vendors">دليل المتاجر</span></button>
+      <button type="button" data-tab="drivers"><span data-nav-lbl="drivers">دليل السائقين</span></button>
+      <button type="button" data-tab="users"><span data-nav-lbl="users">المستخدمون والصلاحيات</span></button>
+      <button type="button" data-tab="cities" data-kind="zones"><span data-nav-lbl="cities">المدن ومناطق التوصيل</span></button>
+      <button type="button" data-tab="orders"><span data-nav-lbl="orders">مراقبة الطلبات</span></button>
+      <button type="button" data-tab="copilot" class="ai-tab"><span data-nav-lbl="copilot">مساعد الإدارة الذكي</span></button>
+      <button type="button" data-tab="settings"><span data-nav-lbl="settings">الإعدادات والتدقيق</span></button>
     </nav>
-    <div class="side-foot" data-i18n="sideNote">بوابة عمليات محمية. راجع البيانات والوثائق بدقة قبل اعتماد أي شريك توصيل.</div>
+
+    <div class="side-controls">
+      <div class="side-seg tri" role="group" aria-label="Language">
+        <button type="button" data-admin-lang="ar" aria-pressed="true">عربي</button>
+        <button type="button" data-admin-lang="en" aria-pressed="false">EN</button>
+        <button type="button" data-admin-lang="tr" aria-pressed="false">TR</button>
+      </div>
+      <div class="side-seg" role="group" aria-label="نمط الواجهة">
+        <button type="button" id="adminGlassBtn" aria-pressed="true">Glass</button>
+        <button type="button" id="adminStandardBtn" aria-pressed="false">Standard</button>
+      </div>
+      <div class="side-seg" role="group" aria-label="المظهر">
+        <button type="button" id="adminLightBtn" aria-pressed="true">نهاري</button>
+        <button type="button" id="adminDarkBtn" aria-pressed="false">ليلي</button>
+      </div>
+    </div>
   </aside>
 
-  <main class="main">
+  <main class="workspace">
     <header class="topbar">
-      <div>
-        <h1 id="pageTitle">طلبات انضمام السائقين</h1>
-        <div id="pageSub" class="topbar-sub">مراجعة واعتماد شركاء التوصيل في DAZREVO</div>
-      </div>
-      <div class="topbar-actions">
-        <div class="segmented" role="group" aria-label="Language">
-          <button type="button" class="active" data-lang="ar">AR</button>
-          <button type="button" data-lang="en">EN</button>
-          <button type="button" data-lang="tr">TR</button>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button type="button" id="mobileMenuBtn" class="btn-outline mobile-menu-btn" aria-label="القائمة">☰</button>
+        <div>
+          <div id="breadcrumb" class="crumb">إدارة دازريفو / الموافقات المعلقة</div>
+          <h1 id="pageTitle">مراجعة طلبات الانضمام والمؤشرات</h1>
         </div>
-        <button type="button" id="themeToggle" class="btn-outline">الوضع النهاري</button>
-        <button type="button" id="logout" class="btn-outline" data-i18n="logout">تسجيل الخروج</button>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="refreshBtn" class="btn-outline">تحديث البيانات</button>
+        <button type="button" id="logoutBtn" class="btn-danger">تسجيل الخروج</button>
       </div>
     </header>
 
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-label" data-i18n="statDrivers">طلبات السائقين المعلقة</span>
-        <b id="driverStat" class="stat-value">—</b>
-      </div>
-      <div class="stat">
-        <span class="stat-label" data-i18n="statVendors">طلبات المتاجر المعلقة</span>
-        <b id="vendorStat" class="stat-value">—</b>
-      </div>
-      <div class="stat">
-        <span class="stat-label" data-i18n="statSession">صلاحية الجلسة</span>
-        <b class="stat-value" style="font-size:18px;font-family:var(--font-ui)" data-i18n="statAdmin">مدير معتمد (ADMIN)</b>
-      </div>
+    <div class="kpi-grid">
+      <article class="kpi-card surface">
+        <span class="kpi-label" id="kpiLblActive">طلبات نشطة</span>
+        <strong id="kpiActiveOrders" class="kpi-value tabular">—</strong>
+      </article>
+      <article class="kpi-card surface">
+        <span class="kpi-label" id="kpiLblTotal">إجمالي الطلبات</span>
+        <strong id="kpiTotalOrders" class="kpi-value tabular">—</strong>
+      </article>
+      <article class="kpi-card surface">
+        <span class="kpi-label" id="kpiLblPending">بانتظار الاعتماد</span>
+        <strong id="kpiPendingTotal" class="kpi-value tabular">—</strong>
+      </article>
+      <article class="kpi-card surface">
+        <span class="kpi-label" id="kpiLblGmv">حجم المبيعات المكتمل (SYP)</span>
+        <strong id="kpiGmv" class="kpi-value tabular">—</strong>
+      </article>
     </div>
 
-    <section class="panel">
+    <section class="panel surface">
       <div class="panel-head">
-        <h2 id="listTitle">قائمة المراجعة</h2>
-        <span id="panelBadge" class="panel-meta">بانتظار القرار</span>
+        <div>
+          <h2 id="panelTitle">طلبات السائقين والمتاجر بانتظار القرار</h2>
+        </div>
+        <div id="panelSummary" class="panel-meta"></div>
       </div>
-      <div id="list" class="list"><div class="empty">جارٍ تحميل البيانات…</div></div>
+      <div id="contentRoot">
+        <div class="empty-box">جارٍ تحميل البيانات…</div>
+      </div>
     </section>
   </main>
 </section>
 
-<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
-<div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
-  <div class="modal-card">
-    <h3 id="confirmTitle">تأكيد الإجراء</h3>
-    <p id="confirmBody"></p>
+<!-- Custom In-Page Modal -->
+<div id="modalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card surface">
+    <h3 id="modalTitle">تأكيد الإجراء</h3>
+    <div id="modalBody"></div>
     <div class="modal-actions">
-      <button type="button" id="confirmCancel" class="btn-outline">إلغاء</button>
-      <button type="button" id="confirmOk">تأكيد</button>
+      <button type="button" id="modalCancelBtn" class="btn-outline">إلغاء</button>
+      <button type="button" id="modalConfirmBtn" class="btn-primary">تأكيد</button>
     </div>
   </div>
 </div>
 
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
 <script>
-const API='https://darb-api-yapv.onrender.com/api/v1';
-const GOOGLE_WEB_CLIENT_ID='1005839784892-3b1sctr2c32hfa6ssq17nunfhn2d9pji.apps.googleusercontent.com';
-const $=id=>document.getElementById(id);
-let kind='drivers',rows=[],zones=[],ordersPage=1,ordersPages=1,ordersStatus='',ordersType='',queueQuery='',lang='ar';
-const token=()=>sessionStorage.getItem('darb_access');
+const GOOGLE_WEB_CLIENT_ID = '1005839784892-3b1sctr2c32hfa6ssq17nunfhn2d9pji.apps.googleusercontent.com';
+const PROD_API = 'https://darb-api-yapv.onrender.com/api/v1';
+const LOCAL_API = (window.location.origin || 'http://localhost:3000') + '/api/v1';
+const isLocalPreviewHost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname) || window.location.protocol === 'http:';
 
-const dict={
-  ar:{dir:'rtl',portalSub:'بوابة الإدارة والعمليات',consoleSub:'مركز العمليات',loginTitle:'تسجيل دخول المدير',loginDesc:'الوصول مقصور على الحسابات المعتمدة بصلاحية ADMIN عبر بريد Google المصرح به من إدارة DAZREVO.',navDrivers:'طلبات السائقين',navVendors:'طلبات المتاجر',navZones:'مناطق ورسوم التوصيل',navOrders:'مراقبة الطلبات',navRefresh:'تحديث البيانات',sideNote:'بوابة عمليات محمية. راجع البيانات والوثائق بدقة قبل اعتماد أي شريك توصيل.',logout:'تسجيل الخروج',statDrivers:'طلبات السائقين المعلقة',statVendors:'طلبات المتاجر المعلقة',statSession:'صلاحية الجلسة',statAdmin:'مدير معتمد (ADMIN)',light:'الوضع النهاري',dark:'الوضع الداكن'},
-  en:{dir:'ltr',portalSub:'Operations & Admin Console',consoleSub:'Operations Center',loginTitle:'Administrator Sign In',loginDesc:'Access is restricted to authorized ADMIN Google accounts verified by DAZREVO.',navDrivers:'Driver Queue',navVendors:'Store Queue',navZones:'Delivery Zones',navOrders:'Order Monitor',navRefresh:'Refresh Data',sideNote:'Protected internal console. Verify partner records before approving access.',logout:'Sign Out',statDrivers:'Pending Drivers',statVendors:'Pending Stores',statSession:'Session Access',statAdmin:'Verified ADMIN',light:'Light Mode',dark:'Dark Mode'},
-  tr:{dir:'ltr',portalSub:'Yönetim ve Operasyon Portalı',consoleSub:'Operasyon Merkezi',loginTitle:'Yönetici Girişi',loginDesc:'Erişim yalnızca DAZREVO tarafından yetkilendirilmiş ADMIN Google hesaplarına açıktır.',navDrivers:'Kurye Başvuruları',navVendors:'Mağaza Başvuruları',navZones:'Teslimat Bölgeleri',navOrders:'Sipariş İzleme',navRefresh:'Verileri Yenile',sideNote:'Korumalı yönetim portalı. Onay vermeden önce belgeleri dikkatle inceleyin.',logout:'Çıkış Yap',statDrivers:'Bekleyen Kuryeler',statVendors:'Bekleyen Mağazalar',statSession:'Oturum Yetkisi',statAdmin:'Yetkili ADMIN',light:'Açık Mod',dark:'Koyu Mod'}
-};
+let API = isLocalPreviewHost ? LOCAL_API : PROD_API;
+let accessToken = null;
+let refreshToken = null;
+const token = () => accessToken;
 
-function notify(text,bad=false){
-  const t=$('toast');if(!t)return;
-  t.textContent=text;t.className='toast'+(bad?' bad':'');
-  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.add('hidden'),3400);
-}
-function askConfirm(title,body){
-  return new Promise(resolve=>{
-    $('confirmTitle').textContent=title;$('confirmBody').textContent=body;
-    $('confirmModal').classList.remove('hidden');
-    const cleanup=val=>{$('confirmModal').classList.add('hidden');$('confirmOk').onclick=null;$('confirmCancel').onclick=null;resolve(val);};
-    $('confirmOk').onclick=()=>cleanup(true);
-    $('confirmCancel').onclick=()=>cleanup(false);
-  });
-}
-function message(text,bad=false){$('loginNotice').className='notice'+(bad?' bad':'');$('loginNotice').textContent=text;}
+const $ = (id) => document.getElementById(id);
 
-async function raw(path,method='GET',body=null,auth=true){
-  const headers={'Accept':'application/json'};
-  if(body)headers['Content-Type']='application/json';
-  if(auth&&token())headers.Authorization='Bearer '+token();
-  let res=await fetch(API+path,{method,headers,body:body?JSON.stringify(body):undefined});
-  if(res.status===401&&auth){
-    const refresh=sessionStorage.getItem('darb_refresh');
-    if(refresh){
-      const rr=await fetch(API+'/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:refresh})});
-      if(rr.ok){
-        const data=await rr.json();
-        sessionStorage.setItem('darb_access',data.accessToken);
-        sessionStorage.setItem('darb_refresh',data.refreshToken);
-        headers.Authorization='Bearer '+data.accessToken;
-        res=await fetch(API+path,{method,headers,body:body?JSON.stringify(body):undefined});
-      }
+let adminLang = localStorage.getItem('dazrevo_admin_lang') || 'ar';
+let currentTab = 'pending';
+let ordersPage = 1;
+let ordersStatusFilter = '';
+let ordersTypeFilter = '';
+let vendorStatusFilter = '';
+let driverStatusFilter = '';
+let userRoleFilter = '';
+let userQuery = '';
+const copilotMessages = [];
+let copilotBusy = false;
+
+const ADMIN_I18N = {
+  ar: {
+    dir: 'rtl',
+    gateSub: 'بوابة العمليات والإدارة',
+    loginTitle: 'تسجيل دخول الإدارة',
+    loginDesc: 'الوصول محصور بحسابات ADMIN المعتمدة. يتم التحقق من صلاحية الحساب على الخادم قبل فتح لوحة التحكم.',
+    apiEnvLabel: 'بيئة الخادم',
+    previewLoginBtn: 'دخول سريع لوضع المعاينة (Admin Preview)',
+    sideBrandSub: 'مركز العمليات والإدارة',
+    refreshBtn: 'تحديث البيانات',
+    logoutBtn: 'تسجيل الخروج',
+    light: 'نهاري',
+    dark: 'ليلي',
+    kpiActive: 'طلبات نشطة',
+    kpiTotal: 'إجمالي الطلبات',
+    kpiPending: 'بانتظار الاعتماد',
+    kpiGmv: 'حجم المبيعات المكتمل (SYP)',
+    nav: {
+      pending: 'الموافقات المعلقة',
+      vendors: 'دليل المتاجر',
+      drivers: 'دليل السائقين',
+      users: 'المستخدمون والصلاحيات',
+      cities: 'المدن ومناطق التوصيل',
+      orders: 'مراقبة الطلبات',
+      copilot: 'مساعد الإدارة الذكي',
+      settings: 'الإعدادات والتدقيق'
+    }
+  },
+  en: {
+    dir: 'ltr',
+    gateSub: 'Operations & Control Portal',
+    loginTitle: 'Admin Sign In',
+    loginDesc: 'Access is restricted to verified ADMIN accounts. Role permissions are validated on the server before opening the workspace.',
+    apiEnvLabel: 'Server Environment',
+    previewLoginBtn: 'Quick Admin Preview Access',
+    sideBrandSub: 'Operations Command',
+    refreshBtn: 'Refresh Data',
+    logoutBtn: 'Sign Out',
+    light: 'Light',
+    dark: 'Dark',
+    kpiActive: 'Active Orders',
+    kpiTotal: 'Total Orders',
+    kpiPending: 'Pending Review',
+    kpiGmv: 'Delivered GMV (SYP)',
+    nav: {
+      pending: 'Pending Approvals',
+      vendors: 'Merchants Directory',
+      drivers: 'Couriers Directory',
+      users: 'Users & Roles',
+      cities: 'Cities & Zones',
+      orders: 'Orders Monitor',
+      copilot: 'AI Operations Copilot',
+      settings: 'Settings & Audit'
+    }
+  },
+  tr: {
+    dir: 'ltr',
+    gateSub: 'Operasyon ve Yönetim Portalı',
+    loginTitle: 'Yönetici Girişi',
+    loginDesc: 'Erişim yalnızca yetkili ADMIN hesaplarıyla sınırlıdır. Yetkiler sunucuda doğrulanır.',
+    apiEnvLabel: 'Sunucu Ortamı',
+    previewLoginBtn: 'Hızlı Yönetici Önizlemesi',
+    sideBrandSub: 'Operasyon Merkezi',
+    refreshBtn: 'Verileri Yenile',
+    logoutBtn: 'Çıkış Yap',
+    light: 'Açık',
+    dark: 'Koyu',
+    kpiActive: 'Aktif Siparişler',
+    kpiTotal: 'Toplam Sipariş',
+    kpiPending: 'Onay Bekleyen',
+    kpiGmv: 'Teslim Hacmi (SYP)',
+    nav: {
+      pending: 'Bekleyen Onaylar',
+      vendors: 'Mağazalar',
+      drivers: 'Kuryeler',
+      users: 'Kullanıcılar & Roller',
+      cities: 'Şehirler & Bölgeler',
+      orders: 'Sipariş İzleme',
+      copilot: 'AI Operasyon Asistanı',
+      settings: 'Ayarlar & Denetim'
     }
   }
-  const data=await res.json().catch(()=>({message:'استجابة غير مفهومة من الخادم'}));
-  if(!res.ok)throw new Error(Array.isArray(data.message)?data.message.join('، '):(data.message||'فشل الطلب'));
+};
+
+function applyAdminLang(lang) {
+  adminLang = lang;
+  localStorage.setItem('dazrevo_admin_lang', lang);
+  const d = ADMIN_I18N[lang] || ADMIN_I18N.ar;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = d.dir;
+  document.querySelectorAll('[data-admin-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.adminLang === lang)));
+  $('gateSub').textContent = d.gateSub;
+  $('loginTitle').textContent = d.loginTitle;
+  $('loginDesc').textContent = d.loginDesc;
+  $('apiEnvLabel').textContent = d.apiEnvLabel;
+  $('previewLoginBtn').textContent = d.previewLoginBtn;
+  $('sideBrandSub').textContent = d.sideBrandSub;
+  $('refreshBtn').textContent = d.refreshBtn;
+  $('logoutBtn').textContent = d.logoutBtn;
+  $('adminLightBtn').textContent = d.light;
+  $('adminDarkBtn').textContent = d.dark;
+  $('kpiLblActive').textContent = d.kpiActive;
+  $('kpiLblTotal').textContent = d.kpiTotal;
+  $('kpiLblPending').textContent = d.kpiPending;
+  $('kpiLblGmv').textContent = d.kpiGmv;
+  document.querySelectorAll('[data-nav-lbl]').forEach((el) => {
+    const k = el.getAttribute('data-nav-lbl');
+    if (d.nav[k]) el.textContent = d.nav[k];
+  });
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function notify(text, isError = false) {
+  const toast = $('toast');
+  toast.textContent = text;
+  toast.className = 'toast' + (isError ? ' bad' : '');
+  clearTimeout(notify._timer);
+  notify._timer = setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 3600);
+}
+
+function setLoginNotice(text, isError = false) {
+  const box = $('loginNotice');
+  box.textContent = text;
+  box.className = 'notice' + (isError ? ' bad' : '');
+}
+
+function openModal({ title, contentNode, confirmLabel = 'تأكيد', danger = false }) {
+  return new Promise((resolve) => {
+    $('modalTitle').textContent = title;
+    const body = $('modalBody');
+    body.replaceChildren(contentNode);
+    const confirmBtn = $('modalConfirmBtn');
+    const cancelBtn = $('modalCancelBtn');
+    confirmBtn.textContent = confirmLabel;
+    confirmBtn.className = danger ? 'btn-danger' : 'btn-primary';
+    $('modalBackdrop').classList.remove('hidden');
+
+    const cleanup = (val) => {
+      $('modalBackdrop').classList.add('hidden');
+      confirmBtn.onclick = null;
+      cancelBtn.onclick = null;
+      resolve(val);
+    };
+    confirmBtn.onclick = () => cleanup(true);
+    cancelBtn.onclick = () => cleanup(false);
+  });
+}
+
+async function confirmDialog(title, message, danger = false) {
+  const p = document.createElement('p');
+  p.style.margin = '0';
+  p.style.color = 'var(--muted)';
+  p.textContent = message;
+  return openModal({ title, contentNode: p, confirmLabel: 'تأكيد', danger });
+}
+
+async function apiFetch(path, method = 'GET', body = null, auth = true) {
+  const headers = { Accept: 'application/json' };
+  if (body !== null) headers['Content-Type'] = 'application/json';
+  if (auth && token()) {
+    headers.Authorization = 'Bearer ' + token();
+  }
+  let res = await fetch(API + path, {
+    method,
+    headers,
+    body: body !== null ? JSON.stringify(body) : undefined,
+  });
+
+  if (res.status === 401 && auth && refreshToken) {
+    const rr = await fetch(API + '/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (rr.ok) {
+      const refreshed = await rr.json();
+      accessToken = refreshed.accessToken;
+      refreshToken = refreshed.refreshToken;
+      headers.Authorization = 'Bearer ' + token();
+      res = await fetch(API + path, {
+        method,
+        headers,
+        body: body !== null ? JSON.stringify(body) : undefined,
+      });
+    }
+  }
+
+  const data = await res.json().catch(() => ({ message: 'استجابة غير مفهومة من الخادم' }));
+  if (!res.ok) {
+    const msg = Array.isArray(data.message) ? data.message.join('، ') : (data.message || 'فشل الطلب');
+    throw new Error(msg);
+  }
   return data;
 }
 
-async function handleGoogleCredential(response){
-  try{
-    message('جارٍ التحقق من حساب Google…');
-    const data=await raw('/auth/google','POST',{idToken:response.credential,locale:lang},false);
-    sessionStorage.setItem('darb_access',data.tokens.accessToken);
-    sessionStorage.setItem('darb_refresh',data.tokens.refreshToken);
-    const me=await raw('/auth/me');
-    if(me.role!=='ADMIN'){sessionStorage.removeItem('darb_access');sessionStorage.removeItem('darb_refresh');throw new Error('هذا البريد غير مصرح له بإدارة DAZREVO.');}
-    $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');
-    await load();
-  }catch(e){sessionStorage.removeItem('darb_access');sessionStorage.removeItem('darb_refresh');message(e.message,true);}
-}
-
-function initializeGoogleLogin(){
-  if(GOOGLE_WEB_CLIENT_ID.startsWith('REPLACE_')){message('يلزم ضبط Google Web Client ID قبل تفعيل تسجيل الدخول.',true);return;}
-  if(!window.google?.accounts?.id){setTimeout(initializeGoogleLogin,250);return;}
-  window.google.accounts.id.initialize({client_id:GOOGLE_WEB_CLIENT_ID,callback:handleGoogleCredential,auto_select:false});
-  window.google.accounts.id.renderButton($('googleButton'),{theme:'outline',size:'large',shape:'pill',text:'signin_with',locale:'ar',width:320});
-}
-window.addEventListener('load',initializeGoogleLogin);
-
-async function load(){
-  if(kind==='orders'){
-    const params=new URLSearchParams({page:String(ordersPage),limit:'20'});
-    if(ordersStatus)params.set('status',ordersStatus);
-    if(ordersType)params.set('type',ordersType);
-    const result=await raw('/admin/orders?'+params.toString());
-    rows=result.items||[];ordersPages=result.pages||1;renderOrders(result);return;
+async function enterDashboard(authPayload) {
+  accessToken = authPayload.tokens.accessToken;
+  refreshToken = authPayload.tokens.refreshToken;
+  const me = await apiFetch('/auth/me');
+  if (me.role !== 'ADMIN') {
+    accessToken = null;
+    refreshToken = null;
+    throw new Error('هذا الحساب لا يحمل صلاحية ADMIN لإدارة دازريفو.');
   }
-  if(kind==='zones'){
-    zones=await raw('/admin/delivery-zones');
-    renderZones();return;
+  $('loginView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  await refreshAll();
+}
+
+async function handleGoogleCredential(response) {
+  try {
+    setLoginNotice('جارٍ التحقق من حساب Google…');
+    const data = await apiFetch('/auth/google', 'POST', { idToken: response.credential, locale: adminLang }, false);
+    await enterDashboard(data);
+  } catch (e) {
+    accessToken = null;
+    refreshToken = null;
+    setLoginNotice(e.message, true);
   }
-  const [drivers,vendors]=await Promise.all([raw('/admin/drivers/pending'),raw('/admin/vendors/pending')]);
-  $('driverCount').textContent=drivers.length;$('vendorCount').textContent=vendors.length;
-  $('driverStat').textContent=drivers.length;$('vendorStat').textContent=vendors.length;
-  rows=kind==='drivers'?drivers:vendors;render();
 }
 
-function renderOrders(result){
-  $('pageTitle').textContent='مراقبة الطلبات';$('pageSub').textContent='متابعة جميع طلبات المتاجر والتوصيل المستقل في DAZREVO';
-  $('listTitle').textContent='سجل طلبات DAZREVO';$('panelBadge').textContent=(result.total||0)+' طلب';
-  const list=$('list');list.innerHTML='';
-  const filters=document.createElement('div');filters.className='filterbar';
-  const status=document.createElement('select');status.setAttribute('aria-label','تصفية حسب الحالة');
-  const statusOptions=[['','كل الحالات'],['PENDING','قيد الانتظار'],['ACCEPTED','مقبول'],['PREPARING','قيد التجهيز'],['READY','جاهز'],['ASSIGNED','تم تعيين سائق'],['PICKED_UP','تم الاستلام'],['DELIVERED','تم التسليم'],['CANCELLED','ملغي']];
-  for(const [value,label] of statusOptions){const o=document.createElement('option');o.value=value;o.textContent=label;status.append(o);}
-  status.value=ordersStatus;status.onchange=()=>{ordersStatus=status.value;ordersPage=1;load().catch(showLoadError);};
-  const type=document.createElement('select');type.setAttribute('aria-label','تصفية حسب نوع الطلب');
-  for(const [value,label] of [['','كل أنواع الطلبات'],['VENDOR_ORDER','طلبات المتاجر'],['PEER_DELIVERY','التوصيل المستقل']]){const o=document.createElement('option');o.value=value;o.textContent=label;type.append(o);}
-  type.value=ordersType;type.onchange=()=>{ordersType=type.value;ordersPage=1;load().catch(showLoadError);};
-  filters.append(status,type);list.append(filters);
-  if(!rows.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='لا توجد طلبات تطابق عوامل التصفية.';list.append(empty);return;}
-  const statusNames={PENDING:'قيد الانتظار',ACCEPTED:'مقبول',PREPARING:'قيد التجهيز',READY:'جاهز',ASSIGNED:'تم تعيين سائق',PICKED_UP:'تم الاستلام',DELIVERED:'تم التسليم',CANCELLED:'ملغي'};
-  const typeNames={VENDOR_ORDER:'طلب متجر',PEER_DELIVERY:'توصيل مستقل'};
-  for(const order of rows){
-    const card=document.createElement('article');card.className='order-card';
-    const top=document.createElement('div');top.className='order-top';
-    const number=document.createElement('strong');number.textContent='#'+order.orderNumber;
-    const badge=document.createElement('span');badge.className='status-label';badge.textContent=statusNames[order.status]||order.status;
-    top.append(number,badge);
-    const meta=document.createElement('div');meta.className='order-meta';
-    const city=order.city?.names?.find(x=>x.locale==='ar')?.name||order.city?.code||'—';
-    const vendorName=order.vendor?.translations?.find(x=>x.locale==='ar')?.name||order.vendor?.translations?.[0]?.name||'—';
-    const values=[['النوع',typeNames[order.type]||order.type],['المدينة',city],['العميل',order.customer?.name||order.customer?.phone||'—'],['المتجر',order.type==='VENDOR_ORDER'?vendorName:'—'],['السائق',order.driver?.user?.name||order.driver?.user?.phone||'لم يعيّن'],['الإجمالي',(order.total??'—')+' '+(order.currency||'')],['الدفع',order.payment?.status||'—'],['تاريخ الطلب',order.createdAt?new Date(order.createdAt).toLocaleString('ar'):'—']];
-    for(const [label,value] of values){const cell=document.createElement('div');cell.className='order-cell';const s=document.createElement('small');s.textContent=label;const v=document.createElement('span');v.textContent=value;cell.append(s,v);meta.append(cell);}
-    card.append(top,meta);list.append(card);
+async function loginWithPreviewAdmin() {
+  try {
+    setLoginNotice('جارٍ فتح جلسة المعاينة…');
+    const data = await apiFetch('/auth/preview-admin', 'POST', {}, false);
+    await enterDashboard(data);
+  } catch (e) {
+    setLoginNotice(e.message, true);
   }
-  const pager=document.createElement('div');pager.className='pager';
-  const prev=document.createElement('button');prev.className='btn-outline';prev.textContent='السابق';prev.disabled=ordersPage<=1;prev.onclick=()=>{ordersPage--;load().catch(showLoadError);};
-  const pageLabel=document.createElement('span');pageLabel.className='panel-meta';pageLabel.textContent='صفحة '+ordersPage+' من '+ordersPages;
-  const next=document.createElement('button');next.className='btn-outline';next.textContent='التالي';next.disabled=ordersPage>=ordersPages;next.onclick=()=>{ordersPage++;load().catch(showLoadError);};
-  pager.append(prev,pageLabel,next);list.append(pager);
 }
 
-function showLoadError(e){$('list').innerHTML='';const el=document.createElement('div');el.className='error';el.textContent=e.message;$('list').append(el);}
-
-function render(){
-  $('pageTitle').textContent=kind==='drivers'?'طلبات انضمام السائقين':'طلبات انضمام المتاجر';
-  $('pageSub').textContent='مراجعة واعتماد شركاء التوصيل في DAZREVO';
-  $('listTitle').textContent=kind==='drivers'?'السائقون بانتظار الاعتماد':'المتاجر بانتظار الاعتماد';
-  $('panelBadge').textContent=rows.length+' طلب';
-  const list=$('list');list.innerHTML='';
-  const filter=document.createElement('div');filter.className='filterbar';
-  const search=document.createElement('input');search.type='search';search.placeholder='بحث بالاسم أو الهاتف أو المدينة…';search.value=queueQuery;
-  search.oninput=()=>{queueQuery=search.value.trim().toLowerCase();renderQueueRows(rowsWrap);};
-  filter.append(search);list.append(filter);
-  const rowsWrap=document.createElement('div');rowsWrap.className='list';list.append(rowsWrap);
-  renderQueueRows(rowsWrap);
-}
-
-function renderQueueRows(container){
-  container.innerHTML='';
-  const visible=rows.filter(r=>{
-    if(!queueQuery)return true;
-    const u=r.user||{},tr=r.translations?.find(x=>x.locale==='ar')||r.translations?.[0]||{};
-    return [u.name,u.phone,u.email,tr.name,r.vehicleType,r.type,r.city?.code].filter(Boolean).join(' ').toLowerCase().includes(queueQuery);
+function initializeGoogleLogin() {
+  if (GOOGLE_WEB_CLIENT_ID.startsWith('REPLACE_')) {
+    setLoginNotice('يلزم ضبط Google Web Client ID قبل تفعيل تسجيل الدخول.', true);
+    return;
+  }
+  if (!window.google?.accounts?.id) {
+    setTimeout(initializeGoogleLogin, 250);
+    return;
+  }
+  window.google.accounts.id.initialize({
+    client_id: GOOGLE_WEB_CLIENT_ID,
+    callback: handleGoogleCredential,
+    auto_select: false,
   });
-  if(!visible.length){container.innerHTML='<div class="empty">لا توجد طلبات معلقة مطابقة حالياً.</div>';return;}
-  for(const r of visible){
-    const user=r.user||{},city=r.city?.names?.find(x=>x.locale==='ar')?.name||r.city?.code||'',translation=r.translations?.find(x=>x.locale==='ar')||r.translations?.[0]||{};
-    const title=kind==='drivers'?(user.name||'سائق جديد'):(translation.name||'متجر جديد');
-    const detail=kind==='drivers'?(r.vehicleType||'نوع المركبة غير محدد'):(r.type||'نوع النشاط غير محدد');
-    const phone=user.phone?'\u2066'+user.phone+'\u2069':'';
-    const lines=[phone||user.email||'لا يوجد رقم تواصل',detail,city?'المدينة: '+city:'',user.email&&user.phone?'البريد: '+user.email:''];
-    if(kind==='vendors'){
-      if(r.commercialRegNo)lines.push('السجل التجاري: '+r.commercialRegNo);
-      const address=r.location?.address;if(address)lines.push('العنوان: '+address);
-      const cities=(r.cities||[]).map(x=>x.city?.names?.find(n=>n.locale==='ar')?.name||x.city?.code).filter(Boolean);
-      if(cities.length)lines.push('نطاق العمل: '+cities.join(' · '));
-      if(translation.description)lines.push('الوصف: '+translation.description);
-    }else if(r.createdAt){lines.push('تاريخ التقديم: '+new Date(r.createdAt).toLocaleDateString('ar'));}
-    const el=document.createElement('article');el.className='request';
-    const info=document.createElement('div');info.style.flex='1';
-    const heading=document.createElement('h3');heading.textContent=title;
-    const meta=document.createElement('div');meta.className='meta';meta.textContent=lines.filter(Boolean).join(' · ');
-    info.append(heading,meta);
-    const actions=document.createElement('div');actions.className='actions';
-    const approve=document.createElement('button');approve.textContent='اعتماد الطلب';approve.onclick=()=>decide(r.id,'APPROVED',approve);
-    const reject=document.createElement('button');reject.className='btn-danger';reject.textContent=kind==='drivers'?'تعليق الطلب':'رفض الطلب';reject.onclick=()=>decide(r.id,kind==='drivers'?'SUSPENDED':'REJECTED',reject);
-    actions.append(approve,reject);el.append(info,actions);container.append(el);
+  window.google.accounts.id.renderButton($('googleButton'), {
+    theme: 'outline',
+    size: 'large',
+    shape: 'rectangular',
+    text: 'signin_with',
+    locale: adminLang,
+    width: 320,
+  });
+}
+
+function statusMeta(status) {
+  const map = {
+    PENDING: ['قيد الانتظار', 'state-warn'],
+    ACCEPTED: ['مقبول', 'state-ok'],
+    PREPARING: ['قيد التحضير', 'state-warn'],
+    READY: ['جاهز', 'state-ok'],
+    ASSIGNED: ['تم تعيين مندوب', 'state-ok'],
+    PICKED_UP: ['في الطريق', 'state-ok'],
+    DELIVERED: ['تم التسليم', 'state-ok'],
+    CANCELLED: ['ملغي', 'state-bad'],
+    APPROVED: ['معتمد', 'state-ok'],
+    REJECTED: ['مرفوض', 'state-bad'],
+    SUSPENDED: ['موقوف', 'state-bad'],
+  };
+  return map[status] || [status, ''];
+}
+
+function formatMoney(val) {
+  return new Intl.NumberFormat('en-US').format(Number(val || 0));
+}
+
+function cityName(city) {
+  return city?.names?.find((x) => x.locale === adminLang)?.name || city?.names?.find((x) => x.locale === 'ar')?.name || city?.names?.[0]?.name || city?.code || '—';
+}
+
+async function refreshStats() {
+  try {
+    const stats = await apiFetch('/admin/stats');
+    $('kpiActiveOrders').textContent = formatMoney(stats.ordersActive);
+    $('kpiTotalOrders').textContent = formatMoney(stats.ordersTotal);
+    const pendingSum = Number(stats.driversPending || 0) + Number(stats.vendorsPending || 0);
+    $('kpiPendingTotal').textContent = formatMoney(pendingSum);
+    $('navPendingCount').textContent = String(pendingSum);
+    $('kpiGmv').textContent = formatMoney(stats.deliveredGrossTotal);
+  } catch (_) {}
+}
+
+async function refreshAll() {
+  const root = $('contentRoot');
+  root.replaceChildren(elText('div', 'empty-box', 'جارٍ تحميل البيانات…'));
+  await refreshStats();
+
+  try {
+    if (currentTab === 'pending') await loadPending(root);
+    else if (currentTab === 'vendors') await loadDirectory(root, 'vendors');
+    else if (currentTab === 'drivers') await loadDirectory(root, 'drivers');
+    else if (currentTab === 'users') await loadUsers(root);
+    else if (currentTab === 'cities') await loadCitiesAndZones(root);
+    else if (currentTab === 'orders') await loadOrders(root);
+    else if (currentTab === 'copilot') loadCopilot(root);
+    else if (currentTab === 'settings') await loadSettingsAndAudit(root);
+  } catch (err) {
+    root.replaceChildren(elText('div', 'error-box', err.message || 'تعذر تحميل البيانات'));
   }
 }
 
-function renderZones(){
-  $('pageTitle').textContent='مناطق ورسوم التوصيل';
-  $('pageSub').textContent='تحديد الرسوم الأساسية ورسم كل كيلومتر لكل مدينة';
-  $('listTitle').textContent='إعدادات رسوم المدن';
-  $('panelBadge').textContent=zones.length+' منطقة';
-  const list=$('list');list.innerHTML='';
-  if(!zones.length){list.innerHTML='<div class="empty">لا توجد مناطق توصيل مُعدة حالياً.</div>';return;}
-  const grid=document.createElement('div');grid.className='zone-grid';
-  for(const zone of zones){
-    const city=zone.city?.names?.find(x=>x.locale==='ar')?.name||zone.city?.code||'مدينة غير معروفة';
-    const card=document.createElement('article');card.className='zone-card';
-    const title=document.createElement('h3');title.textContent=city;
-    const subtitle=document.createElement('div');subtitle.className='zone-sub';subtitle.textContent=zone.name+' · '+(zone.city?.code||'');
-    const fields=document.createElement('div');fields.className='zone-fields';
-    const makeField=(label,value,name)=>{
-      const wrap=document.createElement('label');wrap.textContent=label;
-      const input=document.createElement('input');input.type=name==='name'?'text':'number';
-      if(name!=='name'){input.min='0';input.step='0.01';}
-      input.required=true;input.value=String(value??0);input.dataset.field=name;
-      wrap.append(input);fields.append(wrap);
-    };
-    makeField('اسم المنطقة',zone.name,'name');
-    makeField('الرسوم الأساسية (ل.س)',zone.feeBase,'feeBase');
-    makeField('رسوم كل كم (ل.س)',zone.feePerKm,'feePerKm');
-    const save=document.createElement('button');save.className='zone-save';save.textContent='حفظ التعديلات';
-    save.onclick=async()=>{
-      const inputs=[...fields.querySelectorAll('input')];
-      if(inputs.some(i=>!i.value.trim()||Number(i.value)<0)){notify('أدخل قيماً صحيحة غير سالبة.',true);return;}
-      save.disabled=true;save.textContent='جارٍ الحفظ…';
-      try{
-        await raw('/admin/delivery-zones/'+zone.id,'PATCH',{
-          name:fields.querySelector('[data-field="name"]').value.trim(),
-          feeBase:Number(fields.querySelector('[data-field="feeBase"]').value),
-          feePerKm:Number(fields.querySelector('[data-field="feePerKm"]').value)
-        });
-        notify('تم تحديث رسوم المنطقة بنجاح');
-        await load();
-      }catch(e){notify(e.message,true);save.disabled=false;save.textContent='حفظ التعديلات';}
-    };
-    card.append(title,subtitle,fields,save);grid.append(card);
+function elText(tag, cls, text) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  node.textContent = text;
+  return node;
+}
+
+async function loadPending(root) {
+  $('breadcrumb').textContent = 'إدارة دازريفو / الموافقات المعلقة';
+  $('pageTitle').textContent = 'طلبات انضمام السائقين والمتاجر';
+  $('panelTitle').textContent = 'قائمة المراجعة والاعتماد';
+
+  const [drivers, vendors] = await Promise.all([
+    apiFetch('/admin/drivers/pending'),
+    apiFetch('/admin/vendors/pending'),
+  ]);
+  $('panelSummary').textContent = `${drivers.length} سائق · ${vendors.length} متجر`;
+  $('navPendingCount').textContent = String(drivers.length + vendors.length);
+
+  if (!drivers.length && !vendors.length) {
+    root.replaceChildren(elText('div', 'empty-box', 'لا توجد طلبات انضمام معلقة حالياً.'));
+    return;
   }
-  list.append(grid);
+
+  const list = document.createElement('div');
+  list.className = 'row-list';
+
+  for (const d of drivers) {
+    const item = document.createElement('article');
+    item.className = 'row-item';
+    const info = document.createElement('div');
+    info.className = 'row-info';
+    info.append(
+      elText('h3', '', `${d.user?.name || 'سائق جديد'} — سائق`),
+      elText('div', 'row-meta', `${d.user?.phone || d.user?.email || '—'} · المركبة: ${d.vehicleType || '—'} · المدينة: ${cityName(d.city)}`)
+    );
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+    const okBtn = elText('button', 'btn-primary', 'اعتماد السائق');
+    okBtn.type = 'button';
+    okBtn.onclick = async () => {
+      if (!(await confirmDialog('اعتماد السائق', 'تأكيد اعتماد السائق وتفعيل استقبال الطلبات؟'))) return;
+      await apiFetch(`/admin/drivers/${d.id}/status`, 'PATCH', { status: 'APPROVED' });
+      notify('تم اعتماد السائق');
+      await refreshAll();
+    };
+    const rejBtn = elText('button', 'btn-danger', 'تعليق');
+    rejBtn.type = 'button';
+    rejBtn.onclick = async () => {
+      if (!(await confirmDialog('تعليق الطلب', 'تأكيد تعليق طلب السائق؟', true))) return;
+      await apiFetch(`/admin/drivers/${d.id}/status`, 'PATCH', { status: 'SUSPENDED' });
+      notify('تم تعليق السائق');
+      await refreshAll();
+    };
+    actions.append(okBtn, rejBtn);
+    item.append(info, actions);
+    list.append(item);
+  }
+
+  for (const v of vendors) {
+    const tr = v.translations?.find((t) => t.locale === adminLang) || v.translations?.find((t) => t.locale === 'ar') || v.translations?.[0] || {};
+    const item = document.createElement('article');
+    item.className = 'row-item';
+    const info = document.createElement('div');
+    info.className = 'row-info';
+    info.append(
+      elText('h3', '', `${tr.name || 'متجر جديد'} — متجر`),
+      elText('div', 'row-meta', `${v.type || '—'} · الهاتف: ${v.user?.phone || '—'} · السجل: ${v.commercialRegNo || '—'} · ${v.location?.address || ''}`)
+    );
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+    const okBtn = elText('button', 'btn-primary', 'اعتماد المتجر');
+    okBtn.type = 'button';
+    okBtn.onclick = async () => {
+      if (!(await confirmDialog('اعتماد المتجر', 'تأكيد اعتماد المتجر وظهوره للعملاء؟'))) return;
+      await apiFetch(`/admin/vendors/${v.id}/status`, 'PATCH', { status: 'APPROVED' });
+      notify('تم اعتماد المتجر');
+      await refreshAll();
+    };
+    const rejBtn = elText('button', 'btn-danger', 'رفض');
+    rejBtn.type = 'button';
+    rejBtn.onclick = async () => {
+      if (!(await confirmDialog('رفض المتجر', 'تأكيد رفض طلب انضمام المتجر؟', true))) return;
+      await apiFetch(`/admin/vendors/${v.id}/status`, 'PATCH', { status: 'REJECTED' });
+      notify('تم رفض الطلب');
+      await refreshAll();
+    };
+    actions.append(okBtn, rejBtn);
+    item.append(info, actions);
+    list.append(item);
+  }
+
+  root.replaceChildren(list);
 }
 
-async function decide(id,status,button){
-  const label=button.textContent;
-  const confirmed=await askConfirm(
-    status==='APPROVED'?'تأكيد اعتماد الطلب':'تأكيد تغيير حالة الطلب',
-    status==='APPROVED'?'سيتم تفعيل صلاحيات الشريك في منظومة DAZREVO. هل تريد المتابعة؟':'هل أنت متأكد من رفض أو تعليق هذا الطلب؟'
-  );
-  if(!confirmed)return;
-  try{button.disabled=true;await raw('/admin/'+kind+'/'+id+'/status','PATCH',{status});notify('تم تحديث حالة الطلب بنجاح');await load();}
-  catch(e){notify(e.message,true);button.disabled=false;button.textContent=label;}
+async function loadDirectory(root, kind) {
+  const isVendors = kind === 'vendors';
+  $('breadcrumb').textContent = `إدارة دازريفو / ${isVendors ? 'دليل المتاجر' : 'دليل السائقين'}`;
+  $('pageTitle').textContent = isVendors ? 'إدارة المتاجر المسجلة' : 'إدارة السائقين المسجلين';
+  $('panelTitle').textContent = isVendors ? 'كافة المتاجر' : 'كافة السائقين';
+
+  const currentFilter = isVendors ? vendorStatusFilter : driverStatusFilter;
+  const rows = await apiFetch(`/admin/${kind}${currentFilter ? '?status=' + currentFilter : ''}`);
+  $('panelSummary').textContent = `${rows.length} سجل`;
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  const select = document.createElement('select');
+  for (const [val, lbl] of [['', 'كل الحالات'], ['APPROVED', 'معتمد'], ['PENDING', 'قيد الانتظار'], ['SUSPENDED', 'موقوف'], ['REJECTED', 'مرفوض']]) {
+    const o = document.createElement('option');
+    o.value = val;
+    o.textContent = lbl;
+    select.append(o);
+  }
+  select.value = currentFilter;
+  select.onchange = () => {
+    if (isVendors) vendorStatusFilter = select.value;
+    else driverStatusFilter = select.value;
+    refreshAll();
+  };
+  toolbar.append(select);
+
+  if (!rows.length) {
+    root.replaceChildren(toolbar, elText('div', 'empty-box', 'لا توجد نتائج مطابقة.'));
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  for (const col of ['الاسم', 'التفاصيل', 'الهاتف', 'الحالة', 'إجراء']) {
+    headRow.append(elText('th', '', col));
+  }
+  thead.append(headRow);
+  const tbody = document.createElement('tbody');
+
+  for (const row of rows) {
+    const tr = document.createElement('tr');
+    const name = isVendors
+      ? (row.translations?.find((t) => t.locale === adminLang)?.name || row.translations?.[0]?.name || 'متجر')
+      : (row.user?.name || 'سائق');
+    const detail = isVendors
+      ? `${row.type || '—'} · ${row.isOpen === false ? 'مغلق' : 'مفتوح'}`
+      : `${row.vehicleType || '—'} · ${row.isOnline ? 'متصل' : 'غير متصل'}`;
+    const [statusLabel, statusClass] = statusMeta(row.status);
+    tr.append(
+      elText('td', '', name),
+      elText('td', '', detail),
+      elText('td', 'tabular', row.user?.phone || '—'),
+      elText('td', `state-text ${statusClass}`, statusLabel)
+    );
+    const actTd = document.createElement('td');
+    const actWrap = document.createElement('div');
+    actWrap.className = 'row-actions';
+    if (row.status !== 'APPROVED') {
+      const b = elText('button', 'btn-primary', 'اعتماد');
+      b.type = 'button';
+      b.onclick = async () => {
+        await apiFetch(`/admin/${kind}/${row.id}/status`, 'PATCH', { status: 'APPROVED' });
+        notify('تم تحديث الحالة إلى معتمد');
+        refreshAll();
+      };
+      actWrap.append(b);
+    }
+    if (row.status !== 'SUSPENDED') {
+      const b = elText('button', 'btn-danger', 'إيقاف');
+      b.type = 'button';
+      b.onclick = async () => {
+        await apiFetch(`/admin/${kind}/${row.id}/status`, 'PATCH', { status: 'SUSPENDED' });
+        notify('تم إيقاف الحساب');
+        refreshAll();
+      };
+      actWrap.append(b);
+    }
+    actTd.append(actWrap);
+    tr.append(actTd);
+    tbody.append(tr);
+  }
+
+  table.append(thead, tbody);
+  wrap.append(table);
+  root.replaceChildren(toolbar, wrap);
 }
 
-function applyLang(next){
-  lang=next;const d=dict[lang]||dict.ar;
-  document.documentElement.lang=lang;document.documentElement.dir=d.dir;
-  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(k&&d[k])el.textContent=d[k];});
-  document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('active',b.getAttribute('data-lang')===lang));
-  const isDark=document.documentElement.classList.contains('dark');
-  if($('themeToggle'))$('themeToggle').textContent=isDark?d.light:d.dark;
+async function loadUsers(root) {
+  $('breadcrumb').textContent = 'إدارة دازريفو / المستخدمون';
+  $('pageTitle').textContent = 'إدارة المستخدمين والصلاحيات';
+  $('panelTitle').textContent = 'دليل الحسابات';
+
+  const params = new URLSearchParams();
+  if (userRoleFilter) params.set('role', userRoleFilter);
+  if (userQuery) params.set('q', userQuery);
+  const res = await apiFetch('/admin/users' + (params.toString() ? '?' + params.toString() : ''));
+  const rows = Array.isArray(res) ? res : (res.items || []);
+  $('panelSummary').textContent = `${res.total ?? rows.length} مستخدم`;
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  const searchInput = document.createElement('input');
+  searchInput.placeholder = 'ابحث بالاسم أو الهاتف أو البريد…';
+  searchInput.value = userQuery;
+  const searchBtn = elText('button', 'btn-primary', 'بحث');
+  searchBtn.type = 'button';
+  searchBtn.onclick = () => {
+    userQuery = searchInput.value.trim();
+    refreshAll();
+  };
+  const roleSelect = document.createElement('select');
+  for (const [val, lbl] of [['', 'كل الصلاحيات'], ['CUSTOMER', 'عميل'], ['DRIVER', 'سائق'], ['VENDOR', 'متجر'], ['ADMIN', 'إدارة']]) {
+    const o = document.createElement('option');
+    o.value = val;
+    o.textContent = lbl;
+    roleSelect.append(o);
+  }
+  roleSelect.value = userRoleFilter;
+  roleSelect.onchange = () => {
+    userRoleFilter = roleSelect.value;
+    refreshAll();
+  };
+  toolbar.append(searchInput, roleSelect, searchBtn);
+
+  if (!rows.length) {
+    root.replaceChildren(toolbar, elText('div', 'empty-box', 'لا توجد حسابات مطابقة.'));
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const htr = document.createElement('tr');
+  for (const c of ['الاسم', 'الهاتف', 'البريد', 'الصلاحية', 'تعديل الصلاحية']) htr.append(elText('th', '', c));
+  thead.append(htr);
+  const tbody = document.createElement('tbody');
+
+  for (const u of rows) {
+    const tr = document.createElement('tr');
+    tr.append(
+      elText('td', '', u.name || 'مستخدم دازريفو'),
+      elText('td', 'tabular', u.phone || '—'),
+      elText('td', '', u.email || '—'),
+      elText('td', 'tabular', u.role)
+    );
+    const td = document.createElement('td');
+    const sel = document.createElement('select');
+    for (const r of ['CUSTOMER', 'DRIVER', 'VENDOR', 'ADMIN']) {
+      const o = document.createElement('option');
+      o.value = r;
+      o.textContent = r;
+      sel.append(o);
+    }
+    sel.value = u.role;
+    sel.onchange = async () => {
+      const ok = await confirmDialog('تغيير الصلاحية', `هل تريد تغيير صلاحية ${u.name || u.phone} إلى ${sel.value}؟`);
+      if (!ok) {
+        sel.value = u.role;
+        return;
+      }
+      await apiFetch(`/admin/users/${u.id}/role`, 'PATCH', { role: sel.value });
+      notify('تم تحديث صلاحية المستخدم');
+      refreshAll();
+    };
+    td.append(sel);
+    tr.append(td);
+    tbody.append(tr);
+  }
+  table.append(thead, tbody);
+  wrap.append(table);
+  root.replaceChildren(toolbar, wrap);
 }
 
-document.querySelectorAll('[data-lang]').forEach(b=>{b.onclick=()=>applyLang(b.getAttribute('data-lang')||'ar');});
-$('themeToggle').onclick=()=>{
-  document.documentElement.classList.toggle('dark');
-  const isDark=document.documentElement.classList.contains('dark');
-  const d=dict[lang]||dict.ar;
-  $('themeToggle').textContent=isDark?d.light:d.dark;
-  const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta)meta.setAttribute('content',isDark?'#090B0E':'#F7F6F2');
-};
-document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=async()=>{
-  kind=b.dataset.kind;
-  document.querySelectorAll('[data-kind]').forEach(x=>x.classList.toggle('active',x===b));
-  try{await load();}catch(e){showLoadError(e);}
+function renderZones(zoneGrid, zones) {
+  zoneGrid.replaceChildren();
+  for (const z of zones) {
+    const box = document.createElement('article');
+    box.className = 'zone-box';
+    const title = elText('strong', '', `${cityName(z.city)} · ${z.name}`);
+    const fields = document.createElement('div');
+    fields.className = 'zone-fields';
+
+    const baseGroup = document.createElement('div'); baseGroup.className = 'field-group';
+    const baseIn = document.createElement('input'); baseIn.type = 'number'; baseIn.value = String(z.feeBase ?? 0);
+    baseGroup.append(elText('label', '', 'الأساسي (SYP)'), baseIn);
+
+    const kmGroup = document.createElement('div'); kmGroup.className = 'field-group';
+    const kmIn = document.createElement('input'); kmIn.type = 'number'; kmIn.value = String(z.feePerKm ?? 0);
+    kmGroup.append(elText('label', '', 'لكل كم (SYP)'), kmIn);
+
+    fields.append(baseGroup, kmGroup);
+
+    const btns = document.createElement('div');
+    btns.className = 'row-actions';
+    const saveBtn = elText('button', 'btn-primary', 'حفظ الرسوم');
+    saveBtn.type = 'button';
+    saveBtn.onclick = async () => {
+      const fb = Number(baseIn.value);
+      const fk = Number(kmIn.value);
+      if (fb < 0 || fk < 0 || Number.isNaN(fb) || Number.isNaN(fk)) {
+        notify('أدخل قيماً صحيحة غير سالبة', true);
+        return;
+      }
+      await apiFetch(`/admin/delivery-zones/${z.id}`, 'PATCH', { feeBase: fb, feePerKm: fk });
+      notify('تم حفظ رسوم المنطقة');
+      refreshAll();
+    };
+    const delBtn = elText('button', 'btn-danger', 'حذف');
+    delBtn.type = 'button';
+    delBtn.onclick = async () => {
+      if (!(await confirmDialog('حذف منطقة التوصيل', `هل تريد حذف منطقة ${z.name}؟`, true))) return;
+      await apiFetch(`/admin/delivery-zones/${z.id}`, 'DELETE');
+      notify('تم حذف المنطقة');
+      refreshAll();
+    };
+    btns.append(saveBtn, delBtn);
+    box.append(title, fields, btns);
+    zoneGrid.append(box);
+  }
+}
+
+async function loadCitiesAndZones(root) {
+  $('breadcrumb').textContent = 'إدارة دازريفو / المدن ومناطق التوصيل';
+  $('pageTitle').textContent = 'المدن السورية ومناطق التسعير';
+  $('panelTitle').textContent = 'إعدادات المدن والرسوم';
+
+  const [cities, zones] = await Promise.all([
+    apiFetch('/admin/cities'),
+    apiFetch('/admin/delivery-zones'),
+  ]);
+  $('panelSummary').textContent = `${cities.length} مدينة · ${zones.length} منطقة توصيل`;
+
+  const actionsBar = document.createElement('div');
+  actionsBar.className = 'toolbar';
+
+  const addCityBtn = elText('button', 'btn-primary', 'إضافة مدينة جديدة');
+  addCityBtn.type = 'button';
+  addCityBtn.onclick = async () => {
+    const form = document.createElement('div');
+    form.style.display = 'grid';
+    form.style.gap = '10px';
+    const codeIn = document.createElement('input'); codeIn.placeholder = 'الرمز بالإنجليزية الصغيرة (مثل tartus)';
+    const arIn = document.createElement('input'); arIn.placeholder = 'الاسم بالعربية (مثل طرطوس)';
+    const enIn = document.createElement('input'); enIn.placeholder = 'الاسم بالإنجليزية (مثل Tartus)';
+    form.append(codeIn, arIn, enIn);
+    const ok = await openModal({ title: 'إضافة مدينة', contentNode: form, confirmLabel: 'حفظ المدينة' });
+    if (!ok) return;
+    const code = codeIn.value.trim().toLowerCase();
+    const nameAr = arIn.value.trim();
+    if (!/^[a-z0-9_-]{2,24}$/.test(code) || !nameAr) {
+      notify('أدخل رمزاً إنجليزياً صالحاً واسماً عربياً للمدينة', true);
+      return;
+    }
+    await apiFetch('/admin/cities', 'POST', {
+      code,
+      nameAr,
+      nameEn: enIn.value.trim() || undefined,
+      defaultCurrency: 'SYP',
+    });
+    notify('تمت إضافة المدينة');
+    refreshAll();
+  };
+
+  const addZoneBtn = elText('button', 'btn-outline', 'إضافة منطقة توصيل');
+  addZoneBtn.type = 'button';
+  addZoneBtn.onclick = async () => {
+    const form = document.createElement('div');
+    form.style.display = 'grid';
+    form.style.gap = '10px';
+    const citySel = document.createElement('select');
+    for (const c of cities) {
+      const o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = `${cityName(c)} (${c.code})`;
+      citySel.append(o);
+    }
+    const nameIn = document.createElement('input'); nameIn.placeholder = 'اسم المنطقة (مثلاً المركزية)';
+    const baseIn = document.createElement('input'); baseIn.type = 'number'; baseIn.placeholder = 'الرسوم الأساسية (SYP)';
+    const kmIn = document.createElement('input'); kmIn.type = 'number'; kmIn.placeholder = 'لكل كم (SYP)';
+    form.append(citySel, nameIn, baseIn, kmIn);
+    const ok = await openModal({ title: 'إضافة منطقة توصيل', contentNode: form, confirmLabel: 'حفظ المنطقة' });
+    if (!ok) return;
+    await apiFetch('/admin/delivery-zones', 'POST', {
+      cityId: citySel.value,
+      name: nameIn.value.trim() || 'منطقة رئيسية',
+      feeBase: Number(baseIn.value || 0),
+      feePerKm: Number(kmIn.value || 0),
+    });
+    notify('تم إنشاء منطقة التوصيل');
+    refreshAll();
+  };
+
+  actionsBar.append(addCityBtn, addZoneBtn);
+
+  const citiesTitle = elText('h3', '', 'المدن المفعّلة');
+  const citiesList = document.createElement('div');
+  citiesList.className = 'row-list';
+  for (const c of cities) {
+    const item = document.createElement('div');
+    item.className = 'row-item';
+    const info = document.createElement('div');
+    info.append(
+      elText('strong', '', `${cityName(c)} (${c.code})`),
+      elText('div', 'row-meta', c.isActive ? 'مفعّلة للطلبات' : 'متوقفة مؤقتاً')
+    );
+    const toggleBtn = elText('button', c.isActive ? 'btn-danger' : 'btn-primary', c.isActive ? 'تعطيل' : 'تفعيل');
+    toggleBtn.type = 'button';
+    toggleBtn.onclick = async () => {
+      await apiFetch(`/admin/cities/${c.id}`, 'PATCH', { isActive: !c.isActive });
+      notify('تم تحديث حالة المدينة');
+      refreshAll();
+    };
+    item.append(info, toggleBtn);
+    citiesList.append(item);
+  }
+
+  const zonesTitle = elText('h3', '', 'مناطق التسعير');
+  const zoneGrid = document.createElement('div');
+  zoneGrid.className = 'zone-grid';
+  renderZones(zoneGrid, zones);
+
+  root.replaceChildren(actionsBar, citiesTitle, citiesList, zonesTitle, zoneGrid);
+}
+
+function renderSpatialOrderRoute(container, order) {
+  const pLat = Number(order.pickupLatitude || 33.5138);
+  const pLng = Number(order.pickupLongitude || 36.2765);
+  const dLat = Number(order.address?.latitude || 33.5150);
+  const dLng = Number(order.address?.longitude || 36.2900);
+  const distKm = Math.hypot((dLat - pLat) * 111, (dLng - pLng) * 92).toFixed(2);
+
+  container.replaceChildren();
+  const bar = document.createElement('div');
+  bar.className = 'route-map-bar';
+  const left = document.createElement('strong');
+  left.textContent = `مسار التوصيل الفعلي (${distKm} كم)`;
+  const coords = document.createElement('span');
+  coords.className = 'tabular';
+  coords.style.color = '#3FD1BE';
+  coords.textContent = `P(${pLat.toFixed(4)}, ${pLng.toFixed(4)}) → D(${dLat.toFixed(4)}, ${dLng.toFixed(4)})`;
+  bar.append(left, coords);
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 640 165');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', 'معاينة المسار الجغرافي للطلب');
+  svg.innerHTML = `
+    <defs>
+      <pattern id="routeGrid-${escapeHtml(order.id)}" width="32" height="32" patternUnits="userSpaceOnUse">
+        <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(231,211,163,0.09)" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="640" height="165" fill="url(#routeGrid-${escapeHtml(order.id)})"/>
+    <path d="M78 124 C195 30, 390 135, 562 42" fill="none" stroke="#D6B46C" stroke-width="3.5" stroke-dasharray="8 6"/>
+    <path d="M78 124 C230 124, 380 58, 562 42" fill="none" stroke="#3FD1BE" stroke-width="2" stroke-opacity="0.7" stroke-dasharray="4 5"/>
+    <circle cx="78" cy="124" r="18" fill="rgba(214,180,108,0.16)" stroke="rgba(214,180,108,0.5)"/>
+    <circle cx="78" cy="124" r="8" fill="#D6B46C"/>
+    <text x="78" y="152" text-anchor="middle" fill="#E7D3A3" font-size="11" font-weight="700">P · استلام</text>
+    <circle cx="320" cy="82" r="6" fill="#F5F3EE"/>
+    <circle cx="562" cy="42" r="18" fill="rgba(63,209,190,0.16)" stroke="rgba(63,209,190,0.5)"/>
+    <circle cx="562" cy="42" r="8" fill="#3FD1BE"/>
+    <text x="562" y="18" text-anchor="middle" fill="#3FD1BE" font-size="11" font-weight="700">D · تسليم</text>
+  `;
+  container.append(bar, svg);
+}
+
+function renderOrders(wrap, items) {
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const htr = document.createElement('tr');
+  for (const h of ['رقم الطلب', 'النوع', 'المدينة', 'العميل', 'المتجر / السائق', 'الإجمالي', 'الحالة']) htr.append(elText('th', '', h));
+  thead.append(htr);
+  const tbody = document.createElement('tbody');
+
+  for (const o of items) {
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.title = 'انقر لعرض تفاصيل المسار وخريطة التوصيل';
+    const [stLabel, stCls] = statusMeta(o.status);
+    const vendorName = o.vendor?.translations?.[0]?.name || '—';
+    const driverName = o.driver?.user?.name || 'بانتظار مندوب';
+    tr.append(
+      elText('td', 'tabular', '#' + o.orderNumber),
+      elText('td', '', o.type === 'PEER_DELIVERY' ? 'توصيل مستقل' : 'طلب متجر'),
+      elText('td', '', cityName(o.city)),
+      elText('td', '', o.customer?.name || o.customer?.phone || '—'),
+      elText('td', '', `${o.type === 'VENDOR_ORDER' ? vendorName : 'مسار خاص'} · ${driverName}`),
+      elText('td', 'tabular', `${formatMoney(o.total)} ${o.currency || 'SYP'}`),
+      elText('td', `state-text ${stCls}`, stLabel)
+    );
+
+    const expandTr = document.createElement('tr');
+    expandTr.className = 'order-expand-tr hidden';
+    const expandTd = document.createElement('td');
+    expandTd.colSpan = 7;
+
+    const detailsBox = document.createElement('div');
+    detailsBox.className = 'order-details-box';
+
+    const infoGrid = document.createElement('div');
+    infoGrid.className = 'order-info-grid';
+
+    const pickupText = o.pickupAddress || vendorName || 'نقطة الانطلاق';
+    const dropoffText = o.address?.details || o.address?.label || 'عنوان العميل';
+    const itemsText = (o.items || []).map((i) => `${escapeHtml(i.nameSnapshot || 'منتج')} × ${i.quantity}`).join(' · ') || 'توصيل طرد خاص أو مسار مباشر';
+
+    infoGrid.innerHTML = `
+      <div class="info-card">
+        <strong>نقطة الاستلام</strong>
+        <p style="margin:4px 0 0; color:var(--ink);">${escapeHtml(pickupText)}</p>
+      </div>
+      <div class="info-card">
+        <strong>نقطة التسليم</strong>
+        <p style="margin:4px 0 0; color:var(--ink);">${escapeHtml(dropoffText)}</p>
+      </div>
+      <div class="info-card">
+        <strong>تفاصيل الأصناف</strong>
+        <p style="margin:4px 0 0; color:var(--ink);">${itemsText}</p>
+      </div>
+    `;
+
+    const mapDiv = document.createElement('div');
+    mapDiv.className = 'route-map-container';
+    mapDiv.setAttribute('data-testid', `order-route-${o.id}`);
+
+    const overrideRow = document.createElement('div');
+    overrideRow.className = 'row-actions';
+    overrideRow.style.alignItems = 'center';
+    const overrideSel = document.createElement('select');
+    overrideSel.style.maxWidth = '220px';
+    for (const st of ['PENDING', 'ACCEPTED', 'PREPARING', 'READY', 'ASSIGNED', 'PICKED_UP', 'DELIVERED', 'CANCELLED']) {
+      const opt = document.createElement('option');
+      opt.value = st;
+      opt.textContent = statusMeta(st)[0];
+      overrideSel.append(opt);
+    }
+    overrideSel.value = o.status;
+    const overrideBtn = elText('button', 'btn-teal', 'تحديث حالة الطلب');
+    overrideBtn.type = 'button';
+    overrideBtn.onclick = async () => {
+      if (overrideSel.value === o.status) return;
+      await apiFetch(`/admin/orders/${o.id}/status`, 'PATCH', { status: overrideSel.value });
+      notify('تم تحديث حالة الطلب وتسجيله في التدقيق');
+      await refreshAll();
+    };
+    overrideRow.append(overrideSel, overrideBtn);
+
+    detailsBox.append(infoGrid, mapDiv, overrideRow);
+    expandTd.append(detailsBox);
+    expandTr.append(expandTd);
+
+    tr.onclick = () => {
+      const isHidden = expandTr.classList.contains('hidden');
+      document.querySelectorAll('.order-expand-tr').forEach((el) => el.classList.add('hidden'));
+      if (isHidden) {
+        expandTr.classList.remove('hidden');
+        renderSpatialOrderRoute(mapDiv, o);
+      }
+    };
+
+    tbody.append(tr, expandTr);
+  }
+  table.append(thead, tbody);
+  wrap.replaceChildren(table);
+}
+
+async function loadOrders(root) {
+  $('breadcrumb').textContent = 'إدارة دازريفو / مراقبة الطلبات';
+  $('pageTitle').textContent = 'سجل الطلبات المباشر';
+  $('panelTitle').textContent = 'كل الطلبات (اضغط على أي صف لمعاينة المسار)';
+
+  const params = new URLSearchParams({ page: String(ordersPage), limit: '20' });
+  if (ordersStatusFilter) params.set('status', ordersStatusFilter);
+  if (ordersTypeFilter) params.set('type', ordersTypeFilter);
+
+  const result = await apiFetch('/admin/orders?' + params.toString());
+  const items = result.items || [];
+  $('panelSummary').textContent = `${result.total || 0} طلب`;
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'toolbar';
+  const sSel = document.createElement('select');
+  for (const [val, lbl] of [['', 'كل الحالات'], ['PENDING', 'قيد الانتظار'], ['ACCEPTED', 'مقبول'], ['PREPARING', 'قيد التحضير'], ['READY', 'جاهز'], ['ASSIGNED', 'تم تعيين مندوب'], ['PICKED_UP', 'في الطريق'], ['DELIVERED', 'تم التسليم'], ['CANCELLED', 'ملغي']]) {
+    const o = document.createElement('option'); o.value = val; o.textContent = lbl; sSel.append(o);
+  }
+  sSel.value = ordersStatusFilter;
+  sSel.onchange = () => { ordersStatusFilter = sSel.value; ordersPage = 1; refreshAll(); };
+
+  const tSel = document.createElement('select');
+  for (const [val, lbl] of [['', 'كل الأنواع'], ['VENDOR_ORDER', 'طلب متجر'], ['PEER_DELIVERY', 'توصيل مستقل']]) {
+    const o = document.createElement('option'); o.value = val; o.textContent = lbl; tSel.append(o);
+  }
+  tSel.value = ordersTypeFilter;
+  tSel.onchange = () => { ordersTypeFilter = tSel.value; ordersPage = 1; refreshAll(); };
+
+  const csvBtn = elText('button', 'btn-outline', 'تصدير CSV');
+  csvBtn.type = 'button';
+  csvBtn.onclick = () => {
+    const header = ['OrderNumber', 'Type', 'City', 'Customer', 'TotalSYP', 'Status'];
+    const lines = [header.join(',')].concat(
+      items.map((o) => [
+        o.orderNumber,
+        o.type,
+        cityName(o.city),
+        (o.customer?.name || '').replace(/,/g, ' '),
+        o.total,
+        o.status,
+      ].join(','))
+    );
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `dazrevo-orders-p${ordersPage}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    notify('تم تصدير تقرير الطلبات');
+  };
+  toolbar.append(sSel, tSel, csvBtn);
+
+  if (!items.length) {
+    root.replaceChildren(toolbar, elText('div', 'empty-box', 'لا توجد طلبات مطابقة لعوامل التصفية.'));
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  renderOrders(wrap, items);
+
+  const pager = document.createElement('div');
+  pager.className = 'pager';
+  const prevBtn = elText('button', 'btn-outline', 'السابق');
+  prevBtn.type = 'button';
+  prevBtn.disabled = ordersPage <= 1;
+  prevBtn.onclick = () => { ordersPage--; refreshAll(); };
+  const pageLbl = elText('span', 'panel-meta tabular', `صفحة ${ordersPage} من ${result.pages || 1}`);
+  const nextBtn = elText('button', 'btn-outline', 'التالي');
+  nextBtn.type = 'button';
+  nextBtn.disabled = ordersPage >= (result.pages || 1);
+  nextBtn.onclick = () => { ordersPage++; refreshAll(); };
+  pager.append(prevBtn, pageLbl, nextBtn);
+
+  root.replaceChildren(toolbar, wrap, pager);
+}
+
+function loadCopilot(root) {
+  $('breadcrumb').textContent = 'إدارة دازريفو / مساعد الإدارة الذكي';
+  $('pageTitle').textContent = 'مساعد دازريفو الذكي للإدارة';
+  $('panelTitle').textContent = 'تحليل العمليات والإجابة من بيانات النظام الحقيقية';
+  $('panelSummary').textContent = `${copilotMessages.length} رسالة`;
+
+  const box = document.createElement('div');
+  box.className = 'copilot-box';
+
+  const promptsRow = document.createElement('div');
+  promptsRow.className = 'copilot-prompts';
+  const presets = [
+    'لخّص الموافقات المعلقة وحالة الطلبات اليوم',
+    'ما حالة المتاجر والسائقين النشطين حالياً؟',
+    'أعطني نظرة سريعة على العمليات في المدن',
+  ];
+
+  const feed = document.createElement('div');
+  feed.className = 'copilot-feed';
+  if (!copilotMessages.length) {
+    feed.append(elText('div', 'empty-box', 'اكتب سؤالك الإداري أدناه وسيجيبك المساعد اعتماداً على صلاحية الإدارة وبيانات الخادم الفعلية.'));
+  } else {
+    for (const m of copilotMessages) {
+      feed.append(elText('div', `copilot-msg ${m.user ? 'user' : ''} ${m.bad ? 'bad' : ''}`, m.text));
+    }
+  }
+
+  const form = document.createElement('form');
+  form.className = 'copilot-form';
+  const input = document.createElement('input');
+  input.placeholder = 'اسأل المساعد الإداري…';
+  input.disabled = copilotBusy;
+  const sendBtn = elText('button', 'btn-teal', copilotBusy ? 'جارٍ التحليل…' : 'إرسال');
+  sendBtn.type = 'submit';
+  sendBtn.disabled = copilotBusy;
+
+  async function askCopilot(text) {
+    const q = (text || '').trim();
+    if (q.length < 2 || copilotBusy) return;
+    copilotBusy = true;
+    copilotMessages.push({ user: true, text: q });
+    loadCopilot(root);
+    try {
+      const res = await apiFetch('/ai/assistant/ask', 'POST', { message: q });
+      copilotMessages.push({ user: false, text: res.answer || res.reply || 'لا توجد استجابة نصية.' });
+    } catch (e) {
+      copilotMessages.push({ user: false, bad: true, text: e.message || 'تعذر الاتصال بالمساعد الذكي' });
+    } finally {
+      copilotBusy = false;
+      loadCopilot(root);
+    }
+  }
+
+  for (const p of presets) {
+    const b = elText('button', '', p);
+    b.type = 'button';
+    b.disabled = copilotBusy;
+    b.onclick = () => askCopilot(p);
+    promptsRow.append(b);
+  }
+
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    askCopilot(input.value);
+  };
+  form.append(input, sendBtn);
+  box.append(promptsRow, feed, form);
+  root.replaceChildren(box);
+}
+
+async function loadSettingsAndAudit(root) {
+  $('breadcrumb').textContent = 'إدارة دازريفو / الإعدادات والتدقيق';
+  $('pageTitle').textContent = 'إعدادات المنصة وسجل التدقيق';
+  $('panelTitle').textContent = 'التحكم العام والرقابة';
+
+  const [settings, logs] = await Promise.all([
+    apiFetch('/admin/settings'),
+    apiFetch('/admin/audit-logs'),
+  ]);
+  $('panelSummary').textContent = `${logs.length} سجل تدقيق`;
+
+  const box = document.createElement('div');
+  box.className = 'zone-box';
+  const grid = document.createElement('div');
+  grid.className = 'zone-fields';
+
+  const commG = document.createElement('div'); commG.className = 'field-group';
+  const commIn = document.createElement('input'); commIn.type = 'number'; commIn.min = '0'; commIn.max = '50'; commIn.step = '0.5';
+  commIn.value = String(settings.commissionPercent ?? 10);
+  commG.append(elText('label', '', 'نسبة العمولة (%)'), commIn);
+
+  const contactG = document.createElement('div'); contactG.className = 'field-group';
+  const contactIn = document.createElement('input');
+  contactIn.value = String(settings.supportContact ?? '');
+  contactG.append(elText('label', '', 'تواصل الدعم (هاتف أو بريد)'), contactIn);
+
+  const maintG = document.createElement('div'); maintG.className = 'field-group';
+  const maintSel = document.createElement('select');
+  for (const [v, l] of [['false', 'النظام يعمل بشكل طبيعي'], ['true', 'تفعيل وضع الصيانة']]) {
+    const o = document.createElement('option'); o.value = v; o.textContent = l; maintSel.append(o);
+  }
+  maintSel.value = String(Boolean(settings.maintenanceMode));
+  maintG.append(elText('label', '', 'حالة المنصة'), maintSel);
+
+  const peerG = document.createElement('div'); peerG.className = 'field-group';
+  const peerSel = document.createElement('select');
+  for (const [v, l] of [['true', 'مفعّل'], ['false', 'متوقف']]) {
+    const o = document.createElement('option'); o.value = v; o.textContent = l; peerSel.append(o);
+  }
+  peerSel.value = String(settings.peerDeliveryEnabled !== false);
+  peerG.append(elText('label', '', 'خدمة التوصيل المستقل'), peerSel);
+
+  grid.append(commG, contactG, maintG, peerG);
+  const saveBtn = elText('button', 'btn-primary', 'حفظ إعدادات المنصة');
+  saveBtn.type = 'button';
+  saveBtn.onclick = async () => {
+    const pct = Number(commIn.value);
+    if (Number.isNaN(pct) || pct < 0 || pct > 50) {
+      notify('يجب أن تكون نسبة العمولة بين 0 و 50%', true);
+      return;
+    }
+    await apiFetch('/admin/settings', 'PATCH', {
+      commissionPercent: pct,
+      supportContact: contactIn.value.trim(),
+      maintenanceMode: maintSel.value === 'true',
+      peerDeliveryEnabled: peerSel.value === 'true',
+    });
+    notify('تم حفظ الإعدادات');
+    refreshAll();
+  };
+  box.append(grid, saveBtn);
+
+  const logsTitle = elText('h3', '', 'أحدث إجراءات الإدارة');
+  const logList = document.createElement('div');
+  logList.className = 'row-list';
+  for (const l of logs) {
+    const item = document.createElement('div');
+    item.className = 'row-item';
+    const dt = l.createdAt ? new Date(l.createdAt).toLocaleString(adminLang) : '—';
+    item.append(
+      elText('strong', 'tabular', `${l.action} (${l.targetType || 'System'}${l.targetId ? ' · ' + String(l.targetId).slice(0, 8) : ''})`),
+      elText('span', 'row-meta tabular', `${l.actorRole || 'ADMIN'} · ${dt}`)
+    );
+    logList.append(item);
+  }
+
+  root.replaceChildren(box, logsTitle, logList);
+}
+
+document.querySelectorAll('.side-nav button[data-tab]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    currentTab = btn.dataset.tab;
+    document.querySelectorAll('.side-nav button[data-tab]').forEach((b) => b.classList.toggle('active', b === btn));
+    $('adminSidebar').classList.remove('open-mobile');
+    refreshAll();
+  });
 });
-$('refresh').onclick=async()=>{try{await load();notify('تم تحديث البيانات');}catch(e){notify(e.message,true);}};
-$('logout').onclick=()=>{sessionStorage.clear();location.reload();};
-applyLang('ar');
+
+document.querySelectorAll('[data-admin-lang]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    applyAdminLang(btn.dataset.adminLang);
+    if (!$('appView').classList.contains('hidden')) refreshAll();
+  });
+});
+
+$('mobileMenuBtn').addEventListener('click', () => $('adminSidebar').classList.toggle('open-mobile'));
+$('refreshBtn').addEventListener('click', () => refreshAll());
+$('previewLoginBtn').addEventListener('click', () => loginWithPreviewAdmin());
+
+$('apiEnvSelect').value = isLocalPreviewHost ? 'local' : 'prod';
+if (!isLocalPreviewHost) $('previewLoginBtn').classList.add('hidden');
+$('apiEnvSelect').addEventListener('change', (e) => {
+  const mode = e.target.value;
+  API = mode === 'local' ? LOCAL_API : PROD_API;
+  $('previewLoginBtn').classList.toggle('hidden', mode !== 'local');
+  setLoginNotice('تم تبديل الخادم المستهدف بنجاح.');
+});
+
+$('logoutBtn').addEventListener('click', async () => {
+  try {
+    if (refreshToken) await apiFetch('/auth/logout', 'POST', { refreshToken }, false);
+  } catch (_) {}
+  accessToken = null;
+  refreshToken = null;
+  $('appView').classList.add('hidden');
+  $('loginView').classList.remove('hidden');
+  setLoginNotice('تم تسجيل الخروج بأمان.');
+});
+
+function setAdminStyle(style) {
+  document.documentElement.setAttribute('data-style', style);
+  $('adminGlassBtn').setAttribute('aria-pressed', String(style === 'glass'));
+  $('adminStandardBtn').setAttribute('aria-pressed', String(style === 'standard'));
+  try {
+    sessionStorage.setItem('dazrevo_admin_style', style);
+    sessionStorage.setItem('darb_admin_style', style);
+  } catch (_) {}
+}
+function setAdminTheme(dark) {
+  document.documentElement.classList.toggle('dark', dark);
+  $('adminDarkBtn').setAttribute('aria-pressed', String(dark));
+  $('adminLightBtn').setAttribute('aria-pressed', String(!dark));
+  try {
+    sessionStorage.setItem('dazrevo_admin_theme', dark ? 'dark' : 'light');
+    sessionStorage.setItem('darb_admin_theme', dark ? 'dark' : 'light');
+  } catch (_) {}
+}
+
+$('adminGlassBtn').addEventListener('click', () => setAdminStyle('glass'));
+$('adminStandardBtn').addEventListener('click', () => setAdminStyle('standard'));
+$('adminLightBtn').addEventListener('click', () => setAdminTheme(false));
+$('adminDarkBtn').addEventListener('click', () => setAdminTheme(true));
+
+try {
+  const savedStyle = sessionStorage.getItem('dazrevo_admin_style') || sessionStorage.getItem('darb_admin_style');
+  if (savedStyle === 'standard' || savedStyle === 'glass') setAdminStyle(savedStyle);
+  const savedTheme = sessionStorage.getItem('dazrevo_admin_theme') || sessionStorage.getItem('darb_admin_theme');
+  if (savedTheme === 'dark' || savedTheme === 'light') setAdminTheme(savedTheme === 'dark');
+} catch (_) {}
+
+applyAdminLang(adminLang);
+initializeGoogleLogin();
 </script>
 </body>
 </html>

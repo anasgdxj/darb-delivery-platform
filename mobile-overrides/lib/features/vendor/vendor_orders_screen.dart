@@ -18,6 +18,7 @@ class VendorOrdersScreen extends StatefulWidget {
 }
 
 class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
+  final _searchController = TextEditingController();
   Map<String, dynamic>? _vendor;
   Map<String, dynamic>? _stats;
   List<Map<String, dynamic>> _orders = const [];
@@ -32,6 +33,12 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -443,9 +450,18 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
     final isOpen = _vendor?['isOpen'] != false;
     final stats = _stats;
     final statsCurrency = stats?['currency']?.toString() ?? 'SYP';
-    final filtered = _statusFilter.isEmpty
-        ? _orders
-        : _orders.where((o) => o['status'] == _statusFilter).toList();
+    final pendingCount =
+        _orders.where((o) => o['status'] == 'PENDING').length;
+    final q = _searchController.text.trim().toLowerCase();
+    final filtered = _orders.where((o) {
+      if (_statusFilter.isNotEmpty && o['status'] != _statusFilter) {
+        return false;
+      }
+      if (q.isEmpty) return true;
+      final number = o['orderNumber']?.toString().toLowerCase() ?? '';
+      final customer = o['customer']?['name']?.toString().toLowerCase() ?? '';
+      return number.contains(q) || customer.contains(q);
+    }).toList();
 
     final statusFilters = [
       ('', dt('الكل'), _orders.length),
@@ -587,7 +603,23 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
                   onAction: _load,
                 ),
               ],
-              const SizedBox(height: 14),
+              if (pendingCount > 0 && _statusFilter != 'PENDING') ...[
+                const SizedBox(height: 12),
+                DarbFeedbackBanner(
+                  kind: DarbFeedbackKind.warning,
+                  message:
+                      '${dt('طلب جديد بانتظار القبول')} ($pendingCount)',
+                  actionLabel: dt('قيد الانتظار'),
+                  onAction: () => setState(() => _statusFilter = 'PENDING'),
+                ),
+              ],
+              const SizedBox(height: 12),
+              DarbSearchBar(
+                controller: _searchController,
+                hintText: dt('ابحث برقم الطلب أو اسم العميل...'),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 12),
               DarbSegmentedDock<String>(
                 compact: true,
                 selectedValue: _statusFilter,
@@ -612,7 +644,10 @@ class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
                       : Icons.filter_list_off_rounded,
                   onRetry: _orders.isEmpty
                       ? _load
-                      : () => setState(() => _statusFilter = ''),
+                      : () {
+                          _searchController.clear();
+                          setState(() => _statusFilter = '');
+                        },
                 )
               else
                 DarbResponsiveTwoColumn(

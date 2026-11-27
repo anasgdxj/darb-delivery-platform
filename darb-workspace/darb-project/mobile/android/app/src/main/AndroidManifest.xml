@@ -52,6 +52,9 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/dazrevo_accent" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="dazrevo_high_importance" />
 
         <meta-data
             android:name="flutterEmbedding"

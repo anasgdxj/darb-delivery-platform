@@ -1,0 +1,2383 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-style="glass">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#14171D">
+<title>دازريفو | DAZREVO — تطبيق العملاء والسائقين والمتاجر</title>
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --obsidian: #0C0D0F;
+  --obsidian-rail: #14171D;
+  --obsidian-soft: #1E222B;
+  --gold: #D6B46C;
+  --gold-soft: #E7D3A3;
+  --bronze: #8A651F;
+  --bronze-hover: #735216;
+  --gold-tint: #F6EFE0;
+  --teal: #1D7A6E;
+  --teal-bright: #3FD1BE;
+  --teal-soft: #E8F5F3;
+  --canvas: #FAF9F6;
+  --surface: #FFFFFF;
+  --surface-glass: rgba(255, 255, 255, 0.84);
+  --surface-alt: #F2EFE9;
+  --ink: #141413;
+  --muted: #636059;
+  --line: #E5E0D6;
+  --border-strong: #CEC7BA;
+  --glass-border: rgba(214, 180, 108, 0.28);
+  --ok: #177856;
+  --ok-soft: #E6F4EE;
+  --warn: #B57314;
+  --warn-soft: #FBF1DF;
+  --danger: #C83E3E;
+  --danger-soft: #FCEBEB;
+  --shadow: 0 22px 58px rgba(12, 13, 15, 0.08);
+  --font-ar: 'Cairo', 'Plus Jakarta Sans', Tahoma, sans-serif;
+  --font-latin: 'Plus Jakarta Sans', 'Cairo', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+html.dark {
+  color-scheme: dark;
+  --canvas: #0C0D0F;
+  --surface: #14161A;
+  --surface-glass: rgba(20, 22, 26, 0.86);
+  --surface-alt: #232730;
+  --ink: #F5F3EE;
+  --muted: #A39E93;
+  --bronze: #D6B46C;
+  --bronze-hover: #E7D3A3;
+  --gold-tint: rgba(214, 180, 108, 0.14);
+  --teal: #3FD1BE;
+  --teal-soft: #112926;
+  --line: #262A33;
+  --border-strong: #3A404D;
+  --glass-border: rgba(214, 180, 108, 0.2);
+  --ok: #4AD99D;
+  --ok-soft: rgba(74, 217, 157, 0.14);
+  --warn: #F0B654;
+  --warn-soft: rgba(240, 182, 84, 0.14);
+  --danger: #F26E6E;
+  --danger-soft: rgba(242, 110, 110, 0.14);
+  --shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: clip; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-ar);
+  line-height: 1.6;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 200ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+html[lang="en"] body, html[lang="tr"] body { font-family: var(--font-latin); }
+button, input, select, textarea { font: inherit; }
+button {
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  min-height: 40px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms ease, border-color 160ms ease;
+}
+button:hover:not(:disabled) { transform: translateY(-1px); }
+button:active:not(:disabled) { transform: scale(0.98); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+input, select, textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13.5px;
+}
+.tabular { font-family: var(--font-mono); font-variant-numeric: tabular-nums; unicode-bidi: isolate; direction: ltr; }
+.hidden { display: none !important; }
+
+/* Ambient Spatial Field */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 220ms ease;
+}
+html[data-style="standard"] .ambient { opacity: 0; }
+.orb { position: absolute; border-radius: 50%; filter: blur(86px); }
+.orb-1 {
+  width: 460px; height: 460px; top: -150px; inset-inline-start: -120px;
+  background: radial-gradient(circle, rgba(214, 180, 108, 0.22), transparent 70%);
+}
+.orb-2 {
+  width: 420px; height: 420px; bottom: -140px; inset-inline-end: -100px;
+  background: radial-gradient(circle, rgba(29, 122, 110, 0.16), transparent 70%);
+}
+html.dark .orb-1 { background: radial-gradient(circle, rgba(214, 180, 108, 0.14), transparent 70%); }
+html.dark .orb-2 { background: radial-gradient(circle, rgba(63, 209, 190, 0.12), transparent 70%); }
+
+.surface {
+  background: var(--surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+}
+html[data-style="standard"] .surface {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 18px rgba(12, 13, 15, 0.05);
+}
+
+.btn-primary {
+  background: var(--obsidian-rail);
+  color: var(--gold);
+  border-color: rgba(214, 180, 108, 0.35);
+}
+.btn-primary:hover:not(:disabled) { background: var(--obsidian-soft); }
+html.dark .btn-primary { background: var(--gold); color: var(--obsidian); border-color: transparent; }
+html.dark .btn-primary:hover:not(:disabled) { background: var(--gold-soft); }
+.btn-teal { background: var(--teal-soft); color: var(--teal); border-color: color-mix(in srgb, var(--teal) 32%, transparent); }
+.btn-teal:hover:not(:disabled) { background: color-mix(in srgb, var(--teal) 18%, var(--teal-soft)); }
+.btn-outline { background: var(--surface); border-color: var(--border-strong); color: var(--ink); }
+.btn-outline:hover:not(:disabled) { background: var(--surface-alt); }
+.btn-danger { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+
+/* Brand Mark */
+.brand-row { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 44px; height: 44px; border-radius: 13px; overflow: hidden;
+  border: 1px solid rgba(214, 180, 108, 0.42);
+  box-shadow: 0 8px 20px rgba(12, 13, 15, 0.24);
+  flex-shrink: 0;
+}
+.brand-mark svg { width: 100%; height: 100%; display: block; }
+
+/* Splash / Onboarding & Auth View */
+.gate-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: 20px 24px 36px;
+  gap: 24px;
+}
+.gate-topbar {
+  max-width: 1120px;
+  width: 100%;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.gate-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.seg-mini {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+}
+.seg-mini button {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 8px;
+}
+.seg-mini button[aria-pressed="true"] {
+  background: var(--obsidian-rail);
+  color: var(--gold);
+}
+html.dark .seg-mini button[aria-pressed="true"] {
+  background: var(--gold);
+  color: var(--obsidian);
+}
+
+.gate-stage {
+  max-width: 1120px;
+  width: 100%;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 28px;
+  align-items: center;
+}
+.onboarding-card {
+  border-radius: 28px;
+  padding: 34px;
+  background: linear-gradient(145deg, #0C0D0F 0%, #14171D 58%, #1E222B 100%);
+  color: #F5F3EE;
+  border: 1px solid rgba(214, 180, 108, 0.34);
+  box-shadow: 0 28px 64px rgba(12, 13, 15, 0.28);
+  display: grid;
+  gap: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.onboarding-slide { display: grid; gap: 10px; min-height: 150px; align-content: start; }
+.slide-kicker { color: var(--gold); font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em; }
+.onboarding-slide h2 { margin: 0; font-size: clamp(24px, 3vw, 34px); line-height: 1.25; }
+.onboarding-slide p { margin: 0; color: #C8C2B6; font-size: 14.5px; line-height: 1.8; }
+.slide-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.slide-dots { display: flex; gap: 8px; }
+.slide-dots button {
+  min-height: 10px; width: 28px; height: 10px; padding: 0; border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2);
+}
+.slide-dots button[aria-pressed="true"] { width: 44px; background: var(--gold); }
+.slide-visual {
+  border-radius: 20px;
+  background: rgba(12, 13, 15, 0.55);
+  border: 1px solid rgba(231, 211, 163, 0.16);
+  padding: 14px;
+}
+
+.auth-card {
+  border-radius: 28px;
+  padding: 30px;
+  display: grid;
+  gap: 16px;
+}
+.auth-card h1 { margin: 0; font-size: 24px; font-weight: 900; }
+.auth-card > p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.field-group { display: grid; gap: 5px; }
+.field-group label { font-size: 12px; font-weight: 800; color: var(--muted); }
+.role-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.role-pick {
+  min-height: 54px;
+  padding: 8px 10px;
+  border-radius: 13px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+}
+.role-pick small { font-size: 11px; color: var(--muted); font-weight: 600; }
+.role-pick[aria-pressed="true"] {
+  background: var(--obsidian-rail);
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.role-pick[aria-pressed="true"] small { color: var(--gold-soft); }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--surface-alt); padding: 4px; border-radius: 12px; }
+.auth-tabs button { min-height: 36px; background: transparent; color: var(--muted); border-radius: 9px; font-size: 13px; }
+.auth-tabs button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 2px 6px rgba(12,13,15,0.08); }
+html.dark .auth-tabs button[aria-pressed="true"] { background: var(--obsidian-soft); color: var(--gold); }
+.notice { padding: 11px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; background: var(--teal-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--teal) 32%, transparent); }
+.notice.bad { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+
+/* App Workspace Shell */
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 276px minmax(0, 1fr);
+}
+.sidebar {
+  background: linear-gradient(180deg, var(--obsidian) 0%, var(--obsidian-rail) 100%);
+  color: #F5F3EE;
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-inline-end: 1px solid rgba(214, 180, 108, 0.2);
+}
+.brand-sub { font-size: 12px; color: var(--gold-soft); font-weight: 700; }
+.role-banner {
+  padding: 12px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(214, 180, 108, 0.2);
+  display: grid;
+  gap: 8px;
+}
+.role-banner-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: #C8C2B6; }
+.role-switcher { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: rgba(0,0,0,0.34); padding: 4px; border-radius: 10px; }
+.role-switcher button { min-height: 30px; padding: 4px 6px; font-size: 11.5px; color: rgba(245,243,238,0.72); background: transparent; border-radius: 7px; }
+.role-switcher button[aria-pressed="true"] { background: rgba(214, 180, 108, 0.22); color: var(--gold); }
+
+.side-nav { display: grid; gap: 6px; }
+.side-nav button {
+  background: transparent;
+  color: rgba(245, 243, 238, 0.8);
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+}
+.side-nav button:hover { background: rgba(255, 255, 255, 0.07); color: #FFFFFF; }
+.side-nav button.active {
+  background: var(--obsidian-soft);
+  color: var(--gold);
+  border-color: rgba(214, 180, 108, 0.36);
+}
+.side-nav button.ai-tab.active {
+  background: rgba(29, 122, 110, 0.24);
+  color: var(--teal-bright);
+  border-color: rgba(63, 209, 190, 0.45);
+}
+.count-pill {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 1px 7px;
+  border-radius: 8px;
+  background: rgba(214, 180, 108, 0.2);
+  color: var(--gold);
+}
+.side-footer { margin-top: auto; display: grid; gap: 8px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.12); }
+.side-seg { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; background: rgba(0, 0, 0, 0.32); padding: 4px; border-radius: 10px; }
+.side-seg.tri { grid-template-columns: repeat(3, 1fr); }
+.side-seg button { min-height: 30px; padding: 4px 6px; font-size: 11.5px; color: rgba(245, 243, 238, 0.72); background: transparent; border-radius: 7px; }
+.side-seg button[aria-pressed="true"] { background: rgba(214, 180, 108, 0.22); color: var(--gold); }
+
+/* Main Workspace */
+.workspace {
+  padding: 24px 28px 40px;
+  max-width: 1380px;
+  width: 100%;
+  margin-inline: auto;
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.crumb { font-size: 12px; color: var(--muted); font-weight: 800; }
+.topbar h1 { margin: 2px 0 0; font-size: 22px; font-weight: 900; }
+.top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* Bento & Cards */
+.bento-hero {
+  display: grid;
+  grid-template-columns: 1.25fr 0.95fr;
+  gap: 16px;
+}
+.stage-card {
+  border-radius: 24px;
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+  align-content: space-between;
+}
+.stage-card.obsidian {
+  background: linear-gradient(145deg, #0C0D0F 0%, #14171D 60%, #1E222B 100%);
+  color: #F5F3EE;
+  border: 1px solid rgba(214, 180, 108, 0.3);
+}
+.stage-card.obsidian p { color: #C8C2B6; margin: 0; font-size: 14px; }
+.telemetry-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.telemetry-cell { border-radius: 18px; padding: 16px 18px; }
+.telemetry-cell span { font-size: 12px; font-weight: 800; color: var(--muted); display: block; }
+.telemetry-cell strong { display: block; margin-top: 6px; font-size: clamp(16px, 2.2vw, 24px); font-weight: 900; white-space: nowrap; }
+
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.toolbar > * { flex: 1 1 180px; }
+.city-strip { display: flex; gap: 8px; flex-wrap: wrap; }
+.city-pill {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+}
+.city-pill[aria-pressed="true"] {
+  background: var(--obsidian-rail);
+  color: var(--gold);
+  border-color: var(--gold);
+}
+html.dark .city-pill[aria-pressed="true"] { background: var(--gold); color: var(--obsidian); }
+
+.stores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.store-card {
+  border-radius: 20px;
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms ease;
+}
+.store-card:hover { transform: translateY(-2px); border-color: var(--gold); }
+.store-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.store-head h3 { margin: 0; font-size: 16.5px; font-weight: 900; }
+.store-meta { font-size: 12.5px; color: var(--muted); }
+.status-label { font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 8px; }
+.status-ok { background: var(--ok-soft); color: var(--ok); }
+.status-warn { background: var(--warn-soft); color: var(--warn); }
+.status-bad { background: var(--danger-soft); color: var(--danger); }
+
+.panel { border-radius: 22px; padding: 22px; display: grid; gap: 16px; }
+.list-stack { display: grid; gap: 12px; }
+.item-row {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.order-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+.order-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.stepper { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.step-node {
+  padding: 8px 6px;
+  border-radius: 10px;
+  background: var(--surface-alt);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 800;
+  text-align: center;
+  border: 1px solid var(--line);
+}
+.step-node.done { background: var(--gold-tint); color: var(--bronze); border-color: rgba(214, 180, 108, 0.45); }
+html.dark .step-node.done { color: var(--gold); }
+@keyframes stepNodePulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--teal) 32%, transparent);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--teal) 0%, transparent);
+  }
+}
+.step-node.current {
+  background: var(--teal-soft);
+  color: var(--teal);
+  border-color: color-mix(in srgb, var(--teal) 55%, transparent);
+  animation: stepNodePulse 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Spatial SVG Route Map */
+.spatial-map {
+  border-radius: 16px;
+  background: linear-gradient(145deg, #0C0D0F, #14171D);
+  border: 1px solid rgba(214, 180, 108, 0.28);
+  padding: 14px;
+  color: #F5F3EE;
+  display: grid;
+  gap: 10px;
+}
+.spatial-map-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #C8C2B6; gap: 8px; flex-wrap: wrap; }
+.spatial-map svg { width: 100%; height: 150px; display: block; border-radius: 12px; background: rgba(255,255,255,0.02); }
+
+/* Copilot & Section Feature Helpers */
+.copilot-feed { display: grid; gap: 10px; max-height: 360px; overflow-y: auto; }
+.copilot-msg { padding: 13px 15px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); font-size: 14px; white-space: pre-wrap; display: grid; gap: 8px; }
+.copilot-msg.user { background: var(--teal-soft); border-color: color-mix(in srgb, var(--teal) 35%, transparent); }
+.fav-btn { min-height: 34px; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-alt); color: var(--muted); font-size: 14px; }
+.fav-btn[aria-pressed="true"] { background: var(--gold-tint); color: var(--bronze); border-color: rgba(214, 180, 108, 0.55); }
+html.dark .fav-btn[aria-pressed="true"] { color: var(--gold); }
+.rating-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid var(--line); }
+.star-btn { min-height: 34px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-alt); color: var(--muted); font-size: 14px; }
+.star-btn.lit { background: var(--gold-tint); color: var(--bronze); border-color: rgba(214, 180, 108, 0.55); }
+html.dark .star-btn.lit { color: var(--gold); }
+.meta-note { font-size: 12.5px; color: var(--muted); padding: 8px 12px; border-radius: 10px; background: var(--surface-alt); border: 1px solid var(--line); }
+.inline-edit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.inline-edit input { width: 100px; min-height: 38px; padding: 6px 10px; }
+
+/* Cart Floating Bar */
+.cart-bar {
+  position: sticky;
+  bottom: 18px;
+  z-index: 30;
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: var(--obsidian-rail);
+  color: #F5F3EE;
+  border: 1px solid rgba(214, 180, 108, 0.45);
+  box-shadow: 0 20px 44px rgba(12, 13, 15, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Modal & Toast */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 70;
+  background: rgba(12, 13, 15, 0.68);
+  backdrop-filter: blur(8px);
+  display: grid; place-items: center; padding: 20px;
+}
+.modal-card {
+  width: min(560px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: 24px;
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+}
+.toast {
+  position: fixed; bottom: 24px; inset-inline-start: 24px; z-index: 80;
+  padding: 12px 18px; border-radius: 14px;
+  background: var(--obsidian-rail); color: var(--gold);
+  border: 1px solid rgba(214, 180, 108, 0.45);
+  font-size: 13.5px; font-weight: 800; box-shadow: var(--shadow);
+}
+.toast.bad { background: var(--danger); color: #FFFFFF; border-color: #FFFFFF; }
+
+/* Mobile Dock */
+.mobile-dock { display: none; }
+.mobile-head-toggle { display: none; }
+
+@media (max-width: 960px) {
+  .gate-stage { grid-template-columns: 1fr; }
+  .app-shell { grid-template-columns: 1fr; padding-bottom: 78px; }
+  .sidebar { display: none; }
+  .sidebar.open-mobile {
+    display: flex; position: fixed; inset-block: 0; inset-inline-start: 0;
+    width: min(290px, 85vw); z-index: 65; box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+  }
+  .mobile-head-toggle { display: inline-flex; }
+  .bento-hero { grid-template-columns: 1fr; }
+  .telemetry-grid { grid-template-columns: repeat(2, 1fr); }
+  .mobile-dock {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 4px;
+    position: fixed;
+    bottom: 0; inset-inline: 0; z-index: 50;
+    background: var(--obsidian-rail);
+    border-top: 1px solid rgba(214, 180, 108, 0.25);
+    padding: 6px 8px;
+  }
+  .mobile-dock button {
+    min-height: 48px;
+    padding: 4px 6px;
+    font-size: 11px;
+    background: transparent;
+    color: rgba(245, 243, 238, 0.72);
+    border-radius: 10px;
+  }
+  .mobile-dock button.active { background: rgba(214, 180, 108, 0.18); color: var(--gold); }
+}
+@media (max-width: 560px) {
+  .workspace { padding: 16px; }
+  .role-cards { grid-template-columns: 1fr; }
+  .stepper { grid-template-columns: repeat(2, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+</div>
+
+<!-- Onboarding & Authentication Gate -->
+<section id="gateView" class="gate-shell">
+  <header class="gate-topbar">
+    <div class="brand-row">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 108 108">
+          <rect width="108" height="108" rx="28" fill="#14171D"/>
+          <path d="M33 25h24l23 17v24L57 83H33l9.5-11h12l14-10.5v-15L54.5 36h-12z" fill="#F7F4EC"/>
+          <path d="M28 36L52 54 28 72" fill="none" stroke="#D6B46C" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="53" cy="54" r="5.8" fill="#3FD1BE"/>
+        </svg>
+      </div>
+      <div>
+        <strong id="gateBrandTitle">دازريفو · DAZREVO</strong>
+        <div class="crumb" id="gateBrandSub">منصة التوصيل الذكية متعددة الأدوار</div>
+      </div>
+    </div>
+    <div class="gate-controls">
+      <div class="seg-mini" role="group" aria-label="Language">
+        <button type="button" data-lang="ar" aria-pressed="true">عربي</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        <button type="button" data-lang="tr" aria-pressed="false">TR</button>
+      </div>
+      <div class="seg-mini" role="group" aria-label="Theme">
+        <button type="button" data-theme-btn="light" aria-pressed="true" id="gateLightBtn">نهاري</button>
+        <button type="button" data-theme-btn="dark" aria-pressed="false" id="gateDarkBtn">ليلي</button>
+      </div>
+      <a class="btn-outline" style="min-height:36px;padding:6px 12px;border-radius:11px;display:inline-flex;align-items:center;font-size:12.5px;font-weight:800;" href="../" id="backLandingLink">الموقع التعريفي</a>
+    </div>
+  </header>
+
+  <div class="gate-stage">
+    <!-- Interactive 3-Slide Onboarding Stage -->
+    <article class="onboarding-card">
+      <div class="onboarding-slide">
+        <div class="slide-kicker" id="slideKicker">01 / تجربة العميل المكانية</div>
+        <h2 id="slideTitle">متاجر مدينتك وتوصيل الطرود في مسار موحد.</h2>
+        <p id="slideBody">استعرض المتاجر المحلية، قارن رسوم التوصيل الشفافة، أو أرسل طرداً مستقلاً مع تتبع حي عبر الخريطة ومساعد ذكي.</p>
+      </div>
+      <div class="slide-visual" aria-hidden="true">
+        <svg viewBox="0 0 420 130" style="width:100%;height:110px;display:block">
+          <path d="M40 95 C120 30, 220 110, 380 35" fill="none" stroke="#D6B46C" stroke-width="3" stroke-dasharray="7 8"/>
+          <path d="M40 95 C150 95, 250 55, 380 35" fill="none" stroke="#3FD1BE" stroke-width="2" stroke-dasharray="4 6"/>
+          <circle cx="40" cy="95" r="8" fill="#D6B46C"/>
+          <circle cx="215" cy="70" r="6" fill="#F5F3EE"/>
+          <circle cx="380" cy="35" r="8" fill="#3FD1BE"/>
+        </svg>
+      </div>
+      <div class="slide-nav">
+        <div class="slide-dots" role="group" aria-label="Slides">
+          <button type="button" data-slide="0" aria-pressed="true" aria-label="Slide 1"></button>
+          <button type="button" data-slide="1" aria-pressed="false" aria-label="Slide 2"></button>
+          <button type="button" data-slide="2" aria-pressed="false" aria-label="Slide 3"></button>
+        </div>
+        <button type="button" class="btn-teal" id="nextSlideBtn">التالي ←</button>
+      </div>
+    </article>
+
+    <!-- Login / Sign Up / Role Entry -->
+    <div class="auth-card surface">
+      <div>
+        <h1 id="authHeading">تسجيل الدخول إلى دازريفو</h1>
+        <p id="authSubtitle">سجّل برقم الهاتف السوري، حساب Google، أو جرّب أي دور فوراً.</p>
+      </div>
+
+      <div class="auth-tabs" role="group" aria-label="Auth mode">
+        <button type="button" id="tabLoginBtn" aria-pressed="true">تسجيل الدخول</button>
+        <button type="button" id="tabSignupBtn" aria-pressed="false">إنشاء حساب جديد</button>
+      </div>
+
+      <div class="field-group">
+        <label id="roleSelectLabel">اختر نوع الحساب</label>
+        <div class="role-cards" role="group" aria-label="Role">
+          <button type="button" class="role-pick" data-auth-role="CUSTOMER" aria-pressed="true">
+            <span id="roleLblCustomer">عميل</span><small>Customer</small>
+          </button>
+          <button type="button" class="role-pick" data-auth-role="DRIVER" aria-pressed="false">
+            <span id="roleLblDriver">مندوب</span><small>Courier</small>
+          </button>
+          <button type="button" class="role-pick" data-auth-role="VENDOR" aria-pressed="false">
+            <span id="roleLblVendor">متجر</span><small>Merchant</small>
+          </button>
+        </div>
+      </div>
+
+      <form id="otpForm" style="display:grid;gap:10px">
+        <div id="signupNameGroup" class="field-group hidden">
+          <label for="authNameInput" id="authNameLabel">الاسم الكامل</label>
+          <input id="authNameInput" placeholder="أحمد السالم">
+        </div>
+        <div class="field-group">
+          <label for="authPhoneInput" id="authPhoneLabel">رقم الهاتف السوري</label>
+          <input id="authPhoneInput" value="+963911223344" dir="ltr">
+        </div>
+        <div id="otpCodeGroup" class="field-group hidden">
+          <label for="authOtpInput" id="authOtpLabel">رمز التحقق (6 أرقام)</label>
+          <input id="authOtpInput" placeholder="123456" maxlength="6" dir="ltr">
+        </div>
+        <button type="submit" class="btn-primary" id="otpSubmitBtn">إرسال رمز التحقق SMS</button>
+      </form>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button type="button" class="btn-outline" id="googleDemoBtn">Google Sign-In</button>
+        <button type="button" class="btn-teal" id="instantPreviewBtn" data-testid="instant-preview-btn">دخول تجريبي فوري</button>
+      </div>
+      <div id="gateNotice" class="hidden" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Multi-Role Application Workspace -->
+<section id="appView" class="app-shell hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-row">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 108 108">
+          <rect width="108" height="108" rx="28" fill="#14171D"/>
+          <path d="M33 25h24l23 17v24L57 83H33l9.5-11h12l14-10.5v-15L54.5 36h-12z" fill="#F7F4EC"/>
+          <path d="M28 36L52 54 28 72" fill="none" stroke="#D6B46C" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="53" cy="54" r="5.8" fill="#3FD1BE"/>
+        </svg>
+      </div>
+      <div>
+        <strong>دازريفو · DAZREVO</strong>
+        <div class="brand-sub" id="sideUserName">مستخدم دازريفو</div>
+      </div>
+    </div>
+
+    <div class="role-banner">
+      <div class="role-banner-top">
+        <span id="activeRoleBadge">واجهة العميل</span>
+        <span class="tabular">SYP</span>
+      </div>
+      <div class="role-switcher" role="group" aria-label="Switch Role">
+        <button type="button" data-switch-role="CUSTOMER" aria-pressed="true" id="swCust">عميل</button>
+        <button type="button" data-switch-role="DRIVER" aria-pressed="false" id="swDrv">مندوب</button>
+        <button type="button" data-switch-role="VENDOR" aria-pressed="false" id="swVnd">متجر</button>
+      </div>
+    </div>
+
+    <nav class="side-nav" id="sideNav" aria-label="App navigation"></nav>
+
+    <div class="side-footer">
+      <div class="side-seg tri" role="group" aria-label="Language">
+        <button type="button" data-lang="ar" aria-pressed="true">عربي</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        <button type="button" data-lang="tr" aria-pressed="false">TR</button>
+      </div>
+      <div class="side-seg" role="group" aria-label="Theme">
+        <button type="button" data-theme-btn="light" aria-pressed="true" id="appLightBtn">نهاري</button>
+        <button type="button" data-theme-btn="dark" aria-pressed="false" id="appDarkBtn">ليلي</button>
+      </div>
+      <div class="side-seg" role="group" aria-label="Surface Style">
+        <button type="button" data-style-btn="glass" aria-pressed="true" id="appGlassBtn">Glass</button>
+        <button type="button" data-style-btn="standard" aria-pressed="false" id="appStdBtn">Standard</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button type="button" class="btn-outline mobile-head-toggle" id="mobileMenuBtn" aria-label="القائمة">☰</button>
+        <div>
+          <div class="crumb" id="appCrumb">DAZREVO / الرئيسية</div>
+          <h1 id="appHeading">استكشاف المتاجر</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn-outline" id="notifTopBtn">الإشعارات <span class="count-pill" id="notifBadge">0</span></button>
+        <button type="button" class="btn-outline" id="refreshAppBtn">تحديث</button>
+        <button type="button" class="btn-danger" id="appLogoutBtn">خروج</button>
+      </div>
+    </header>
+
+    <div id="appBody" style="display:grid;gap:18px"></div>
+
+    <div id="cartDock" class="cart-bar hidden">
+      <div>
+        <strong id="cartSummaryText">سلة المشتريات</strong>
+        <div style="font-size:12.5px;color:#C8C2B6" id="cartVendorText"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button type="button" class="btn-outline" id="clearCartBtn">تفريغ</button>
+        <button type="button" class="btn-primary" id="openCheckoutBtn" style="background:var(--gold);color:var(--obsidian)">إتمام الطلب</button>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-dock" id="mobileDock" aria-label="Mobile navigation"></nav>
+</section>
+
+<!-- Modal -->
+<div id="modalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card surface">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <h3 id="modalTitle" style="margin:0;font-size:18px;font-weight:900"></h3>
+      <button type="button" class="btn-outline" id="modalCloseBtn" aria-label="إغلاق" style="min-height:34px;padding:4px 10px">✕</button>
+    </div>
+    <div id="modalBody" style="display:grid;gap:12px"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const API_BASE = (window.location.origin || 'http://localhost:3000') + '/api/v1';
+
+const I18N = {
+  ar: {
+    dir: 'rtl',
+    brandSub: 'منصة التوصيل الذكية متعددة الأدوار',
+    backLanding: 'الموقع التعريفي',
+    light: 'نهاري',
+    dark: 'ليلي',
+    loginTab: 'تسجيل الدخول',
+    signupTab: 'إنشاء حساب جديد',
+    authHeading: 'تسجيل الدخول إلى دازريفو',
+    authSubtitle: 'سجّل برقم الهاتف السوري، حساب Google، أو جرّب أي دور فوراً.',
+    roleLabel: 'اختر نوع الحساب',
+    cust: 'عميل', drv: 'مندوب', vnd: 'متجر',
+    fullName: 'الاسم الكامل', phone: 'رقم الهاتف السوري', otp: 'رمز التحقق (6 أرقام)',
+    sendOtp: 'إرسال رمز التحقق SMS', verifyOtp: 'تأكيد الدخول',
+    instantPreview: 'دخول تجريبي فوري',
+    logout: 'خروج', refresh: 'تحديث', notifications: 'الإشعارات',
+    heroKicker: 'DAZREVO DISPATCH · توصيل ذكي',
+    heroTitle: 'اطلب من متاجر مدينتك أو أرسل طرداً مستقلاً.',
+    heroBody: 'أجرة واضحة قبل التأكيد، دفع نقدي عند الاستلام، وتتبع مسار مباشر بالليرة السورية.',
+    heroPeerBtn: 'إرسال طرد مستقل الآن',
+    heroAiBtn: 'استشارة المساعد الذكي',
+    allCities: 'كل المدن', searchPh: 'ابحث عن متجر أو مطعم أو حلويات…', searchBtn: 'بحث',
+    favOnly: 'المفضلة فقط', openOnly: 'المفتوح الآن',
+    noVendors: 'لا توجد متاجر مطابقة في هذه المدينة حالياً.',
+    storeOpen: 'مفتوح', storeClosed: 'مغلق', browseBtn: 'تصفح المنتجات والطلب',
+    schedLbl: 'موعد التوصيل', schedNow: 'توصيل فوري', sched2h: 'خلال ساعتين', schedEve: 'فترة المساء',
+    notesLbl: 'ملاحظات للمتجر أو السائق', notesPh: 'مثال: الاتصال عند الوصول للبوابة',
+    peerKmLbl: 'المسافة التقديرية (كم)', peerTierLbl: 'أولوية الشحنة', tierStd: 'عادي (1.0x)', tierExp: 'مستعجل (1.25x)',
+    applyFareBtn: 'تطبيق الأجرة المقترحة',
+    reorderBtn: 'إعادة الطلب', rateTitle: 'قيّم تجربتك:', sendRateBtn: 'إرسال التقييم', ratedLabel: 'تقييمك:',
+    filterAll: 'الكل', filterStores: 'طلبات المتاجر', filterPeer: 'طرود مستقلة',
+    filterAction: 'تتطلب إجراء', filterDone: 'مكتملة',
+    proofPh: 'ملاحظة إثبات التسليم (اختياري)',
+    saveItemBtn: 'حفظ', copyReplyBtn: 'نسخ الملخص',
+    addAddrTitle: 'إضافة عنوان توصيل جديد', addrLblPh: 'التسمية (المنزل / العمل)', addrDetPh: 'الحي، الشارع، البناء', addAddrBtn: 'حفظ العنوان', delAddrBtn: 'حذف',
+    drvOnline: '● متصل ويستقبل الطلبات', drvOffline: '○ غير متصل الآن',
+    drvEarnings: 'أرباح مكتملة', drvCompleted: 'رحلات مكتملة', drvActive: 'رحلات نشطة', drvRate: 'نسبة القبول',
+    drvAvailable: 'الطلبات المتاحة في مدينتك', drvMyTrips: 'رحلاتي النشطة والسابقة',
+    noTasks: 'لا توجد مهام في هذه القائمة حالياً.',
+    acceptJob: 'قبول وتنفيذ الرحلة', pickupConfirm: 'تأكيد الاستلام من نقطة الانطلاق', deliverConfirm: 'تأكيد التسليم للعميل',
+    vndOpen: '● المتجر مفتوح للطلبات', vndClosed: '○ المتجر مغلق مؤقتاً',
+    vndActive: 'طلبات نشطة', vndDone: 'طلبات مكتملة', vndRev: 'مبيعات المتجر', vndCount: 'عدد المنتجات',
+    vndOrdersTitle: 'إدارة طلبات المتجر', vndCatalogTitle: 'كتالوج المنتجات والمخزون',
+    addProdBtn: 'إضافة منتج', prodAvail: 'متاح للطلب', prodPaused: 'متوقف مؤقتاً',
+    aiTitle: 'مساعد دازريفو الذكي', aiSend: 'إرسال', aiBusy: 'جارٍ التحليل…',
+    aiHint: 'اكتب سؤالك أو وصف طلبك وسيرد المساعد بناءً على صلاحيات دورك والبيانات الفعلية.',
+    aiPh: 'اكتب طلبك أو استفسارك هنا…',
+    statuses: {
+      PENDING: 'قيد الانتظار', ACCEPTED: 'مقبول', PREPARING: 'قيد التحضير',
+      READY: 'جاهز للاستلام', ASSIGNED: 'تم تعيين مندوب', PICKED_UP: 'في الطريق إليك',
+      DELIVERED: 'تم التسليم', CANCELLED: 'ملغي'
+    },
+    tabs: {
+      CUSTOMER: [
+        { id: 'home', label: 'الرئيسية والمتاجر' },
+        { id: 'peer', label: 'توصيل طرد مستقل' },
+        { id: 'orders', label: 'طلباتي والتتبع' },
+        { id: 'assistant', label: 'المساعد الذكي', ai: true },
+        { id: 'account', label: 'حسابي والعناوين' }
+      ],
+      DRIVER: [
+        { id: 'driver-board', label: 'مهام التوصيل المباشرة' },
+        { id: 'driver-active', label: 'رحلاتي والمسار' },
+        { id: 'assistant', label: 'مساعد السائق الذكي', ai: true },
+        { id: 'account', label: 'حسابي وإعداداتي' }
+      ],
+      VENDOR: [
+        { id: 'vendor-orders', label: 'طلبات المتجر الواردة' },
+        { id: 'vendor-catalog', label: 'المنتجات والمخزون' },
+        { id: 'assistant', label: 'مساعد المتجر الذكي', ai: true },
+        { id: 'account', label: 'حسابي وإعداداتي' }
+      ]
+    },
+    slides: [
+      { k: '01 / تجربة العميل المكانية', t: 'متاجر مدينتك وتوصيل الطرود في مسار موحد.', b: 'استعرض المتاجر المحلية، قارن رسوم التوصيل الشفافة، أو أرسل طرداً مستقلاً مع تتبع حي عبر الخريطة ومساعد ذكي.' },
+      { k: '02 / لوحة السائق الميدانية', b: 'تصفح الطلبات المتاحة في مدينتك، حدّد جاهزيتك بلمسة، وتابع أرباحك وخط سيرك خطوة بخطوة.', t: 'تحكم كامل برحلاتك وأرباحك لحظة بلحظة.' },
+      { k: '03 / إدارة المتاجر والمخزون', t: 'استقبل الطلبات ونظّم أصناف متجرك بسهولة.', b: 'فعّل حالة فتح المتجر، أضف منتجاتك، وحرّك مراحل التحضير مع إسناد فوري للمندوبين.' }
+    ]
+  },
+  en: {
+    dir: 'ltr',
+    brandSub: 'Multi-Role Smart Delivery Platform',
+    backLanding: 'Public Website',
+    light: 'Light',
+    dark: 'Dark',
+    loginTab: 'Sign In',
+    signupTab: 'Create Account',
+    authHeading: 'Sign in to DAZREVO',
+    authSubtitle: 'Use Syrian phone OTP, Google Sign-In, or launch an instant preview role.',
+    roleLabel: 'Select Account Role',
+    cust: 'Customer', drv: 'Driver', vnd: 'Merchant',
+    fullName: 'Full Name', phone: 'Syrian Phone Number', otp: 'Verification Code (6 digits)',
+    sendOtp: 'Send SMS Code', verifyOtp: 'Verify & Enter',
+    instantPreview: 'Instant Demo Preview',
+    logout: 'Sign Out', refresh: 'Refresh', notifications: 'Alerts',
+    heroKicker: 'DAZREVO DISPATCH · SMART DELIVERY',
+    heroTitle: 'Order from local stores or dispatch a peer parcel.',
+    heroBody: 'Transparent SYP delivery fares before confirmation, cash on delivery, and live route tracking.',
+    heroPeerBtn: 'Send Peer Parcel Now',
+    heroAiBtn: 'Ask AI Copilot',
+    allCities: 'All Cities', searchPh: 'Search stores, restaurants, or sweets…', searchBtn: 'Search',
+    favOnly: 'Favorites Only', openOnly: 'Open Now',
+    noVendors: 'No matching stores found in this city.',
+    storeOpen: 'Open', storeClosed: 'Closed', browseBtn: 'Browse Catalog & Order',
+    schedLbl: 'Delivery Window', schedNow: 'ASAP Dispatch', sched2h: 'Within 2 Hours', schedEve: 'Evening Slot',
+    notesLbl: 'Notes for Store or Driver', notesPh: 'e.g., Call upon arrival at gate',
+    peerKmLbl: 'Estimated Distance (km)', peerTierLbl: 'Priority Tier', tierStd: 'Standard (1.0x)', tierExp: 'Express (1.25x)',
+    applyFareBtn: 'Apply Suggested Fare',
+    reorderBtn: 'Reorder', rateTitle: 'Rate delivery:', sendRateBtn: 'Submit Rating', ratedLabel: 'Your Rating:',
+    filterAll: 'All', filterStores: 'Store Orders', filterPeer: 'Peer Parcels',
+    filterAction: 'Needs Action', filterDone: 'Completed',
+    proofPh: 'Delivery proof note (optional)',
+    saveItemBtn: 'Save', copyReplyBtn: 'Copy Summary',
+    addAddrTitle: 'Add Saved Delivery Address', addrLblPh: 'Label (Home / Office)', addrDetPh: 'District, street, building', addAddrBtn: 'Save Address', delAddrBtn: 'Delete',
+    drvOnline: '● Online & Dispatching', drvOffline: '○ Offline',
+    drvEarnings: 'Completed Earnings', drvCompleted: 'Completed Trips', drvActive: 'Active Trips', drvRate: 'Acceptance Rate',
+    drvAvailable: 'Available Jobs in Your City', drvMyTrips: 'Active & Past Trips',
+    noTasks: 'No tasks in this queue right now.',
+    acceptJob: 'Accept & Start Trip', pickupConfirm: 'Confirm Pickup', deliverConfirm: 'Confirm Delivery',
+    vndOpen: '● Store Open for Orders', vndClosed: '○ Store Temporarily Closed',
+    vndActive: 'Active Orders', vndDone: 'Delivered Orders', vndRev: 'Store Revenue', vndCount: 'Catalog Items',
+    vndOrdersTitle: 'Incoming Store Orders', vndCatalogTitle: 'Catalog & Stock Manager',
+    addProdBtn: 'Add Product', prodAvail: 'Available', prodPaused: 'Paused',
+    aiTitle: 'DAZREVO AI Copilot', aiSend: 'Send', aiBusy: 'Analyzing…',
+    aiHint: 'Ask a question or describe an order; the copilot responds using live store and route context.',
+    aiPh: 'Type your request or question…',
+    statuses: {
+      PENDING: 'Pending', ACCEPTED: 'Accepted', PREPARING: 'Preparing',
+      READY: 'Ready', ASSIGNED: 'Driver Assigned', PICKED_UP: 'Picked Up',
+      DELIVERED: 'Delivered', CANCELLED: 'Cancelled'
+    },
+    tabs: {
+      CUSTOMER: [
+        { id: 'home', label: 'Home & Stores' },
+        { id: 'peer', label: 'Peer Courier' },
+        { id: 'orders', label: 'Orders & Tracking' },
+        { id: 'assistant', label: 'AI Assistant', ai: true },
+        { id: 'account', label: 'Profile & Addresses' }
+      ],
+      DRIVER: [
+        { id: 'driver-board', label: 'Available Jobs' },
+        { id: 'driver-active', label: 'Active Trips & Route' },
+        { id: 'assistant', label: 'AI Driver Copilot', ai: true },
+        { id: 'account', label: 'Account & Settings' }
+      ],
+      VENDOR: [
+        { id: 'vendor-orders', label: 'Incoming Orders' },
+        { id: 'vendor-catalog', label: 'Catalog & Stock' },
+        { id: 'assistant', label: 'AI Store Copilot', ai: true },
+        { id: 'account', label: 'Account & Settings' }
+      ]
+    },
+    slides: [
+      { k: '01 / SPATIAL CUSTOMER EXPERIENCE', t: 'Local stores and peer courier on one unified route.', b: 'Browse curated neighborhood merchants, inspect transparent SYP fees, or dispatch an independent courier with live route telemetry.' },
+      { k: '02 / COURIER DISPATCH BOARD', t: 'Real-time availability, pickup routes, and earnings.', b: 'Go online with one tap, claim ready store orders or peer parcels, and advance delivery milestones.' },
+      { k: '03 / MERCHANT COMMAND', t: 'Fulfill incoming orders and manage live stock.', b: 'Toggle store open status, add catalog products, and move orders seamlessly from Pending to Ready.' }
+    ]
+  },
+  tr: {
+    dir: 'ltr',
+    brandSub: 'Çok Rollü Akıllı Teslimat Platformu',
+    backLanding: 'Tanıtım Sitesi',
+    light: 'Açık',
+    dark: 'Koyu',
+    loginTab: 'Giriş Yap',
+    signupTab: 'Hesap Oluştur',
+    authHeading: 'DAZREVO Girişi',
+    authSubtitle: 'Telefon OTP, Google veya anında önizleme rolü ile devam edin.',
+    roleLabel: 'Hesap Rolü Seçin',
+    cust: 'Müşteri', drv: 'Kurye', vnd: 'Mağaza',
+    fullName: 'Ad Soyad', phone: 'Telefon Numarası', otp: 'Doğrulama Kodu (6 hane)',
+    sendOtp: 'SMS Kodu Gönder', verifyOtp: 'Doğrula ve Gir',
+    instantPreview: 'Anında Önizleme',
+    logout: 'Çıkış', refresh: 'Yenile', notifications: 'Bildirimler',
+    heroKicker: 'DAZREVO DISPATCH · AKILLI TESLİMAT',
+    heroTitle: 'Yerel mağazalardan sipariş verin veya bağımsız kurye çağırın.',
+    heroBody: 'Onay öncesi şeffaf SYP ücreti, kapıda ödeme ve canlı rota takibi.',
+    heroPeerBtn: 'Bağımsız Paket Gönder',
+    heroAiBtn: 'AI Asistana Sor',
+    allCities: 'Tüm Şehirler', searchPh: 'Mağaza, restoran veya tatlı ara…', searchBtn: 'Ara',
+    favOnly: 'Sadece Favoriler', openOnly: 'Şimdi Açık',
+    noVendors: 'Bu şehirde eşleşen mağaza bulunamadı.',
+    storeOpen: 'Açık', storeClosed: 'Kapalı', browseBtn: 'Ürünleri Gör ve Sipariş Ver',
+    schedLbl: 'Teslimat Zamanı', schedNow: 'Hemen Gönderim', sched2h: '2 Saat İçinde', schedEve: 'Akşam Dilimi',
+    notesLbl: 'Mağaza / Kurye Notu', notesPh: 'Örn: Kapıda arayın',
+    peerKmLbl: 'Tahmini Mesafe (km)', peerTierLbl: 'Öncelik Seviyesi', tierStd: 'Standart (1.0x)', tierExp: 'Hızlı (1.25x)',
+    applyFareBtn: 'Önerilen Ücreti Uygula',
+    reorderBtn: 'Tekrar Sipariş Ver', rateTitle: 'Puanla:', sendRateBtn: 'Puanı Gönder', ratedLabel: 'Puanınız:',
+    filterAll: 'Tümü', filterStores: 'Mağaza Siparişleri', filterPeer: 'Bağımsız Kurye',
+    filterAction: 'İşlem Bekleyen', filterDone: 'Tamamlanan',
+    proofPh: 'Teslimat kanıt notu (opsiyonel)',
+    saveItemBtn: 'Kaydet', copyReplyBtn: 'Özeti Kopyala',
+    addAddrTitle: 'Yeni Adres Ekle', addrLblPh: 'Başlık (Ev / İş)', addrDetPh: 'Mahalle, sokak, bina', addAddrBtn: 'Adresi Kaydet', delAddrBtn: 'Sil',
+    drvOnline: '● Çevrimiçi · Göreve Hazır', drvOffline: '○ Çevrimdışı',
+    drvEarnings: 'Tamamlanan Kazanç', drvCompleted: 'Tamamlanan Sefer', drvActive: 'Aktif Sefer', drvRate: 'Kabul Oranı',
+    drvAvailable: 'Şehrinizdeki Mevcut Görevler', drvMyTrips: 'Aktif ve Geçmiş Seferler',
+    noTasks: 'Bu listede şu an görev yok.',
+    acceptJob: 'Görevi Kabul Et', pickupConfirm: 'Teslim Alındı', deliverConfirm: 'Teslim Edildi',
+    vndOpen: '● Mağaza Siparişe Açık', vndClosed: '○ Mağaza Geçici Kapalı',
+    vndActive: 'Aktif Siparişler', vndDone: 'Teslim Edilenler', vndRev: 'Mağaza Cirosu', vndCount: 'Ürün Sayısı',
+    vndOrdersTitle: 'Gelen Mağaza Siparişleri', vndCatalogTitle: 'Ürün Kataloğu ve Stok',
+    addProdBtn: 'Ürün Ekle', prodAvail: 'Stokta', prodPaused: 'Durduruldu',
+    aiTitle: 'DAZREVO AI Asistanı', aiSend: 'Gönder', aiBusy: 'Analiz ediliyor…',
+    aiHint: 'Sorunuzu yazın; asistan canlı mağaza ve rota verilerine göre yanıt verir.',
+    aiPh: 'Siparişinizi veya sorunuzu yazın…',
+    statuses: {
+      PENDING: 'Beklemede', ACCEPTED: 'Kabul Edildi', PREPARING: 'Hazırlanıyor',
+      READY: 'Hazır', ASSIGNED: 'Kurye Atandı', PICKED_UP: 'Yolda',
+      DELIVERED: 'Teslim Edildi', CANCELLED: 'İptal'
+    },
+    tabs: {
+      CUSTOMER: [
+        { id: 'home', label: 'Ana Sayfa & Mağazalar' },
+        { id: 'peer', label: 'Bağımsız Kurye' },
+        { id: 'orders', label: 'Siparişler & Rota' },
+        { id: 'assistant', label: 'AI Asistan', ai: true },
+        { id: 'account', label: 'Profil & Adresler' }
+      ],
+      DRIVER: [
+        { id: 'driver-board', label: 'Mevcut Görevler' },
+        { id: 'driver-active', label: 'Aktif Teslimatlar' },
+        { id: 'assistant', label: 'AI Kurye Asistanı', ai: true },
+        { id: 'account', label: 'Hesap & Ayarlar' }
+      ],
+      VENDOR: [
+        { id: 'vendor-orders', label: 'Gelen Siparişler' },
+        { id: 'vendor-catalog', label: 'Ürünler & Stok' },
+        { id: 'assistant', label: 'AI Mağaza Asistanı', ai: true },
+        { id: 'account', label: 'Hesap & Ayarlar' }
+      ]
+    },
+    slides: [
+      { k: '01 / MÜŞTERİ DENEYİMİ', t: 'Yerel mağazalar ve bağımsız kurye tek rotada.', b: 'Yakındaki mağazalardan sipariş verin veya iki nokta arasında şeffaf ücretle paket gönderin.' },
+      { k: '02 / KURYE PANELİ', t: 'Anlık görevler ve canlı rota takibi.', b: 'Çevrimiçi olun, hazır siparişleri alın ve teslimat adımlarını kolayca yönetin.' },
+      { k: '03 / MAĞAZA YÖNETİMİ', t: 'Sipariş akışı ve stok kontrolü.', b: 'Mağazanızı açıp kapatın, yeni ürün ekleyin ve siparişleri kuryeye hazırlayın.' }
+    ]
+  }
+};
+
+const state = {
+  lang: localStorage.getItem('dazrevo_app_lang') || 'ar',
+  theme: localStorage.getItem('dazrevo_app_theme') || 'light',
+  style: localStorage.getItem('dazrevo_app_style') || 'glass',
+  favorites: JSON.parse(localStorage.getItem('dazrevo_fav_vendors') || '[]'),
+  onlyFavorites: false,
+  onlyOpen: false,
+  driverJobFilter: 'ALL',
+  vendorOrderFilter: 'ALL',
+  peerDraft: null,
+  slide: 0,
+  authMode: 'login',
+  authRole: 'CUSTOMER',
+  otpRequested: false,
+  token: null,
+  user: null,
+  role: 'CUSTOMER',
+  tab: 'home',
+  cityId: '',
+  searchQ: '',
+  cities: [],
+  vendors: [],
+  addresses: [],
+  orders: [],
+  notifications: [],
+  cart: { vendor: null, items: [] },
+  aiMessages: [],
+  aiBusy: false,
+};
+
+function notify(msg, bad = false) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (bad ? ' bad' : '');
+  clearTimeout(notify._timer);
+  notify._timer = setTimeout(() => t.classList.add('hidden'), 3600);
+}
+
+function money(val) {
+  return new Intl.NumberFormat('en-US').format(Number(val || 0)) + ' SYP';
+}
+
+function localizedName(translations, fallback = '—') {
+  if (!Array.isArray(translations)) return fallback;
+  return translations.find((x) => x.locale === state.lang)?.name || translations[0]?.name || fallback;
+}
+
+function cityLabel(city) {
+  return localizedName(city?.names, city?.code || '—');
+}
+
+function statusMeta(st) {
+  const dict = I18N[state.lang] || I18N.ar;
+  const cls = {
+    PENDING: 'status-warn', ACCEPTED: 'status-ok', PREPARING: 'status-warn',
+    READY: 'status-ok', ASSIGNED: 'status-ok', PICKED_UP: 'status-ok',
+    DELIVERED: 'status-ok', CANCELLED: 'status-bad'
+  };
+  return [dict.statuses[st] || st, cls[st] || 'status-warn'];
+}
+
+async function api(path, method = 'GET', body = null) {
+  const headers = { Accept: 'application/json' };
+  if (body !== null) headers['Content-Type'] = 'application/json';
+  if (state.token) headers.Authorization = 'Bearer ' + state.token;
+  const res = await fetch(API_BASE + path, {
+    method,
+    headers,
+    body: body !== null ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Request failed');
+  return data;
+}
+
+function applyAppearance() {
+  const dict = I18N[state.lang] || I18N.ar;
+  document.documentElement.lang = state.lang;
+  document.documentElement.dir = dict.dir;
+  document.documentElement.classList.toggle('dark', state.theme === 'dark');
+  document.documentElement.setAttribute('data-style', state.style);
+
+  document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
+  document.querySelectorAll('[data-theme-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeBtn === state.theme)));
+  document.querySelectorAll('[data-style-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.styleBtn === state.style)));
+
+  $('gateBrandSub').textContent = dict.brandSub;
+  $('backLandingLink').textContent = dict.backLanding;
+  $('gateLightBtn').textContent = dict.light;
+  $('gateDarkBtn').textContent = dict.dark;
+  $('appLightBtn').textContent = dict.light;
+  $('appDarkBtn').textContent = dict.dark;
+  $('tabLoginBtn').textContent = dict.loginTab;
+  $('tabSignupBtn').textContent = dict.signupTab;
+  $('authHeading').textContent = dict.authHeading;
+  $('authSubtitle').textContent = dict.authSubtitle;
+  $('roleSelectLabel').textContent = dict.roleLabel;
+  $('roleLblCustomer').textContent = dict.cust;
+  $('roleLblDriver').textContent = dict.drv;
+  $('roleLblVendor').textContent = dict.vnd;
+  $('authNameLabel').textContent = dict.fullName;
+  $('authPhoneLabel').textContent = dict.phone;
+  $('authOtpLabel').textContent = dict.otp;
+  $('otpSubmitBtn').textContent = state.otpRequested ? dict.verifyOtp : dict.sendOtp;
+  $('instantPreviewBtn').textContent = dict.instantPreview;
+  $('appLogoutBtn').textContent = dict.logout;
+  $('refreshAppBtn').textContent = dict.refresh;
+  $('swCust').textContent = dict.cust;
+  $('swDrv').textContent = dict.drv;
+  $('swVnd').textContent = dict.vnd;
+
+  const slide = dict.slides[state.slide] || dict.slides[0];
+  $('slideKicker').textContent = slide.k;
+  $('slideTitle').textContent = slide.t;
+  $('slideBody').textContent = slide.b;
+  document.querySelectorAll('[data-slide]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.slide) === state.slide)));
+  if (!$('appView').classList.contains('hidden')) renderShellNav();
+}
+
+function openModal(title, contentBuilder) {
+  $('modalTitle').textContent = title;
+  const body = $('modalBody');
+  body.replaceChildren();
+  contentBuilder(body);
+  $('modalBackdrop').classList.remove('hidden');
+}
+function closeModal() { $('modalBackdrop').classList.add('hidden'); }
+$('modalCloseBtn').onclick = closeModal;
+
+function createSpatialRouteSvg(o) {
+  const pLat = Number(o.pickupLatitude || 33.513);
+  const pLng = Number(o.pickupLongitude || 36.276);
+  const dLat = Number(o.address?.latitude || 33.519);
+  const dLng = Number(o.address?.longitude || 36.289);
+  const km = (Math.hypot((dLat - pLat) * 111, (dLng - pLng) * 92)).toFixed(1);
+
+  const box = document.createElement('div');
+  box.className = 'spatial-map';
+  box.setAttribute('data-testid', 'spatial-route-map');
+
+  const head = document.createElement('div');
+  head.className = 'spatial-map-head';
+  const left = document.createElement('strong');
+  left.textContent = `${o.pickupAddress || 'نقطة الاستلام'} → ${o.address?.details || o.address?.label || 'نقطة التسليم'}`;
+  const right = document.createElement('span');
+  right.className = 'tabular';
+  right.style.color = '#3FD1BE';
+  right.textContent = `${km} km · (${pLat.toFixed(3)}, ${pLng.toFixed(3)})`;
+  head.append(left, right);
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 440 130');
+  svg.innerHTML = `
+    <path d="M52 96 C150 28, 280 104, 388 34" fill="none" stroke="#D6B46C" stroke-width="3" stroke-dasharray="7 6"/>
+    <path d="M52 96 C170 96, 265 44, 388 34" fill="none" stroke="#3FD1BE" stroke-width="2" stroke-opacity="0.7" stroke-dasharray="4 5"/>
+    <circle cx="52" cy="96" r="14" fill="rgba(214,180,108,0.18)" stroke="rgba(214,180,108,0.5)"/>
+    <circle cx="52" cy="96" r="6" fill="#D6B46C"/>
+    <circle cx="220" cy="64" r="5" fill="#F5F3EE"/>
+    <circle cx="388" cy="34" r="14" fill="rgba(63,209,190,0.18)" stroke="rgba(63,209,190,0.5)"/>
+    <circle cx="388" cy="34" r="6" fill="#3FD1BE"/>
+  `;
+  box.append(head, svg);
+  return box;
+}
+
+async function enterSession(role, authPromise) {
+  try {
+    const payload = await authPromise;
+    state.token = payload.tokens.accessToken;
+    state.user = payload.user;
+    state.role = role;
+    state.tab = I18N[state.lang].tabs[role][0].id;
+    $('gateView').classList.add('hidden');
+    $('appView').classList.remove('hidden');
+    await loadWorkspace();
+  } catch (err) {
+    const notice = $('gateNotice');
+    notice.textContent = err.message;
+    notice.className = 'notice bad';
+  }
+}
+
+async function switchRoleSession(role) {
+  await enterSession(role, api('/auth/preview-role', 'POST', { role }));
+}
+
+function renderShellNav() {
+  const dict = I18N[state.lang] || I18N.ar;
+  const tabs = dict.tabs[state.role];
+  const roleNames = { CUSTOMER: dict.cust, DRIVER: dict.drv, VENDOR: dict.vnd };
+  $('sideUserName').textContent = state.user?.name || 'DAZREVO User';
+  $('activeRoleBadge').textContent = roleNames[state.role];
+  document.querySelectorAll('[data-switch-role]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.switchRole === state.role)));
+
+  const sideNav = $('sideNav');
+  const mobileDock = $('mobileDock');
+  sideNav.replaceChildren();
+  mobileDock.replaceChildren();
+
+  tabs.forEach((t, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = t.label;
+    btn.className = (t.ai ? 'ai-tab ' : '') + (state.tab === t.id ? 'active' : '');
+    btn.onclick = () => {
+      state.tab = t.id;
+      $('sidebar').classList.remove('open-mobile');
+      renderShellNav();
+      renderCurrentTab();
+    };
+    sideNav.append(btn);
+
+    if (idx < 4) {
+      const mBtn = document.createElement('button');
+      mBtn.type = 'button';
+      mBtn.textContent = t.label.split(' ')[0];
+      mBtn.className = state.tab === t.id ? 'active' : '';
+      mBtn.onclick = btn.onclick;
+      mobileDock.append(mBtn);
+    }
+  });
+
+  const activeTabObj = tabs.find((t) => t.id === state.tab) || tabs[0];
+  $('appCrumb').textContent = `DAZREVO · ${roleNames[state.role]}`;
+  $('appHeading').textContent = activeTabObj.label;
+
+  const unread = state.notifications.filter((n) => !n.isRead).length;
+  $('notifBadge').textContent = String(unread);
+  $('notifTopBtn').firstChild.textContent = dict.notifications + ' ';
+  updateCartDock();
+}
+
+function updateCartDock() {
+  const show = state.role === 'CUSTOMER' && state.cart.items.length > 0;
+  $('cartDock').classList.toggle('hidden', !show);
+  if (!show) return;
+  const qty = state.cart.items.reduce((s, x) => s + x.quantity, 0);
+  const sub = state.cart.items.reduce((s, x) => s + x.price * x.quantity, 0);
+  $('cartSummaryText').textContent = `${qty} صنف · ${money(sub)}`;
+  $('cartVendorText').textContent = localizedName(state.cart.vendor?.translations, 'متجر محلي');
+}
+
+async function loadWorkspace() {
+  const [cities, notif] = await Promise.all([api('/cities'), api('/notifications')]);
+  state.cities = cities;
+  state.notifications = notif;
+  renderShellNav();
+  await renderCurrentTab();
+}
+
+async function renderCurrentTab() {
+  const body = $('appBody');
+  body.replaceChildren();
+  if (state.tab === 'home') await renderCustomerHome(body);
+  else if (state.tab === 'peer') renderPeerDelivery(body);
+  else if (state.tab === 'orders') await renderCustomerOrders(body);
+  else if (state.tab === 'assistant') renderAssistant(body);
+  else if (state.tab === 'account') await renderAccount(body);
+  else if (state.tab === 'driver-board' || state.tab === 'driver-active') await renderDriverView(body, state.tab);
+  else if (state.tab === 'vendor-orders' || state.tab === 'vendor-catalog') await renderVendorView(body, state.tab);
+}
+
+async function renderCustomerHome(body) {
+  const params = new URLSearchParams();
+  if (state.cityId) params.set('cityId', state.cityId);
+  if (state.searchQ) params.set('q', state.searchQ);
+  const vendors = await api('/vendors' + (params.toString() ? '?' + params.toString() : ''));
+  state.vendors = vendors;
+
+  const dict = I18N[state.lang] || I18N.ar;
+
+  // Bento Hero Stage
+  const bento = document.createElement('div');
+  bento.className = 'bento-hero';
+
+  const heroCard = document.createElement('div');
+  heroCard.className = 'stage-card obsidian';
+  heroCard.innerHTML = `
+    <div>
+      <div style="color:#D6B46C;font-size:12px;font-weight:800">${dict.heroKicker}</div>
+      <h2 style="margin:6px 0 8px;font-size:24px;line-height:1.3">${dict.heroTitle}</h2>
+      <p>${dict.heroBody}</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button type="button" class="btn-primary" id="heroPeerBtn" style="background:#D6B46C;color:#0C0D0F">${dict.heroPeerBtn}</button>
+      <button type="button" class="btn-teal" id="heroAiBtn">${dict.heroAiBtn}</button>
+    </div>
+  `;
+
+  const searchCard = document.createElement('div');
+  searchCard.className = 'stage-card surface';
+  const cityStrip = document.createElement('div');
+  cityStrip.className = 'city-strip';
+  const allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.className = 'city-pill';
+  allBtn.textContent = dict.allCities;
+  allBtn.setAttribute('aria-pressed', String(!state.cityId));
+  allBtn.onclick = () => { state.cityId = ''; renderCurrentTab(); };
+  cityStrip.append(allBtn);
+
+  state.cities.forEach((c) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'city-pill';
+    b.textContent = cityLabel(c);
+    b.setAttribute('aria-pressed', String(state.cityId === c.id));
+    b.onclick = () => { state.cityId = c.id; renderCurrentTab(); };
+    cityStrip.append(b);
+  });
+
+  const favBtn = document.createElement('button');
+  favBtn.type = 'button';
+  favBtn.className = 'city-pill';
+  favBtn.textContent = '★ ' + dict.favOnly;
+  favBtn.setAttribute('aria-pressed', String(state.onlyFavorites));
+  favBtn.onclick = () => { state.onlyFavorites = !state.onlyFavorites; renderCurrentTab(); };
+
+  const openFilterBtn = document.createElement('button');
+  openFilterBtn.type = 'button';
+  openFilterBtn.className = 'city-pill';
+  openFilterBtn.textContent = dict.openOnly;
+  openFilterBtn.setAttribute('aria-pressed', String(state.onlyOpen));
+  openFilterBtn.onclick = () => { state.onlyOpen = !state.onlyOpen; renderCurrentTab(); };
+
+  cityStrip.append(favBtn, openFilterBtn);
+
+  const searchForm = document.createElement('form');
+  searchForm.className = 'toolbar';
+  const qIn = document.createElement('input');
+  qIn.placeholder = dict.searchPh;
+  qIn.value = state.searchQ;
+  const qBtn = document.createElement('button');
+  qBtn.type = 'submit';
+  qBtn.className = 'btn-primary';
+  qBtn.textContent = dict.searchBtn;
+  searchForm.append(qIn, qBtn);
+  searchForm.onsubmit = (e) => { e.preventDefault(); state.searchQ = qIn.value.trim(); renderCurrentTab(); };
+
+  searchCard.append(cityStrip, searchForm);
+  bento.append(heroCard, searchCard);
+  body.append(bento);
+
+  $('heroPeerBtn').onclick = () => { state.tab = 'peer'; renderShellNav(); renderCurrentTab(); };
+  $('heroAiBtn').onclick = () => { state.tab = 'assistant'; renderShellNav(); renderCurrentTab(); };
+
+  const filteredVendors = vendors.filter((v) => {
+    if (state.onlyFavorites && !state.favorites.includes(v.id)) return false;
+    if (state.onlyOpen && !v.isOpen) return false;
+    return true;
+  });
+
+  // Stores Grid
+  const grid = document.createElement('div');
+  grid.className = 'stores-grid';
+  if (!filteredVendors.length) {
+    const empty = document.createElement('div');
+    empty.className = 'panel surface';
+    empty.textContent = dict.noVendors;
+    body.append(empty);
+    return;
+  }
+
+  filteredVendors.forEach((v) => {
+    const isFav = state.favorites.includes(v.id);
+    const card = document.createElement('article');
+    card.className = 'store-card surface';
+    const head = document.createElement('div');
+    head.className = 'store-head';
+    const titleBox = document.createElement('div');
+    const h3 = document.createElement('h3');
+    h3.textContent = localizedName(v.translations, 'Store');
+    const meta = document.createElement('div');
+    meta.className = 'store-meta';
+    meta.textContent = `${v.type || 'STORE'} · ${v.location?.address || ''}`;
+    titleBox.append(h3, meta);
+
+    const actionsRight = document.createElement('div');
+    actionsRight.style.cssText = 'display:flex;align-items:center;gap:6px';
+    const favToggle = document.createElement('button');
+    favToggle.type = 'button';
+    favToggle.className = 'fav-btn';
+    favToggle.setAttribute('aria-pressed', String(isFav));
+    favToggle.setAttribute('aria-label', dict.favOnly);
+    favToggle.textContent = isFav ? '★' : '☆';
+    favToggle.onclick = () => {
+      if (state.favorites.includes(v.id)) state.favorites = state.favorites.filter((x) => x !== v.id);
+      else state.favorites = [...state.favorites, v.id];
+      localStorage.setItem('dazrevo_fav_vendors', JSON.stringify(state.favorites));
+      renderCurrentTab();
+    };
+
+    const badge = document.createElement('span');
+    badge.className = 'status-label ' + (v.isOpen ? 'status-ok' : 'status-bad');
+    badge.textContent = v.isOpen ? dict.storeOpen : dict.storeClosed;
+    actionsRight.append(favToggle, badge);
+    head.append(titleBox, actionsRight);
+
+    const desc = document.createElement('p');
+    desc.style.cssText = 'margin:0;font-size:13px;color:var(--muted)';
+    desc.textContent = v.translations?.find((t) => t.locale === state.lang)?.description || v.translations?.[0]?.description || '';
+
+    const openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'btn-primary';
+    openBtn.textContent = dict.browseBtn;
+    openBtn.onclick = () => openVendorCatalogModal(v.id);
+
+    card.append(head, desc, openBtn);
+    grid.append(card);
+  });
+  body.append(grid);
+}
+
+async function openVendorCatalogModal(vendorId) {
+  const data = await api(`/vendors/${vendorId}/products`);
+  const vendor = data.vendor;
+  const items = data.products || [];
+  openModal(localizedName(vendor.translations), (modal) => {
+    const addrInfo = document.createElement('div');
+    addrInfo.style.cssText = 'font-size:13px;color:var(--muted)';
+    addrInfo.textContent = vendor.location?.address || '';
+    modal.append(addrInfo);
+
+    const list = document.createElement('div');
+    list.className = 'list-stack';
+    items.forEach((p) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      const info = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = localizedName(p.translations);
+      const sub = document.createElement('div');
+      sub.style.cssText = 'font-size:12.5px;color:var(--muted)';
+      sub.textContent = `${money(p.price)} · المخزون: ${p.stock}`;
+      info.append(name, sub);
+
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = p.isAvailable && p.stock > 0 ? 'btn-primary' : 'btn-outline';
+      addBtn.disabled = !p.isAvailable || p.stock <= 0;
+      addBtn.textContent = p.isAvailable ? 'أضف للسلة' : 'غير متوفر';
+      addBtn.onclick = () => {
+        if (state.cart.vendor && state.cart.vendor.id !== vendor.id) {
+          state.cart.items = [];
+        }
+        state.cart.vendor = vendor;
+        const existing = state.cart.items.find((x) => x.productId === p.id);
+        if (existing) existing.quantity++;
+        else state.cart.items.push({ productId: p.id, name: localizedName(p.translations), price: p.price, quantity: 1 });
+        updateCartDock();
+        notify('تمت الإضافة إلى السلة');
+      };
+      row.append(info, addBtn);
+      list.append(row);
+    });
+    modal.append(list);
+
+    if (state.cart.items.length) {
+      const goBtn = document.createElement('button');
+      goBtn.type = 'button';
+      goBtn.className = 'btn-teal';
+      goBtn.textContent = 'الانتقال لإتمام الطلب';
+      goBtn.onclick = () => { closeModal(); openCheckoutModal(); };
+      modal.append(goBtn);
+    }
+  });
+}
+
+async function openCheckoutModal() {
+  const dict = I18N[state.lang] || I18N.ar;
+  const addresses = await api('/addresses');
+  state.addresses = addresses;
+  openModal('تأكيد الطلب والدفع عند الاستلام', (modal) => {
+    const selGroup = document.createElement('div');
+    selGroup.className = 'field-group';
+    const lbl = document.createElement('label');
+    lbl.textContent = 'اختر عنوان التسليم';
+    const sel = document.createElement('select');
+    addresses.forEach((a) => {
+      const o = document.createElement('option');
+      o.value = a.id;
+      o.textContent = `${a.label} — ${a.details}`;
+      sel.append(o);
+    });
+    selGroup.append(lbl, sel);
+
+    const schedGroup = document.createElement('div');
+    schedGroup.className = 'field-group';
+    const schedLbl = document.createElement('label');
+    schedLbl.textContent = dict.schedLbl;
+    const schedSel = document.createElement('select');
+    [dict.schedNow, dict.sched2h, dict.schedEve].forEach((slot) => {
+      const o = document.createElement('option');
+      o.value = slot;
+      o.textContent = slot;
+      schedSel.append(o);
+    });
+    schedGroup.append(schedLbl, schedSel);
+
+    const notesGroup = document.createElement('div');
+    notesGroup.className = 'field-group';
+    const notesLbl = document.createElement('label');
+    notesLbl.textContent = dict.notesLbl;
+    const notesIn = document.createElement('input');
+    notesIn.placeholder = dict.notesPh;
+    notesGroup.append(notesLbl, notesIn);
+
+    const summary = document.createElement('div');
+    summary.className = 'panel surface';
+    const sub = state.cart.items.reduce((s, x) => s + x.price * x.quantity, 0);
+    const estFee = 6000;
+    summary.innerHTML = `
+      <div style="display:flex;justify-content:space-between"><span>قيمة المنتجات</span><strong class="tabular">${money(sub)}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>رسوم التوصيل التقديرية</span><strong class="tabular">${money(estFee)}</strong></div>
+      <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px"><strong>الإجمالي المتوقع</strong><strong class="tabular" style="color:var(--teal)">${money(sub + estFee)}</strong></div>
+    `;
+
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'button';
+    submitBtn.className = 'btn-primary';
+    submitBtn.textContent = 'تأكيد وإرسال الطلب';
+    submitBtn.onclick = async () => {
+      submitBtn.disabled = true;
+      try {
+        await api('/orders', 'POST', {
+          vendorId: state.cart.vendor.id,
+          addressId: sel.value,
+          scheduledFor: schedSel.value,
+          notes: notesIn.value.trim() || undefined,
+          items: state.cart.items.map((x) => ({ productId: x.productId, quantity: x.quantity })),
+        });
+        state.cart = { vendor: null, items: [] };
+        closeModal();
+        notify('تم إرسال طلبك بنجاح');
+        state.tab = 'orders';
+        await loadWorkspace();
+      } catch (err) {
+        notify(err.message, true);
+        submitBtn.disabled = false;
+      }
+    };
+    modal.append(selGroup, schedGroup, notesGroup, summary, submitBtn);
+  });
+}
+
+function renderPeerDelivery(body) {
+  const dict = I18N[state.lang] || I18N.ar;
+  const draft = state.peerDraft || {};
+  const panel = document.createElement('div');
+  panel.className = 'panel surface';
+  panel.innerHTML = `<h2 style="margin:0;font-size:19px;font-weight:900">إنشاء طلب توصيل مستقل (من الباب إلى الباب)</h2>`;
+
+  const form = document.createElement('form');
+  form.style.cssText = 'display:grid;gap:12px';
+  form.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
+      <div class="field-group"><label for="peerCity">المدينة</label><select id="peerCity"></select></div>
+      <div class="field-group"><label for="peerKm">${dict.peerKmLbl}</label><input id="peerKm" type="number" min="1" max="50" step="0.5" value="4"></div>
+      <div class="field-group"><label for="peerTier">${dict.peerTierLbl}</label><select id="peerTier"><option value="STANDARD">${dict.tierStd}</option><option value="EXPRESS">${dict.tierExp}</option></select></div>
+      <div class="field-group"><label for="peerFare">الأجرة المقترحة (SYP)</label><input id="peerFare" type="number" min="5000" step="500" value="${draft.offeredFare || 18000}"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap" class="meta-note">
+      <span id="peerEstimateText" class="tabular"></span>
+      <button type="button" class="btn-teal" id="applySuggestedFareBtn">${dict.applyFareBtn}</button>
+    </div>
+    <div class="field-group"><label for="peerPickup">عنوان الاستلام</label><input id="peerPickup" placeholder="ساحة المحافظة، دمشق" value="${draft.pickupAddress || 'الشعلان، دمشق'}"></div>
+    <div class="field-group"><label for="peerDropoff">عنوان التسليم</label><input id="peerDropoff" placeholder="المزة فيلات غربية، بناء 10" value="${draft.dropoffAddress || 'المالكي، شارع عبد المنعم رياض'}"></div>
+    <div class="field-group"><label for="peerDesc">وصف الغرض</label><input id="peerDesc" placeholder="طرد مستندات أو أغراض شخصية" value="${draft.description || 'طرد مستندات وأمانات'}"></div>
+    <button type="submit" class="btn-primary">نشر طلب التوصيل للمناديب</button>
+  `;
+  panel.append(form);
+  body.append(panel);
+
+  const citySel = $('peerCity');
+  state.cities.forEach((c) => {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = cityLabel(c);
+    citySel.append(o);
+  });
+  if (draft.cityId) citySel.value = draft.cityId;
+
+  function calcSuggested() {
+    const km = Math.max(0.5, Number($('peerKm').value || 1));
+    const mult = $('peerTier').value === 'EXPRESS' ? 1.25 : 1;
+    const est = Math.max(5000, Math.round(((6000 + km * 1800) * mult) / 500) * 500);
+    $('peerEstimateText').textContent = `${km} km · ${money(est)}`;
+    return est;
+  }
+  calcSuggested();
+  $('peerKm').oninput = calcSuggested;
+  $('peerTier').onchange = calcSuggested;
+  $('applySuggestedFareBtn').onclick = () => {
+    $('peerFare').value = String(calcSuggested());
+  };
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api('/orders/peer', 'POST', {
+        cityId: citySel.value,
+        offeredFare: Number($('peerFare').value),
+        pickupAddress: $('peerPickup').value.trim(),
+        dropoffAddress: $('peerDropoff').value.trim(),
+        description: $('peerDesc').value.trim(),
+        scheduledFor: $('peerTier').value === 'EXPRESS' ? dict.tierExp : dict.tierStd,
+      });
+      state.peerDraft = null;
+      notify('تم بث طلب التوصيل للمناديب');
+      state.tab = 'orders';
+      await loadWorkspace();
+    } catch (err) {
+      notify(err.message, true);
+    }
+  };
+}
+
+async function renderCustomerOrders(body) {
+  const dict = I18N[state.lang] || I18N.ar;
+  const orders = await api('/orders/mine');
+  state.orders = orders;
+  if (!orders.length) {
+    const empty = document.createElement('div');
+    empty.className = 'panel surface';
+    empty.textContent = 'لا توجد طلبات مسجلة حتى الآن.';
+    body.append(empty);
+    return;
+  }
+
+  const stack = document.createElement('div');
+  stack.className = 'list-stack';
+  const steps = ['PENDING', 'ACCEPTED', 'READY', 'PICKED_UP', 'DELIVERED'];
+
+  orders.forEach((o) => {
+    const card = document.createElement('article');
+    card.className = 'order-card';
+    const [stLabel, stCls] = statusMeta(o.status);
+
+    const top = document.createElement('div');
+    top.className = 'order-top';
+    const title = document.createElement('div');
+    title.innerHTML = `<strong class="tabular">#${o.orderNumber}</strong> · <span>${o.type === 'PEER_DELIVERY' ? 'توصيل مستقل' : localizedName(o.vendor?.translations, 'متجر')}</span>`;
+    const right = document.createElement('div');
+    right.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap';
+    const badge = document.createElement('span');
+    badge.className = 'status-label ' + stCls;
+    badge.textContent = stLabel;
+    const tot = document.createElement('strong');
+    tot.className = 'tabular';
+    tot.textContent = money(o.total);
+    const reorderBtn = document.createElement('button');
+    reorderBtn.type = 'button';
+    reorderBtn.className = 'btn-outline';
+    reorderBtn.textContent = dict.reorderBtn;
+    reorderBtn.onclick = () => {
+      if (o.type === 'PEER_DELIVERY') {
+        state.peerDraft = {
+          cityId: o.city?.id,
+          offeredFare: o.deliveryFee,
+          pickupAddress: o.pickupAddress,
+          dropoffAddress: o.address?.details,
+          description: o.items?.[0]?.nameSnapshot || '',
+        };
+        state.tab = 'peer';
+        renderShellNav();
+        renderCurrentTab();
+      } else if (o.vendor?.id) {
+        state.cart = {
+          vendor: o.vendor,
+          items: (o.items || []).filter((i) => i.productId).map((i) => ({
+            productId: i.productId,
+            name: i.nameSnapshot,
+            price: i.unitPrice,
+            quantity: i.quantity,
+          })),
+        };
+        updateCartDock();
+        openCheckoutModal();
+      }
+    };
+    right.append(badge, tot, reorderBtn);
+    top.append(title, right);
+
+    const stepper = document.createElement('div');
+    stepper.className = 'stepper';
+    const currentIdx = steps.indexOf(o.status === 'PREPARING' ? 'ACCEPTED' : o.status === 'ASSIGNED' ? 'READY' : o.status);
+    steps.forEach((s, idx) => {
+      const node = document.createElement('div');
+      node.className = 'step-node' + (idx < currentIdx ? ' done' : idx === currentIdx ? ' current' : '');
+      node.textContent = statusMeta(s)[0];
+      stepper.append(node);
+    });
+
+    card.append(top, stepper, createSpatialRouteSvg(o));
+
+    if (o.scheduledFor || o.notes || o.deliveryProofNote) {
+      const meta = document.createElement('div');
+      meta.className = 'meta-note';
+      meta.textContent = [o.scheduledFor, o.notes, o.deliveryProofNote].filter(Boolean).join(' · ');
+      card.append(meta);
+    }
+
+    if (o.status === 'DELIVERED') {
+      const rateBox = document.createElement('div');
+      rateBox.className = 'rating-box';
+      if (o.rating) {
+        const done = document.createElement('span');
+        done.className = 'status-label status-ok';
+        done.textContent = `${dict.ratedLabel} ${'★'.repeat(o.rating.stars)} (${o.rating.stars}/5)${o.rating.comment ? ' · ' + o.rating.comment : ''}`;
+        rateBox.append(done);
+      } else {
+        let selectedStars = 5;
+        const lbl = document.createElement('span');
+        lbl.style.cssText = 'font-size:12.5px;font-weight:800;color:var(--muted)';
+        lbl.textContent = dict.rateTitle;
+        const starBtns = [];
+        for (let s = 1; s <= 5; s++) {
+          const sb = document.createElement('button');
+          sb.type = 'button';
+          sb.className = 'star-btn lit';
+          sb.textContent = '★';
+          sb.setAttribute('aria-label', `${s}/5`);
+          sb.onclick = () => {
+            selectedStars = s;
+            starBtns.forEach((b, i) => b.classList.toggle('lit', i < s));
+          };
+          starBtns.push(sb);
+        }
+        const cIn = document.createElement('input');
+        cIn.style.cssText = 'flex:1;min-width:140px;min-height:36px;padding:6px 10px';
+        cIn.placeholder = dict.notesPh;
+        const sendR = document.createElement('button');
+        sendR.type = 'button';
+        sendR.className = 'btn-teal';
+        sendR.textContent = dict.sendRateBtn;
+        sendR.onclick = async () => {
+          await api(`/orders/${o.id}/rating`, 'POST', { stars: selectedStars, comment: cIn.value.trim() });
+          notify('OK');
+          await loadWorkspace();
+        };
+        rateBox.append(lbl, ...starBtns, cIn, sendR);
+      }
+      card.append(rateBox);
+    }
+
+    if (o.status === 'PENDING') {
+      const cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button';
+      cancelBtn.className = 'btn-danger';
+      cancelBtn.textContent = 'إلغاء الطلب';
+      cancelBtn.onclick = async () => {
+        await api(`/orders/${o.id}/cancel`, 'PATCH');
+        notify('تم إلغاء الطلب');
+        await loadWorkspace();
+      };
+      card.append(cancelBtn);
+    }
+    stack.append(card);
+  });
+  body.append(stack);
+}
+
+async function renderDriverView(body, tab) {
+  const dict = I18N[state.lang] || I18N.ar;
+  const dash = await api('/driver/dashboard');
+  const dr = dash.driver;
+  const st = dash.stats;
+
+  // Availability + Telemetry
+  const topPanel = document.createElement('div');
+  topPanel.className = 'stage-card obsidian';
+  topPanel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div>
+        <div style="color:#D6B46C;font-size:12px;font-weight:800">COURIER TELEMETRY · ${dr.vehicleType || 'MOTORCYCLE'}</div>
+        <h2 style="margin:4px 0 0;font-size:20px">${dr.user?.name || dict.drv}</h2>
+      </div>
+      <button type="button" id="driverAvailBtn" class="${dr.isOnline ? 'btn-teal' : 'btn-outline'}">${dr.isOnline ? dict.drvOnline : dict.drvOffline}</button>
+    </div>
+  `;
+  const kpis = document.createElement('div');
+  kpis.className = 'telemetry-grid';
+  [
+    [dict.drvEarnings, money(st.earnings)],
+    [dict.drvCompleted, String(st.completedTrips)],
+    [dict.drvActive, String(st.activeTrips)],
+    [dict.drvRate, st.acceptanceRate + '%'],
+  ].forEach(([l, v]) => {
+    const c = document.createElement('div');
+    c.className = 'telemetry-cell surface';
+    c.innerHTML = `<span>${l}</span><strong class="tabular">${v}</strong>`;
+    kpis.append(c);
+  });
+  body.append(topPanel, kpis);
+
+  $('driverAvailBtn').onclick = async () => {
+    await api('/driver/availability', 'PATCH', { isOnline: !dr.isOnline });
+    notify('OK');
+    await renderCurrentTab();
+  };
+
+  const rawList = tab === 'driver-board' ? dash.availableOrders : dash.myOrders;
+  const list = rawList.filter((o) => state.driverJobFilter === 'ALL' || o.type === state.driverJobFilter);
+
+  const panel = document.createElement('div');
+  panel.className = 'panel surface';
+  const headRow = document.createElement('div');
+  headRow.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap';
+  const head = document.createElement('h2');
+  head.style.cssText = 'margin:0;font-size:17px;font-weight:900';
+  head.textContent = (tab === 'driver-board' ? dict.drvAvailable : dict.drvMyTrips) + ` (${list.length})`;
+  const filterStrip = document.createElement('div');
+  filterStrip.className = 'city-strip';
+  [['ALL', dict.filterAll], ['VENDOR_ORDER', dict.filterStores], ['PEER_DELIVERY', dict.filterPeer]].forEach(([k, lbl]) => {
+    const fb = document.createElement('button');
+    fb.type = 'button';
+    fb.className = 'city-pill';
+    fb.textContent = lbl;
+    fb.setAttribute('aria-pressed', String(state.driverJobFilter === k));
+    fb.onclick = () => { state.driverJobFilter = k; renderCurrentTab(); };
+    filterStrip.append(fb);
+  });
+  headRow.append(head, filterStrip);
+  panel.append(headRow);
+
+  if (!list.length) {
+    const empty = document.createElement('p');
+    empty.style.color = 'var(--muted)';
+    empty.textContent = dict.noTasks;
+    panel.append(empty);
+  } else {
+    list.forEach((o) => {
+      const card = document.createElement('div');
+      card.className = 'order-card';
+      card.append(createSpatialRouteSvg(o));
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap';
+      row.innerHTML = `<div><strong class="tabular">#${o.orderNumber}</strong> · <span class="tabular">${money(o.deliveryFee)}</span> · <span>${statusMeta(o.status)[0]}</span></div>`;
+      if (tab === 'driver-board') {
+        const acc = document.createElement('button');
+        acc.type = 'button';
+        acc.className = 'btn-primary';
+        acc.textContent = dict.acceptJob;
+        acc.onclick = async () => {
+          await api(`/driver/orders/${o.id}/accept`, 'POST');
+          state.tab = 'driver-active';
+          renderShellNav();
+          await renderCurrentTab();
+        };
+        row.append(acc);
+      } else if (o.status === 'ASSIGNED' || o.status === 'PICKED_UP') {
+        const nextSt = o.status === 'ASSIGNED' ? 'PICKED_UP' : 'DELIVERED';
+        const nextLbl = o.status === 'ASSIGNED' ? dict.pickupConfirm : dict.deliverConfirm;
+        const actionGroup = document.createElement('div');
+        actionGroup.className = 'inline-edit';
+        let proofIn = null;
+        if (nextSt === 'DELIVERED') {
+          proofIn = document.createElement('input');
+          proofIn.style.width = '200px';
+          proofIn.placeholder = dict.proofPh;
+          actionGroup.append(proofIn);
+        }
+        const adv = document.createElement('button');
+        adv.type = 'button';
+        adv.className = 'btn-teal';
+        adv.textContent = nextLbl;
+        adv.onclick = async () => {
+          await api(`/driver/orders/${o.id}/status`, 'PATCH', {
+            status: nextSt,
+            deliveryProofNote: proofIn ? proofIn.value.trim() : undefined,
+          });
+          await renderCurrentTab();
+        };
+        actionGroup.append(adv);
+        row.append(actionGroup);
+      }
+      card.append(row);
+      panel.append(card);
+    });
+  }
+  body.append(panel);
+}
+
+async function renderVendorView(body, tab) {
+  const dict = I18N[state.lang] || I18N.ar;
+  const dash = await api('/vendor/dashboard');
+  const v = dash.vendor;
+  const st = dash.stats;
+
+  const top = document.createElement('div');
+  top.className = 'stage-card obsidian';
+  top.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div>
+        <div style="color:#D6B46C;font-size:12px;font-weight:800">MERCHANT STUDIO · ${v.type}</div>
+        <h2 style="margin:4px 0 0;font-size:20px">${localizedName(v.translations)}</h2>
+      </div>
+      <button type="button" id="vendorOpenBtn" class="${v.isOpen ? 'btn-teal' : 'btn-danger'}">${v.isOpen ? dict.vndOpen : dict.vndClosed}</button>
+    </div>
+  `;
+  const kpis = document.createElement('div');
+  kpis.className = 'telemetry-grid';
+  [
+    [dict.vndActive, String(st.activeOrders)],
+    [dict.vndDone, String(st.deliveredOrders)],
+    [dict.vndRev, money(st.revenue)],
+    [dict.vndCount, String(st.productCount)],
+  ].forEach(([l, val]) => {
+    const c = document.createElement('div');
+    c.className = 'telemetry-cell surface';
+    c.innerHTML = `<span>${l}</span><strong class="tabular">${val}</strong>`;
+    kpis.append(c);
+  });
+  body.append(top, kpis);
+
+  $('vendorOpenBtn').onclick = async () => {
+    await api('/vendor/toggle-open', 'PATCH', { isOpen: !v.isOpen });
+    await renderCurrentTab();
+  };
+
+  if (tab === 'vendor-orders') {
+    const filteredOrders = dash.orders.filter((o) => {
+      if (state.vendorOrderFilter === 'ACTION') return ['PENDING', 'ACCEPTED', 'PREPARING'].includes(o.status);
+      if (state.vendorOrderFilter === 'DONE') return ['READY', 'ASSIGNED', 'PICKED_UP', 'DELIVERED'].includes(o.status);
+      return true;
+    });
+    const panel = document.createElement('div');
+    panel.className = 'panel surface';
+    const headRow = document.createElement('div');
+    headRow.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap';
+    headRow.innerHTML = `<h2 style="margin:0;font-size:17px;font-weight:900">${dict.vndOrdersTitle} (${filteredOrders.length})</h2>`;
+    const fStrip = document.createElement('div');
+    fStrip.className = 'city-strip';
+    [['ALL', dict.filterAll], ['ACTION', dict.filterAction], ['DONE', dict.filterDone]].forEach(([k, lbl]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'city-pill';
+      b.textContent = lbl;
+      b.setAttribute('aria-pressed', String(state.vendorOrderFilter === k));
+      b.onclick = () => { state.vendorOrderFilter = k; renderCurrentTab(); };
+      fStrip.append(b);
+    });
+    headRow.append(fStrip);
+    panel.append(headRow);
+
+    const nextMap = { PENDING: ['ACCEPTED', dict.statuses.ACCEPTED], ACCEPTED: ['PREPARING', dict.statuses.PREPARING], PREPARING: ['READY', dict.statuses.READY] };
+    filteredOrders.forEach((o) => {
+      const card = document.createElement('div');
+      card.className = 'item-row';
+      const info = document.createElement('div');
+      info.innerHTML = `<strong class="tabular">#${o.orderNumber}</strong> · <span>${o.customer?.name || dict.cust}</span> · <strong class="tabular">${money(o.total)}</strong><div class="store-meta">${statusMeta(o.status)[0]}${o.notes ? ' · ' + o.notes : ''}</div>`;
+      card.append(info);
+      if (nextMap[o.status]) {
+        const [ns, nl] = nextMap[o.status];
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-primary';
+        btn.textContent = nl;
+        btn.onclick = async () => {
+          await api(`/vendor/orders/${o.id}/status`, 'PATCH', { status: ns });
+          await renderCurrentTab();
+        };
+        card.append(btn);
+      }
+      panel.append(card);
+    });
+    body.append(panel);
+  } else {
+    const panel = document.createElement('div');
+    panel.className = 'panel surface';
+    panel.innerHTML = `<h2 style="margin:0;font-size:17px;font-weight:900">${dict.vndCatalogTitle}</h2>`;
+    const addForm = document.createElement('form');
+    addForm.className = 'toolbar';
+    addForm.innerHTML = `
+      <input id="newProdName" placeholder="${dict.fullName}" required>
+      <input id="newProdPrice" type="number" min="500" placeholder="SYP" required>
+      <input id="newProdStock" type="number" min="1" value="15" placeholder="15">
+      <button type="submit" class="btn-primary">${dict.addProdBtn}</button>
+    `;
+    addForm.onsubmit = async (e) => {
+      e.preventDefault();
+      await api('/vendor/products', 'POST', {
+        name: $('newProdName').value.trim(),
+        price: Number($('newProdPrice').value),
+        stock: Number($('newProdStock').value),
+      });
+      await renderCurrentTab();
+    };
+    panel.append(addForm);
+
+    const list = document.createElement('div');
+    list.className = 'list-stack';
+    dash.products.forEach((p) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `<div><strong>${localizedName(p.translations)}</strong><div class="store-meta tabular">${money(p.price)} · ${p.stock}</div></div>`;
+      const controls = document.createElement('div');
+      controls.className = 'inline-edit';
+      const priceIn = document.createElement('input');
+      priceIn.type = 'number';
+      priceIn.min = '500';
+      priceIn.value = String(p.price);
+      priceIn.setAttribute('aria-label', 'Price SYP');
+      const stockIn = document.createElement('input');
+      stockIn.type = 'number';
+      stockIn.min = '0';
+      stockIn.value = String(p.stock);
+      stockIn.style.width = '76px';
+      stockIn.setAttribute('aria-label', 'Stock');
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button';
+      saveBtn.className = 'btn-primary';
+      saveBtn.textContent = dict.saveItemBtn;
+      saveBtn.onclick = async () => {
+        await api(`/vendor/products/${p.id}`, 'PATCH', { price: Number(priceIn.value), stock: Number(stockIn.value) });
+        notify('OK');
+        await renderCurrentTab();
+      };
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = p.isAvailable ? 'btn-teal' : 'btn-outline';
+      toggle.textContent = p.isAvailable ? dict.prodAvail : dict.prodPaused;
+      toggle.onclick = async () => {
+        await api(`/vendor/products/${p.id}`, 'PATCH', { isAvailable: !p.isAvailable });
+        await renderCurrentTab();
+      };
+      controls.append(priceIn, stockIn, saveBtn, toggle);
+      row.append(controls);
+      list.append(row);
+    });
+    panel.append(list);
+    body.append(panel);
+  }
+}
+
+function renderAssistant(body) {
+  const dict = I18N[state.lang] || I18N.ar;
+  const panel = document.createElement('div');
+  panel.className = 'panel surface';
+  panel.innerHTML = `<h2 style="margin:0;font-size:18px;font-weight:900">${dict.aiTitle}</h2>`;
+
+  const rolePresets = {
+    CUSTOMER: ['أريد طلب حلويات ومشروبات في دمشق', 'كيف أحسب أجرة التوصيل المستقل؟'],
+    DRIVER: ['لخّص حالة الطلبات المتاحة اليوم', 'أين أعلى طلب للمناديب حالياً؟'],
+    VENDOR: ['لخّص جاهزية المناديب لاستلام الطلبات', 'كيف أحسّن سرعة تجهيز طلبات المتجر؟'],
+  };
+  const presets = document.createElement('div');
+  presets.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+  (rolePresets[state.role] || rolePresets.CUSTOMER).forEach((q) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn-teal';
+    b.textContent = q;
+    b.onclick = () => sendAi(q);
+    presets.append(b);
+  });
+
+  const feed = document.createElement('div');
+  feed.className = 'copilot-feed';
+  if (!state.aiMessages.length) {
+    const hint = document.createElement('div');
+    hint.className = 'copilot-msg';
+    hint.textContent = dict.aiHint;
+    feed.append(hint);
+  } else {
+    state.aiMessages.forEach((m) => {
+      const d = document.createElement('div');
+      d.className = 'copilot-msg' + (m.user ? ' user' : '');
+      const txt = document.createElement('span');
+      txt.textContent = m.text;
+      d.append(txt);
+      if (!m.user) {
+        const cp = document.createElement('button');
+        cp.type = 'button';
+        cp.className = 'btn-outline';
+        cp.style.cssText = 'justify-self:start;min-height:32px;padding:4px 10px;font-size:12px';
+        cp.textContent = dict.copyReplyBtn;
+        cp.onclick = async () => {
+          try { await navigator.clipboard.writeText(m.text); } catch (_) {}
+          notify('OK');
+        };
+        d.append(cp);
+      }
+      feed.append(d);
+    });
+  }
+
+  const form = document.createElement('form');
+  form.className = 'toolbar';
+  const input = document.createElement('input');
+  input.placeholder = dict.aiPh;
+  input.disabled = state.aiBusy;
+  const sendBtn = document.createElement('button');
+  sendBtn.type = 'submit';
+  sendBtn.className = 'btn-primary';
+  sendBtn.disabled = state.aiBusy;
+  sendBtn.textContent = state.aiBusy ? dict.aiBusy : dict.aiSend;
+  form.append(input, sendBtn);
+
+  async function sendAi(txt) {
+    const msg = (txt || '').trim();
+    if (msg.length < 2 || state.aiBusy) return;
+    state.aiBusy = true;
+    state.aiMessages.push({ user: true, text: msg });
+    renderCurrentTab();
+    try {
+      const res = await api('/ai/assistant/ask', 'POST', { message: msg });
+      state.aiMessages.push({ user: false, text: res.answer || 'OK' });
+    } catch (err) {
+      state.aiMessages.push({ user: false, text: err.message });
+    } finally {
+      state.aiBusy = false;
+      renderCurrentTab();
+    }
+  }
+  form.onsubmit = (e) => { e.preventDefault(); sendAi(input.value); };
+  panel.append(presets, feed, form);
+  body.append(panel);
+}
+
+async function renderAccount(body) {
+  const dict = I18N[state.lang] || I18N.ar;
+  const addrs = await api('/addresses');
+  state.addresses = addrs;
+
+  const prof = document.createElement('div');
+  prof.className = 'panel surface';
+  prof.innerHTML = `<h2 style="margin:0;font-size:18px;font-weight:900">الملف الشخصي والعناوين</h2>`;
+  const form = document.createElement('form');
+  form.className = 'toolbar';
+  form.innerHTML = `
+    <input id="profName" value="${state.user?.name || ''}" placeholder="الاسم الكامل">
+    <input id="profEmail" value="${state.user?.email || ''}" placeholder="البريد الإلكتروني">
+    <button type="submit" class="btn-primary">حفظ التعديلات</button>
+  `;
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    state.user = await api('/auth/profile', 'PATCH', {
+      name: $('profName').value.trim(),
+      email: $('profEmail').value.trim(),
+    });
+    renderShellNav();
+    notify('تم حفظ الملف الشخصي');
+  };
+  prof.append(form);
+
+  const addrBox = document.createElement('div');
+  addrBox.className = 'panel surface';
+  addrBox.innerHTML = `<h3 style="margin:0;font-size:16px;font-weight:900">العناوين المحفوظة (${addrs.length})</h3>`;
+  const addAddrForm = document.createElement('form');
+  addAddrForm.className = 'toolbar';
+  addAddrForm.innerHTML = `
+    <input id="newAddrLabel" placeholder="${dict.addrLblPh}" required>
+    <input id="newAddrDetails" placeholder="${dict.addrDetPh}" required>
+    <button type="submit" class="btn-teal">${dict.addAddrBtn}</button>
+  `;
+  addAddrForm.onsubmit = async (e) => {
+    e.preventDefault();
+    await api('/addresses', 'POST', {
+      label: $('newAddrLabel').value.trim(),
+      details: $('newAddrDetails').value.trim(),
+      cityId: state.cities[0]?.id || 'city-dam',
+    });
+    notify('OK');
+    await renderCurrentTab();
+  };
+  addrBox.append(addAddrForm);
+
+  const list = document.createElement('div');
+  list.className = 'list-stack';
+  addrs.forEach((a) => {
+    const r = document.createElement('div');
+    r.className = 'item-row';
+    r.innerHTML = `<div><strong>${a.label}</strong><div class="store-meta">${a.details}</div></div>`;
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'btn-danger';
+    delBtn.style.cssText = 'min-height:36px;padding:6px 12px';
+    delBtn.textContent = dict.delAddrBtn;
+    delBtn.onclick = async () => {
+      await api(`/addresses/${a.id}`, 'DELETE');
+      notify('OK');
+      await renderCurrentTab();
+    };
+    r.append(delBtn);
+    list.append(r);
+  });
+  addrBox.append(list);
+  body.append(prof, addrBox);
+}
+
+// Event Bindings
+document.querySelectorAll('[data-lang]').forEach((b) => {
+  b.addEventListener('click', () => {
+    state.lang = b.dataset.lang;
+    localStorage.setItem('dazrevo_app_lang', state.lang);
+    applyAppearance();
+    if (!$('appView').classList.contains('hidden')) renderCurrentTab();
+  });
+});
+document.querySelectorAll('[data-theme-btn]').forEach((b) => {
+  b.addEventListener('click', () => {
+    state.theme = b.dataset.themeBtn;
+    localStorage.setItem('dazrevo_app_theme', state.theme);
+    applyAppearance();
+  });
+});
+document.querySelectorAll('[data-style-btn]').forEach((b) => {
+  b.addEventListener('click', () => {
+    state.style = b.dataset.styleBtn;
+    localStorage.setItem('dazrevo_app_style', state.style);
+    applyAppearance();
+  });
+});
+document.querySelectorAll('[data-slide]').forEach((b) => {
+  b.addEventListener('click', () => { state.slide = Number(b.dataset.slide); applyAppearance(); });
+});
+$('nextSlideBtn').addEventListener('click', () => {
+  state.slide = (state.slide + 1) % 3;
+  applyAppearance();
+});
+
+$('tabLoginBtn').onclick = () => {
+  state.authMode = 'login';
+  $('tabLoginBtn').setAttribute('aria-pressed', 'true');
+  $('tabSignupBtn').setAttribute('aria-pressed', 'false');
+  $('signupNameGroup').classList.add('hidden');
+};
+$('tabSignupBtn').onclick = () => {
+  state.authMode = 'signup';
+  $('tabLoginBtn').setAttribute('aria-pressed', 'false');
+  $('tabSignupBtn').setAttribute('aria-pressed', 'true');
+  $('signupNameGroup').classList.remove('hidden');
+};
+document.querySelectorAll('[data-auth-role]').forEach((b) => {
+  b.addEventListener('click', () => {
+    state.authRole = b.dataset.authRole;
+    document.querySelectorAll('[data-auth-role]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  });
+});
+
+$('otpForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const phone = $('authPhoneInput').value.trim();
+  const name = $('authNameInput').value.trim();
+  if (!state.otpRequested) {
+    try {
+      const res = await api('/auth/otp/request', 'POST', { phone });
+      state.otpRequested = true;
+      $('otpCodeGroup').classList.remove('hidden');
+      $('authOtpInput').value = res.previewOtp || '123456';
+      applyAppearance();
+      notify('تم إرسال رمز التحقق التجريبي: ' + (res.previewOtp || '123456'));
+    } catch (err) {
+      notify(err.message, true);
+    }
+  } else {
+    const code = $('authOtpInput').value.trim();
+    await enterSession(state.authRole, api('/auth/otp/verify', 'POST', { phone, code, name, role: state.authRole }));
+  }
+};
+
+$('googleDemoBtn').onclick = () => enterSession(state.authRole, api('/auth/google', 'POST', { role: state.authRole }));
+$('instantPreviewBtn').onclick = () => switchRoleSession(state.authRole);
+document.querySelectorAll('[data-switch-role]').forEach((b) => {
+  b.addEventListener('click', () => switchRoleSession(b.dataset.switchRole));
+});
+
+$('notifTopBtn').onclick = () => {
+  openModal('الإشعارات المباشرة', (modal) => {
+    const markAll = document.createElement('button');
+    markAll.type = 'button';
+    markAll.className = 'btn-teal';
+    markAll.textContent = 'تحديد الكل كمقروء';
+    markAll.onclick = async () => {
+      await api('/notifications/read-all', 'POST');
+      state.notifications = await api('/notifications');
+      renderShellNav();
+      closeModal();
+    };
+    modal.append(markAll);
+    state.notifications.forEach((n) => {
+      const r = document.createElement('div');
+      r.className = 'item-row';
+      r.innerHTML = `<div><strong>${n.title}</strong><div class="store-meta">${n.body}</div></div><span class="status-label ${n.isRead ? 'status-ok' : 'status-warn'}">${n.isRead ? 'مقروء' : 'جديد'}</span>`;
+      modal.append(r);
+    });
+  });
+};
+
+$('clearCartBtn').onclick = () => { state.cart = { vendor: null, items: [] }; updateCartDock(); };
+$('openCheckoutBtn').onclick = openCheckoutModal;
+$('refreshAppBtn').onclick = loadWorkspace;
+$('mobileMenuBtn').onclick = () => $('sidebar').classList.toggle('open-mobile');
+$('appLogoutBtn').onclick = () => {
+  state.token = null;
+  state.user = null;
+  state.otpRequested = false;
+  $('otpCodeGroup').classList.add('hidden');
+  $('appView').classList.add('hidden');
+  $('gateView').classList.remove('hidden');
+  applyAppearance();
+};
+
+applyAppearance();
+const params = new URLSearchParams(window.location.search);
+if (params.get('autostart') === '1') {
+  const r = (params.get('role') || 'CUSTOMER').toUpperCase();
+  switchRoleSession(['CUSTOMER', 'DRIVER', 'VENDOR'].includes(r) ? r : 'CUSTOMER');
+}
+</script>
+</body>
+</html>

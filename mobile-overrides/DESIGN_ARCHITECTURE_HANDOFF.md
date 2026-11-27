@@ -14,43 +14,49 @@ The presentation layer has been refactored away from repetitive stacked Material
 ```text
 mobile-overrides/
 ├── DESIGN_ARCHITECTURE_HANDOFF.md         # This technical handoff specification
+├── MainActivity.kt                        # Android 8+ notification channels (dazrevo_high_importance & fallback) + APK updater channel
 ├── ic_launcher.xml                        # Unified chamfered D + Champagne Brass + Mineral Teal vector icon
 ├── android-res/                           # Adaptive XMLs, launch splash, notification vector & mipmap PNG icons
 ├── lib/
 │   ├── core/
 │   │   ├── l10n/
-│   │   │   └── app_localizations.dart         # Full AR/EN/TR _sourceValues dictionary (665 keys + dynamic rules)
+│   │   │   └── app_localizations.dart         # Full AR/EN/TR _sourceValues dictionary (683 keys + dynamic rules)
+│   │   ├── services/
+│   │   │   └── notifications_service.dart     # Hardened FCM registration, token refresh, deduplication, retry & sync diagnostics
 │   │   ├── theme/
 │   │   │   └── darb_design_system.dart        # DarbColors, DarbSpace, DarbRadius, DarbMotion, DarbTheme, DarbAppearanceController
 │   │   └── widgets/
-│   │       ├── darb_components.dart           # DarbFeedbackBanner, DarbOrderTimeline, DarbBentoActionCard, DarbRouteConnector, DarbActivityLedgerStrip, DarbResponsiveTwoColumn
+│   │       ├── darb_components.dart           # DarbBrandMark (animatePulse), DarbOrderTimeline (glowing active step), DarbFeedbackBanner, DarbBentoActionCard
 │   │       ├── darb_copy_order_number_button.dart # Accessible copy-to-clipboard order reference action
 │   │       ├── darb_glass.dart                # DarbGlassSurface, DarbGlassBottomNav, DarbGlassSideRail (with pulse beacon & DAZREVO anchor)
-│   │       └── darb_spatial_primitives.dart   # NEW: 7 core spatial UI primitives + CustomPainters
+│   │       ├── darb_motion_components.dart    # DarbBeaconRing expanding pulse halo, kinetic wrappers & staggered motion
+│   │       └── darb_spatial_primitives.dart   # 7 core spatial UI primitives + CustomPainters (including favorite toggle in DarbEditorialStoreCard)
 │   └── features/
 │       ├── auth/
 │       │   ├── onboarding_screen.dart         # Full-bleed spatial canvas over CityShowcaseBanner + numbered 01/02/03 step pillars
-│       │   └── login_screen.dart              # Continuous DarbLoginVectorMap + floating glass pill bar + tablet split-pane (6:5) + DarbOtpPinPreview
+│       │   └── login_screen.dart              # Continuous DarbLoginVectorMap + pulsing crest + tablet split-pane (6:5) + DarbOtpPinPreview
 │       ├── shell/
-│       │   └── app_shell.dart                 # Role-routed shell (CUSTOMER/DRIVER/VENDOR/ADMIN), DarbFeedbackBanner offline bar, glass nav/rail
+│       │   └── app_shell.dart                 # Role-routed shell, tap-to-open notification order/update routing, glass nav/rail
+│       ├── notifications/
+│       │   └── notifications_screen.dart      # Live FCM sync status bar ("مزامنة الآن") + tap-to-open order/update routing
 │       ├── customer/
-│       │   ├── customer_home_screen.dart      # DarbCommandStage + DarbCityOrbStrip + 6:5 Bento split + DarbTicketPass + DarbSegmentedDock + DarbEditorialStoreCard
+│       │   ├── customer_home_screen.dart      # DarbCommandStage + persistent Favorite Stores pinning + DarbCityOrbStrip + Bento + DarbEditorialStoreCard
 │       │   ├── customer_orders_screen.dart    # DarbSegmentedDock with live counts + DarbTicketPass order cards + DarbCopyOrderNumberButton
 │       │   └── vendor_catalog_screen.dart     # DarbCommandStage + DarbSegmentedDock + DarbTelemetryProductCard + Obsidian-Lime floating cart bar
 │       ├── driver/
-│       │   ├── driver_dashboard_screen.dart   # DarbCommandStage dispatch console + DarbTelemetryDeck + DarbTicketPass available jobs
-│       │   └── driver_orders_screen.dart      # DarbSegmentedDock + DarbTicketPass active/completed courier tickets
+│       │   ├── driver_dashboard_screen.dart   # DarbCommandStage dispatch console + job-type DarbSegmentedDock (ALL/VENDOR/PEER_DELIVERY) + DarbTelemetryDeck
+│       │   └── driver_orders_screen.dart      # Job-type & status DarbSegmentedDock + DarbTicketPass active/completed courier tickets
 │       ├── vendor/
-│       │   ├── vendor_orders_screen.dart      # DarbCommandStage store console + DarbTelemetryDeck + DarbSegmentedDock + DarbTicketPass
+│       │   ├── vendor_orders_screen.dart      # DarbCommandStage + instant search bar + pending alert banner + DarbTelemetryDeck + DarbTicketPass
 │       │   └── vendor_products_screen.dart    # DarbCommandStage + DarbSegmentedDock + DarbTelemetryProductCard inventory with stock meters
 │       ├── admin/
 │       │   ├── admin_dashboard_screen.dart    # DarbCommandStage KPI header + DarbTelemetryDeck + DarbSegmentedDock + DarbTicketPass approval cards
 │       │   └── admin_operations_screens.dart  # AdminOrdersScreen & AdminOperationsScreen using DarbSegmentedDock + DarbTicketPass + DarbFeedbackBanner
 │       └── account/
-│           ├── account_screen.dart            # DarbCommandStage user hero + DarbActivityLedgerStrip + 3 grouped DarbGroupedSection blocks
-│           └── settings_screen.dart           # Appearance, accessibility (textScale, reduceMotion, haptics), notifications, privacy & cache controls
+│           ├── account_screen.dart            # DarbCommandStage user hero with pulsing crest + live push sync badge + 3 grouped sections
+│           └── settings_screen.dart           # Appearance, accessibility (textScale, reduceMotion, haptics), live FCM force-sync, privacy & cache
 └── test/
-    └── widget_test.dart                       # All existing 46+ stability/role/theme tests + new Spatial Primitives test suite
+    └── widget_test.dart                       # Full suite including FCM registration, DarbBeaconRing motion, notification routing & role filter tests
 ```
 
 ---
@@ -136,9 +142,10 @@ Uses the platform font stack (system Arabic/Latin sans) scaled dynamically by `D
 2. **Backend Endpoints & Auth**:
    - Auth recovery (`Api.restore`), token refresh, MsgPlus OTP, Google Sign-In, `/auth/me`, `/notifications`, `/cities`, `/vendors`, `/drivers/me`, `/drivers/stats`, `/orders/driver/available`, `/vendors/mine`, `/vendors/mine/stats`, `/orders/vendor`, `/admin/stats`, `/admin/vendors/pending`, `/admin/drivers/pending`, `/admin/orders` remain unmodified.
    - `VendorOrdersScreen` preserves exact `MISSING`/`PENDING` empty states; `DriverDashboardScreen` preserves `REJECTED` review messages and non-fatal `statsError` banner recovery; `AccountScreen` preserves `ListView` + 3 `DarbGroupedSection` blocks and `SettingsScreen` navigation.
-3. **Localization Completeness**: All 619+ static `dt('...')` UI strings have explicit English and Turkish pairs in `app_localizations.dart` (`_sourceValues`), plus dynamic prefix/suffix handlers for stock counts, distances, and product totals.
-4. **Verification Note**: CI workflows (`.github/workflows/validate-mobile-overrides.yml` and `.github/workflows/build-android-release.yml`) should be executed via `flutter analyze lib` and `flutter test` in an environment with Flutter SDK installed to verify runtime widget tests (`widget_test.dart`).
-
-## Release Provenance
-
-The Android release must be built from the current `main` branch after all Google AI synchronized changes have landed. The visual identity source of truth is `mobile-overrides/lib/core/theme/darb_design_system.dart`; Android launcher artwork is maintained under `mobile-overrides/android-res/` and `mobile-overrides/ic_launcher.xml`. Release CI must apply these overrides before running Flutter tests and producing the signed APK/AAB.
+3. **FCM & Android Notification Channels**:
+   - `MainActivity.kt` creates high-importance channels `dazrevo_high_importance` and `fcm_fallback_notification_channel` on Android O+.
+   - `AndroidManifest.xml` specifies `com.google.firebase.messaging.default_notification_channel_id = dazrevo_high_importance`.
+   - `backend-overrides/notifications.service.ts` attaches `android.notification.channelId = 'dazrevo_high_importance'`, `#8A651F` tint, and `دازريفو` release notification copy.
+   - `DarbNotifications` checks `Firebase.apps.isEmpty`, normalizes platform names (`android`, `ios`, `web`), subscribes to `onTokenRefresh` unconditionally, deduplicates identical syncs, retries once on transient errors, and exposes test hooks (`tokenProviderOverride`, `registerDeviceOverride`, `unregisterDeviceOverride`).
+4. **Localization Completeness**: All 683 static `dt('...')` UI strings have explicit English and Turkish pairs in `app_localizations.dart` (`_sourceValues`), plus dynamic prefix/suffix handlers for stock counts, distances, and product totals.
+5. **Verification Note**: Run `.github/workflows/validate-mobile-overrides.yml` and `.github/workflows/build-android-release.yml` in GitHub Actions to execute `flutter analyze lib`, `flutter test`, and signed `com.darb.darb` release APK/AAB compilation before publishing (`[publish-apk]`).

@@ -6,12 +6,18 @@ import 'darb_glass.dart';
 import 'darb_motion_components.dart';
 
 class DarbBrandMark extends StatelessWidget {
-  const DarbBrandMark({super.key, this.size = 44});
+  const DarbBrandMark({
+    super.key,
+    this.size = 44,
+    this.animatePulse = false,
+  });
   final double size;
+  final bool animatePulse;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final radius = BorderRadius.circular(size * 0.28);
+    final emblem = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
@@ -24,7 +30,7 @@ class DarbBrandMark extends StatelessWidget {
             DarbColors.forestSoft,
           ],
         ),
-        borderRadius: BorderRadius.circular(size * 0.28),
+        borderRadius: radius,
         border: Border.all(
           color: DarbColors.lime.withValues(alpha: 0.52),
           width: size >= 56 ? 1.5 : 1.05,
@@ -38,12 +44,21 @@ class DarbBrandMark extends StatelessWidget {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.28),
+        borderRadius: radius,
         child: CustomPaint(
           painter: const _DarbBrandMarkPainter(),
           size: Size.square(size),
         ),
       ),
+    );
+
+    if (!animatePulse) return emblem;
+    return DarbBeaconRing(
+      active: true,
+      color: DarbColors.lime,
+      maxScale: 1.24,
+      borderRadius: radius,
+      child: emblem,
     );
   }
 }
@@ -784,7 +799,7 @@ class DarbOrderTimeline extends StatelessWidget {
             final stepIdx = idx ~/ 2;
             final reached = stepIdx <= activeIndex;
             final current = stepIdx == activeIndex && !isDone;
-            return AnimatedContainer(
+            final node = AnimatedContainer(
               duration: duration,
               curve: DarbMotion.enter,
               width: compact ? 24 : 28,
@@ -800,6 +815,15 @@ class DarbOrderTimeline extends StatelessWidget {
                   color: reached ? activeTone : border,
                   width: current ? 0 : 1.3,
                 ),
+                boxShadow: current
+                    ? [
+                        BoxShadow(
+                          color: activeTone.withValues(alpha: 0.36),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null,
               ),
               child: Icon(
                 steps[stepIdx].$3,
@@ -808,6 +832,13 @@ class DarbOrderTimeline extends StatelessWidget {
                     ? DarbColors.onPrimaryOf(context)
                     : (reached ? activeTone : muted),
               ),
+            );
+            if (!current) return node;
+            return DarbBeaconRing(
+              active: true,
+              color: activeTone,
+              maxScale: 1.42,
+              child: node,
             );
           }),
         ),

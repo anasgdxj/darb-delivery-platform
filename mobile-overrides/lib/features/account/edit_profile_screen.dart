@@ -8,6 +8,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({
@@ -292,122 +293,74 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 32),
                 children: [
                   DarbFadeSlide(
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: AlignmentDirectional.topStart,
-                          end: AlignmentDirectional.bottomEnd,
-                          colors: [
-                            DarbColors.forest,
-                            DarbColors.forestSoft,
-                          ],
+                    child: DarbCommandStage(
+                      livePulse: true,
+                      eyebrow: dt('هوية موثّقة'),
+                      title: displayName,
+                      subtitle: _roleLabel(role),
+                      leading: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              DarbColors.lime.withValues(alpha: 0.30),
+                              DarbColors.darkViolet.withValues(alpha: 0.24),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: DarbColors.lime.withValues(alpha: 0.55),
+                            width: 1.5,
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(DarbRadius.xl),
-                        border: Border.all(
-                          color: DarbColors.mint.withValues(alpha: 0.24),
-                        ),
-                        boxShadow: DarbElevation.glow(
-                          DarbColors.forest,
-                          isDark: isDark,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 62,
-                            height: 62,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  DarbColors.mint.withValues(alpha: 0.28),
-                                  DarbColors.lime.withValues(alpha: 0.22),
-                                ],
-                              ),
-                              border: Border.all(
-                                color: DarbColors.mint.withValues(alpha: 0.50),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                _monogram(displayName),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
+                        child: Center(
+                          child: Text(
+                            _monogram(displayName),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      ),
+                      bottom: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          DarbStatusBadge(status: role),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              borderRadius:
+                                  BorderRadius.circular(DarbRadius.pill),
+                              border: Border.all(
+                                color: DarbColors.lime.withValues(alpha: 0.35),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
+                                const Icon(
+                                  Icons.verified_user_outlined,
+                                  size: 13,
+                                  color: DarbColors.lime,
+                                ),
+                                const SizedBox(width: 5),
                                 Text(
-                                  displayName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  dt('هوية موثّقة'),
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _roleLabel(role),
-                                  style: TextStyle(
-                                    color: DarbColors.mint.withValues(alpha: 0.90),
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 6,
-                                  children: [
-                                    DarbStatusBadge(status: role),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4.5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.12),
-                                        borderRadius:
-                                            BorderRadius.circular(DarbRadius.pill),
-                                        border: Border.all(
-                                          color: DarbColors.mint
-                                              .withValues(alpha: 0.30),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.verified_user_outlined,
-                                            size: 13,
-                                            color: DarbColors.lime,
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            dt('هوية موثّقة'),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ],
                             ),

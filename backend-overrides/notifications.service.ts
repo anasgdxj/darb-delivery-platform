@@ -171,8 +171,8 @@ export class NotificationsService {
     }
 
     const releaseTag = input.releaseTag.slice(0, 80);
-    const title = 'تحديث جديد لتطبيق دَرْب';
-    const body = `الإصدار ${input.versionName} أصبح متاحاً. افتح دَرْب لتثبيته.`;
+    const title = 'تحديث جديد لتطبيق دازريفو';
+    const body = `الإصدار ${input.versionName} أصبح متاحاً. افتح دازريفو لتثبيته.`;
     const data = {
       type: 'APP_UPDATE',
       releaseTag,
@@ -214,7 +214,14 @@ export class NotificationsService {
           tokens: batch,
           notification: { title, body },
           data,
-          android: { priority: 'high' },
+          android: {
+            priority: 'high',
+            notification: {
+              channelId: 'dazrevo_high_importance',
+              sound: 'default',
+              color: '#8A651F',
+            },
+          },
         });
         pushSent += result.successCount;
         result.responses.forEach((response, index) => {
@@ -273,7 +280,14 @@ export class NotificationsService {
           tokens: batch,
           notification: { title, body },
           data,
-          android: { priority: 'high' },
+          android: {
+            priority: 'high',
+            notification: {
+              channelId: 'dazrevo_high_importance',
+              sound: 'default',
+              color: '#8A651F',
+            },
+          },
         });
         result.responses.forEach((response, index) => {
           const code = response.error?.code ?? '';

@@ -8,6 +8,7 @@ import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_map_picker.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 
 class VendorApplicationScreen extends StatefulWidget {
   const VendorApplicationScreen({
@@ -436,8 +437,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
   }) {
     final isConflict = vendorStatus == null && driverStatus != null;
     final activeStatus = vendorStatus ?? driverStatus ?? 'PENDING';
-    final ink = DarbColors.inkOf(context);
-    final muted = DarbColors.mutedOf(context);
 
     final (IconData icon, Color tone, String title, String message) =
         isConflict
@@ -469,56 +468,36 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
               };
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
         DarbFadeSlide(
+          child: DarbCommandStage(
+            livePulse: activeStatus == 'PENDING',
+            accentColor: tone,
+            eyebrow: dt('انضم كتاجر شريك'),
+            title: title,
+            subtitle: message,
+            leading: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: tone.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: tone.withValues(alpha: 0.45)),
+              ),
+              child: Icon(icon, size: 26, color: tone),
+            ),
+            bottom: DarbStatusBadge(status: activeStatus),
+          ),
+        ),
+        const SizedBox(height: 14),
+        DarbFadeSlide(
+          delay: DarbMotion.staggerDelay(1),
           child: DarbGlassSurface(
-            padding: const EdgeInsets.all(22),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: tone.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Icon(icon, size: 28, color: tone),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              color: ink,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          DarbStatusBadge(status: activeStatus),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  message,
-                  style: TextStyle(
-                    color: muted,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 20),
                 DarbActionButton(
                   label: dt('تحديث حالة الطلب'),
                   loadingLabel: dt('جارٍ التحديث...'),
@@ -615,8 +594,6 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
   }
 
   Widget _buildWizardView(BuildContext context) {
-    final primary = DarbColors.primaryOf(context);
-    final ink = DarbColors.inkOf(context);
     final muted = DarbColors.mutedOf(context);
     final reduced = DarbMotion.reduceMotion(context);
     final progress = (_step + 1) / _totalSteps;
@@ -624,77 +601,53 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: DarbGlassSurface(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+          child: DarbCommandStage(
+            livePulse: true,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            borderRadius: DarbRadius.lg,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(DarbRadius.pill),
-                      ),
-                      child: Text(
-                        '${_step + 1} / $_totalSteps',
-                        style: TextStyle(
-                          color: primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _stepTitle(_step),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ],
+            eyebrow: '${_step + 1} / $_totalSteps',
+            title: _stepTitle(_step),
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: DarbColors.lime.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: DarbColors.lime.withValues(alpha: 0.42),
                 ),
-                const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(DarbRadius.pill),
-                  child: Container(
-                    height: 6,
-                    color: DarbColors.softSurfaceOf(context),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: AnimatedFractionallySizedBox(
-                        duration: DarbMotion.effectiveDuration(
-                          context,
-                          DarbMotion.standard,
+              ),
+              child: const Icon(
+                Icons.storefront_rounded,
+                size: 20,
+                color: DarbColors.lime,
+              ),
+            ),
+            bottom: ClipRRect(
+              borderRadius: BorderRadius.circular(DarbRadius.pill),
+              child: Container(
+                height: 6,
+                color: Colors.white.withValues(alpha: 0.14),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: AnimatedFractionallySizedBox(
+                    duration: DarbMotion.effectiveDuration(
+                      context,
+                      DarbMotion.standard,
+                    ),
+                    curve: DarbMotion.enter,
+                    widthFactor: progress,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [DarbColors.lime, DarbColors.darkViolet],
                         ),
-                        curve: DarbMotion.enter,
-                        widthFactor: progress,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [primary, DarbColors.lime],
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(DarbRadius.pill),
-                          ),
-                        ),
+                        borderRadius: BorderRadius.circular(DarbRadius.pill),
                       ),
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -916,15 +869,55 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
             runSpacing: 8,
             children: [
               for (final tag in suggestions)
-                ChoiceChip(
-                  label: Text(tag),
-                  selected: _storeTypeCtrl.text.trim() == tag,
-                  onSelected: (_) {
-                    DarbHaptics.selection();
-                    setState(() {
-                      _storeTypeCtrl.text = tag;
-                      _stepError = null;
-                    });
+                Builder(
+                  builder: (ctx) {
+                    final selected = _storeTypeCtrl.text.trim() == tag;
+                    final isDark = DarbColors.isDark(ctx);
+                    final activeBg =
+                        isDark ? DarbColors.lime : DarbColors.forest;
+                    final activeFg =
+                        isDark ? DarbColors.darkCanvas : Colors.white;
+                    return DarbPressScale(
+                      borderRadius: DarbRadius.pill,
+                      onTap: () {
+                        DarbHaptics.selection();
+                        setState(() {
+                          _storeTypeCtrl.text = tag;
+                          _stepError = null;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: DarbMotion.effectiveDuration(
+                          ctx,
+                          DarbMotion.fast,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 13,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? activeBg
+                              : DarbColors.softSurfaceOf(ctx),
+                          borderRadius:
+                              BorderRadius.circular(DarbRadius.pill),
+                          border: Border.all(
+                            color: selected
+                                ? activeBg
+                                : DarbColors.borderOf(ctx),
+                          ),
+                        ),
+                        child: Text(
+                          tag,
+                          style: TextStyle(
+                            color: selected ? activeFg : DarbColors.inkOf(ctx),
+                            fontSize: 12.5,
+                            fontWeight:
+                                selected ? FontWeight.w900 : FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    );
                   },
                 ),
             ],
@@ -1223,16 +1216,14 @@ class _VendorApplicationScreenState extends State<VendorApplicationScreen> {
     final cityLabel =
         selectedCity != null ? _cityName(selectedCity) : (_cityId ?? dt('غير محدد'));
 
-    return DarbGlassSurface(
-      padding: const EdgeInsets.all(18),
-      child: Column(
+    return DarbTicketPass(
+      leadingIcon: Icons.storefront_rounded,
+      title: dt('مراجعة طلب انضمام المتجر'),
+      subtitle: dt('تحقق من صحة البيانات قبل الإرسال النهائي'),
+      status: 'PENDING',
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DarbSectionHeader(
-            title: dt('مراجعة طلب انضمام المتجر'),
-            subtitle: dt('تحقق من صحة البيانات قبل الإرسال النهائي'),
-          ),
-          const SizedBox(height: 14),
           _VendorReviewTile(
             label: dt('اسم المتجر ونوع النشاط'),
             value:

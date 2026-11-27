@@ -8,6 +8,7 @@ import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_map_picker.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 import 'addresses_screen.dart';
 
 class PeerDeliveryScreen extends StatefulWidget {
@@ -47,7 +48,12 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   String? _selectedAddressId;
   String? _error;
 
-  static const _quickTypes = ['مستندات', 'مفاتيح', 'طرد شخصي', 'أغراض منزلية'];
+  static const _quickTypes = [
+    ('مستندات', Icons.description_outlined),
+    ('مفاتيح', Icons.vpn_key_outlined),
+    ('طرد شخصي', Icons.inventory_2_outlined),
+    ('أغراض منزلية', Icons.home_repair_service_outlined),
+  ];
 
   @override
   void initState() {
@@ -78,7 +84,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         if (_selectedAddressId == null && list.isNotEmpty) {
           final withLoc = list.where((a) => a['hasLocation'] == true).toList();
           _selectedAddressId =
-              (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
+              (withLoc.isNotEmpty ? withLoc.first : list.first)['id']
+                  ?.toString();
         }
       });
     } on ApiException catch (e) {
@@ -142,8 +149,9 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
       if (_selectedAddressId == null) {
         DarbHaptics.warning();
         setState(() {
-          _error =
-              dt('اختر عنوان تسليم محفوظاً مع موقع جغرافي أو أضف عنواناً جديداً');
+          _error = dt(
+            'اختر عنوان تسليم محفوظاً مع موقع جغرافي أو أضف عنواناً جديداً',
+          );
           _submitState = DarbActionState.error;
           _errorTrigger++;
         });
@@ -260,174 +268,216 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         subtitle: '${widget.cityName} · ${dt('الخطوة ${_step + 1} من 3')}',
       ),
       body: DarbAmbientBackground(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
-          children: [
-            DarbGlassSurface(
-              padding: const EdgeInsets.all(14),
-              child: Row(
-                children: List.generate(3, (i) {
-                  final active = i <= _step;
-                  final completed = i < _step;
-                  final primary = DarbColors.primaryOf(context);
-                  return Expanded(
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.only(end: i < 2 ? 8 : 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              AnimatedContainer(
-                                duration: DarbMotion.effectiveDuration(
-                                  context,
-                                  DarbMotion.fast,
-                                ),
-                                width: 22,
-                                height: 22,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: active
-                                      ? primary
-                                      : DarbColors.softSurfaceOf(context),
-                                  border: Border.all(
-                                    color: active
-                                        ? primary
-                                        : DarbColors.borderOf(context),
-                                  ),
-                                ),
-                                child: Center(
-                                  child: completed
-                                      ? Icon(
-                                          Icons.check_rounded,
-                                          size: 13,
-                                          color: DarbColors.onPrimaryOf(context),
-                                        )
-                                      : Text(
-                                          '${i + 1}',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w900,
-                                            color: active
-                                                ? DarbColors.onPrimaryOf(context)
-                                                : DarbColors.mutedOf(context),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+              children: [
+                DarbFadeSlide(
+                  child: DarbCommandStage(
+                    livePulse: true,
+                    eyebrow: widget.cityName,
+                    title: dt('توصيل مستقل'),
+                    subtitle:
+                        '${stepTitles[_step]} · ${dt('الخطوة ${_step + 1} من 3')}',
+                    padding: const EdgeInsets.all(16),
+                    bottom: Row(
+                      children: List.generate(3, (i) {
+                        final active = i <= _step;
+                        final completed = i < _step;
+                        return Expanded(
+                          child: Padding(
+                            padding:
+                                EdgeInsetsDirectional.only(end: i < 2 ? 8 : 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    AnimatedContainer(
+                                      duration: DarbMotion.effectiveDuration(
+                                        context,
+                                        DarbMotion.fast,
+                                      ),
+                                      width: 22,
+                                      height: 22,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: active
+                                            ? DarbColors.lime
+                                            : Colors.white
+                                                .withValues(alpha: 0.10),
+                                        border: Border.all(
+                                          color: active
+                                              ? DarbColors.lime
+                                              : Colors.white
+                                                  .withValues(alpha: 0.24),
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: completed
+                                            ? const Icon(
+                                                Icons.check_rounded,
+                                                size: 13,
+                                                color: DarbColors.darkCanvas,
+                                              )
+                                            : Text(
+                                                '${i + 1}',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: active
+                                                      ? DarbColors.darkCanvas
+                                                      : Colors.white,
+                                                  fontFeatures: const [
+                                                    FontFeature
+                                                        .tabularFigures(),
+                                                  ],
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: AnimatedContainer(
+                                        duration: DarbMotion.effectiveDuration(
+                                          context,
+                                          DarbMotion.fast,
+                                        ),
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                          color: active
+                                              ? DarbColors.lime
+                                              : Colors.white
+                                                  .withValues(alpha: 0.16),
+                                          borderRadius: BorderRadius.circular(
+                                            DarbRadius.pill,
                                           ),
                                         ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: AnimatedContainer(
-                                  duration: DarbMotion.effectiveDuration(
-                                    context,
-                                    DarbMotion.fast,
-                                  ),
-                                  height: 4,
-                                  decoration: BoxDecoration(
+                                const SizedBox(height: 5),
+                                Text(
+                                  stepTitles[i],
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: active
+                                        ? FontWeight.w900
+                                        : FontWeight.w600,
                                     color: active
-                                        ? primary
-                                        : DarbColors.borderOf(context),
-                                    borderRadius:
-                                        BorderRadius.circular(DarbRadius.pill),
+                                        ? Colors.white
+                                        : DarbColors.mint
+                                            .withValues(alpha: 0.72),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            stepTitles[i],
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight:
-                                  active ? FontWeight.w900 : FontWeight.w600,
-                              color: active
-                                  ? DarbColors.inkOf(context)
-                                  : DarbColors.mutedOf(context),
+                              ],
                             ),
                           ),
-                        ],
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                AnimatedSwitcher(
+                  duration: DarbMotion.effectiveDuration(
+                    context,
+                    DarbMotion.standard,
+                  ),
+                  switchInCurve: DarbMotion.enter,
+                  switchOutCurve: DarbMotion.exit,
+                  child: KeyedSubtree(
+                    key: ValueKey(_step),
+                    child: _step == 0
+                        ? _buildLocationsStep()
+                        : (_step == 1
+                            ? _buildDetailsStep()
+                            : _buildReviewStep()),
+                  ),
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 12),
+                  DarbGlassSurface(
+                    tintColor: DarbColors.dangerSoftOf(context),
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      _error!,
+                      style: TextStyle(
+                        color: DarbColors.dangerOf(context),
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  );
-                }),
-              ),
-            ),
-            const SizedBox(height: 14),
-            AnimatedSwitcher(
-              duration: DarbMotion.effectiveDuration(
-                context,
-                DarbMotion.standard,
-              ),
-              switchInCurve: DarbMotion.enter,
-              switchOutCurve: DarbMotion.exit,
-              child: KeyedSubtree(
-                key: ValueKey(_step),
-                child: _step == 0
-                    ? _buildLocationsStep()
-                    : (_step == 1
-                        ? _buildDetailsStep()
-                        : _buildReviewStep()),
-              ),
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              DarbGlassSurface(
-                tintColor: DarbColors.dangerSoftOf(context),
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  _error!,
-                  style: TextStyle(
-                    color: DarbColors.dangerOf(context),
-                    fontWeight: FontWeight.w700,
                   ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                if (_step > 0) ...[
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _submitting
-                          ? null
-                          : () => setState(() {
-                                _step--;
-                                _error = null;
-                                _submitState = DarbActionState.idle;
-                              }),
-                      child: Text(dt('السابق')),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
                 ],
-                Expanded(
-                  flex: 2,
-                  child: DarbActionButton(
-                    label: _step < 2 ? dt('متابعة') : dt('تأكيد وإرسال الطلب'),
-                    loadingLabel: dt('جارٍ الحفظ'),
-                    successLabel: dt('تم إرسال طلبك'),
-                    state: _submitState,
-                    errorTrigger: _errorTrigger,
-                    icon: _step < 2
-                        ? Icons.arrow_forward_rounded
-                        : Icons.send_rounded,
-                    onPressed:
-                        _submitting ? null : (_step < 2 ? _nextStep : _submit),
-                  ),
-                ),
               ],
             ),
-          ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 6, 14, 12),
+          child: Center(
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 680),
+              child: DarbGlassSurface(
+                borderRadius: DarbRadius.xl,
+                blurSigma: 24,
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    if (_step > 0) ...[
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _submitting
+                              ? null
+                              : () => setState(() {
+                                    _step--;
+                                    _error = null;
+                                    _submitState = DarbActionState.idle;
+                                  }),
+                          child: Text(dt('السابق')),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    Expanded(
+                      flex: 2,
+                      child: DarbActionButton(
+                        label: _step < 2
+                            ? dt('متابعة')
+                            : dt('تأكيد وإرسال الطلب'),
+                        loadingLabel: dt('جارٍ الحفظ'),
+                        successLabel: dt('تم إرسال طلبك'),
+                        state: _submitState,
+                        errorTrigger: _errorTrigger,
+                        icon: _step < 2
+                            ? Icons.arrow_forward_rounded
+                            : Icons.send_rounded,
+                        onPressed: _submitting
+                            ? null
+                            : (_step < 2 ? _nextStep : _submit),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildLocationsStep() {
+    final primary = DarbColors.primaryOf(context);
     return DarbGlassSurface(
       padding: const EdgeInsets.all(18),
       child: Column(
@@ -435,7 +485,11 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         children: [
           Text(
             dt('من أين نستلم؟'),
-            style: TextStyle(color: DarbColors.inkOf(context), fontSize: 17, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: DarbColors.inkOf(context),
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -452,15 +506,57 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          OutlinedButton.icon(
-            onPressed: _locatingPickup ? null : _capturePickupGps,
-            icon: _locatingPickup
-                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                : Icon(_pickupLat != null ? Icons.check_circle_rounded : Icons.my_location_rounded),
-            label: Text(
-              _pickupLat != null
-                  ? '${dt('تم تحديد موقع الاستلام')} (${_pickupLat!.toStringAsFixed(4)}, ${_pickupLng!.toStringAsFixed(4)})'
-                  : dt('استخدام موقعي الحالي'),
+          DarbPressScale(
+            borderRadius: DarbRadius.md,
+            onTap: _locatingPickup ? null : _capturePickupGps,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              decoration: BoxDecoration(
+                color: _pickupLat != null
+                    ? primary.withValues(alpha: 0.11)
+                    : DarbColors.softSurfaceOf(context),
+                borderRadius: BorderRadius.circular(DarbRadius.md),
+                border: Border.all(
+                  color: _pickupLat != null
+                      ? primary.withValues(alpha: 0.45)
+                      : DarbColors.borderOf(context),
+                ),
+              ),
+              child: Row(
+                children: [
+                  if (_locatingPickup)
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    Icon(
+                      _pickupLat != null
+                          ? Icons.check_circle_rounded
+                          : Icons.my_location_rounded,
+                      size: 18,
+                      color: _pickupLat != null
+                          ? primary
+                          : DarbColors.mutedOf(context),
+                    ),
+                  const SizedBox(width: 9),
+                  Expanded(
+                    child: Text(
+                      _pickupLat != null
+                          ? '${dt('تم تحديد موقع الاستلام')} (${_pickupLat!.toStringAsFixed(4)}, ${_pickupLng!.toStringAsFixed(4)})'
+                          : dt('استخدام موقعي الحالي'),
+                      style: TextStyle(
+                        color: _pickupLat != null
+                            ? primary
+                            : DarbColors.inkOf(context),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -483,14 +579,23 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
               Expanded(
                 child: Text(
                   dt('إلى أين نوصّل؟'),
-                  style: TextStyle(color: DarbColors.inkOf(context), fontSize: 17, fontWeight: FontWeight.w900),
+                  style: TextStyle(
+                    color: DarbColors.inkOf(context),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
               TextButton.icon(
                 onPressed: () async {
-                  final created = await showAddressFormSheet(context, requireLocation: true);
+                  final created = await showAddressFormSheet(
+                    context,
+                    requireLocation: true,
+                  );
                   if (created != null) {
-                    setState(() => _selectedAddressId = created['id']?.toString());
+                    setState(
+                      () => _selectedAddressId = created['id']?.toString(),
+                    );
                     await _loadAddresses();
                   }
                 },
@@ -501,7 +606,7 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
           ),
           const SizedBox(height: 8),
           if (_loadingAddresses)
-            const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
+            const DarbStateView.loading()
           else if (_addresses.isEmpty)
             Text(
               dt('لا يوجد عنوان تسليم محفوظ. أضف عنواناً وحدد موقعه للمتابعة.'),
@@ -513,7 +618,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
                 for (var i = 0; i < _addresses.length; i++) ...[
                   if (i > 0) const SizedBox(height: 8),
                   DarbRadioOptionTile(
-                    selected: _addresses[i]['id']?.toString() == _selectedAddressId,
+                    selected:
+                        _addresses[i]['id']?.toString() == _selectedAddressId,
                     title: _addresses[i]['label']?.toString().isNotEmpty == true
                         ? _addresses[i]['label'].toString()
                         : dt('عنوان التسليم'),
@@ -531,6 +637,8 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
   }
 
   Widget _buildDetailsStep() {
+    final isDark = DarbColors.isDark(context);
+    final primary = DarbColors.primaryOf(context);
     return DarbGlassSurface(
       padding: const EdgeInsets.all(18),
       child: Column(
@@ -538,22 +646,83 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         children: [
           Text(
             dt('ماذا تريد إرسال؟'),
-            style: TextStyle(color: DarbColors.inkOf(context), fontSize: 17, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: DarbColors.inkOf(context),
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final chip in _quickTypes)
-                ChoiceChip(
-                  label: Text(dt(chip)),
-                  selected: _itemTypeController.text.trim() == dt(chip),
-                  onSelected: (_) => setState(() => _itemTypeController.text = dt(chip)),
+              for (final item in _quickTypes)
+                Builder(
+                  builder: (ctx) {
+                    final label = dt(item.$1);
+                    final active = _itemTypeController.text.trim() == label;
+                    return DarbPressScale(
+                      borderRadius: DarbRadius.pill,
+                      onTap: () {
+                        DarbHaptics.selection();
+                        setState(() => _itemTypeController.text = label);
+                      },
+                      child: AnimatedContainer(
+                        duration: DarbMotion.effectiveDuration(
+                          ctx,
+                          DarbMotion.fast,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 13,
+                          vertical: 9,
+                        ),
+                        decoration: BoxDecoration(
+                          color: active
+                              ? (isDark ? DarbColors.lime : DarbColors.forest)
+                              : DarbColors.softSurfaceOf(ctx),
+                          borderRadius: BorderRadius.circular(DarbRadius.pill),
+                          border: Border.all(
+                            color: active
+                                ? (isDark ? DarbColors.lime : DarbColors.forest)
+                                : DarbColors.borderOf(ctx),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              item.$2,
+                              size: 16,
+                              color: active
+                                  ? (isDark
+                                      ? DarbColors.darkCanvas
+                                      : Colors.white)
+                                  : primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              label,
+                              style: TextStyle(
+                                color: active
+                                    ? (isDark
+                                        ? DarbColors.darkCanvas
+                                        : Colors.white)
+                                    : DarbColors.inkOf(ctx),
+                                fontSize: 12.5,
+                                fontWeight:
+                                    active ? FontWeight.w900 : FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           TextField(
             controller: _itemTypeController,
             decoration: InputDecoration(
@@ -589,20 +758,14 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
           (a) => a?['id']?.toString() == _selectedAddressId,
           orElse: () => null,
         );
-    return DarbGlassSurface(
-      padding: const EdgeInsets.all(18),
-      child: Column(
+    return DarbTicketPass(
+      leadingIcon: Icons.route_rounded,
+      title: dt('راجع طلبك'),
+      subtitle: widget.cityName,
+      status: 'PENDING',
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            dt('راجع طلبك'),
-            style: TextStyle(
-              color: DarbColors.inkOf(context),
-              fontSize: 17,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 12),
           DarbRouteConnector(
             pickupLabel: dt('موقع الاستلام'),
             pickupAddress: _pickupAddressController.text.trim(),
@@ -616,19 +779,16 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
           _summaryRow(dt('وصف الغرض'), _itemDescriptionController.text.trim()),
           if (_instructionsController.text.trim().isNotEmpty)
             _summaryRow(dt('تعليمات السائق'), _instructionsController.text.trim()),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: DarbColors.softSurfaceOf(context),
-              borderRadius: BorderRadius.circular(DarbRadius.sm),
-            ),
-            child: Text(
-              dt('بعد إرسال الطلب سيحدد السائقون أجورهم وفق مسافة التوصيل، وستختار العرض المناسب قبل تأكيد الطلب.'),
-              style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 12.5, height: 1.4),
-            ),
-          ),
         ],
+      ),
+      footer: Text(
+        dt('بعد إرسال الطلب سيحدد السائقون أجورهم وفق مسافة التوصيل، وستختار العرض المناسب قبل تأكيد الطلب.'),
+        style: TextStyle(
+          color: DarbColors.mutedOf(context),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          height: 1.4,
+        ),
       ),
     );
   }
@@ -638,9 +798,22 @@ class _PeerDeliveryScreenState extends State<PeerDeliveryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: TextStyle(color: DarbColors.mutedOf(context), fontSize: 12, fontWeight: FontWeight.w700)),
+            Text(
+              label,
+              style: TextStyle(
+                color: DarbColors.mutedOf(context),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(height: 2),
-            Text(value, style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w700)),
+            Text(
+              value,
+              style: TextStyle(
+                color: DarbColors.inkOf(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ),
       );

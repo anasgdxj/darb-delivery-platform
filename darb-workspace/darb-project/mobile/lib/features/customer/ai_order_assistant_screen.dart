@@ -6,6 +6,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 import 'peer_delivery_screen.dart';
 import 'vendor_catalog_screen.dart';
 
@@ -114,8 +115,9 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
       return;
     }
 
-    final items =
-        (draft['items'] as List? ?? []).whereType<Map<String, dynamic>>().toList();
+    final items = (draft['items'] as List? ?? [])
+        .whereType<Map<String, dynamic>>()
+        .toList();
     String? vendorId = draft['vendorId']?.toString();
     String vendorName = dt('متجر');
     final prefilledCart = <String, int>{};
@@ -173,73 +175,63 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
   @override
   Widget build(BuildContext context) {
     final draft = _draft;
+    final teal = DarbColors.violetOf(context);
+    final isDark = DarbColors.isDark(context);
+
     return Scaffold(
       appBar: DarbGlassAppBar(
         title: dt('مساعد الطلبات الذكي'),
         subtitle: widget.cityName,
       ),
       body: DarbAmbientBackground(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
-          children: [
-            DarbFadeSlide(
-              child: DarbGlassSurface(
-                padding: const EdgeInsets.all(18),
-                borderColor: DarbColors.violetOf(context).withValues(alpha: 0.34),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: DarbColors.violetSoftOf(context),
-                            borderRadius: BorderRadius.circular(13),
-                            border: Border.all(
-                              color: DarbColors.violetOf(context)
-                                  .withValues(alpha: 0.35),
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.auto_awesome_rounded,
-                            color: DarbColors.violetOf(context),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            dt('صف طلبك أو الغرض المطلوب توصيله بالعربية وسنجهزه لك للمراجعة'),
-                            style: TextStyle(
-                              color: DarbColors.inkOf(context),
-                              fontWeight: FontWeight.w700,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                      ],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+              children: [
+                DarbFadeSlide(
+                  child: DarbCommandStage(
+                    livePulse: true,
+                    accentColor: DarbColors.darkViolet,
+                    eyebrow: widget.cityName,
+                    title: dt('مساعد الطلبات الذكي'),
+                    subtitle: dt(
+                      'صف طلبك أو الغرض المطلوب توصيله بالعربية وسنجهزه لك للمراجعة',
                     ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
+                    leading: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: DarbColors.darkViolet.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: DarbColors.darkViolet.withValues(alpha: 0.45),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.auto_awesome_rounded,
+                        color: DarbColors.darkViolet,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                DarbFadeSlide(
+                  delay: DarbMotion.staggerDelay(1),
+                  child: DarbGlassSurface(
+                    padding: const EdgeInsets.all(18),
+                    borderColor: teal.withValues(alpha: 0.34),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         for (final sample in [
                           dt('أريد عبوتين زيت وخبز إلى حي الشهباء'),
                           dt('إرسال مفاتيح من المزة إلى المالكي'),
-                        ])
-                          ActionChip(
-                            avatar: Icon(
-                              Icons.bolt_rounded,
-                              size: 15,
-                              color: DarbColors.violetOf(context),
-                            ),
-                            label: Text(
-                              sample,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            onPressed: _submitting
+                        ]) ...[
+                          DarbPressScale(
+                            borderRadius: DarbRadius.md,
+                            onTap: _submitting
                                 ? null
                                 : () {
                                     DarbHaptics.selection();
@@ -249,166 +241,191 @@ class _AiOrderAssistantScreenState extends State<AiOrderAssistantScreen> {
                                       _analyzeState = DarbActionState.idle;
                                     });
                                   },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: teal.withValues(alpha: isDark ? 0.14 : 0.08),
+                                borderRadius: BorderRadius.circular(DarbRadius.md),
+                                border: Border.all(
+                                  color: teal.withValues(alpha: 0.26),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.bolt_rounded,
+                                    size: 16,
+                                    color: teal,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      sample,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: DarbColors.inkOf(context),
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _textController,
-                      maxLines: 4,
-                      onChanged: (_) {
-                        if (_analyzeState == DarbActionState.error) {
-                          setState(() => _analyzeState = DarbActionState.idle);
-                        }
-                      },
-                      decoration: InputDecoration(
-                        labelText: dt('اكتب طلبك هنا'),
-                        hintText: dt(
-                          'مثال: أريد عبوتين زيت وخبز إلى حي الشهباء، أو إرسال مفاتيح من المزة إلى المالكي',
+                          const SizedBox(height: 8),
+                        ],
+                        const SizedBox(height: 4),
+                        TextField(
+                          controller: _textController,
+                          maxLines: 4,
+                          onChanged: (_) {
+                            if (_analyzeState == DarbActionState.error) {
+                              setState(() => _analyzeState = DarbActionState.idle);
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: dt('اكتب طلبك هنا'),
+                            hintText: dt(
+                              'مثال: أريد عبوتين زيت وخبز إلى حي الشهباء، أو إرسال مفاتيح من المزة إلى المالكي',
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    if (_error != null) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        _error!,
-                        style: TextStyle(
-                          color: DarbColors.dangerOf(context),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                    if (_submitting) ...[
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          const DarbTypingDots(),
-                          const SizedBox(width: 10),
+                        if (_error != null) ...[
+                          const SizedBox(height: 10),
                           Text(
-                            dt('جارٍ التحليل...'),
+                            _error!,
                             style: TextStyle(
-                              color: DarbColors.mutedOf(context),
-                              fontSize: 12.5,
+                              color: DarbColors.dangerOf(context),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-                    DarbActionButton(
-                      label: dt('تحليل الطلب'),
-                      loadingLabel: dt('جارٍ التحليل...'),
-                      state: _analyzeState,
-                      errorTrigger: _errorTrigger,
-                      icon: Icons.bolt_rounded,
-                      onPressed: _submitting ? null : _analyze,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (draft != null) ...[
-              const SizedBox(height: 16),
-              DarbFadeSlide(
-                child: DarbGlassSurface(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              dt('مسودة الطلب المستخرجة'),
-                              style: TextStyle(
-                                color: DarbColors.inkOf(context),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
+                        if (_submitting) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              DarbTypingDots(color: teal),
+                              const SizedBox(width: 10),
+                              Text(
+                                dt('جارٍ التحليل...'),
+                                style: TextStyle(
+                                  color: DarbColors.mutedOf(context),
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                          ),
-                          DarbStatusBadge(
-                            status: draft['status']?.toString() ?? 'NEEDS_REVIEW',
+                            ],
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '${dt('النوع')}: ${draft['intent'] == 'PEER_DELIVERY' ? dt('توصيل مستقل') : dt('الطلب من المتاجر')}',
-                        style: TextStyle(
-                          color: DarbColors.primaryOf(context),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      for (final item in (draft['items'] as List? ?? [])
-                          .whereType<Map<String, dynamic>>())
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            children: [
-                              Icon(
-                                item['productId'] != null
-                                    ? Icons.check_circle_rounded
-                                    : Icons.help_outline_rounded,
-                                size: 17,
-                                color: item['productId'] != null
-                                    ? DarbColors.primaryOf(context)
-                                    : DarbColors.warningOf(context),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  '${item['rawName']} × ${item['quantity'] ?? 1}',
-                                  style: TextStyle(
-                                    color: DarbColors.inkOf(context),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      if ((draft['warnings'] as List? ?? []).isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: DarbColors.warningSoftOf(context),
-                            borderRadius: BorderRadius.circular(DarbRadius.sm),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (final w in (draft['warnings'] as List))
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
-                                  child: Text(
-                                    '• $w',
-                                    style: TextStyle(
-                                      color: DarbColors.warningOf(context),
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                        const SizedBox(height: 14),
+                        DarbActionButton(
+                          label: dt('تحليل الطلب'),
+                          loadingLabel: dt('جارٍ التحليل...'),
+                          state: _analyzeState,
+                          errorTrigger: _errorTrigger,
+                          icon: Icons.bolt_rounded,
+                          onPressed: _submitting ? null : _analyze,
                         ),
                       ],
-                      const SizedBox(height: 16),
-                      DarbActionButton(
+                    ),
+                  ),
+                ),
+                if (draft != null) ...[
+                  const SizedBox(height: 16),
+                  DarbFadeSlide(
+                    child: DarbTicketPass(
+                      leadingIcon: Icons.auto_awesome_rounded,
+                      accentColor: teal,
+                      title: dt('مسودة الطلب المستخرجة'),
+                      subtitle: draft['intent'] == 'PEER_DELIVERY'
+                          ? dt('توصيل مستقل')
+                          : dt('الطلب من المتاجر'),
+                      status: draft['status']?.toString() ?? 'NEEDS_REVIEW',
+                      body: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            '${dt('النوع')}: ${draft['intent'] == 'PEER_DELIVERY' ? dt('توصيل مستقل') : dt('الطلب من المتاجر')}',
+                            style: TextStyle(
+                              color: teal,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          for (final item in (draft['items'] as List? ?? [])
+                              .whereType<Map<String, dynamic>>())
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    item['productId'] != null
+                                        ? Icons.check_circle_rounded
+                                        : Icons.help_outline_rounded,
+                                    size: 17,
+                                    color: item['productId'] != null
+                                        ? teal
+                                        : DarbColors.warningOf(context),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      '${item['rawName']} × ${item['quantity'] ?? 1}',
+                                      style: TextStyle(
+                                        color: DarbColors.inkOf(context),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if ((draft['warnings'] as List? ?? []).isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: DarbColors.warningSoftOf(context),
+                                borderRadius:
+                                    BorderRadius.circular(DarbRadius.sm),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  for (final w in (draft['warnings'] as List))
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 4),
+                                      child: Text(
+                                        '• $w',
+                                        style: TextStyle(
+                                          color: DarbColors.warningOf(context),
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      footer: DarbActionButton(
                         label: dt('متابعة لمراجعة وإرسال الطلب'),
                         icon: Icons.arrow_forward_rounded,
                         onPressed: () => _proceedWithDraft(draft),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ],
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

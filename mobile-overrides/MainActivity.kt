@@ -4,10 +4,10 @@ import android.app.DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ClipData
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
@@ -21,24 +21,38 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val TAG = "DarbUpdater"
         private const val CHANNEL = "com.darb/update"
-        private const val DAZREVO_CHANNEL_ID = "dazrevo_updates"
+        private const val HIGH_NOTIFICATION_CHANNEL_ID = "dazrevo_high_importance"
+        private const val FALLBACK_NOTIFICATION_CHANNEL_ID = "fcm_fallback_notification_channel"
     }
 
-    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel(
-                DAZREVO_CHANNEL_ID,
-                "تحديثات دازريفو",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "إشعارات تحديثات التطبيق والتنبيهات المهمة"
-                enableVibration(true)
-            }
-            notificationManager.createNotificationChannel(channel)
+        createNotificationChannels()
+    }
+
+    private fun createNotificationChannels() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = getSystemService(NOTIFICATION_SERVICE) as? NotificationManager ?: return
+        val highChannel = NotificationChannel(
+            HIGH_NOTIFICATION_CHANNEL_ID,
+            "إشعارات دازريفو الفورية",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "تنبيهات الطلبات وتحديثات المندوبين وإصدارات التطبيق"
+            enableVibration(true)
+            setShowBadge(true)
         }
+        val fallbackChannel = NotificationChannel(
+            FALLBACK_NOTIFICATION_CHANNEL_ID,
+            "التنبيهات العامة",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "إشعارات النظام الفورية"
+            enableVibration(true)
+            setShowBadge(true)
+        }
+        manager.createNotificationChannel(highChannel)
+        manager.createNotificationChannel(fallbackChannel)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -62,11 +76,13 @@ class MainActivity : FlutterActivity() {
                             val oldId = prefs.getLong(DarbUpdateDownloadReceiver.KEY_DOWNLOAD_ID, -1L)
                             if (oldId > 0L) (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).remove(oldId)
                             val request = DownloadManager.Request(Uri.parse(url))
-                                .setTitle("تحديث دَرْب")
+                                .setTitle("تحديث دازريفو")
                                 .setDescription("جارٍ تنزيل الإصدار $version")
                                 .setAllowedOverMetered(true)
                                 .setAllowedOverRoaming(true)
-                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
+                                // VISIBILITY_HIDDEN requires the privileged DOWNLOAD_WITHOUT_NOTIFICATION permission.
+                                // Use a normal system notification so downloads work on standard Android devices.
+                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                                 .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "darb-update-$version.apk")
                             val id = (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
                             prefs.edit().putLong(DarbUpdateDownloadReceiver.KEY_DOWNLOAD_ID, id)
@@ -122,7 +138,7 @@ class MainActivity : FlutterActivity() {
         val uri = Uri.parse(uriText)
         val installIntent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
-            clipData = ClipData.newUri(contentResolver, "Darb APK update", uri)
+            clipData = ClipData.newUri(contentResolver, "DAZREVO APK update", uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(installIntent)
@@ -147,7 +163,7 @@ class MainActivity : FlutterActivity() {
         val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", apk)
         val installIntent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
-            clipData = ClipData.newUri(contentResolver, "Darb APK update", uri)
+            clipData = ClipData.newUri(contentResolver, "DAZREVO APK update", uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(installIntent)

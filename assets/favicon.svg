@@ -1,9 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
-  <rect width="108" height="108" rx="25" fill="#14171D"/>
-  <circle cx="54" cy="54" r="40" fill="none" stroke="#E7D3A3" stroke-opacity=".18" stroke-width="1.5"/>
-  <path d="M33 25H57L80 42V66L57 83H33L42.5 72H54.5L68.5 61.5V46.5L54.5 36H42.5Z" fill="#F7F4EC"/>
-  <path d="M28 36L52 54L28 72" fill="none" stroke="#D6B46C" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M34 45L45.5 54L34 63" fill="none" stroke="#E7D3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="28" cy="36" r="4" fill="#D6B46C"/><circle cx="28" cy="72" r="4" fill="#D6B46C"/>
-  <circle cx="53" cy="54" r="9.6" fill="#3FD1BE" fill-opacity=".26"/><circle cx="53" cy="54" r="5.8" fill="#3FD1BE"/><circle cx="53" cy="54" r="2.2" fill="#0C0D0F"/>
+  <defs>
+    <linearGradient id="dazBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0C0D0F"/>
+      <stop offset="52%" stop-color="#14171D"/>
+      <stop offset="100%" stop-color="#1E222B"/>
+    </linearGradient>
+    <radialGradient id="dazGlow" cx="52%" cy="48%" r="44%">
+      <stop offset="0%" stop-color="#D6B46C" stop-opacity="0.24"/>
+      <stop offset="58%" stop-color="#3FD1BE" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#0C0D0F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="108" height="108" rx="28" fill="url(#dazBg)"/>
+  <rect x="2" y="2" width="104" height="104" rx="26" fill="none" stroke="#D6B46C" stroke-opacity="0.48" stroke-width="2"/>
+  <circle cx="54" cy="54" r="44" fill="url(#dazGlow)"/>
+  <circle cx="54" cy="54" r="35" fill="none" stroke="#E7D3A3" stroke-opacity="0.2" stroke-width="1.4"/>
+  <path d="M33 25h24l23 17v24L57 83H33l9.5-11h12l14-10.5v-15L54.5 36h-12z" fill="#F7F4EC"/>
+  <path d="M28 36L52 54 28 72" fill="none" stroke="#D6B46C" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M34 45L45.5 54 34 63" fill="none" stroke="#E7D3A3" stroke-opacity="0.76" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="28" cy="36" r="4" fill="#D6B46C"/>
+  <circle cx="28" cy="72" r="4" fill="#D6B46C"/>
+  <circle cx="53" cy="54" r="9.6" fill="#3FD1BE" fill-opacity="0.26"/>
+  <circle cx="53" cy="54" r="5.8" fill="#3FD1BE"/>
+  <circle cx="53" cy="54" r="2.2" fill="#0C0D0F"/>
 </svg>

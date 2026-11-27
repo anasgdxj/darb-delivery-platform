@@ -242,7 +242,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (widget.syncNotificationsOverride != null) {
         err = await widget.syncNotificationsOverride!();
       } else {
-        await DarbNotifications.register();
+        await DarbNotifications.register(force: true);
         err = DarbNotifications.lastError;
       }
       if (!mounted) return;
@@ -838,9 +838,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         DarbSettingsTile(
                           icon: Icons.sync_rounded,
-                          accentColor: DarbColors.infoOf(context),
+                          accentColor: DarbNotifications.hasSyncedToken &&
+                                  DarbNotifications.lastError == null
+                              ? DarbColors.successOf(context)
+                              : DarbColors.infoOf(context),
                           title: dt('مزامنة إشعارات الجهاز'),
-                          subtitle: dt('إعادة تسجيل رمز الجهاز لاستقبال الإشعارات الفورية'),
+                          subtitle: (DarbNotifications.lastError != null &&
+                                  DarbNotifications.lastError!.isNotEmpty)
+                              ? DarbNotifications.lastError!
+                              : dt(
+                                  'إعادة تسجيل رمز الجهاز لاستقبال الإشعارات الفورية',
+                                ),
+                          valueLabel: DarbNotifications.hasSyncedToken &&
+                                  DarbNotifications.lastError == null
+                              ? dt('مزامن')
+                              : dt('بحاجة للمزامنة'),
                           enabled: !_syncingPush,
                           trailing: _syncingPush
                               ? const SizedBox(

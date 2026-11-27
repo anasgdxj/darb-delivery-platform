@@ -1,10 +1,13 @@
 package com.darb.darb
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
@@ -18,6 +21,38 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val TAG = "DarbUpdater"
         private const val CHANNEL = "com.darb/update"
+        private const val HIGH_NOTIFICATION_CHANNEL_ID = "dazrevo_high_importance"
+        private const val FALLBACK_NOTIFICATION_CHANNEL_ID = "fcm_fallback_notification_channel"
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        createNotificationChannels()
+    }
+
+    private fun createNotificationChannels() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = getSystemService(NOTIFICATION_SERVICE) as? NotificationManager ?: return
+        val highChannel = NotificationChannel(
+            HIGH_NOTIFICATION_CHANNEL_ID,
+            "إشعارات دازريفو الفورية",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "تنبيهات الطلبات وتحديثات المندوبين وإصدارات التطبيق"
+            enableVibration(true)
+            setShowBadge(true)
+        }
+        val fallbackChannel = NotificationChannel(
+            FALLBACK_NOTIFICATION_CHANNEL_ID,
+            "التنبيهات العامة",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "إشعارات النظام الفورية"
+            enableVibration(true)
+            setShowBadge(true)
+        }
+        manager.createNotificationChannel(highChannel)
+        manager.createNotificationChannel(fallbackChannel)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

@@ -928,6 +928,8 @@ class DarbEditorialStoreCard extends StatelessWidget {
     this.address,
     this.ratingAvg = 0,
     this.reviewsCount = 0,
+    this.isFavorite = false,
+    this.onToggleFavorite,
     this.onTap,
   });
 
@@ -938,6 +940,8 @@ class DarbEditorialStoreCard extends StatelessWidget {
   final String? address;
   final double ratingAvg;
   final int reviewsCount;
+  final bool isFavorite;
+  final VoidCallback? onToggleFavorite;
   final VoidCallback? onTap;
 
   @override
@@ -1022,6 +1026,41 @@ class DarbEditorialStoreCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (onToggleFavorite != null) ...[
+                  const SizedBox(width: 6),
+                  DarbPressScale(
+                    borderRadius: DarbRadius.pill,
+                    onTap: onToggleFavorite,
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isFavorite
+                            ? DarbColors.lime.withValues(alpha: 0.24)
+                            : (isOpen
+                                ? Colors.white.withValues(alpha: 0.12)
+                                : DarbColors.surfaceOf(context)),
+                        border: Border.all(
+                          color: isFavorite
+                              ? DarbColors.lime
+                              : (isOpen
+                                  ? Colors.white.withValues(alpha: 0.20)
+                                  : DarbColors.borderOf(context)),
+                        ),
+                      ),
+                      child: Icon(
+                        isFavorite
+                            ? Icons.bookmark_rounded
+                            : Icons.bookmark_border_rounded,
+                        size: 16,
+                        color: isFavorite
+                            ? DarbColors.lime
+                            : (isOpen ? Colors.white : muted),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(width: 8),
                 FittedBox(
                   fit: BoxFit.scaleDown,

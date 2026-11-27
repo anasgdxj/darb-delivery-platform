@@ -6,6 +6,7 @@ import '../../core/theme/darb_design_system.dart';
 import '../../core/widgets/darb_components.dart';
 import '../../core/widgets/darb_glass.dart';
 import '../../core/widgets/darb_motion_components.dart';
+import '../../core/widgets/darb_spatial_primitives.dart';
 import 'addresses_screen.dart';
 
 class CartCheckoutItem {
@@ -72,6 +73,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double get _subtotal =>
       widget.items.fold(0, (sum, item) => sum + item.unitPrice * item.quantity);
 
+  int get _totalUnits =>
+      widget.items.fold(0, (sum, item) => sum + item.quantity);
+
+  Map<String, dynamic>? get _selectedAddress =>
+      _addresses.cast<Map<String, dynamic>?>().firstWhere(
+            (a) => a?['id']?.toString() == _selectedAddressId,
+            orElse: () => null,
+          );
+
   Future<void> _loadAddresses() async {
     setState(() {
       _loadingAddresses = true;
@@ -90,7 +100,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           if (list.isNotEmpty) {
             final withLoc = list.where((a) => a['hasLocation'] == true).toList();
             _selectedAddressId =
-                (withLoc.isNotEmpty ? withLoc.first : list.first)['id']?.toString();
+                (withLoc.isNotEmpty ? withLoc.first : list.first)['id']
+                    ?.toString();
           } else {
             _selectedAddressId = null;
           }
@@ -288,10 +299,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     final currency = _estimate?['currency']?.toString() ??
         (widget.items.isNotEmpty ? widget.items.first.currency : 'SYP');
-    final estSubtotal = num.tryParse(_estimate?['subtotal']?.toString() ?? '') ?? _subtotal;
+    final estSubtotal =
+        num.tryParse(_estimate?['subtotal']?.toString() ?? '') ?? _subtotal;
     final estDelivery = num.tryParse(_estimate?['deliveryFee']?.toString() ?? '');
     final estTotal = num.tryParse(_estimate?['total']?.toString() ?? '');
     final estDistance = _estimate?['distanceKm'];
+    final selectedAddress = _selectedAddress;
+    final vendorOpen = _estimate?['vendorOpen'] != false;
+    final canSubmit = !_submitting &&
+        !_loadingAddresses &&
+        !_estimating &&
+        _estimate != null &&
+        _estimateError == null &&
+        vendorOpen;
 
     return Scaffold(
       appBar: DarbGlassAppBar(
@@ -299,251 +319,425 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         subtitle: widget.vendorName,
       ),
       body: DarbAmbientBackground(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 30),
-          children: [
-            DarbGlassSurface(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      _CheckoutStepPill(step: '1'),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          dt('عنوان التوصيل'),
-                          style: TextStyle(color: DarbColors.inkOf(context), fontSize: 16, fontWeight: FontWeight.w900),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              children: [
+                DarbFadeSlide(
+                  child: DarbCommandStage(
+                    livePulse: vendorOpen,
+                    eyebrow: dt('الدفع نقداً عند الاستلام'),
+                    title: widget.vendorName,
+                    subtitle: dt('ملخص السلة'),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 11,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: DarbColors.lime.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(DarbRadius.pill),
+                        border: Border.all(
+                          color: DarbColors.lime.withValues(alpha: 0.42),
                         ),
                       ),
-                      TextButton.icon(
-                        onPressed: () async {
-                          final created = await showAddressFormSheet(context, requireLocation: true);
-                          if (created != null) {
-                            setState(() => _selectedAddressId = created['id']?.toString());
-                            await _loadAddresses();
-                          }
-                        },
-                        icon: const Icon(Icons.add_rounded, size: 18),
-                        label: Text(dt('إضافة عنوان')),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  if (_loadingAddresses)
-                    const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
-                  else if (_addressesError != null)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          _addressesError!,
-                          style: TextStyle(
-                            color: DarbColors.dangerOf(context),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: TextButton.icon(
-                            onPressed: _loadAddresses,
-                            icon: const Icon(Icons.refresh_rounded),
-                            label: Text(dt('إعادة المحاولة')),
-                          ),
-                        ),
-                      ],
-                    )
-                  else if (_addresses.isEmpty)
-                    Text(
-                      dt('لا يوجد عنوان محفوظ'),
-                      style: TextStyle(color: DarbColors.mutedOf(context)),
-                    )
-                  else
-                    Column(
-                      children: [
-                        for (var i = 0; i < _addresses.length; i++) ...[
-                          if (i > 0) const SizedBox(height: 8),
-                          DarbRadioOptionTile(
-                            selected: _addresses[i]['id']?.toString() == _selectedAddressId,
-                            title: _addresses[i]['label']?.toString().isNotEmpty == true
-                                ? _addresses[i]['label'].toString()
-                                : dt('عنوان'),
-                            subtitle: _addresses[i]['details']?.toString() ?? '',
-                            trailing: DarbStatusBadge(
-                              status: _addresses[i]['hasLocation'] == true ? 'OPEN' : 'PENDING',
-                            ),
-                            onTap: _submitting
-                                ? null
-                                : () async {
-                                    setState(() {
-                                      _selectedAddressId = _addresses[i]['id']?.toString();
-                                      _error = null;
-                                    });
-                                    await _refreshEstimate();
-                                  },
-                          ),
-                        ],
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            DarbGlassSurface(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      _CheckoutStepPill(step: '2'),
-                      const SizedBox(width: 8),
-                      Text(
-                        dt('ملخص السلة'),
-                        style: TextStyle(color: DarbColors.inkOf(context), fontSize: 16, fontWeight: FontWeight.w900),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  for (final item in widget.items)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${item.name} × ${item.quantity}',
-                              style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w700),
-                            ),
-                          ),
-                          Text(
-                            formatDarbMoney(item.unitPrice * item.quantity, item.currency),
-                            style: TextStyle(color: DarbColors.inkOf(context), fontWeight: FontWeight.w800),
-                          ),
-                        ],
-                      ),
-                    ),
-                  const Divider(height: 22),
-                  _feeRow(dt('المجموع الفرعي التقريبي'), formatDarbMoney(estSubtotal, currency)),
-                  if (_estimating)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: LinearProgressIndicator(borderRadius: BorderRadius.circular(DarbRadius.pill)),
-                    )
-                  else if (_estimateError != null)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          _estimateError!,
-                          style: TextStyle(
-                            color: DarbColors.dangerOf(context),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: TextButton.icon(
-                            onPressed: _selectedAddressId == null ? null : _refreshEstimate,
-                            icon: const Icon(Icons.refresh_rounded),
-                            label: Text(dt('إعادة حساب التكلفة')),
-                          ),
-                        ),
-                      ],
-                    )
-                  else ...[
-                    if (estDistance != null)
-                      _feeRow(dt('مسافة التوصيل: $estDistance كم'), ''),
-                    if (estDelivery != null)
-                      _feeRow(dt('أجرة التوصيل المتوقعة'), formatDarbMoney(estDelivery, currency)),
-                    if (estTotal != null)
-                      _feeRow(
-                        dt('الإجمالي التقديري'),
-                        formatDarbMoney(estTotal, currency),
-                        highlight: true,
-                      ),
-                  ],
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.payments_outlined, size: 17, color: DarbColors.primaryOf(context)),
-                      const SizedBox(width: 6),
-                      Text(
-                        dt('الدفع نقداً عند الاستلام'),
-                        style: TextStyle(color: DarbColors.mutedOf(context), fontWeight: FontWeight.w700, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            DarbGlassSurface(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      _CheckoutStepPill(step: '3'),
-                      const SizedBox(width: 8),
-                      Text(
-                        dt('ملاحظات للمتجر (اختياري)'),
-                        style: TextStyle(
-                          color: DarbColors.inkOf(context),
-                          fontSize: 15,
+                      child: Text(
+                        '$_totalUnits',
+                        style: const TextStyle(
+                          color: DarbColors.lime,
+                          fontSize: 13,
                           fontWeight: FontWeight.w900,
+                          fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _notesController,
-                    maxLines: 2,
-                    decoration: InputDecoration(
-                      hintText: dt('ملاحظات للمتجر (اختياري)'),
+                ),
+                const SizedBox(height: 12),
+                DarbFadeSlide(
+                  delay: DarbMotion.staggerDelay(1),
+                  child: DarbRouteConnector(
+                    pickupLabel: dt('الاستلام'),
+                    pickupAddress: widget.vendorName,
+                    dropoffLabel: dt('عنوان التوصيل'),
+                    dropoffAddress: selectedAddress?['details']?.toString() ??
+                        dt('اختر عنوان توصيل صالحاً أو أضف عنواناً جديداً'),
+                    badgeText: estDistance != null
+                        ? '$estDistance كم'
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                DarbFadeSlide(
+                  delay: DarbMotion.staggerDelay(2),
+                  child: DarbGlassSurface(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            const _CheckoutStepPill(step: '1'),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                dt('عنوان التوصيل'),
+                                style: TextStyle(
+                                  color: DarbColors.inkOf(context),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: () async {
+                                final created = await showAddressFormSheet(
+                                  context,
+                                  requireLocation: true,
+                                );
+                                if (created != null) {
+                                  setState(
+                                    () => _selectedAddressId =
+                                        created['id']?.toString(),
+                                  );
+                                  await _loadAddresses();
+                                }
+                              },
+                              icon: const Icon(Icons.add_rounded, size: 18),
+                              label: Text(dt('إضافة عنوان')),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        if (_loadingAddresses)
+                          const DarbStateView.loading()
+                        else if (_addressesError != null)
+                          DarbStateView.error(
+                            message: _addressesError!,
+                            onRetry: _loadAddresses,
+                          )
+                        else if (_addresses.isEmpty)
+                          DarbStateView.empty(
+                            message: dt('لا يوجد عنوان محفوظ'),
+                            icon: Icons.location_off_outlined,
+                            onRetry: () async {
+                              final created = await showAddressFormSheet(
+                                context,
+                                requireLocation: true,
+                              );
+                              if (created != null) {
+                                setState(
+                                  () => _selectedAddressId =
+                                      created['id']?.toString(),
+                                );
+                                await _loadAddresses();
+                              }
+                            },
+                          )
+                        else
+                          Column(
+                            children: [
+                              for (var i = 0; i < _addresses.length; i++) ...[
+                                if (i > 0) const SizedBox(height: 8),
+                                DarbRadioOptionTile(
+                                  selected: _addresses[i]['id']?.toString() ==
+                                      _selectedAddressId,
+                                  title: _addresses[i]['label']
+                                              ?.toString()
+                                              .isNotEmpty ==
+                                          true
+                                      ? _addresses[i]['label'].toString()
+                                      : dt('عنوان'),
+                                  subtitle:
+                                      _addresses[i]['details']?.toString() ?? '',
+                                  trailing: DarbStatusBadge(
+                                    status: _addresses[i]['hasLocation'] == true
+                                        ? 'OPEN'
+                                        : 'PENDING',
+                                  ),
+                                  onTap: _submitting
+                                      ? null
+                                      : () async {
+                                          DarbHaptics.selection();
+                                          setState(() {
+                                            _selectedAddressId =
+                                                _addresses[i]['id']?.toString();
+                                            _error = null;
+                                          });
+                                          await _refreshEstimate();
+                                        },
+                                ),
+                              ],
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                DarbFadeSlide(
+                  delay: DarbMotion.staggerDelay(3),
+                  child: DarbTicketPass(
+                    leadingIcon: Icons.receipt_long_rounded,
+                    title: dt('ملخص السلة'),
+                    subtitle: widget.vendorName,
+                    status: vendorOpen ? 'OPEN' : 'CLOSED',
+                    body: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final item in widget.items)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: DarbColors.softSurfaceOf(context),
+                                    borderRadius:
+                                        BorderRadius.circular(DarbRadius.pill),
+                                  ),
+                                  child: Text(
+                                    '${item.quantity}×',
+                                    style: TextStyle(
+                                      color: DarbColors.primaryOf(context),
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w900,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    item.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: DarbColors.inkOf(context),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  formatDarbMoney(
+                                    item.unitPrice * item.quantity,
+                                    item.currency,
+                                  ),
+                                  style: TextStyle(
+                                    color: DarbColors.inkOf(context),
+                                    fontWeight: FontWeight.w800,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const Divider(height: 20),
+                        _feeRow(
+                          dt('المجموع الفرعي التقريبي'),
+                          formatDarbMoney(estSubtotal, currency),
+                        ),
+                        if (_estimating)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: LinearProgressIndicator(
+                              borderRadius:
+                                  BorderRadius.circular(DarbRadius.pill),
+                            ),
+                          )
+                        else if (_estimateError != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                _estimateError!,
+                                style: TextStyle(
+                                  color: DarbColors.dangerOf(context),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: TextButton.icon(
+                                  onPressed: _selectedAddressId == null
+                                      ? null
+                                      : _refreshEstimate,
+                                  icon: const Icon(Icons.refresh_rounded),
+                                  label: Text(dt('إعادة حساب التكلفة')),
+                                ),
+                              ),
+                            ],
+                          )
+                        else ...[
+                          if (estDistance != null)
+                            _feeRow(dt('مسافة التوصيل: $estDistance كم'), ''),
+                          if (estDelivery != null)
+                            _feeRow(
+                              dt('أجرة التوصيل المتوقعة'),
+                              formatDarbMoney(estDelivery, currency),
+                            ),
+                          if (estTotal != null)
+                            _feeRow(
+                              dt('الإجمالي التقديري'),
+                              formatDarbMoney(estTotal, currency),
+                              highlight: true,
+                            ),
+                        ],
+                      ],
+                    ),
+                    footer: Row(
+                      children: [
+                        Icon(
+                          Icons.payments_outlined,
+                          size: 17,
+                          color: DarbColors.primaryOf(context),
+                        ),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            dt('الدفع نقداً عند الاستلام'),
+                            style: TextStyle(
+                              color: DarbColors.mutedOf(context),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                DarbFadeSlide(
+                  delay: DarbMotion.staggerDelay(4),
+                  child: DarbGlassSurface(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            const _CheckoutStepPill(step: '3'),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                dt('ملاحظات للمتجر (اختياري)'),
+                                style: TextStyle(
+                                  color: DarbColors.inkOf(context),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _notesController,
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            hintText: dt('ملاحظات للمتجر (اختياري)'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 12),
+                  DarbGlassSurface(
+                    tintColor: DarbColors.dangerSoftOf(context),
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      _error!,
+                      style: TextStyle(
+                        color: DarbColors.dangerOf(context),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              DarbGlassSurface(
-                tintColor: DarbColors.dangerSoftOf(context),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 6, 14, 12),
+          child: Center(
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 680),
+              child: DarbGlassSurface(
+                borderRadius: DarbRadius.xl,
+                blurSigma: 24,
                 padding: const EdgeInsets.all(12),
-                child: Text(
-                  _error!,
-                  style: TextStyle(color: DarbColors.dangerOf(context), fontWeight: FontWeight.w700),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (estTotal != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              dt('الإجمالي التقديري'),
+                              style: TextStyle(
+                                color: DarbColors.mutedOf(context),
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              formatDarbMoney(estTotal, currency),
+                              style: TextStyle(
+                                color: DarbColors.primaryOf(context),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    DarbActionButton(
+                      label: dt('إرسال الطلب — الدفع عند الاستلام'),
+                      loadingLabel: dt('جارٍ الحفظ'),
+                      successLabel: dt('تم استلام طلبك'),
+                      state: _submitState,
+                      errorTrigger: _errorTrigger,
+                      icon: Icons.check_circle_outline_rounded,
+                      onPressed: canSubmit ? _placeOrder : null,
+                    ),
+                  ],
                 ),
               ),
-            ],
-            const SizedBox(height: 18),
-            DarbActionButton(
-              label: dt('إرسال الطلب — الدفع عند الاستلام'),
-              loadingLabel: dt('جارٍ الحفظ'),
-              successLabel: dt('تم استلام طلبك'),
-              state: _submitState,
-              errorTrigger: _errorTrigger,
-              icon: Icons.check_circle_outline_rounded,
-              onPressed: (_submitting ||
-                      _loadingAddresses ||
-                      _estimating ||
-                      _estimate == null ||
-                      _estimateError != null ||
-                      _estimate?['vendorOpen'] == false)
-                  ? null
-                  : _placeOrder,
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _feeRow(String label, String value, {bool highlight = false}) => Padding(
+  Widget _feeRow(String label, String value, {bool highlight = false}) =>
+      Padding(
         padding: const EdgeInsets.only(bottom: 6),
         child: Row(
           children: [
@@ -551,7 +745,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: highlight ? DarbColors.inkOf(context) : DarbColors.mutedOf(context),
+                  color: highlight
+                      ? DarbColors.inkOf(context)
+                      : DarbColors.mutedOf(context),
                   fontWeight: highlight ? FontWeight.w900 : FontWeight.w600,
                   fontSize: highlight ? 15 : 13.5,
                 ),
@@ -561,9 +757,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Text(
                 value,
                 style: TextStyle(
-                  color: highlight ? DarbColors.primaryOf(context) : DarbColors.inkOf(context),
+                  color: highlight
+                      ? DarbColors.primaryOf(context)
+                      : DarbColors.inkOf(context),
                   fontWeight: FontWeight.w900,
                   fontSize: highlight ? 16 : 14,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
           ],

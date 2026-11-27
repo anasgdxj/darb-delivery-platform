@@ -218,6 +218,9 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
         _validPoint(widget.dropoffLatitude, widget.dropoffLongitude);
     final fallbackCenter = dropoffPoint ?? pickupPoint ?? _syriaCenter;
     final isDark = DarbColors.isDark(context);
+    final primary = DarbColors.primaryOf(context);
+    final teal = DarbColors.violetOf(context);
+    final live = point != null && !_stale && _error == null;
 
     final markers = <Marker>[
       if (pickupPoint != null)
@@ -261,42 +264,45 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
       if (point != null)
         Marker(
           point: point,
-          width: 84,
-          height: 78,
+          width: 88,
+          height: 80,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: DarbColors.primaryOf(context),
+                  gradient: const LinearGradient(
+                    colors: [DarbColors.forest, DarbColors.forestSoft],
+                  ),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white,
-                    width: 3,
+                    color: DarbColors.lime,
+                    width: 2.8,
                   ),
                   boxShadow: DarbElevation.floating(isDark),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.delivery_dining_rounded,
-                  color: DarbColors.onPrimaryOf(context),
-                  size: 24,
+                  color: DarbColors.lime,
+                  size: 23,
                 ),
               ),
               const SizedBox(height: 3),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
-                  color: DarbColors.surfaceElevatedOf(context)
-                      .withValues(alpha: 0.94),
+                  color: DarbColors.forest.withValues(alpha: 0.94),
                   borderRadius: BorderRadius.circular(DarbRadius.pill),
-                  border: Border.all(color: DarbColors.borderOf(context)),
+                  border: Border.all(
+                    color: DarbColors.lime.withValues(alpha: 0.45),
+                  ),
                 ),
                 child: Text(
                   dt('المندوب'),
-                  style: TextStyle(
-                    color: DarbColors.inkOf(context),
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                   ),
@@ -308,386 +314,497 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen>
     ];
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: DarbAmbientBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 12),
-                child: Row(
-                  children: [
-                    IconButton.filledTonal(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      tooltip: dt('رجوع'),
+      backgroundColor: DarbColors.canvasOf(context),
+      body: Stack(
+        children: [
+          // Full-bleed edge-to-edge spatial live map canvas
+          Positioned.fill(
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: point ?? fallbackCenter,
+                initialZoom: point != null
+                    ? 15.5
+                    : (dropoffPoint != null || pickupPoint != null ? 14 : 6.2),
+                minZoom: 4,
+                maxZoom: 19,
+                onMapReady: () {
+                  _mapReady = true;
+                  if (_driverPoint != null && _followDriver) {
+                    _mapController.move(_driverPoint!, 15.5);
+                  }
+                },
+                onPositionChanged: (_, hasGesture) {
+                  if (hasGesture && _followDriver) {
+                    setState(() => _followDriver = false);
+                  }
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate:
+                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.darb.darb',
+                  maxZoom: 19,
+                  keepBuffer: 4,
+                  panBuffer: 2,
+                  errorTileCallback: (tile, error, stackTrace) {
+                    if (mounted && !_mapTilesUnavailable) {
+                      setState(() => _mapTilesUnavailable = true);
+                    }
+                  },
+                ),
+                if (pickupPoint != null || dropoffPoint != null)
+                  PolylineLayer(
+                    polylines: [
+                      if (pickupPoint != null && point != null)
+                        Polyline(
+                          points: [pickupPoint, point],
+                          color: DarbColors.infoOf(context).withValues(alpha: 0.78),
+                          strokeWidth: 3.6,
+                        ),
+                      if (point != null && dropoffPoint != null)
+                        Polyline(
+                          points: [point, dropoffPoint],
+                          color: primary,
+                          strokeWidth: 4.8,
+                        ),
+                      if (point == null &&
+                          pickupPoint != null &&
+                          dropoffPoint != null)
+                        Polyline(
+                          points: [pickupPoint, dropoffPoint],
+                          color: primary.withValues(alpha: 0.60),
+                          strokeWidth: 3.6,
+                        ),
+                    ],
+                  ),
+                if (markers.isNotEmpty) MarkerLayer(markers: markers),
+                RichAttributionWidget(
+                  alignment: AttributionAlignment.bottomRight,
+                  attributions: [
+                    TextSourceAttribution(
+                      '© OpenStreetMap contributors',
+                      onTap: () {
+                        launchUrl(
+                          Uri.parse('https://www.openstreetmap.org/copyright'),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Top Floating Translucent Obsidian/Glass Command Bar
+          PositionedDirectional(
+            top: 0,
+            start: 0,
+            end: 0,
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DarbGlassSurface(
+                      borderRadius: DarbRadius.xl,
+                      blurSigma: 24,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      child: Row(
                         children: [
-                          Text(
-                            dt('تتبع المندوب'),
-                            style: TextStyle(
-                              color: DarbColors.inkOf(context),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
+                          _MapGlassIconBtn(
+                            tooltip: dt('رجوع'),
+                            icon: Icons.arrow_back_rounded,
+                            onTap: () => Navigator.of(context).pop(),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  children: [
+                                    if (live) ...[
+                                      DarbPulseDot(color: teal, size: 7.5),
+                                      const SizedBox(width: 6),
+                                    ],
+                                    Flexible(
+                                      child: Text(
+                                        dt('تتبع المندوب'),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: DarbColors.inkOf(context),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  dt('يتحدث الموقع تلقائياً كل 25 ثانية'),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: DarbColors.mutedOf(context),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Text(
-                            dt('يتحدث الموقع تلقائياً كل 25 ثانية'),
-                            style: TextStyle(
-                              color: DarbColors.mutedOf(context),
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
+                          if (point != null) ...[
+                            const SizedBox(width: 6),
+                            _MapGlassIconBtn(
+                              tooltip: dt('فتح موقع المندوب خارج التطبيق'),
+                              icon: Icons.open_in_new_rounded,
+                              onTap: () => launchUrl(
+                                Uri.parse(
+                                  'https://www.openstreetmap.org/?mlat=${point.latitude}'
+                                  '&mlon=${point.longitude}#map=16/${point.latitude}/${point.longitude}',
+                                ),
+                                mode: LaunchMode.externalApplication,
+                              ),
                             ),
+                          ],
+                          const SizedBox(width: 6),
+                          _MapGlassIconBtn(
+                            tooltip: dt('تحديث الموقع'),
+                            icon: Icons.refresh_rounded,
+                            loading: _requesting,
+                            onTap: _requesting ? null : () => _refreshLocation(),
                           ),
                         ],
                       ),
                     ),
-                    if (point != null)
-                      IconButton(
-                        onPressed: () => launchUrl(
-                          Uri.parse(
-                            'https://www.openstreetmap.org/?mlat=${point.latitude}'
-                            '&mlon=${point.longitude}#map=16/${point.latitude}/${point.longitude}',
-                          ),
-                          mode: LaunchMode.externalApplication,
+                    if (_mapTilesUnavailable) ...[
+                      const SizedBox(height: 8),
+                      DarbGlassSurface(
+                        borderRadius: DarbRadius.md,
+                        elevated: false,
+                        tintColor: DarbColors.warningSoftOf(context),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 9,
                         ),
-                        icon: const Icon(Icons.open_in_new_rounded),
-                        tooltip: dt('فتح موقع المندوب خارج التطبيق'),
-                      ),
-                    IconButton(
-                      onPressed: _requesting
-                          ? null
-                          : () => _refreshLocation(),
-                      icon: _requesting
-                          ? const SizedBox(
-                              width: 19,
-                              height: 19,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.refresh_rounded),
-                      tooltip: dt('تحديث الموقع'),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: DarbGlassSurface(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 11,
-                  ),
-                  elevated: false,
-                  child: Row(
-                    children: [
-                      if (point != null && !_stale && _error == null)
-                        DarbPulseDot(
-                          color: DarbColors.successOf(context),
-                          size: 8.5,
-                        )
-                      else
-                        Icon(
-                          _stale
-                              ? Icons.location_disabled_rounded
-                              : Icons.location_searching_rounded,
-                          color: _stale
-                              ? DarbColors.warningOf(context)
-                              : DarbColors.mutedOf(context),
-                          size: 18,
-                        ),
-                      const SizedBox(width: 9),
-                      Expanded(
-                        child: AnimatedSwitcher(
-                          duration: DarbMotion.effectiveDuration(
-                            context,
-                            DarbMotion.standard,
-                          ),
-                          switchInCurve: DarbMotion.enter,
-                          switchOutCurve: DarbMotion.exit,
-                          transitionBuilder: (child, animation) => FadeTransition(
-                            opacity: animation,
-                            child: SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(0, 0.12),
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: child,
-                            ),
-                          ),
-                          child: Text(
-                            _error ?? _message ?? _updatedAtLabel(),
-                            key: ValueKey(_error ?? _message ?? _updatedAtLabel()),
-                            style: TextStyle(
-                              color: _error != null
-                                  ? DarbColors.dangerOf(context)
-                                  : DarbColors.inkOf(context),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (_loading || _requesting)
-                        const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(DarbRadius.xl),
-                    child: Stack(
-                      children: [
-                        FlutterMap(
-                          mapController: _mapController,
-                          options: MapOptions(
-                            initialCenter: point ?? fallbackCenter,
-                            initialZoom: point != null
-                                ? 15.5
-                                : (dropoffPoint != null || pickupPoint != null
-                                    ? 14
-                                    : 6.2),
-                            minZoom: 4,
-                            maxZoom: 19,
-                            onMapReady: () {
-                              _mapReady = true;
-                              if (_driverPoint != null && _followDriver) {
-                                _mapController.move(_driverPoint!, 15.5);
-                              }
-                            },
-                            onPositionChanged: (_, hasGesture) {
-                              if (hasGesture && _followDriver) {
-                                setState(() => _followDriver = false);
-                              }
-                            },
-                          ),
+                        child: Row(
                           children: [
-                            TileLayer(
-                              urlTemplate:
-                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                              userAgentPackageName: 'com.darb.darb',
-                              maxZoom: 19,
-                              keepBuffer: 4,
-                              panBuffer: 2,
-                              errorTileCallback: (tile, error, stackTrace) {
-                                if (mounted && !_mapTilesUnavailable) {
-                                  setState(() => _mapTilesUnavailable = true);
-                                }
-                              },
+                            Icon(
+                              Icons.signal_wifi_connected_no_internet_4_rounded,
+                              size: 17,
+                              color: DarbColors.warningOf(context),
                             ),
-                            if (pickupPoint != null || dropoffPoint != null)
-                              PolylineLayer(
-                                polylines: [
-                                  if (pickupPoint != null && point != null)
-                                    Polyline(
-                                      points: [pickupPoint, point],
-                                      color: DarbColors.infoOf(context)
-                                          .withValues(alpha: 0.72),
-                                      strokeWidth: 3.5,
-                                    ),
-                                  if (point != null && dropoffPoint != null)
-                                    Polyline(
-                                      points: [point, dropoffPoint],
-                                      color: DarbColors.primaryOf(context),
-                                      strokeWidth: 4.5,
-                                    ),
-                                  if (point == null &&
-                                      pickupPoint != null &&
-                                      dropoffPoint != null)
-                                    Polyline(
-                                      points: [pickupPoint, dropoffPoint],
-                                      color: DarbColors.primaryOf(context)
-                                          .withValues(alpha: 0.55),
-                                      strokeWidth: 3.5,
-                                    ),
-                                ],
-                              ),
-                            if (markers.isNotEmpty)
-                              MarkerLayer(markers: markers),
-                            RichAttributionWidget(
-                              alignment: AttributionAlignment.bottomRight,
-                              attributions: [
-                                TextSourceAttribution(
-                                  '© OpenStreetMap contributors',
-                                  onTap: () {
-                                    launchUrl(
-                                      Uri.parse(
-                                        'https://www.openstreetmap.org/copyright',
-                                      ),
-                                      mode: LaunchMode.externalApplication,
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        if (_mapTilesUnavailable)
-                          PositionedDirectional(
-                            top: 12,
-                            start: 12,
-                            end: 12,
-                            child: DarbGlassSurface(
-                              elevated: false,
-                              padding: const EdgeInsets.all(10),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.signal_wifi_connected_no_internet_4_rounded,
-                                    size: 18,
-                                    color: DarbColors.warningOf(context),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      dt('تعذر تحميل بلاطات الخريطة. احتفظنا بآخر موقع معروف ويمكنك فتحه خارج التطبيق عند توفر الإنترنت.'),
-                                      style: TextStyle(
-                                        color: DarbColors.inkOf(context),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        if (pickupPoint != null ||
-                            dropoffPoint != null ||
-                            point != null)
-                          PositionedDirectional(
-                            start: 12,
-                            bottom: 12,
-                            child: DarbGlassSurface(
-                              elevated: false,
-                              borderRadius: DarbRadius.pill,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 7,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (pickupPoint != null) ...[
-                                    _MapLegendItem(
-                                      color: DarbColors.infoOf(context),
-                                      label: dt('الاستلام'),
-                                    ),
-                                    const SizedBox(width: 10),
-                                  ],
-                                  if (point != null) ...[
-                                    _MapLegendItem(
-                                      color: DarbColors.primaryOf(context),
-                                      label: dt('المندوب'),
-                                    ),
-                                    if (dropoffPoint != null)
-                                      const SizedBox(width: 10),
-                                  ],
-                                  if (dropoffPoint != null)
-                                    _MapLegendItem(
-                                      color: DarbColors.successOf(context),
-                                      label: dt('التسليم'),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        PositionedDirectional(
-                          end: 12,
-                          bottom: 12,
-                          child: Column(
-                            children: [
-                              if (point != null)
-                                Tooltip(
-                                  message: dt('توسيط على المندوب'),
-                                  child: DarbPressScale(
-                                    onTap: () {
-                                      DarbHaptics.selection();
-                                      setState(() => _followDriver = true);
-                                      if (_mapReady) {
-                                        _animateMapTo(point, 15.5);
-                                      }
-                                    },
-                                    child: DarbGlassSurface(
-                                      borderRadius: DarbRadius.pill,
-                                      tintColor: _followDriver
-                                          ? DarbColors.primaryOf(context)
-                                          : null,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 10,
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.my_location_rounded,
-                                            size: 18,
-                                            color: _followDriver
-                                                ? DarbColors.onPrimaryOf(context)
-                                                : DarbColors.primaryOf(context),
-                                          ),
-                                          if (!_followDriver) ...[
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              dt('توسيط على المندوب'),
-                                              style: TextStyle(
-                                                color:
-                                                    DarbColors.inkOf(context),
-                                                fontSize: 11.5,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              if (point == null && _loading)
-                                const Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: CircularProgressIndicator(),
-                                ),
-                            ],
-                          ),
-                        ),
-                        if (point == null && !_loading)
-                          PositionedDirectional(
-                            top: 12,
-                            start: 12,
-                            end: 12,
-                            child: DarbGlassSurface(
-                              elevated: false,
-                              padding: const EdgeInsets.all(12),
+                            const SizedBox(width: 8),
+                            Expanded(
                               child: Text(
-                                _error ?? _message ?? dt('لم يشارك السائق موقعه بعد'),
-                                textAlign: TextAlign.center,
+                                dt('تعذر تحميل بلاطات الخريطة. احتفظنا بآخر موقع معروف ويمكنك فتحه خارج التطبيق عند توفر الإنترنت.'),
                                 style: TextStyle(
                                   color: DarbColors.inkOf(context),
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
+            ),
+          ),
+
+          // Bottom Floating Spatial Route & Live Telemetry Sheet
+          PositionedDirectional(
+            bottom: 0,
+            start: 0,
+            end: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Floating map controls & recenter dock
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (point != null)
+                          Tooltip(
+                            message: dt('توسيط على المندوب'),
+                            child: DarbPressScale(
+                              borderRadius: DarbRadius.pill,
+                              onTap: () {
+                                DarbHaptics.selection();
+                                setState(() => _followDriver = true);
+                                if (_mapReady) {
+                                  _animateMapTo(point, 15.5);
+                                }
+                              },
+                              child: DarbGlassSurface(
+                                borderRadius: DarbRadius.pill,
+                                tintColor: _followDriver
+                                    ? DarbColors.forest
+                                    : null,
+                                borderColor: _followDriver
+                                    ? DarbColors.lime.withValues(alpha: 0.5)
+                                    : null,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 13,
+                                  vertical: 9,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.my_location_rounded,
+                                      size: 17,
+                                      color: _followDriver
+                                          ? DarbColors.lime
+                                          : primary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      dt('توسيط على المندوب'),
+                                      style: TextStyle(
+                                        color: _followDriver
+                                            ? Colors.white
+                                            : DarbColors.inkOf(context),
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 8),
+                        DarbGlassSurface(
+                          borderRadius: DarbRadius.pill,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 2,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: dt('تكبير الخريطة'),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: _mapReady
+                                    ? () {
+                                        DarbHaptics.selection();
+                                        _mapController.move(
+                                          _mapController.camera.center,
+                                          (_mapController.camera.zoom + 1)
+                                              .clamp(4, 19)
+                                              .toDouble(),
+                                        );
+                                      }
+                                    : null,
+                                icon: const Icon(Icons.add_rounded, size: 18),
+                              ),
+                              IconButton(
+                                tooltip: dt('تصغير الخريطة'),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: _mapReady
+                                    ? () {
+                                        DarbHaptics.selection();
+                                        _mapController.move(
+                                          _mapController.camera.center,
+                                          (_mapController.camera.zoom - 1)
+                                              .clamp(4, 19)
+                                              .toDouble(),
+                                        );
+                                      }
+                                    : null,
+                                icon:
+                                    const Icon(Icons.remove_rounded, size: 18),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    DarbGlassSurface(
+                      borderRadius: DarbRadius.xl,
+                      blurSigma: 26,
+                      padding: const EdgeInsets.all(14),
+                      borderColor: live
+                          ? teal.withValues(alpha: 0.35)
+                          : (_error != null
+                              ? DarbColors.dangerOf(context)
+                                  .withValues(alpha: 0.35)
+                              : null),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: (_error != null
+                                          ? DarbColors.dangerOf(context)
+                                          : (live ? teal : primary))
+                                      .withValues(alpha: isDark ? 0.22 : 0.12),
+                                  borderRadius: BorderRadius.circular(11),
+                                ),
+                                child: live
+                                    ? Center(
+                                        child: DarbPulseDot(
+                                          color: teal,
+                                          size: 9,
+                                        ),
+                                      )
+                                    : Icon(
+                                        _error != null
+                                            ? Icons.error_outline_rounded
+                                            : (_stale
+                                                ? Icons.location_disabled_rounded
+                                                : Icons.location_searching_rounded),
+                                        size: 18,
+                                        color: _error != null
+                                            ? DarbColors.dangerOf(context)
+                                            : (_stale
+                                                ? DarbColors.warningOf(context)
+                                                : primary),
+                                      ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: AnimatedSwitcher(
+                                  duration: DarbMotion.effectiveDuration(
+                                    context,
+                                    DarbMotion.standard,
+                                  ),
+                                  child: Text(
+                                    _error ?? _message ?? _updatedAtLabel(),
+                                    key: ValueKey(
+                                      _error ?? _message ?? _updatedAtLabel(),
+                                    ),
+                                    style: TextStyle(
+                                      color: _error != null
+                                          ? DarbColors.dangerOf(context)
+                                          : DarbColors.inkOf(context),
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (_loading || _requesting)
+                                const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          if (pickupPoint != null ||
+                              dropoffPoint != null ||
+                              point != null) ...[
+                            const SizedBox(height: 10),
+                            Divider(
+                              height: 1,
+                              color: DarbColors.borderOf(context),
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 6,
+                              children: [
+                                if (pickupPoint != null)
+                                  _MapLegendItem(
+                                    color: DarbColors.infoOf(context),
+                                    label: dt('الاستلام'),
+                                  ),
+                                if (point != null)
+                                  _MapLegendItem(
+                                    color: primary,
+                                    label: dt('المندوب'),
+                                  ),
+                                if (dropoffPoint != null)
+                                  _MapLegendItem(
+                                    color: DarbColors.successOf(context),
+                                    label: dt('التسليم'),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MapGlassIconBtn extends StatelessWidget {
+  const _MapGlassIconBtn({
+    required this.tooltip,
+    required this.icon,
+    required this.onTap,
+    this.loading = false,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback? onTap;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(13),
+          onTap: onTap,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: DarbColors.softSurfaceOf(context).withValues(alpha: 0.86),
+              borderRadius: BorderRadius.circular(13),
+              border: Border.all(color: DarbColors.borderOf(context)),
+            ),
+            child: Center(
+              child: loading
+                  ? const SizedBox(
+                      width: 17,
+                      height: 17,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(icon, size: 19, color: DarbColors.inkOf(context)),
+            ),
           ),
         ),
       ),
@@ -706,16 +823,16 @@ class _MapLegendItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 8,
-          height: 8,
+          width: 9,
+          height: 9,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 5),
         Text(
           label,
           style: TextStyle(
             color: DarbColors.inkOf(context),
-            fontSize: 11,
+            fontSize: 11.5,
             fontWeight: FontWeight.w800,
           ),
         ),

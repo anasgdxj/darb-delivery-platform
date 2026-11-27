@@ -24,6 +24,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   Map<String, dynamic>? _driver;
   Map<String, dynamic>? _stats;
   List<Map<String, dynamic>> _available = const [];
+  String _typeFilter = 'ALL';
   bool _loading = true;
   bool _togglingOnline = false;
   bool _sendingLocation = false;
@@ -31,6 +32,13 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
   String? _statsError;
   String? _availableError;
   final Set<String> _busyOrderIds = <String>{};
+
+  List<Map<String, dynamic>> get _filteredAvailable {
+    if (_typeFilter == 'ALL') return _available;
+    return _available
+        .where((o) => o['type']?.toString() == _typeFilter)
+        .toList();
+  }
 
   @override
   void initState() {
@@ -569,18 +577,57 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
                   icon: Icons.delivery_dining_outlined,
                   onRetry: _load,
                 )
-              else
-                DarbResponsiveTwoColumn(
-                  children: [
-                    for (var i = 0; i < _available.length; i++)
-                      i < 6
-                          ? DarbFadeSlide(
-                              delay: DarbMotion.staggerDelay(i),
-                              child: _buildAvailableCard(_available[i]),
-                            )
-                          : _buildAvailableCard(_available[i]),
+              else ...[
+                DarbSegmentedDock<String>(
+                  compact: true,
+                  selectedValue: _typeFilter,
+                  onSelected: (val) => setState(() => _typeFilter = val),
+                  options: [
+                    DarbDockOption(
+                      value: 'ALL',
+                      label: dt('الكل'),
+                      count: _available.length,
+                    ),
+                    DarbDockOption(
+                      value: 'VENDOR',
+                      label: dt('طلب متجر'),
+                      count: _available
+                          .where((o) => o['type']?.toString() != 'PEER_DELIVERY')
+                          .length,
+                      icon: Icons.storefront_outlined,
+                    ),
+                    DarbDockOption(
+                      value: 'PEER_DELIVERY',
+                      label: dt('توصيل مستقل'),
+                      count: _available
+                          .where((o) => o['type']?.toString() == 'PEER_DELIVERY')
+                          .length,
+                      icon: Icons.local_shipping_outlined,
+                    ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                if (_filteredAvailable.isEmpty)
+                  DarbStateView.empty(
+                    message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
+                    icon: Icons.filter_list_off_rounded,
+                    onRetry: () => setState(() => _typeFilter = 'ALL'),
+                  )
+                else
+                  DarbResponsiveTwoColumn(
+                    children: [
+                      for (var i = 0; i < _filteredAvailable.length; i++)
+                        i < 6
+                            ? DarbFadeSlide(
+                                delay: DarbMotion.staggerDelay(i),
+                                child: _buildAvailableCard(
+                                  _filteredAvailable[i],
+                                ),
+                              )
+                            : _buildAvailableCard(_filteredAvailable[i]),
+                    ],
+                  ),
+              ],
             ],
           );
         },

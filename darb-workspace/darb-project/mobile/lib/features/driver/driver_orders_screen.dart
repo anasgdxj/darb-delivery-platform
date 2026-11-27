@@ -20,6 +20,7 @@ class DriverOrdersScreen extends StatefulWidget {
 class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
   List<Map<String, dynamic>> _orders = const [];
   String _filter = 'ALL';
+  String _typeFilter = 'ALL';
   bool _loading = true;
   String? _error;
   final Set<String> _updatingOrders = <String>{};
@@ -119,19 +120,22 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
       .length;
 
   List<Map<String, dynamic>> get _filteredOrders {
+    Iterable<Map<String, dynamic>> list = _orders;
     if (_filter == 'ACTIVE') {
-      return _orders
-          .where((o) =>
-              o['status'] == 'ASSIGNED' || o['status'] == 'PICKED_UP')
-          .toList();
+      list = list.where(
+        (o) => o['status'] == 'ASSIGNED' || o['status'] == 'PICKED_UP',
+      );
+    } else if (_filter == 'COMPLETED') {
+      list = list.where(
+        (o) => o['status'] == 'DELIVERED' || o['status'] == 'CANCELLED',
+      );
     }
-    if (_filter == 'COMPLETED') {
-      return _orders
-          .where((o) =>
-              o['status'] == 'DELIVERED' || o['status'] == 'CANCELLED')
-          .toList();
+    if (_typeFilter == 'VENDOR') {
+      list = list.where((o) => o['type']?.toString() != 'PEER_DELIVERY');
+    } else if (_typeFilter == 'PEER_DELIVERY') {
+      list = list.where((o) => o['type']?.toString() == 'PEER_DELIVERY');
     }
-    return _orders;
+    return list.toList();
   }
 
   @override
@@ -187,12 +191,48 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    DarbSegmentedDock<String>(
+                      compact: true,
+                      selectedValue: _typeFilter,
+                      onSelected: (val) => setState(() => _typeFilter = val),
+                      options: [
+                        DarbDockOption(
+                          value: 'ALL',
+                          label: dt('الكل'),
+                          count: _orders.length,
+                        ),
+                        DarbDockOption(
+                          value: 'VENDOR',
+                          label: dt('طلب متجر'),
+                          count: _orders
+                              .where(
+                                (o) => o['type']?.toString() != 'PEER_DELIVERY',
+                              )
+                              .length,
+                          icon: Icons.storefront_outlined,
+                        ),
+                        DarbDockOption(
+                          value: 'PEER_DELIVERY',
+                          label: dt('توصيل مستقل'),
+                          count: _orders
+                              .where(
+                                (o) => o['type']?.toString() == 'PEER_DELIVERY',
+                              )
+                              .length,
+                          icon: Icons.local_shipping_outlined,
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 14),
                     if (filtered.isEmpty)
                       DarbStateView.empty(
                         message: dt('لا توجد طلبات مطابقة للتصفية الحالية'),
                         icon: Icons.filter_list_off_rounded,
-                        onRetry: () => setState(() => _filter = 'ALL'),
+                        onRetry: () => setState(() {
+                          _filter = 'ALL';
+                          _typeFilter = 'ALL';
+                        }),
                       )
                     else
                       DarbResponsiveTwoColumn(

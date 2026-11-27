@@ -485,7 +485,18 @@ class _AppShellState extends State<AppShell> {
     DarbHaptics.light();
     await Navigator.push(
       context,
-      DarbPageRoute(builder: (_) => const NotificationsScreen()),
+      DarbPageRoute(
+        builder: (routeCtx) => NotificationsScreen(
+          onOpenNotificationData: (data) async {
+            if (Navigator.canPop(routeCtx)) {
+              Navigator.pop(routeCtx);
+            }
+            if (mounted) {
+              await _handleNotificationOpen(data);
+            }
+          },
+        ),
+      ),
     );
     await _refreshUnreadCount();
   }

@@ -324,7 +324,7 @@ class _AccountScreenState extends State<AccountScreen> {
       children: [
         DarbCommandStage(
           livePulse: true,
-          leading: const DarbBrandMark(size: 56),
+          leading: const DarbBrandMark(size: 56, animatePulse: true),
           eyebrow: roleLabel,
           title: widget.user['name']?.toString().isNotEmpty == true
               ? widget.user['name'].toString()
@@ -359,6 +359,48 @@ class _AccountScreenState extends State<AccountScreen> {
           bottom: Row(
             children: [
               DarbStatusBadge(status: role),
+              const SizedBox(width: 8),
+              DarbPressScale(
+                borderRadius: DarbRadius.pill,
+                onTap: _openSettings,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.09),
+                    borderRadius: BorderRadius.circular(DarbRadius.pill),
+                    border: Border.all(
+                      color: (DarbNotifications.hasSyncedToken
+                              ? DarbColors.darkViolet
+                              : DarbColors.lime)
+                          .withValues(alpha: 0.36),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DarbPulseDot(
+                        active: DarbNotifications.hasSyncedToken,
+                        size: 6,
+                        color: DarbNotifications.hasSyncedToken
+                            ? DarbColors.darkViolet
+                            : DarbColors.lime,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        DarbNotifications.hasSyncedToken
+                            ? dt('مزامن')
+                            : dt('الإشعارات'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const Spacer(),
               Container(
                 padding:
