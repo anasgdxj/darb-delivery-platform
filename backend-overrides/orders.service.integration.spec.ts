@@ -87,6 +87,16 @@ runDatabaseTests('OrdersService PostgreSQL integration', () => {
     await prisma?.$disconnect();
   });
 
+  it('returns a newly created peer-delivery order in the customer order history', async () => {
+    const created = await createPeerOrder();
+    const mine = await service.mine(customerId);
+
+    expect(mine.map(order => order.id)).toContain(created.id);
+    expect(mine.find(order => order.id === created.id)).toEqual(
+      expect.objectContaining({ type: 'PEER_DELIVERY', status: 'PENDING' }),
+    );
+  });
+
   it('reserves finite stock atomically when two orders compete for the last unit', async () => {
     const attempts = await Promise.allSettled([
       service.create(customerId, {
