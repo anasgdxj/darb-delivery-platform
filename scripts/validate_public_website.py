@@ -198,7 +198,7 @@ if "DAZREVO" not in root_html:
     fail("The public home page must use the approved DAZREVO identity")
 if "app-debug.apk" in root_html:
     fail("The public home page must never advertise a debug APK")
-if "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" not in root_html:
+if "https://anasgdxj.github.io/darb-delivery-platform/app-release.apk" not in root_html:
     fail("The public home page must link to the official latest signed APK")
 if "admin/" in root_html or "بوابة الإدارة" in root_html or "دخول الإدارة" in root_html:
     fail("Admin portal links must not appear on the public home page")
