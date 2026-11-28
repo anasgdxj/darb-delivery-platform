@@ -46,6 +46,8 @@ class DarbUpdater {
   static const _channel = MethodChannel('com.darb/update');
   static const autoUpdatePrefKey = 'auto_update_enabled';
   static const wifiOnlyPrefKey = 'wifi_only';
+  static const _siteManifest =
+      'https://anasgdxj.github.io/darb-delivery-platform/app-update.json';
   static const _releaseApi =
       'https://api.github.com/repos/anasgdxj/darb-delivery-platform/releases/tags/latest';
   static const _fallbackManifest =
@@ -227,9 +229,27 @@ class DarbUpdater {
     try {
       await restorePreferences();
       Map<String, dynamic>? decoded;
+
+      // Prefer the official DAZREVO website; use GitHub only as a fallback.
       try {
-        final response = await client.get(
-          _cacheBustedUri(_releaseApi),
+        final websiteResponse = await client.get(
+          _cacheBustedUri(_siteManifest),
+          headers: const {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache, no-store, max-age=0',
+            'Pragma': 'no-cache',
+          },
+        ).timeout(const Duration(seconds: 12));
+        if (websiteResponse.statusCode == 200) {
+          final value = jsonDecode(utf8.decode(websiteResponse.bodyBytes));
+          if (value is Map<String, dynamic>) decoded = value;
+        }
+      } catch (_) {}
+
+      if (decoded == null) {
+        try {
+          final response = await client.get(
+            _cacheBustedUri(_releaseApi),
           headers: const {
             'Accept': 'application/vnd.github+json',
             'X-GitHub-Api-Version': '2022-11-28',
@@ -267,8 +287,9 @@ class DarbUpdater {
               }
             }
           }
-        }
-      } catch (_) {}
+          }
+        } catch (_) {}
+      }
       if (decoded == null) {
         final fallback = await client.get(
           _cacheBustedUri(_fallbackManifest),
