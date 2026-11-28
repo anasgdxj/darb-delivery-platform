@@ -1,10 +1,5 @@
 # DAZREVO release publication
 
-This marker records the approved publication of the already validated Android source revision.
+Publish the signed Android release built and verified from commit `9177403811a73fe1159d3337762c765cc5d8edc5`.
 
-- Validated source commit: `1bbc70dc26514270f0154319eedfea1a508d2a40`
-- Validation workflow: `46071511967` (success)
-- Signed Android build workflow: `46071511987` (success)
-- Publication approval: explicitly confirmed by the project owner in ChatGPT on 2026-11-28.
-
-This file does not change application runtime behavior. It exists to trigger the repository's path-filtered Android release workflow with the `[publish-apk]` marker after approval.
+The release workflow must complete APK publication, registered-device update notification, and Telegram APK delivery.
