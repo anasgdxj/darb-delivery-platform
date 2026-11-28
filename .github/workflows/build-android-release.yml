@@ -516,6 +516,36 @@ jobs:
           git tag --force latest "$GITHUB_SHA"
           git push origin "refs/tags/latest:refs/tags/latest" --force
 
+      - name: Sync verified release manifest to the public website
+        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MANIFEST: extracted/darb-project/mobile/build/app/outputs/flutter-apk/app-update.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$MANIFEST"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git checkout -B release-manifest-sync origin/main
+            cp "$MANIFEST" app-update.json
+            git add app-update.json
+            if git diff --cached --quiet; then
+              echo "Website release manifest is already current."
+              exit 0
+            fi
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "chore(release): sync verified website manifest"
+            if git push origin HEAD:main; then
+              echo "Verified release manifest synced to main; GitHub Pages deployment will publish the APK."
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "::error::Could not sync the website release manifest after three attempts."
+              exit 1
+            fi
+            sleep "$((attempt * 3))"
+          done
+
       - name: Notify DAZREVO users about the published release
         if: (github.event_name == 'workflow_dispatch' && inputs.publish_release == true) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-apk]'))
         env:
