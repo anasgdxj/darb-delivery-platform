@@ -166,6 +166,8 @@
   const downloadButton = document.getElementById('downloadBtn');
   const releaseVersion = document.getElementById('releaseVersion');
   const releaseSha256 = document.getElementById('releaseSha256');
+  const releaseSize = document.getElementById('releaseSize');
+  const releaseDate = document.getElementById('releaseDate');
   if (downloadStatus || downloadButton) {
     fetch('./app-update.json', {
       cache: 'no-store',
@@ -191,11 +193,25 @@
         if (downloadStatus) downloadStatus.textContent = 'الإصدار الرسمي ' + release.versionName + ' · جاهز للتنزيل';
         if (releaseVersion) releaseVersion.textContent = release.versionName;
         if (releaseSha256) releaseSha256.textContent = String(release.sha256).toLowerCase();
+        if (releaseSize) {
+          const sizeMb = Number(release.apkSizeBytes) / (1024 * 1024);
+          releaseSize.textContent = Number.isFinite(sizeMb) && sizeMb > 0
+            ? new Intl.NumberFormat(document.documentElement.lang || 'ar', { maximumFractionDigits: 1 }).format(sizeMb) + ' MB'
+            : 'غير متاح';
+        }
+        if (releaseDate) {
+          const published = new Date(release.publishedAt);
+          releaseDate.textContent = Number.isNaN(published.getTime())
+            ? 'غير متاح'
+            : new Intl.DateTimeFormat(document.documentElement.lang || 'ar', { year: 'numeric', month: 'short', day: 'numeric' }).format(published);
+        }
       })
       .catch(() => {
         if (downloadStatus) downloadStatus.textContent = 'تعذر التحقق من الإصدار الآن. أعد تحميل الصفحة بعد قليل.';
         if (releaseVersion) releaseVersion.textContent = 'غير متاح مؤقتاً';
         if (releaseSha256) releaseSha256.textContent = 'لم يتم التحقق من البصمة';
+        if (releaseSize) releaseSize.textContent = 'غير متاح';
+        if (releaseDate) releaseDate.textContent = 'غير متاح';
       });
   }
 
