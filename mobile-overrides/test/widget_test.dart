@@ -3091,7 +3091,7 @@ void main() {
 
       await Future.wait([firstCall, secondCall]);
 
-      expect(releaseApiHits, 1);
+      expect(websiteHits, 1);
       expect(DarbUpdater.instance.checkFailed, isFalse);
       expect(DarbUpdater.instance.availableUpdate.value?.versionCode, 2050);
     });
@@ -3310,21 +3310,11 @@ void main() {
       DarbUpdater.instance.installedBuildOverride = 2000;
       DarbUpdater.instance.httpClientOverride = MockClient((request) async {
         final url = request.url.toString();
-        if (url.contains('releases/tags/latest')) {
+        if (url.contains('/app-update.json')) {
           manifestRequests++;
           return manifestGate.future;
         }
-        return _utf8Response(
-          jsonEncode({
-            'versionCode': 2060,
-            'versionName': '1.0.2060',
-            'apkUrl':
-                'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
-            'sha256': digest,
-            'releaseNotes': 'تحديث الإشعار الفوري',
-          }),
-          200,
-        );
+        throw StateError('Unexpected updater request: $url');
       });
 
       DarbNotifications.initialMessageOverride = () async => {
@@ -3362,13 +3352,12 @@ void main() {
       manifestGate.complete(
         _utf8Response(
           jsonEncode({
-            'assets': [
-              {
-                'name': 'app-update.json',
-                'browser_download_url':
-                    'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json',
-              },
-            ],
+            'versionCode': 2060,
+            'versionName': '1.0.2060',
+            'apkUrl':
+                'https://anasgdxj.github.io/darb-delivery-platform/app-release.apk',
+            'sha256': digest,
+            'releaseNotes': 'تحديث الإشعار الفوري',
           }),
           200,
         ),
@@ -3403,31 +3392,20 @@ void main() {
       final digest = sha256.convert(utf8.encode('opened-app-apk')).toString();
       DarbUpdater.instance.installedBuildOverride = 2000;
       DarbUpdater.instance.httpClientOverride = MockClient((request) async {
-        if (request.url.toString().contains('releases/tags/latest')) {
+        if (request.url.toString().contains('/app-update.json')) {
           return _utf8Response(
             jsonEncode({
-              'assets': [
-                {
-                  'name': 'app-update.json',
-                  'browser_download_url':
-                      'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json',
-                },
-              ],
+              'versionCode': 2061,
+              'versionName': '1.0.2061',
+              'apkUrl':
+                  'https://anasgdxj.github.io/darb-delivery-platform/app-release.apk',
+              'sha256': digest,
+              'releaseNotes': 'فتح مباشر من الخلفية',
             }),
             200,
           );
         }
-        return _utf8Response(
-          jsonEncode({
-            'versionCode': 2061,
-            'versionName': '1.0.2061',
-            'apkUrl':
-                'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
-            'sha256': digest,
-            'releaseNotes': 'فتح مباشر من الخلفية',
-          }),
-          200,
-        );
+        throw StateError('Unexpected updater request: ${request.url}');
       });
 
       final openedController =
