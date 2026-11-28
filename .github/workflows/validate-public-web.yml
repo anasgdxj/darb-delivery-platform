@@ -83,6 +83,7 @@ jobs:
           SITE_APK="https://anasgdxj.github.io/darb-delivery-platform/app-release.apk"
           curl --fail --silent --show-error --location --retry 3 "$RELEASE_APK" --output dist/app-release.apk
           python3 - "$PWD/dist/app-update.json" "$PWD/dist/app-release.apk" "$SITE_APK" <<'PY'
+          import datetime
           import hashlib
           import json
           import pathlib
@@ -97,6 +98,8 @@ jobs:
           if not expected or digest != expected:
               raise SystemExit(f"Published APK integrity mismatch: expected {expected}, got {digest}")
           manifest["apkUrl"] = site_url
+          manifest["apkSizeBytes"] = apk_path.stat().st_size
+          manifest["publishedAt"] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
           manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + chr(10), encoding="utf-8")
           print(f"Verified and staged DAZREVO {manifest['versionName']} APK ({apk_path.stat().st_size} bytes).")
           PY
