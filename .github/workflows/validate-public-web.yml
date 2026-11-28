@@ -79,8 +79,30 @@ jobs:
           mkdir -p dist/admin
           cp -R admin-web/. dist/admin/
           touch dist/.nojekyll
+          RELEASE_APK="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk"
+          SITE_APK="https://anasgdxj.github.io/darb-delivery-platform/app-release.apk"
+          curl --fail --silent --show-error --location --retry 3 "$RELEASE_APK" --output dist/app-release.apk
+          python3 - "$PWD/dist/app-update.json" "$PWD/dist/app-release.apk" "$SITE_APK" <<'PY'
+          import hashlib
+          import json
+          import pathlib
+          import sys
+
+          manifest_path = pathlib.Path(sys.argv[1])
+          apk_path = pathlib.Path(sys.argv[2])
+          site_url = sys.argv[3]
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          digest = hashlib.sha256(apk_path.read_bytes()).hexdigest()
+          expected = str(manifest.get("sha256", "")).lower()
+          if not expected or digest != expected:
+              raise SystemExit(f"Published APK integrity mismatch: expected {expected}, got {digest}")
+          manifest["apkUrl"] = site_url
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          print(f"Verified and staged DAZREVO {manifest['versionName']} APK ({apk_path.stat().st_size} bytes).")
+          PY
           test -s dist/index.html
           test -s dist/app-update.json
+          test -s dist/app-release.apk
           test -s dist/404.html
           test -s dist/admin/index.html
           test -s dist/assets/css/site.css
