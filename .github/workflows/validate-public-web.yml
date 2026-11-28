@@ -97,7 +97,7 @@ jobs:
           if not expected or digest != expected:
               raise SystemExit(f"Published APK integrity mismatch: expected {expected}, got {digest}")
           manifest["apkUrl"] = site_url
-          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + chr(10), encoding="utf-8")
           print(f"Verified and staged DAZREVO {manifest['versionName']} APK ({apk_path.stat().st_size} bytes).")
           PY
           test -s dist/index.html
