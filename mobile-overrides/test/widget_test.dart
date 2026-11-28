@@ -3107,6 +3107,72 @@ void main() {
       expect(DarbUpdater.instance.availableUpdate.value?.versionCode, 2050);
     });
 
+    test('force update checks bypass cached release and manifest responses', () async {
+      final storage = <String, String>{};
+      _mockSecureStorage(storage);
+      _mockUpdateChannel(
+        nativePrefs: {'auto_update_enabled': false, 'wifi_only': true},
+      );
+      DarbUpdater.instance.debugResetForTest();
+      DarbUpdater.instance.installedBuildOverride = 2000;
+      final requests = <http.Request>[];
+
+      addTearDown(() {
+        DarbUpdater.instance.debugResetForTest();
+        _clearUpdateChannelMock();
+        _clearSecureStorageMock();
+      });
+
+      final digest = sha256.convert(utf8.encode('cache-busted-release')).toString();
+      DarbUpdater.instance.httpClientOverride = MockClient((request) async {
+        requests.add(request);
+        if (request.url.path.endsWith('/releases/tags/latest')) {
+          return _utf8Response(
+            jsonEncode({
+              'assets': [
+                {
+                  'name': 'app-update.json',
+                  'browser_download_url':
+                      'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json',
+                },
+              ],
+            }),
+            200,
+          );
+        }
+        if (request.url.path.endsWith('/app-update.json')) {
+          return _utf8Response(
+            jsonEncode({
+              'versionCode': 2053,
+              'versionName': '1.0.2053',
+              'apkUrl':
+                  'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
+              'sha256': digest,
+              'releaseNotes': 'تجاوز التخزين المؤقت',
+            }),
+            200,
+          );
+        }
+        return _utf8Response('{}', 404);
+      });
+
+      await DarbUpdater.instance.checkForUpdate(force: true);
+
+      expect(requests, hasLength(2));
+      for (final request in requests) {
+        expect(
+          request.url.queryParameters['_dazrevo_cache_bust'],
+          isNotNull,
+        );
+        expect(
+          request.url.queryParameters['_dazrevo_cache_bust'],
+          isNotEmpty,
+        );
+      }
+      expect(DarbUpdater.instance.checkFailed, isFalse);
+      expect(DarbUpdater.instance.availableUpdate.value?.versionCode, 2053);
+    });
+
     test(
         'auto_update_enabled & wifi_only persist, restore, enforce guards, and prevent duplicate downloads',
         () async {
