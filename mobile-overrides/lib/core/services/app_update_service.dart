@@ -72,6 +72,14 @@ class DarbUpdater {
   @visibleForTesting
   String? supportDirPathOverride;
 
+  Uri _cacheBustedUri(String value) {
+    final uri = Uri.parse(value);
+    final query = Map<String, String>.from(uri.queryParameters);
+    query['_dazrevo_cache_bust'] =
+        DateTime.now().microsecondsSinceEpoch.toString();
+    return uri.replace(queryParameters: query);
+  }
+
   bool get autoUpdateEnabled => autoUpdateEnabledNotifier.value;
   bool get wifiOnly => wifiOnlyNotifier.value;
 
@@ -221,11 +229,12 @@ class DarbUpdater {
       Map<String, dynamic>? decoded;
       try {
         final response = await client.get(
-          Uri.parse(_releaseApi),
+          _cacheBustedUri(_releaseApi),
           headers: const {
             'Accept': 'application/vnd.github+json',
             'X-GitHub-Api-Version': '2022-11-28',
-            'Cache-Control': 'no-cache',
+            'Cache-Control': 'no-cache, no-store, max-age=0',
+            'Pragma': 'no-cache',
           },
         ).timeout(const Duration(seconds: 12));
         if (response.statusCode == 200) {
@@ -243,7 +252,13 @@ class DarbUpdater {
             final url = manifest?['browser_download_url']?.toString();
             if (url != null && url.startsWith('https://')) {
               final manifestResponse = await client
-                  .get(Uri.parse(url))
+                  .get(
+                    _cacheBustedUri(url),
+                    headers: const {
+                      'Cache-Control': 'no-cache, no-store, max-age=0',
+                      'Pragma': 'no-cache',
+                    },
+                  )
                   .timeout(const Duration(seconds: 12));
               if (manifestResponse.statusCode == 200) {
                 final value =
@@ -256,8 +271,11 @@ class DarbUpdater {
       } catch (_) {}
       if (decoded == null) {
         final fallback = await client.get(
-          Uri.parse(_fallbackManifest),
-          headers: const {'Cache-Control': 'no-cache'},
+          _cacheBustedUri(_fallbackManifest),
+          headers: const {
+            'Cache-Control': 'no-cache, no-store, max-age=0',
+            'Pragma': 'no-cache',
+          },
         ).timeout(const Duration(seconds: 12));
         if (fallback.statusCode != 200) {
           throw Exception('Update manifest unavailable');
