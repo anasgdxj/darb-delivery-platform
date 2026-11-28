@@ -188,7 +188,9 @@ class _AppShellState extends State<AppShell> {
           );
         }
       }
-      await _openNotifications();
+      // Release notifications are update actions, not inbox notifications.
+      // Never redirect users to the generic notifications screen when the
+      // release is already installed or the update service is temporarily unavailable.
       return;
     }
 
