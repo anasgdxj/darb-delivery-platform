@@ -3041,7 +3041,7 @@ void main() {
 
   group('DAZREVO App Updater Concurrency, Auto-Update Preferences & Routing', () {
     test(
-        'checkForUpdate awaits an active in-flight check instead of returning early empty',
+        'checkForUpdate awaits an active website manifest check',
         () async {
       final storage = <String, String>{};
       _mockSecureStorage(storage);
@@ -3057,44 +3057,33 @@ void main() {
       });
 
       final digest = sha256.convert(utf8.encode('dazrevo-apk-2050')).toString();
-      final releaseGate = Completer<http.Response>();
-      var releaseApiHits = 0;
+      final websiteGate = Completer<http.Response>();
+      var websiteHits = 0;
 
       DarbUpdater.instance.httpClientOverride = MockClient((request) async {
         final url = request.url.toString();
-        if (url.contains('releases/tags/latest')) {
-          releaseApiHits++;
-          return releaseGate.future;
+        if (url.contains('/app-update.json')) {
+          websiteHits++;
+          return websiteGate.future;
         }
-        return _utf8Response(
-          jsonEncode({
-            'versionCode': 2050,
-            'versionName': '1.0.2050',
-            'apkUrl':
-                'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk',
-            'sha256': digest,
-            'releaseNotes': 'تحديث مهم',
-          }),
-          200,
-        );
+        throw StateError('Unexpected updater request: $url');
       });
 
       final firstCall = DarbUpdater.instance.checkForUpdate();
       await Future<void>.delayed(Duration.zero);
       final secondCall = DarbUpdater.instance.checkForUpdate(force: true);
 
-      expect(releaseApiHits, 1);
+      expect(websiteHits, 1);
 
-      releaseGate.complete(
+      websiteGate.complete(
         _utf8Response(
           jsonEncode({
-            'assets': [
-              {
-                'name': 'app-update.json',
-                'browser_download_url':
-                    'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-update.json',
-              },
-            ],
+            'versionCode': 2050,
+            'versionName': '1.0.2050',
+            'apkUrl':
+                'https://anasgdxj.github.io/darb-delivery-platform/app-release.apk',
+            'sha256': digest,
+            'releaseNotes': 'تحديث مهم',
           }),
           200,
         ),
