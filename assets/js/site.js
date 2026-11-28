@@ -164,20 +164,38 @@
   }
   const downloadStatus = document.getElementById('downloadStatus');
   const downloadButton = document.getElementById('downloadBtn');
+  const releaseVersion = document.getElementById('releaseVersion');
+  const releaseSha256 = document.getElementById('releaseSha256');
   if (downloadStatus || downloadButton) {
-    fetch('./app-update.json', { cache: 'no-store', headers: { accept: 'application/json' } })
+    fetch('./app-update.json', {
+      cache: 'no-store',
+      headers: { accept: 'application/json', 'cache-control': 'no-cache' }
+    })
       .then((response) => {
         if (!response.ok) throw new Error('Release metadata unavailable');
         return response.json();
       })
       .then((release) => {
-        const officialApk = 'https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk';
-        if (release.apkUrl !== officialApk || !Number.isInteger(Number(release.versionCode)) || !/^1\./.test(String(release.versionName || ''))) return;
-        if (downloadButton) downloadButton.href = officialApk;
-        if (downloadStatus) downloadStatus.textContent = 'الإصدار الرسمي ' + release.versionName + ' · تحديث DAZREVO';
+        const officialApk = 'https://anasgdxj.github.io/darb-delivery-platform/app-release.apk';
+        const validVersion = Number.isInteger(Number(release.versionCode)) &&
+          Number(release.versionCode) > 0 && /^1\\./.test(String(release.versionName || ''));
+        const validDigest = /^[a-f0-9]{64}$/i.test(String(release.sha256 || ''));
+        if (release.apkUrl !== officialApk || !validVersion || !validDigest) {
+          throw new Error('Release metadata failed validation');
+        }
+        if (downloadButton) {
+          downloadButton.href = officialApk;
+          downloadButton.download = 'DAZREVO-' + release.versionName + '.apk';
+          downloadButton.removeAttribute('aria-disabled');
+        }
+        if (downloadStatus) downloadStatus.textContent = 'الإصدار الرسمي ' + release.versionName + ' · جاهز للتنزيل';
+        if (releaseVersion) releaseVersion.textContent = release.versionName;
+        if (releaseSha256) releaseSha256.textContent = String(release.sha256).toLowerCase();
       })
       .catch(() => {
-        if (downloadStatus) downloadStatus.textContent = 'إصدار دازريفو الرسمي لأجهزة أندرويد';
+        if (downloadStatus) downloadStatus.textContent = 'تعذر التحقق من الإصدار الآن. أعد تحميل الصفحة بعد قليل.';
+        if (releaseVersion) releaseVersion.textContent = 'غير متاح مؤقتاً';
+        if (releaseSha256) releaseSha256.textContent = 'لم يتم التحقق من البصمة';
       });
   }
 
