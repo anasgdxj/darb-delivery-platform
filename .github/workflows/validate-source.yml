@@ -8,6 +8,17 @@ on:
       - "backend-overrides/**"
       - ".github/workflows/validate-source.yml"
       - ".github/workflows/backend-ci.yml"
+  pull_request:
+    paths:
+      - "DARB-source.zip"
+      - ".github/workflows/validate-source.yml"
+      - ".github/workflows/backend-ci.yml"
+      - ".github/workflows/build-android-release.yml"
+      - "mobile-overrides/**"
+      - "backend/**"
+      - "backend-overrides/**"
+      - "darb-workspace/darb-project/mobile/**"
+      - "darb-workspace/darb-project/backend/**"
   workflow_dispatch:
 
 permissions:
@@ -79,6 +90,7 @@ jobs:
           cp "$ROOT/backend-overrides/orders.tracking.service.spec.ts" "$B/src/modules/orders/orders.tracking.service.spec.ts"
           cp "$ROOT/backend-overrides/driver-location.service.spec.ts" "$B/src/modules/drivers/driver-location.service.spec.ts"
           cp "$ROOT/backend-overrides/notifications.service.spec.ts" "$B/src/modules/notifications/notifications.service.spec.ts"
+          cp "$ROOT/backend-overrides/release-notifications.controller.spec.ts" "$B/src/modules/notifications/release-notifications.controller.spec.ts"
           cp "$ROOT/backend-overrides/app.module.ts" "$B/src/app.module.ts"
           cp "$ROOT/backend-overrides/schema.prisma" "$B/prisma/schema.prisma"
           mkdir -p "$B/prisma/migrations/20261118195000_peer_delivery_pickup_coordinates"
