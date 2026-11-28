@@ -56,7 +56,7 @@
         "operatingSystem": "Android",
         "description": "تطبيق توصيل وطلبات متاجر في سوريا يربط العملاء بالمتاجر والسائقين المستقلين مع تتبع مباشر ومساعد ذكي.",
         "url": "https://anasgdxj.github.io/darb-delivery-platform/",
-        "downloadUrl": "https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk",
+        "downloadUrl": "https://anasgdxj.github.io/darb-delivery-platform/app-release.apk",
         "inLanguage": ["ar", "en", "tr"]
       }
     ]
@@ -319,10 +319,26 @@
             <p>حمّل تطبيق أندرويد وسجّل الدخول برقم الهاتف السوري أو Google، ثم تابع طلباتك أو رحلاتك من مكان واحد.</p>
           </div>
           <div class="download-action">
-            <span class="btn btn-gold" aria-disabled="true">نسخة الويب قريباً</span>
-            <a class="btn btn-ghost-dark" id="downloadBtn" href="https://github.com/anasgdxj/darb-delivery-platform/releases/download/latest/app-release.apk" download="dazrevo-app-release.apk">تنزيل ملف APK</a>
-            <small id="downloadStatus">إصدار دازريفو الرسمي لأجهزة أندرويد. نسخة الويب قيد الإعداد.</small>
+            <a class="btn btn-gold" id="downloadBtn" href="https://anasgdxj.github.io/darb-delivery-platform/app-release.apk" download="dazrevo-app-release.apk">تنزيل أحدث إصدار</a>
+            <small id="downloadStatus" role="status" aria-live="polite">جارٍ التحقق من الإصدار الرسمي...</small>
+            <div class="release-meta" aria-live="polite">
+              <div><span>الإصدار الحالي</span><strong id="releaseVersion">جارٍ التحقق</strong></div>
+              <div><span>بصمة سلامة الملف SHA-256</span><code id="releaseSha256">ستظهر بعد التحقق</code></div>
+            </div>
           </div>
+        </div>
+        <div class="download-guide" id="installGuide">
+          <div>
+            <span class="section-kicker">تثبيت آمن ومباشر</span>
+            <h3>كيف تحدّث DAZREVO من الموقع؟</h3>
+          </div>
+          <ol>
+            <li>اضغط «تنزيل أحدث إصدار» وانتظر اكتمال تنزيل ملف APK.</li>
+            <li>افتح الملف من إشعار التنزيلات أو مجلد التنزيلات.</li>
+            <li>إذا طلب أندرويد الإذن، اسمح للمتصفح بتثبيت التطبيقات من هذا المصدر ثم ارجع إلى ملف التثبيت.</li>
+            <li>اضغط «تحديث» واترك التطبيق يكمل التثبيت، ثم افتحه بصورة طبيعية.</li>
+          </ol>
+          <p class="download-warning">إذا ظهرت رسالة «لم يتم تثبيت التطبيق»، لا تحذف نسختك الحالية. قد يكون هناك تعارض في توقيع النسخة أو رقم إصدارها؛ تواصل معنا أو انتظر إصداراً متوافقاً قبل إزالة التطبيق.</p>
         </div>
       </div>
     </section>
